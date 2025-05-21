@@ -6,7 +6,7 @@ import fs from 'fs'
 import { app } from 'electron'
 import path from 'path'
 
-const dbPath = import.meta.env.DEV ? 'sqlite.db' : path.join(app.getPath('userData'), 'data.db')
+const dbPath = import.meta.env.DEV ? 'local.db' : path.join(app.getPath('userData'), 'data.db')
 
 fs.mkdirSync(path.dirname(dbPath), { recursive: true })
 
