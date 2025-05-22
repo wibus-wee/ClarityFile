@@ -1,8 +1,7 @@
 import * as React from 'react'
-import { Frame, LifeBuoy, Map, PieChart, Send } from 'lucide-react'
+import { LifeBuoy, Send } from 'lucide-react'
 
 import { NavMain } from '@renderer/components/nav-main'
-import { NavProjects } from '@renderer/components/nav-projects'
 import { NavSecondary } from '@renderer/components/nav-secondary'
 import { NavUser } from '@renderer/components/nav-user'
 import {
@@ -13,10 +12,10 @@ import {
   SidebarMenu,
   SidebarMenuItem
 } from '@renderer/components/ui/sidebar'
-import { transformedRoutes } from '@renderer/routes'
 import { Avatar } from '@heroui/react'
 import { CONSTANTS } from '@renderer/constants'
 import { useAppStore } from '@renderer/stores/app'
+import { transformedRoutes } from '@renderer/routers'
 
 const data = {
   navMain: transformedRoutes,
@@ -52,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="p-2 flex items-center gap-3">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <Avatar
-                  name={CONSTANTS.info.jpName[0]}
+                  name={CONSTANTS.info.name[0]}
                   size="sm"
                   isBordered
                   radius="sm"
@@ -61,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{CONSTANTS.info.fullName}</span>
+                <span className="truncate font-semibold">{CONSTANTS.info.name}</span>
                 <span className="truncate text-xs">
                   {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Guest'}
                 </span>
