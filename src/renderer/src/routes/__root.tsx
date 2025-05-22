@@ -1,19 +1,22 @@
+import { HeroUIProvider } from '@heroui/react'
+import { ClarityLayout } from '@renderer/components/layouts/ClarityLayout'
+import { DataProvider } from '@renderer/providers/data-provider'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { ThemeProvider } from 'next-themes'
 
 export const Route = createRootRoute({
   component: () => (
     <>
-      <div className="p-2 flex gap-2">
-        <Link to="/" className="[&.active]:font-bold">
-          Home
-        </Link>{' '}
-        <Link to="/about" className="[&.active]:font-bold">
-          About
-        </Link>
-      </div>
-      <hr />
-      <Outlet />
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <HeroUIProvider>
+          <DataProvider>
+            <ClarityLayout>
+              <Outlet />
+            </ClarityLayout>
+          </DataProvider>
+        </HeroUIProvider>
+      </ThemeProvider>
       <TanStackRouterDevtools />
     </>
   )
