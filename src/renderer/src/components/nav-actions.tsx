@@ -1,8 +1,6 @@
-"use client"
+'use client'
 
-import {
-  MoreHorizontal,
-} from "lucide-react"
+import { FileText, MoreHorizontal, Settings2 } from 'lucide-react'
 
 import {
   Dropdown,
@@ -10,23 +8,23 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownItem,
-  Button,
-} from "@heroui/react"
+  Button
+} from '@heroui/react'
 
 // 分组的操作项数据
 const actionGroups = [
-  // [
-  //   {
-  //     label: "Customize Page",
-  //     icon: Settings2,
-  //     onClick: () => {},
-  //   },
-  //   {
-  //     label: "Turn into wiki",
-  //     icon: FileText,
-  //     onClick: () => {},
-  //   },
-  // ],
+  [
+    {
+      label: 'Customize Page',
+      icon: Settings2,
+      onClick: () => {}
+    },
+    {
+      label: 'Turn into wiki',
+      icon: FileText,
+      onClick: () => {}
+    }
+  ]
 ]
 
 export function NavActions() {
@@ -45,15 +43,9 @@ export function NavActions() {
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownTrigger>
-        <DropdownMenu 
-          aria-label="Actions"
-          className="min-w-[220px]"
-        >
+        <DropdownMenu aria-label="Actions" className="min-w-[220px]">
           {actionGroups.map((group, groupIndex) => (
-            <DropdownSection 
-              key={groupIndex}
-              showDivider={groupIndex !== actionGroups.length - 1}
-            >
+            <DropdownSection key={groupIndex} showDivider={groupIndex !== actionGroups.length - 1}>
               {group.map((item) => (
                 <DropdownItem
                   key={item.label}

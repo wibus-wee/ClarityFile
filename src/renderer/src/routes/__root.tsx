@@ -1,7 +1,7 @@
 import { HeroUIProvider } from '@heroui/react'
 import { ClarityLayout } from '@renderer/components/layouts/ClarityLayout'
 import { DataProvider } from '@renderer/providers/data-provider'
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { ThemeProvider } from 'next-themes'
 
@@ -17,7 +17,7 @@ export const Route = createRootRoute({
           </DataProvider>
         </HeroUIProvider>
       </ThemeProvider>
-      <TanStackRouterDevtools />
+      <TanStackRouterDevtools position="bottom-right" />
     </>
   )
 })

@@ -1,5 +1,5 @@
-import { useLocation } from 'react-router'
-import { flatRoutes } from '@renderer/routes'
+import { useLocation } from '@tanstack/react-router'
+import { flatRoutes } from '@renderer/routers'
 
 interface BreadcrumbItem {
   label: string
