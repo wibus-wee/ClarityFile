@@ -6,6 +6,13 @@ import './index.css'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
+import { scan } from 'react-scan'
+
+// Use React Scan to optimize app
+scan({
+  enabled: import.meta.env.DEV
+})
+
 // Create a new router instance
 const router = createRouter({ routeTree })
 
