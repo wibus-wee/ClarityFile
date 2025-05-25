@@ -21,12 +21,12 @@ const data = {
   navMain: transformedRoutes,
   navSecondary: [
     {
-      title: 'Support',
+      title: '帮助支持',
       url: '#',
       icon: LifeBuoy
     },
     {
-      title: 'Feedback',
+      title: '意见反馈',
       url: '#',
       icon: Send
     }
