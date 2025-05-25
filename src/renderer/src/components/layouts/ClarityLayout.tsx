@@ -1,5 +1,5 @@
 import { Fragment, PropsWithChildren } from 'react'
-
+import styles from './index.module.css'
 import { AppSidebar } from '@renderer/components/app-sidebar'
 import {
   Breadcrumb,
@@ -12,21 +12,42 @@ import {
 import { Separator } from '@renderer/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@renderer/components/ui/sidebar'
 import useBreadcrumb from '@renderer/hooks/use-breadcrumb'
+import { useScrollTop } from '@renderer/hooks/use-scroll-top'
 
 import { NavActions } from '../nav-actions'
 import { SettingsDialog } from '../settings-dialog'
 import { Link } from '@tanstack/react-router'
+import { cn } from '@renderer/lib/utils'
 
 export function ClarityLayout({ children }: PropsWithChildren) {
   const breadcrumbs = useBreadcrumb()
+  const isAtTop = useScrollTop()
 
   return (
     <div>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 sticky top-0 z-50 backdrop-blur-md">
-            <div className="flex flex-1 items-center gap-2 px-3">
+          <header
+            className={cn('flex h-16 shrink-0 items-center gap-2 sticky top-0', styles.header)}
+            style={
+              {
+                'app-region': 'drag'
+              } as any
+            }
+          >
+            {!isAtTop && (
+              <span className={styles.blur}>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            )}
+
+            <div className={cn('flex flex-1 items-center gap-2 px-3 absolute', styles.content)}>
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumb>
