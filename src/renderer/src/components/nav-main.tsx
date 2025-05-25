@@ -55,7 +55,7 @@ export function NavMain({
                     asChild
                     tooltip={item.title}
                   >
-                    <Link to={item.url}>
+                    <Link to={item.url} viewTransition>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
