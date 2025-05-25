@@ -3,6 +3,8 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { runMigrate } from './db'
+import { registerIpcMain } from '@egoist/tipc/main'
+import { router } from './tipc'
 
 function createWindow(): void {
   // Create the browser window.
@@ -52,6 +54,9 @@ app.whenReady().then(async () => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // 注册 TIPC 路由器
+  registerIpcMain(router)
 
   await runMigrate()
   createWindow()

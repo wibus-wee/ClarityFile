@@ -25,7 +25,7 @@ export function ClarityLayout({ children }: PropsWithChildren) {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2">
+          <header className="flex h-16 shrink-0 items-center gap-2 sticky top-0 z-50 backdrop-blur-md">
             <div className="flex flex-1 items-center gap-2 px-3">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
@@ -52,7 +52,7 @@ export function ClarityLayout({ children }: PropsWithChildren) {
               <NavActions />
             </div>
           </header>
-          <div className="p-4">{children}</div>
+          <div className="p-4 px-9">{children}</div>
         </SidebarInset>
         <SettingsDialog />
       </SidebarProvider>
