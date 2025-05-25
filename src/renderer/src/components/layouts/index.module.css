@@ -1,0 +1,42 @@
+.blur {
+  pointer-events: none;
+  display: grid;
+  height: inherit;
+  width: 100%;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.blur span {
+  grid-area: 1/1;
+}
+
+.blur span:first-child {
+  backdrop-filter: blur(1px);
+  mask: linear-gradient(0deg, transparent, #000 8%);
+}
+
+.blur span:nth-child(2) {
+  backdrop-filter: blur(4px);
+  mask: linear-gradient(0deg, transparent 8%, #000 16%);
+}
+
+.blur span:nth-child(3) {
+  backdrop-filter: blur(8px);
+  mask: linear-gradient(0deg, transparent 16%, #000 24%);
+}
+
+.blur span:nth-child(4) {
+  backdrop-filter: blur(16px);
+  mask: linear-gradient(0deg, transparent 24%, #000 36%);
+}
+
+.blur span:nth-child(5) {
+  backdrop-filter: blur(24px);
+  mask: linear-gradient(0deg, transparent 36%, #000 48%);
+}
+
+.blur span:nth-child(6) {
+  backdrop-filter: blur(32px);
+  mask: linear-gradient(0deg, transparent 48%, #000 60%);
+}

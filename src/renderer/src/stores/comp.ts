@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand'
 
 interface CompState {
   settingsDialog: {
@@ -20,11 +20,11 @@ export const useCompStore = create<CompStore>((set) => ({
   // 初始状态
   settingsDialog: {
     isOpen: false,
-    currentNav: "Messages & media"
+    currentNav: 'Messages & media'
   },
 
   // Actions
-  openSettingsDialog: () => 
+  openSettingsDialog: () =>
     set((state) => ({
       settingsDialog: {
         ...state.settingsDialog,
@@ -32,7 +32,7 @@ export const useCompStore = create<CompStore>((set) => ({
       }
     })),
 
-  closeSettingsDialog: () => 
+  closeSettingsDialog: () =>
     set((state) => ({
       settingsDialog: {
         ...state.settingsDialog,
@@ -40,7 +40,7 @@ export const useCompStore = create<CompStore>((set) => ({
       }
     })),
 
-  toggleSettingsDialog: () => 
+  toggleSettingsDialog: () =>
     set((state) => ({
       settingsDialog: {
         ...state.settingsDialog,
@@ -48,7 +48,7 @@ export const useCompStore = create<CompStore>((set) => ({
       }
     })),
 
-  setSettingsNav: (nav: string) => 
+  setSettingsNav: (nav: string) =>
     set((state) => ({
       settingsDialog: {
         ...state.settingsDialog,
