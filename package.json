@@ -21,7 +21,8 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
     "rebuild:sqlite3:electron": "electron-rebuild -f -w better-sqlite3",
-    "rebuild:sqlite3": "pnpm rebuild better-sqlite3"
+    "rebuild:sqlite3": "pnpm rebuild better-sqlite3",
+    "drizzle-kit": "pnpm rebuild:sqlite3 && npx drizzle-kit"
   },
   "dependencies": {
     "@egoist/tipc": "^0.3.2",
@@ -70,6 +71,7 @@
     "input-otp": "^1.4.2",
     "lucide-react": "^0.511.0",
     "next-themes": "^0.4.6",
+    "nuqs": "^2.4.3",
     "react-compiler-runtime": "19.1.0-rc.2",
     "react-day-picker": "8.10.1",
     "react-hook-form": "^7.56.4",
