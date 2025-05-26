@@ -70,7 +70,6 @@ export function ClarityLayout({ children }: PropsWithChildren) {
           </header>
           <div className="p-4 px-9">{children}</div>
         </SidebarInset>
-        <SettingsDialog />
       </SidebarProvider>
     </div>
   )
