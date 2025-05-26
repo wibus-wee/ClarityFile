@@ -33,7 +33,7 @@ export function ErrorBoundary({ error, reset, info }: ErrorBoundaryProps) {
   const isDevelopment = import.meta.env.DEV
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="flex items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
@@ -111,7 +111,7 @@ export function ErrorBoundary({ error, reset, info }: ErrorBoundaryProps) {
             <ul className="text-left space-y-1 max-w-md mx-auto">
               <li>• 刷新页面或重启应用程序</li>
               <li>• 检查网络连接</li>
-              <li>• 清除浏览器缓存</li>
+              <li>• 清除缓存</li>
               <li>• 联系技术支持</li>
             </ul>
           </div>
