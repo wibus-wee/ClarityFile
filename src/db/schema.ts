@@ -258,6 +258,22 @@ export const tags = sqliteTable('tags', {
     .default(sql`(strftime('%s', 'now') * 1000)`)
 })
 
+export const settings = sqliteTable('settings', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  key: text('key').notNull().unique(), // 设置项的唯一键，如 'theme', 'language', 'notifications.enabled'
+  value: text('value', { mode: 'json' }).notNull(), // 设置值，支持 JSON 格式存储复杂数据
+  category: text('category').notNull(), // 设置分类，如 'appearance', 'general', 'advanced'
+  isUserModifiable: integer('is_user_modifiable', { mode: 'boolean' }).notNull().default(true), // 是否允许用户修改
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`)
+})
+
 // MARK: Junction Tables (Many-to-Many)
 
 export const documentVersionTags = sqliteTable(
@@ -472,6 +488,10 @@ export const tagsRelations = relations(tags, ({ many }) => ({
   sharedResourceTags: many(sharedResourceTags),
   projectTags: many(projectTags),
   projectAssetTags: many(projectAssetTags)
+}))
+
+export const settingsRelations = relations(settings, () => ({
+  // settings 表通常不需要关联其他表，它是独立的配置存储
 }))
 
 // MARK: Relations for Junction Tables
