@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Settings2, type LucideIcon } from 'lucide-react'
+import { type LucideIcon } from 'lucide-react'
 
 import {
   SidebarGroup,
@@ -8,7 +8,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@renderer/components/ui/sidebar'
-import { useCompStore } from '@renderer/stores/comp'
 
 export function NavSecondary({
   items,
@@ -20,8 +19,6 @@ export function NavSecondary({
     icon: LucideIcon
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
-  const { openSettingsDialog } = useCompStore()
-
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
@@ -36,21 +33,6 @@ export function NavSecondary({
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              size="sm"
-              onClick={() => {
-                openSettingsDialog()
-              }}
-            >
-              <span>
-                <Settings2 />
-                <span>Settings</span>
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
