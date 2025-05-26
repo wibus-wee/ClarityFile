@@ -1,4 +1,5 @@
 import { tipc } from '@egoist/tipc/main'
+import { dialog, BrowserWindow } from 'electron'
 import { db } from './db'
 import { projects, logicalDocuments, managedFiles, tags, settings } from '../db/schema'
 import { eq, desc, like, and } from 'drizzle-orm'
@@ -324,7 +325,34 @@ export const router = {
       .from(settings)
       .orderBy(settings.category)
     return result.map((r) => r.category)
-  })
+  }),
+
+  // 文件系统相关 API
+
+  // 选择文件夹
+  selectDirectory: t.procedure
+    .input<{ title?: string; defaultPath?: string }>()
+    .action(async ({ input, context }) => {
+      // 从 WebContents 获取对应的 BrowserWindow
+      const browserWindow = BrowserWindow.fromWebContents(context.sender)
+
+      if (!browserWindow) {
+        throw new Error('无法获取浏览器窗口')
+      }
+
+      const result = await dialog.showOpenDialog(browserWindow, {
+        title: input.title || '选择文件夹',
+        defaultPath: input.defaultPath,
+        properties: ['openDirectory', 'createDirectory'],
+        buttonLabel: '选择文件夹'
+      })
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return { canceled: true, path: null }
+      }
+
+      return { canceled: false, path: result.filePaths[0] }
+    })
 }
 
 export type Router = typeof router

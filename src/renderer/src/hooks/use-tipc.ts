@@ -241,3 +241,13 @@ export function useResetSettings() {
 export function useSettingsCategories() {
   return useSWR('settings-categories', () => tipcClient.getSettingsCategories())
 }
+
+// 文件系统相关的 hooks
+export function useSelectDirectory() {
+  return useSWRMutation(
+    'select-directory',
+    async (_mutationKey, { arg }: { arg: { title?: string; defaultPath?: string } }) => {
+      return await tipcClient.selectDirectory(arg)
+    }
+  )
+}

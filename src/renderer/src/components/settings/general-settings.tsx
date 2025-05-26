@@ -161,6 +161,7 @@ export function GeneralSettings() {
               label="默认项目路径"
               description="新建项目时的默认保存路径"
               placeholder="/Users/username/Documents/ClarityFile"
+              type="directory"
             />
           </SettingsSection>
         </>
