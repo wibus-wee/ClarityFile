@@ -11,15 +11,29 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SettingsImport } from './routes/settings'
 import { Route as ProjectsImport } from './routes/projects'
+import { Route as ErrorTestImport } from './routes/error-test'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
+const SettingsRoute = SettingsImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ProjectsRoute = ProjectsImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ErrorTestRoute = ErrorTestImport.update({
+  id: '/error-test',
+  path: '/error-test',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -53,11 +67,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/error-test': {
+      id: '/error-test'
+      path: '/error-test'
+      fullPath: '/error-test'
+      preLoaderRoute: typeof ErrorTestImport
+      parentRoute: typeof rootRoute
+    }
     '/projects': {
       id: '/projects'
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsImport
+      parentRoute: typeof rootRoute
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
   }
@@ -68,41 +96,51 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/error-test': typeof ErrorTestRoute
   '/projects': typeof ProjectsRoute
+  '/settings': typeof SettingsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/error-test': typeof ErrorTestRoute
   '/projects': typeof ProjectsRoute
+  '/settings': typeof SettingsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/error-test': typeof ErrorTestRoute
   '/projects': typeof ProjectsRoute
+  '/settings': typeof SettingsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/projects'
+  fullPaths: '/' | '/about' | '/error-test' | '/projects' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/projects'
-  id: '__root__' | '/' | '/about' | '/projects'
+  to: '/' | '/about' | '/error-test' | '/projects' | '/settings'
+  id: '__root__' | '/' | '/about' | '/error-test' | '/projects' | '/settings'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ErrorTestRoute: typeof ErrorTestRoute
   ProjectsRoute: typeof ProjectsRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ErrorTestRoute: ErrorTestRoute,
   ProjectsRoute: ProjectsRoute,
+  SettingsRoute: SettingsRoute,
 }
 
 export const routeTree = rootRoute
@@ -117,7 +155,9 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
-        "/projects"
+        "/error-test",
+        "/projects",
+        "/settings"
       ]
     },
     "/": {
@@ -126,8 +166,14 @@ export const routeTree = rootRoute
     "/about": {
       "filePath": "about.tsx"
     },
+    "/error-test": {
+      "filePath": "error-test.tsx"
+    },
     "/projects": {
       "filePath": "projects.tsx"
+    },
+    "/settings": {
+      "filePath": "settings.tsx"
     }
   }
 }

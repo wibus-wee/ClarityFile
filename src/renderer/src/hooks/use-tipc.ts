@@ -125,3 +125,119 @@ export function useSystemInfo() {
     refreshInterval: 30000 // 每30秒刷新一次
   })
 }
+
+// 设置相关的 hooks
+export function useSettings() {
+  return useSWR('settings', () => tipcClient.getSettings())
+}
+
+export function useSettingsByCategory(category: string | null) {
+  return useSWR(category ? ['settings-by-category', category] : null, () =>
+    category ? tipcClient.getSettingsByCategory({ category }) : null
+  )
+}
+
+export function useSetting(key: string | null) {
+  return useSWR(key ? ['setting', key] : null, () => (key ? tipcClient.getSetting({ key }) : null))
+}
+
+export function useSetSetting() {
+  return useSWRMutation(
+    'settings',
+    async (
+      _mutationKey,
+      {
+        arg
+      }: {
+        arg: {
+          key: string
+          value: any
+          category: string
+          description?: string
+          isUserModifiable?: boolean
+        }
+      }
+    ) => {
+      const result = await tipcClient.setSetting(arg)
+      // 重新验证相关的设置数据
+      mutate('settings')
+      mutate(['setting', arg.key])
+      mutate(['settings-by-category', arg.category])
+      mutate('settings-categories')
+      return result
+    }
+  )
+}
+
+export function useSetSettings() {
+  return useSWRMutation(
+    'settings',
+    async (
+      _mutationKey,
+      {
+        arg
+      }: {
+        arg: Array<{
+          key: string
+          value: any
+          category: string
+          description?: string
+          isUserModifiable?: boolean
+        }>
+      }
+    ) => {
+      const result = await tipcClient.setSettings(arg)
+      // 重新验证所有设置相关数据
+      mutate('settings')
+      mutate('settings-categories')
+      // 重新验证涉及的分类
+      const categories = [...new Set(arg.map((setting) => setting.category))]
+      categories.forEach((category) => {
+        mutate(['settings-by-category', category])
+      })
+      // 重新验证涉及的单个设置
+      arg.forEach((setting) => {
+        mutate(['setting', setting.key])
+      })
+      return result
+    }
+  )
+}
+
+export function useDeleteSetting() {
+  return useSWRMutation('settings', async (_mutationKey, { arg }: { arg: { key: string } }) => {
+    const result = await tipcClient.deleteSetting(arg)
+    // 重新验证设置数据
+    mutate('settings')
+    mutate(['setting', arg.key])
+    // 注意：我们不知道被删除设置的分类，所以重新验证所有分类数据
+    mutate((key) => Array.isArray(key) && key[0] === 'settings-by-category')
+    return result
+  })
+}
+
+export function useResetSettings() {
+  return useSWRMutation(
+    'settings',
+    async (_mutationKey, { arg }: { arg: { category?: string } }) => {
+      const result = await tipcClient.resetSettings(arg)
+      // 重新验证所有设置相关数据
+      mutate('settings')
+      mutate('settings-categories')
+      if (arg.category) {
+        // 如果指定了分类，只重新验证该分类
+        mutate(['settings-by-category', arg.category])
+      } else {
+        // 如果没有指定分类，重新验证所有分类
+        mutate((key) => Array.isArray(key) && key[0] === 'settings-by-category')
+      }
+      // 重新验证所有单个设置
+      mutate((key) => Array.isArray(key) && key[0] === 'setting')
+      return result
+    }
+  )
+}
+
+export function useSettingsCategories() {
+  return useSWR('settings-categories', () => tipcClient.getSettingsCategories())
+}

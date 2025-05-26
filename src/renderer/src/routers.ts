@@ -79,15 +79,35 @@ export const routes: AppRoute = {
       icon: Settings2,
       children: [
         {
-          path: 'general',
+          path: '?category=general',
           label: '常规设置'
         },
         {
-          path: 'appearance',
+          path: '?category=appearance',
           label: '外观设置'
         },
         {
-          path: 'advanced',
+          path: '?category=notifications',
+          label: '通知设置'
+        },
+        {
+          path: '?category=language',
+          label: '语言与地区'
+        },
+        {
+          path: '?category=accessibility',
+          label: '无障碍'
+        },
+        {
+          path: '?category=audio-video',
+          label: '音频与视频'
+        },
+        {
+          path: '?category=privacy',
+          label: '隐私与可见性'
+        },
+        {
+          path: '?category=advanced',
           label: '高级设置'
         }
       ]
@@ -106,7 +126,7 @@ export const transformedRoutes = Object.entries(routes).map(([group, routes]) =>
     ...(route.children && {
       items: route.children.map((child) => ({
         title: child.label,
-        url: `${route.path}/${child.path}`
+        url: `${child.path}`
       }))
     })
   }))
