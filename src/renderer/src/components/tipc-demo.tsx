@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@renderer/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@renderer/components/ui/card'
 import { Badge } from '@renderer/components/ui/badge'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { 
-  useProjects, 
-  useCreateProject, 
+import {
+  useProjects,
+  useCreateProject,
   useSystemInfo,
   useTags,
   useCreateTag
@@ -23,7 +29,7 @@ export function TipcDemo() {
   const { data: projects, error: projectsError, isLoading: projectsLoading } = useProjects()
   const { data: systemInfo, isLoading: systemInfoLoading } = useSystemInfo()
   const { data: tags, isLoading: tagsLoading } = useTags()
-  
+
   // 使用 SWR mutation hooks
   const { trigger: createProject, isMutating: isCreatingProject } = useCreateProject()
   const { trigger: createTag, isMutating: isCreatingTag } = useCreateTag()
@@ -115,11 +121,7 @@ export function TipcDemo() {
               value={projectDescription}
               onChange={(e) => setProjectDescription(e.target.value)}
             />
-            <Button 
-              onClick={handleCreateProject}
-              disabled={isCreatingProject}
-              className="w-full"
-            >
+            <Button onClick={handleCreateProject} disabled={isCreatingProject} className="w-full">
               {isCreatingProject ? '创建中...' : '创建项目'}
             </Button>
           </CardContent>
@@ -146,11 +148,7 @@ export function TipcDemo() {
               />
               <span className="text-sm text-muted-foreground">选择颜色</span>
             </div>
-            <Button 
-              onClick={handleCreateTag}
-              disabled={isCreatingTag}
-              className="w-full"
-            >
+            <Button onClick={handleCreateTag} disabled={isCreatingTag} className="w-full">
               {isCreatingTag ? '创建中...' : '创建标签'}
             </Button>
           </CardContent>
@@ -215,8 +213,8 @@ export function TipcDemo() {
           ) : tags && tags.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <Badge 
-                  key={tag.id} 
+                <Badge
+                  key={tag.id}
                   style={{ backgroundColor: tag.color || undefined }}
                   className="text-white"
                 >
