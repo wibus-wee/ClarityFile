@@ -62,7 +62,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isBordered
                   radius="sm"
                   className="transition-transform text-sm"
-                  color="primary"
+                  color="secondary"
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
