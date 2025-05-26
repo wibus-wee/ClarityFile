@@ -22,7 +22,7 @@ export const Route = createRootRoute({
           </SWRProvider>
         </HeroUIProvider>
       </ThemeProvider>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors />
       <TanStackRouterDevtools position="bottom-right" />
     </>
   ),

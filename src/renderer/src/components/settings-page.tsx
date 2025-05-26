@@ -33,8 +33,8 @@ function SettingsContent() {
   const CurrentComponent = currentCategory.component
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="overflow-y-auto">
+      <div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{currentCategory.name}</h1>
           <p className="text-muted-foreground mt-2">
