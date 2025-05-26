@@ -94,10 +94,25 @@ export function NavMain({
                                 }}
                               >
                                 <SidebarMenuSubButton
-                                  isActive={location.pathname === subItem.url}
+                                  isActive={
+                                    subItem.url.startsWith('?')
+                                      ? `${location.pathname}${location.search}` ===
+                                        `${item.url}${subItem.url}`
+                                      : location.pathname === subItem.url
+                                  }
                                   asChild
                                 >
-                                  <Link to={subItem.url}>
+                                  <Link
+                                    to={item.url}
+                                    search={
+                                      subItem.url.startsWith('?')
+                                        ? Object.fromEntries(
+                                            new URLSearchParams(subItem.url.substring(1))
+                                          )
+                                        : undefined
+                                    }
+                                    viewTransition
+                                  >
                                     <span>{subItem.title}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
