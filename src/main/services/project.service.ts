@@ -9,7 +9,8 @@ import type {
   SearchProjectsInput
 } from '../types/inputs'
 import type { SuccessResponse } from '../types/outputs'
-import { ProjectFolderService } from './project-folder.service'
+import { ProjectFolderManager } from '../managers/project-folder.manager'
+import { PathSyncManager } from '../managers/path-sync.manager'
 
 export class ProjectService {
   // 获取所有项目
@@ -40,7 +41,7 @@ export class ProjectService {
 
     // 创建项目文件夹并同步路径到数据库
     try {
-      const folderPath = await ProjectFolderService.createProjectFolder(project.name, project.id)
+      const folderPath = await ProjectFolderManager.createProjectFolder(project.name, project.id)
 
       // 更新数据库中的文件夹路径
       await db
@@ -91,7 +92,7 @@ export class ProjectService {
     // 如果项目名称发生了变化，重命名文件夹并同步路径
     if (oldProject && updateData.name && oldProject.name !== updateData.name) {
       try {
-        const newFolderPath = await ProjectFolderService.renameProjectFolder(
+        const newFolderPath = await ProjectFolderManager.renameProjectFolder(
           oldProject.name,
           updateData.name,
           id
@@ -136,7 +137,7 @@ export class ProjectService {
       try {
         // 默认不强制删除，只删除空文件夹
         // 如果需要强制删除，可以传入 true
-        await ProjectFolderService.deleteProjectFolder(project.name, project.id, false)
+        await ProjectFolderManager.deleteProjectFolder(project.name, project.id, false)
         console.log(`项目 "${project.name}" 删除成功，空文件夹已清理`)
       } catch (error) {
         console.error(`项目文件夹删除失败:`, error)
@@ -160,122 +161,16 @@ export class ProjectService {
 
   // 同步项目文件夹路径
   static async syncProjectFolderPath(projectId: string): Promise<SuccessResponse> {
-    try {
-      // 获取项目信息
-      const projectResult = await db
-        .select()
-        .from(projects)
-        .where(eq(projects.id, projectId))
-        .limit(1)
-      const project = projectResult[0]
-
-      if (!project) {
-        throw new Error('项目不存在')
-      }
-
-      // 获取实际的文件夹路径
-      const actualFolderPath = await ProjectFolderService.getProjectFolderPath(
-        project.name,
-        project.id
-      )
-
-      // 检查文件夹是否存在
-      const folderExists = await ProjectFolderService.folderExists(actualFolderPath)
-
-      if (folderExists) {
-        // 更新数据库中的路径
-        await db
-          .update(projects)
-          .set({
-            folderPath: actualFolderPath,
-            updatedAt: new Date()
-          })
-          .where(eq(projects.id, projectId))
-
-        console.log(`项目 "${project.name}" 路径已同步: ${actualFolderPath}`)
-      } else {
-        // 文件夹不存在，清空数据库中的路径
-        await db
-          .update(projects)
-          .set({
-            folderPath: null,
-            updatedAt: new Date()
-          })
-          .where(eq(projects.id, projectId))
-
-        console.log(`项目 "${project.name}" 文件夹不存在，已清空路径记录`)
-      }
-
-      return { success: true }
-    } catch (error) {
-      console.error('同步项目文件夹路径失败:', error)
-      throw new Error(
-        `同步项目文件夹路径失败: ${error instanceof Error ? error.message : String(error)}`
-      )
-    }
+    return await PathSyncManager.syncProjectFolderPath(projectId)
   }
 
   // 批量同步所有项目的文件夹路径
   static async syncAllProjectFolderPaths(): Promise<SuccessResponse> {
-    try {
-      const allProjects = await db.select().from(projects)
-      let syncedCount = 0
-      let errorCount = 0
-
-      for (const project of allProjects) {
-        try {
-          await this.syncProjectFolderPath(project.id)
-          syncedCount++
-        } catch (error) {
-          console.error(`同步项目 "${project.name}" 路径失败:`, error)
-          errorCount++
-        }
-      }
-
-      console.log(`批量同步完成: 成功 ${syncedCount} 个，失败 ${errorCount} 个`)
-      return { success: true }
-    } catch (error) {
-      console.error('批量同步项目文件夹路径失败:', error)
-      throw new Error(
-        `批量同步项目文件夹路径失败: ${error instanceof Error ? error.message : String(error)}`
-      )
-    }
+    return await PathSyncManager.syncAllProjectFolderPaths()
   }
 
   // 修复项目文件夹（重新创建缺失的文件夹）
   static async repairProjectFolder(projectId: string): Promise<SuccessResponse> {
-    try {
-      // 获取项目信息
-      const projectResult = await db
-        .select()
-        .from(projects)
-        .where(eq(projects.id, projectId))
-        .limit(1)
-      const project = projectResult[0]
-
-      if (!project) {
-        throw new Error('项目不存在')
-      }
-
-      // 重新创建文件夹
-      const folderPath = await ProjectFolderService.createProjectFolder(project.name, project.id)
-
-      // 更新数据库中的路径
-      await db
-        .update(projects)
-        .set({
-          folderPath: folderPath,
-          updatedAt: new Date()
-        })
-        .where(eq(projects.id, projectId))
-
-      console.log(`项目 "${project.name}" 文件夹已修复: ${folderPath}`)
-      return { success: true }
-    } catch (error) {
-      console.error('修复项目文件夹失败:', error)
-      throw new Error(
-        `修复项目文件夹失败: ${error instanceof Error ? error.message : String(error)}`
-      )
-    }
+    return await PathSyncManager.repairProjectFolder(projectId)
   }
 }
