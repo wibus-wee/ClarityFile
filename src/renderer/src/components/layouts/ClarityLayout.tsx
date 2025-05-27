@@ -29,10 +29,10 @@ export function ClarityLayout({ children }: PropsWithChildren) {
         <AppSidebar />
         <SidebarInset>
           <header
-            className={cn('flex h-16 shrink-0 items-center gap-2 sticky top-0', styles.header)}
+            className={cn('flex h-16 shrink-0 items-center gap-2 sticky top-0 z-10', styles.header)}
           >
             {!isAtTop && (
-              <span className={styles.blur}>
+              <span className={cn(styles.blur, 'absolute')}>
                 <span></span>
                 <span></span>
                 <span></span>
