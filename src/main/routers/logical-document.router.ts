@@ -23,6 +23,11 @@ export function logicalDocumentRouter(t: any) {
         return await LogicalDocumentService.getLogicalDocument(input)
       }),
 
+    // 获取所有逻辑文档
+    getAllDocuments: t.procedure.action(async () => {
+      return await LogicalDocumentService.getAllDocuments()
+    }),
+
     // 获取项目的所有逻辑文档
     getProjectDocuments: t.procedure
       .input()

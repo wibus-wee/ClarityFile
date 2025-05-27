@@ -71,6 +71,46 @@ export class LogicalDocumentService {
   }
 
   /**
+   * 获取所有逻辑文档
+   */
+  static async getAllDocuments() {
+    // 先获取基本的逻辑文档信息
+    const documents = await db
+      .select({
+        id: logicalDocuments.id,
+        name: logicalDocuments.name,
+        type: logicalDocuments.type,
+        description: logicalDocuments.description,
+        defaultStoragePathSegment: logicalDocuments.defaultStoragePathSegment,
+        status: logicalDocuments.status,
+        currentOfficialVersionId: logicalDocuments.currentOfficialVersionId,
+        projectId: logicalDocuments.projectId,
+        createdAt: logicalDocuments.createdAt,
+        updatedAt: logicalDocuments.updatedAt
+      })
+      .from(logicalDocuments)
+      .where(eq(logicalDocuments.status, 'active'))
+      .orderBy(desc(logicalDocuments.updatedAt))
+
+    // 为每个文档获取版本数量
+    const result = await Promise.all(
+      documents.map(async (doc) => {
+        const versionCountResult = await db
+          .select({ count: count() })
+          .from(documentVersions)
+          .where(eq(documentVersions.logicalDocumentId, doc.id))
+
+        return {
+          ...doc,
+          versionCount: versionCountResult[0]?.count || 0
+        }
+      })
+    )
+
+    return result
+  }
+
+  /**
    * 获取项目的所有逻辑文档
    */
   static async getProjectDocuments(input: GetProjectDocumentsInput) {
