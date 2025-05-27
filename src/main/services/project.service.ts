@@ -9,6 +9,7 @@ import type {
   SearchProjectsInput
 } from '../types/inputs'
 import type { SuccessResponse } from '../types/outputs'
+import { ProjectFolderService } from './project-folder.service'
 
 export class ProjectService {
   // 获取所有项目
@@ -25,6 +26,7 @@ export class ProjectService {
 
   // 创建项目
   static async createProject(input: CreateProjectInput) {
+    // 首先在数据库中创建项目记录
     const result = await db
       .insert(projects)
       .values({
@@ -33,7 +35,21 @@ export class ProjectService {
         status: input.status || 'active'
       })
       .returning()
-    return result[0]
+
+    const project = result[0]
+
+    // 创建项目文件夹
+    try {
+      await ProjectFolderService.createProjectFolder(project.name, project.id)
+      console.log(`项目 "${project.name}" 创建成功，文件夹已创建`)
+    } catch (error) {
+      console.error(`项目 "${project.name}" 文件夹创建失败:`, error)
+      // 注意：这里我们不抛出错误，因为项目记录已经创建成功
+      // 文件夹创建失败不应该影响项目的创建
+      // 可以在后续提供手动创建文件夹的功能
+    }
+
+    return project
   }
 
   // 更新项目
