@@ -25,7 +25,6 @@ export class ProjectFolderManager {
       const defaultPath = await PathUtils.getDefaultProjectPath()
 
       // 确保根目录存在
-      const projectsRoot = PathUtils.getRelativePath(defaultPath, projectPath).split('/')[0]
       const projectsRootPath = `${defaultPath}/Projects`
       await FilesystemOperations.createFolder(projectsRootPath, true)
 

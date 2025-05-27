@@ -121,18 +121,18 @@ export class FilesystemOperations {
    * @returns 是否只包含空的指定子文件夹
    */
   static async isProjectFolderEmpty(
-    folderPath: string, 
+    folderPath: string,
     allowedSubFolders: string[] = ['_Assets', '_Expenses', 'Documents']
   ): Promise<boolean> {
     try {
       const contents = await this.getFolderContents(folderPath)
-      
+
       // 检查是否只包含允许的子文件夹
-      const nonAllowedItems = contents.filter(item => !allowedSubFolders.includes(item))
+      const nonAllowedItems = contents.filter((item) => !allowedSubFolders.includes(item))
       if (nonAllowedItems.length > 0) {
         return false // 包含非允许的文件或文件夹
       }
-      
+
       // 检查允许的子文件夹是否为空
       for (const item of contents) {
         const itemPath = path.join(folderPath, item)
@@ -144,7 +144,7 @@ export class FilesystemOperations {
           }
         }
       }
-      
+
       return true // 文件夹为空或只包含空的允许子文件夹
     } catch {
       return false
@@ -209,6 +209,40 @@ export class FilesystemOperations {
     } catch (error) {
       console.error(`获取文件信息失败 ${filePath}:`, error)
       return null
+    }
+  }
+
+  /**
+   * 列出目录中的所有文件
+   * @param directoryPath 目录路径
+   * @returns 文件路径列表
+   */
+  static async listFiles(directoryPath: string): Promise<string[]> {
+    try {
+      const items = await fs.promises.readdir(directoryPath, { withFileTypes: true })
+      return items
+        .filter((item) => item.isFile())
+        .map((item) => path.join(directoryPath, item.name))
+    } catch (error) {
+      console.error(`列出目录文件失败: ${directoryPath}`, error)
+      return []
+    }
+  }
+
+  /**
+   * 列出目录中的所有文件夹
+   * @param directoryPath 目录路径
+   * @returns 文件夹路径列表
+   */
+  static async listDirectories(directoryPath: string): Promise<string[]> {
+    try {
+      const items = await fs.promises.readdir(directoryPath, { withFileTypes: true })
+      return items
+        .filter((item) => item.isDirectory())
+        .map((item) => path.join(directoryPath, item.name))
+    } catch (error) {
+      console.error(`列出目录文件夹失败: ${directoryPath}`, error)
+      return []
     }
   }
 }

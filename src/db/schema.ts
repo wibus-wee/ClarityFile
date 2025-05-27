@@ -16,12 +16,15 @@ export const managedFiles = sqliteTable('managed_files', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => randomUUID()),
-  name: text('name').notNull(),
-  physicalPath: text('physical_path').notNull().unique(),
-  // originalName: text('original_name'),
-  // fileSizeBytes: integer('file_size_bytes'),
-  fileHash: text('file_hash').unique(), // Can be null if not always calculated
-  // mimeType: text('mime_type'),
+  name: text('name').notNull(), // 显示名称
+  originalFileName: text('original_file_name').notNull(), // 用户上传时的原始文件名
+  physicalPath: text('physical_path').notNull().unique(), // 实际存储的完整路径
+  mimeType: text('mime_type'), // MIME类型
+  fileSizeBytes: integer('file_size_bytes'), // 文件大小（字节）
+  fileHash: text('file_hash').unique(), // 文件哈希值，用于去重和校验
+  uploadedAt: integer('uploaded_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`), // 上传时间
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(strftime('%s', 'now') * 1000)`),
@@ -106,6 +109,7 @@ export const documentVersions = sqliteTable(
       { onDelete: 'set null' }
     ),
     competitionProjectName: text('competition_project_name'),
+    notes: text('notes'), // 版本说明
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
       .default(sql`(strftime('%s', 'now') * 1000)`),
