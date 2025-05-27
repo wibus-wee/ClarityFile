@@ -55,6 +55,10 @@ export function useSearchProjects() {
 }
 
 // 逻辑文档相关的 hooks
+export function useAllDocuments() {
+  return useSWR('all-documents', () => tipcClient.getAllDocuments())
+}
+
 export function useProjectDocuments(projectId: string | null) {
   return useSWR(projectId ? ['project-documents', projectId] : null, () =>
     projectId ? tipcClient.getProjectDocuments({ projectId }) : null
@@ -79,11 +83,28 @@ export function useCreateLogicalDocument() {
       }
     ) => {
       const result = await tipcClient.createLogicalDocument(arg)
-      // 重新验证项目文档列表
+      // 重新验证所有文档列表和项目文档列表
+      mutate('all-documents')
       mutate(['project-documents', arg.projectId])
       return result
     }
   )
+}
+
+export function useLogicalDocument(documentId: string | null) {
+  return useSWR(documentId ? ['logical-document', documentId] : null, () =>
+    documentId ? tipcClient.getLogicalDocument({ id: documentId }) : null
+  )
+}
+
+export function useLogicalDocumentWithVersions(documentId: string | null) {
+  return useSWR(documentId ? ['logical-document-with-versions', documentId] : null, () =>
+    documentId ? tipcClient.getLogicalDocumentWithVersions({ id: documentId }) : null
+  )
+}
+
+export function useDocumentTypes() {
+  return useSWR('document-types', () => tipcClient.getDocumentTypes())
 }
 
 // 标签相关的 hooks
