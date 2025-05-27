@@ -24,6 +24,14 @@ export interface SearchProjectsInput {
   query: string
 }
 
+export interface SyncProjectFolderPathInput {
+  projectId: string
+}
+
+export interface RepairProjectFolderInput {
+  projectId: string
+}
+
 // 文档相关输入类型
 export interface GetProjectDocumentsInput {
   projectId: string

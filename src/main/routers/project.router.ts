@@ -4,7 +4,9 @@ import type {
   UpdateProjectInput,
   GetProjectInput,
   DeleteProjectInput,
-  SearchProjectsInput
+  SearchProjectsInput,
+  SyncProjectFolderPathInput,
+  RepairProjectFolderInput
 } from '../types/inputs'
 
 export function projectRouter(t: any) {
@@ -39,6 +41,25 @@ export function projectRouter(t: any) {
       .input()
       .action(async ({ input }: { input: SearchProjectsInput }) => {
         return await ProjectService.searchProjects(input)
+      }),
+
+    // 同步项目文件夹路径
+    syncProjectFolderPath: t.procedure
+      .input()
+      .action(async ({ input }: { input: SyncProjectFolderPathInput }) => {
+        return await ProjectService.syncProjectFolderPath(input.projectId)
+      }),
+
+    // 批量同步所有项目的文件夹路径
+    syncAllProjectFolderPaths: t.procedure.action(async () => {
+      return await ProjectService.syncAllProjectFolderPaths()
+    }),
+
+    // 修复项目文件夹
+    repairProjectFolder: t.procedure
+      .input()
+      .action(async ({ input }: { input: RepairProjectFolderInput }) => {
+        return await ProjectService.repairProjectFolder(input.projectId)
       })
   }
 }

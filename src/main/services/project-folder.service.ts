@@ -150,6 +150,40 @@ export class ProjectFolderService {
   }
 
   /**
+   * 检查文件夹是否只包含标准子文件夹（空的）
+   * @param folderPath 文件夹路径
+   * @returns 是否只包含空的标准子文件夹
+   */
+  static async isProjectFolderEmpty(folderPath: string): Promise<boolean> {
+    try {
+      const files = await fs.promises.readdir(folderPath)
+      const standardSubFolders = ['_Assets', '_Expenses', 'Documents']
+
+      // 检查是否只包含标准子文件夹
+      const nonStandardFiles = files.filter((file) => !standardSubFolders.includes(file))
+      if (nonStandardFiles.length > 0) {
+        return false // 包含非标准文件或文件夹
+      }
+
+      // 检查标准子文件夹是否为空
+      for (const file of files) {
+        const filePath = path.join(folderPath, file)
+        const stats = await fs.promises.stat(filePath)
+        if (stats.isDirectory()) {
+          const subFiles = await fs.promises.readdir(filePath)
+          if (subFiles.length > 0) {
+            return false // 子文件夹不为空
+          }
+        }
+      }
+
+      return true // 文件夹为空或只包含空的标准子文件夹
+    } catch {
+      return false
+    }
+  }
+
+  /**
    * 删除项目文件夹
    * @param projectName 项目名称
    * @param projectId 项目ID
@@ -169,15 +203,14 @@ export class ProjectFolderService {
         if (force) {
           // 强制删除整个文件夹
           await fs.promises.rm(projectPath, { recursive: true, force: true })
-          console.log(`项目文件夹已删除: ${projectPath}`)
+          console.log(`项目文件夹已强制删除: ${projectPath}`)
         } else {
-          // 检查文件夹是否为空
-          const files = await fs.promises.readdir(projectPath)
-          if (files.length === 0) {
-            await fs.promises.rmdir(projectPath)
+          // 检查文件夹是否为空（只包含空的标准子文件夹）
+          if (await this.isProjectFolderEmpty(projectPath)) {
+            await fs.promises.rm(projectPath, { recursive: true, force: true })
             console.log(`空项目文件夹已删除: ${projectPath}`)
           } else {
-            console.warn(`项目文件夹不为空，跳过删除: ${projectPath}`)
+            console.warn(`项目文件夹包含文件，跳过删除: ${projectPath}`)
           }
         }
       } else {

@@ -40,6 +40,7 @@ export const projects = sqliteTable(
     description: text('description'),
     status: text('status').notNull().default('active'), // e.g., "active", "archived", "on_hold"
     currentCoverAssetId: text('current_cover_asset_id'), // FK to project_assets
+    folderPath: text('folder_path'), // 项目文件夹的完整路径
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
       .default(sql`(strftime('%s', 'now') * 1000)`),
