@@ -1,11 +1,12 @@
-import { DocumentVersionService } from '../services/document-version.service'
+import { DocumentVersionService } from '../services/document/document-version.service'
+import { DocumentUploadService } from '../services/document/document-upload.service'
 import type {
   CreateDocumentVersionInput,
   UpdateDocumentVersionInput,
   GetDocumentVersionInput,
   DeleteDocumentVersionInput,
   GetLogicalDocumentVersionsInput
-} from '../services/document-version.service'
+} from '../services/document/document-version.service'
 
 export function documentVersionRouter(t: any) {
   return {
@@ -66,6 +67,43 @@ export function documentVersionRouter(t: any) {
       .input()
       .action(async ({ input }: { input: { logicalDocumentId: string } }) => {
         return await DocumentVersionService.getVersionsByFileType(input.logicalDocumentId)
+      }),
+
+    // 上传文档版本（原子操作）
+    uploadDocumentVersion: t.procedure.input().action(
+      async ({
+        input
+      }: {
+        input: {
+          sourcePath: string
+          targetDirectory: string
+          displayName: string
+          preserveOriginalName?: boolean
+          logicalDocumentId: string
+          versionTag: string
+          isGenericVersion?: boolean
+          competitionProjectName?: string
+          notes?: string
+        }
+      }) => {
+        return await DocumentUploadService.uploadDocumentVersion(input)
+      }
+    ),
+
+    // 检查文件上传能力
+    checkFileUploadability: t.procedure
+      .input()
+      .action(async ({ input }: { input: { filePath: string } }) => {
+        return await DocumentUploadService.checkFileUploadability(input.filePath)
+      }),
+
+    // 生成版本标签
+    generateVersionTag: t.procedure
+      .input()
+      .action(async ({ input }: { input: { prefix?: string } }) => {
+        return {
+          versionTag: DocumentUploadService.generateVersionTag(input.prefix)
+        }
       })
   }
 }

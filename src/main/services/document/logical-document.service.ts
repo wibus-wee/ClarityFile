@@ -1,7 +1,7 @@
-import { db } from '../db'
-import { logicalDocuments, documentVersions, managedFiles } from '../../db/schema'
+import { db } from '../../db'
+import { logicalDocuments, documentVersions, managedFiles } from '../../../db/schema'
 import { eq, desc, and, count } from 'drizzle-orm'
-import type { SuccessResponse } from '../types/outputs'
+import type { SuccessResponse } from '../../types/outputs'
 
 export interface CreateLogicalDocumentInput {
   projectId: string

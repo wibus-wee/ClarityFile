@@ -5,7 +5,8 @@ import type {
   GetManagedFilesInput,
   CreateManagedFileInput,
   CreateTagInput,
-  SelectDirectoryInput
+  SelectDirectoryInput,
+  SelectFileInput
 } from '../types/inputs'
 
 export function fileRouter(t: any) {
@@ -39,6 +40,13 @@ export function fileRouter(t: any) {
       .input()
       .action(async ({ input, context }: { input: SelectDirectoryInput; context: any }) => {
         return await FilesystemService.selectDirectory(input, context)
+      }),
+
+    // 选择文件
+    selectFile: t.procedure
+      .input()
+      .action(async ({ input, context }: { input: SelectFileInput; context: any }) => {
+        return await FilesystemService.selectFile(input, context)
       })
   }
 }

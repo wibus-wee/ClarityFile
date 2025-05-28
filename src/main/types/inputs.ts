@@ -95,3 +95,9 @@ export interface SelectDirectoryInput {
   title?: string
   defaultPath?: string
 }
+
+export interface SelectFileInput {
+  title?: string
+  defaultPath?: string
+  filters?: Array<{ name: string; extensions: string[] }>
+}

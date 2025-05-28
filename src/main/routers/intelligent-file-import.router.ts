@@ -4,18 +4,14 @@ import type { FileImportContext } from '../services/intelligent-file-import.serv
 export function intelligentFileImportRouter(t: any) {
   return {
     // 导入单个文件
-    importFile: t.procedure
-      .input()
-      .action(async ({ input }: { input: FileImportContext }) => {
-        return await IntelligentFileImportService.importFile(input)
-      }),
+    importFile: t.procedure.input().action(async ({ input }: { input: FileImportContext }) => {
+      return await IntelligentFileImportService.importFile(input)
+    }),
 
     // 预览文件导入方案
-    previewImport: t.procedure
-      .input()
-      .action(async ({ input }: { input: FileImportContext }) => {
-        return await IntelligentFileImportService.previewImport(input)
-      }),
+    previewImport: t.procedure.input().action(async ({ input }: { input: FileImportContext }) => {
+      return await IntelligentFileImportService.previewImport(input)
+    }),
 
     // 批量导入文件
     batchImportFiles: t.procedure
@@ -45,7 +41,13 @@ export function intelligentFileImportRouter(t: any) {
             label: '项目文档',
             description: '项目相关的文档文件，如商业计划书、PPT等',
             icon: '📄',
-            requiredFields: ['projectId', 'projectName', 'logicalDocumentName', 'logicalDocumentType', 'versionTag'],
+            requiredFields: [
+              'projectId',
+              'projectName',
+              'logicalDocumentName',
+              'logicalDocumentType',
+              'versionTag'
+            ],
             optionalFields: ['logicalDocumentId', 'isGenericVersion', 'competitionInfo', 'notes']
           },
           {
@@ -212,16 +214,16 @@ export function intelligentFileImportRouter(t: any) {
         try {
           // 获取预览信息
           const preview = await IntelligentFileImportService.previewImport(input)
-          
+
           // 获取文件类型支持信息
           const isSupported = IntelligentFileImportService.isFileTypeSupported(
             input.originalFileName,
             input.importType
           )
-          
+
           // 获取支持的文件类型列表
           const supportedTypes = IntelligentFileImportService.getSupportedFileTypes()
-          
+
           return {
             ...preview,
             fileTypeSupported: isSupported,

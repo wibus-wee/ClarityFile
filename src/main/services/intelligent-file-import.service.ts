@@ -2,8 +2,8 @@ import path from 'path'
 import { IntelligentNamingService } from './intelligent-naming.service'
 import { IntelligentPathGeneratorService } from './intelligent-path-generator.service'
 import { ManagedFileService } from './managed-file.service'
-import { LogicalDocumentService } from './logical-document.service'
-import { DocumentVersionService } from './document-version.service'
+import { LogicalDocumentService } from './document/logical-document.service'
+import { DocumentVersionService } from './document/document-version.service'
 import { FilesystemOperations } from '../utils/filesystem-operations'
 import { PathUtils } from '../utils/path-utils'
 
@@ -75,6 +75,7 @@ export interface FileImportResult {
 export class IntelligentFileImportService {
   /**
    * 导入文件并自动摆放到正确位置
+   * 严格按照 DIRECTORY_DESIGN.md 的文件系统映射策略执行
    */
   static async importFile(context: FileImportContext): Promise<FileImportResult> {
     const errors: string[] = []
@@ -98,16 +99,36 @@ export class IntelligentFileImportService {
         }
       }
 
-      // 3. 生成智能文件名
+      // 3. 验证文件类型是否支持当前导入类型
+      if (!this.isFileTypeSupported(context.originalFileName, context.importType)) {
+        warnings.push(`文件类型可能不适合 ${context.importType} 类型的导入`)
+      }
+
+      // 4. 检查是否为项目资源，如果是则验证项目信息
+      const isProjectResource = this.isProjectResource(context.importType)
+      if (isProjectResource && !this.validateProjectContext(context)) {
+        return {
+          success: false,
+          errors: ['项目资源导入需要完整的项目信息']
+        }
+      }
+
+      // 5. 生成智能文件名（按照设计文档规范）
       const generatedFileName = await this.generateIntelligentFileName(context)
 
-      // 4. 生成目标路径
+      // 6. 生成目标路径（严格按照 DIRECTORY_DESIGN.md）
       const targetPath = await this.generateTargetPath(context)
 
-      // 5. 确保目标目录存在
-      await IntelligentPathGeneratorService.ensurePathExists(targetPath)
+      // 7. 确保目标目录存在
+      const pathCreated = await IntelligentPathGeneratorService.ensurePathExists(targetPath)
+      if (!pathCreated) {
+        return {
+          success: false,
+          errors: ['无法创建目标目录']
+        }
+      }
 
-      // 6. 检查文件名冲突并生成唯一文件名
+      // 8. 检查文件名冲突并生成唯一文件名
       const existingFiles = await this.getExistingFilesInDirectory(targetPath)
       const uniqueFileName = IntelligentNamingService.generateUniqueFileName(
         generatedFileName,
@@ -118,24 +139,46 @@ export class IntelligentFileImportService {
         warnings.push(`文件名已存在，自动重命名为: ${uniqueFileName}`)
       }
 
-      // 7. 生成完整的目标文件路径
+      // 9. 生成完整的目标文件路径
       const finalPath = path.join(targetPath, uniqueFileName)
 
-      // 8. 导入文件到受管存储
-      const managedFile = await ManagedFileService.importFile({
-        sourcePath: context.sourcePath,
-        targetDirectory: targetPath,
-        displayName: context.displayName || context.originalFileName,
-        preserveOriginalName: false // 使用智能生成的文件名
+      // 10. 验证生成的路径是否符合规范
+      const pathValidation = IntelligentPathGeneratorService.validatePath(finalPath)
+      if (!pathValidation.isValid) {
+        return {
+          success: false,
+          errors: [`路径不符合规范: ${pathValidation.errors.join(', ')}`]
+        }
+      }
+
+      // 11. 复制文件到目标位置
+      const copySuccess = await FilesystemOperations.copyFile(context.sourcePath, finalPath)
+      if (!copySuccess) {
+        return {
+          success: false,
+          errors: ['文件复制失败']
+        }
+      }
+
+      // 12. 获取文件信息
+      const fileStats = await FilesystemOperations.getFileStats(finalPath)
+      if (!fileStats) {
+        return {
+          success: false,
+          errors: ['无法获取文件信息']
+        }
+      }
+
+      // 13. 创建受管文件记录
+      const managedFile = await ManagedFileService.createManagedFile({
+        name: context.displayName || context.originalFileName,
+        originalFileName: context.originalFileName,
+        physicalPath: finalPath,
+        mimeType: this.getMimeType(finalPath),
+        fileSizeBytes: fileStats.size
       })
 
-      // 9. 更新受管文件的物理路径为智能生成的路径
-      await ManagedFileService.updateManagedFile({
-        id: managedFile.id,
-        name: uniqueFileName
-      })
-
-      // 10. 如果是文档类型，创建或更新逻辑文档和版本
+      // 14. 如果是文档类型，创建或更新逻辑文档和版本
       let logicalDocumentId: string | undefined
       let documentVersionId: string | undefined
 
@@ -148,7 +191,7 @@ export class IntelligentFileImportService {
         }
       }
 
-      // 11. 生成相对路径用于显示
+      // 15. 生成相对路径用于显示
       const relativePath = IntelligentPathGeneratorService.getRelativeDisplayPath(
         finalPath,
         context.clarityFileRoot
@@ -542,5 +585,63 @@ export class IntelligentFileImportService {
     }
 
     return typesForImport.includes('.*') || typesForImport.includes(fileExt)
+  }
+
+  /**
+   * 检查导入类型是否为项目资源
+   */
+  private static isProjectResource(importType: string): boolean {
+    return ['document', 'asset', 'expense'].includes(importType)
+  }
+
+  /**
+   * 验证项目相关的上下文信息
+   */
+  private static validateProjectContext(context: FileImportContext): boolean {
+    if (!context.projectId || !context.projectName) {
+      return false
+    }
+
+    // 根据不同的导入类型验证特定字段
+    switch (context.importType) {
+      case 'document':
+        return !!(context.logicalDocumentName && context.logicalDocumentType && context.versionTag)
+      case 'asset':
+        return !!(context.assetType && context.assetName)
+      case 'expense':
+        return !!context.expenseDescription
+      default:
+        return true
+    }
+  }
+
+  /**
+   * 获取文件MIME类型
+   */
+  private static getMimeType(filePath: string): string {
+    const ext = path.extname(filePath).toLowerCase()
+    const mimeTypes: Record<string, string> = {
+      '.pdf': 'application/pdf',
+      '.doc': 'application/msword',
+      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.ppt': 'application/vnd.ms-powerpoint',
+      '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      '.xls': 'application/vnd.ms-excel',
+      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      '.txt': 'text/plain',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.mp4': 'video/mp4',
+      '.mov': 'video/quicktime',
+      '.mp3': 'audio/mpeg',
+      '.wav': 'audio/wav',
+      '.zip': 'application/zip',
+      '.rar': 'application/x-rar-compressed'
+    }
+
+    return mimeTypes[ext] || 'application/octet-stream'
   }
 }

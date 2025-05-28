@@ -49,7 +49,7 @@ export class PathUtils {
     } catch (error) {
       console.warn('获取默认项目路径失败:', error)
     }
-    
+
     // 如果没有设置，返回默认路径
     return path.join(os.homedir(), 'Documents', 'ClarityFile')
   }

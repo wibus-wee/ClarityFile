@@ -16,8 +16,6 @@ import { Route as ProjectsImport } from './routes/projects'
 import { Route as ErrorTestImport } from './routes/error-test'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
-import { Route as DocumentsIndexImport } from './routes/documents/index'
-import { Route as DocumentsDocumentIdImport } from './routes/documents/$documentId'
 
 // Create/Update Routes
 
@@ -48,18 +46,6 @@ const AboutRoute = AboutImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DocumentsIndexRoute = DocumentsIndexImport.update({
-  id: '/documents/',
-  path: '/documents/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DocumentsDocumentIdRoute = DocumentsDocumentIdImport.update({
-  id: '/documents/$documentId',
-  path: '/documents/$documentId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -102,20 +88,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
-    '/documents/$documentId': {
-      id: '/documents/$documentId'
-      path: '/documents/$documentId'
-      fullPath: '/documents/$documentId'
-      preLoaderRoute: typeof DocumentsDocumentIdImport
-      parentRoute: typeof rootRoute
-    }
-    '/documents/': {
-      id: '/documents/'
-      path: '/documents'
-      fullPath: '/documents'
-      preLoaderRoute: typeof DocumentsIndexImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -127,8 +99,6 @@ export interface FileRoutesByFullPath {
   '/error-test': typeof ErrorTestRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
-  '/documents/$documentId': typeof DocumentsDocumentIdRoute
-  '/documents': typeof DocumentsIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -137,8 +107,6 @@ export interface FileRoutesByTo {
   '/error-test': typeof ErrorTestRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
-  '/documents/$documentId': typeof DocumentsDocumentIdRoute
-  '/documents': typeof DocumentsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -148,38 +116,14 @@ export interface FileRoutesById {
   '/error-test': typeof ErrorTestRoute
   '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRoute
-  '/documents/$documentId': typeof DocumentsDocumentIdRoute
-  '/documents/': typeof DocumentsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/about'
-    | '/error-test'
-    | '/projects'
-    | '/settings'
-    | '/documents/$documentId'
-    | '/documents'
+  fullPaths: '/' | '/about' | '/error-test' | '/projects' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/about'
-    | '/error-test'
-    | '/projects'
-    | '/settings'
-    | '/documents/$documentId'
-    | '/documents'
-  id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/error-test'
-    | '/projects'
-    | '/settings'
-    | '/documents/$documentId'
-    | '/documents/'
+  to: '/' | '/about' | '/error-test' | '/projects' | '/settings'
+  id: '__root__' | '/' | '/about' | '/error-test' | '/projects' | '/settings'
   fileRoutesById: FileRoutesById
 }
 
@@ -189,8 +133,6 @@ export interface RootRouteChildren {
   ErrorTestRoute: typeof ErrorTestRoute
   ProjectsRoute: typeof ProjectsRoute
   SettingsRoute: typeof SettingsRoute
-  DocumentsDocumentIdRoute: typeof DocumentsDocumentIdRoute
-  DocumentsIndexRoute: typeof DocumentsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -199,8 +141,6 @@ const rootRouteChildren: RootRouteChildren = {
   ErrorTestRoute: ErrorTestRoute,
   ProjectsRoute: ProjectsRoute,
   SettingsRoute: SettingsRoute,
-  DocumentsDocumentIdRoute: DocumentsDocumentIdRoute,
-  DocumentsIndexRoute: DocumentsIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -217,9 +157,7 @@ export const routeTree = rootRoute
         "/about",
         "/error-test",
         "/projects",
-        "/settings",
-        "/documents/$documentId",
-        "/documents/"
+        "/settings"
       ]
     },
     "/": {
@@ -236,12 +174,6 @@ export const routeTree = rootRoute
     },
     "/settings": {
       "filePath": "settings.tsx"
-    },
-    "/documents/$documentId": {
-      "filePath": "documents/$documentId.tsx"
-    },
-    "/documents/": {
-      "filePath": "documents/index.tsx"
     }
   }
 }

@@ -1,7 +1,7 @@
-import { db } from '../db'
-import { documentVersions, managedFiles, logicalDocuments } from '../../db/schema'
+import { db } from '../../db'
+import { documentVersions, managedFiles, logicalDocuments } from '../../../db/schema'
 import { eq, desc } from 'drizzle-orm'
-import type { SuccessResponse } from '../types/outputs'
+import type { SuccessResponse } from '../../types/outputs'
 
 export interface CreateDocumentVersionInput {
   logicalDocumentId: string
@@ -43,6 +43,8 @@ export class DocumentVersionService {
    * 创建文档版本
    */
   static async createDocumentVersion(input: CreateDocumentVersionInput) {
+    console.log('创建文档版本 - 输入参数:', input)
+
     // 验证逻辑文档是否存在
     const logicalDoc = await db
       .select()
@@ -51,8 +53,11 @@ export class DocumentVersionService {
       .limit(1)
 
     if (logicalDoc.length === 0) {
-      throw new Error('逻辑文档不存在')
+      console.error('逻辑文档不存在:', input.logicalDocumentId)
+      throw new Error(`逻辑文档不存在: ${input.logicalDocumentId}`)
     }
+
+    console.log('逻辑文档验证通过:', logicalDoc[0])
 
     // 验证受管文件是否存在
     const managedFile = await db
@@ -61,8 +66,20 @@ export class DocumentVersionService {
       .where(eq(managedFiles.id, input.managedFileId))
       .limit(1)
 
+    console.log('查询受管文件结果:', {
+      managedFileId: input.managedFileId,
+      found: managedFile.length > 0,
+      file: managedFile[0] || null
+    })
+
     if (managedFile.length === 0) {
-      throw new Error('受管文件不存在')
+      console.error('受管文件不存在:', input.managedFileId)
+
+      // 查询所有受管文件以便调试
+      const allFiles = await db.select().from(managedFiles).limit(10)
+      console.log('当前数据库中的受管文件:', allFiles)
+
+      throw new Error(`受管文件不存在: ${input.managedFileId}`)
     }
 
     // 检查该文件是否已经被其他版本使用
