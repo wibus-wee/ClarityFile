@@ -22,7 +22,12 @@
     "build:linux": "electron-vite build && electron-builder --linux",
     "rebuild:sqlite3:electron": "electron-rebuild -f -w better-sqlite3",
     "rebuild:sqlite3": "pnpm rebuild better-sqlite3",
-    "drizzle-kit": "pnpm rebuild:sqlite3 && npx drizzle-kit"
+    "drizzle-kit": "pnpm rebuild:sqlite3 && npx drizzle-kit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "@egoist/tipc": "^0.3.2",
@@ -92,11 +97,13 @@
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@tanstack/router-plugin": "^1.120.5",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.21",
     "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/ui": "^3.1.4",
     "babel-plugin-react-compiler": "19.1.0-rc.2",
+    "c8": "^10.1.3",
     "drizzle-kit": "^0.31.1",
     "electron": "^35.1.5",
     "electron-builder": "^25.1.8",
@@ -109,7 +116,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "typescript": "^5.8.3",
-    "vite": "^6.2.6"
+    "vite": "^6.2.6",
+    "vitest": "^3.1.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
