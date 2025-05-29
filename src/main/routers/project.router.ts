@@ -8,8 +8,9 @@ import type {
   SyncProjectFolderPathInput,
   RepairProjectFolderInput
 } from '../types/inputs'
+import { ITipc } from '../types'
 
-export function projectRouter(t: any) {
+export function projectRouter(t: ITipc) {
   return {
     // 获取所有项目
     getProjects: t.procedure.action(async () => {
@@ -17,36 +18,34 @@ export function projectRouter(t: any) {
     }),
 
     // 根据 ID 获取项目
-    getProject: t.procedure.input().action(async ({ input }: { input: GetProjectInput }) => {
+    getProject: t.procedure.input<GetProjectInput>().action(async ({ input }) => {
       return await ProjectService.getProject(input)
     }),
 
     // 创建项目
-    createProject: t.procedure.input().action(async ({ input }: { input: CreateProjectInput }) => {
+    createProject: t.procedure.input<CreateProjectInput>().action(async ({ input }) => {
       return await ProjectService.createProject(input)
     }),
 
     // 更新项目
-    updateProject: t.procedure.input().action(async ({ input }: { input: UpdateProjectInput }) => {
+    updateProject: t.procedure.input<UpdateProjectInput>().action(async ({ input }) => {
       return await ProjectService.updateProject(input)
     }),
 
     // 删除项目
-    deleteProject: t.procedure.input().action(async ({ input }: { input: DeleteProjectInput }) => {
+    deleteProject: t.procedure.input<DeleteProjectInput>().action(async ({ input }) => {
       return await ProjectService.deleteProject(input)
     }),
 
     // 搜索项目
-    searchProjects: t.procedure
-      .input()
-      .action(async ({ input }: { input: SearchProjectsInput }) => {
-        return await ProjectService.searchProjects(input)
-      }),
+    searchProjects: t.procedure.input<SearchProjectsInput>().action(async ({ input }) => {
+      return await ProjectService.searchProjects(input)
+    }),
 
     // 同步项目文件夹路径
     syncProjectFolderPath: t.procedure
-      .input()
-      .action(async ({ input }: { input: SyncProjectFolderPathInput }) => {
+      .input<SyncProjectFolderPathInput>()
+      .action(async ({ input }) => {
         return await ProjectService.syncProjectFolderPath(input.projectId)
       }),
 
@@ -56,10 +55,8 @@ export function projectRouter(t: any) {
     }),
 
     // 修复项目文件夹
-    repairProjectFolder: t.procedure
-      .input()
-      .action(async ({ input }: { input: RepairProjectFolderInput }) => {
-        return await ProjectService.repairProjectFolder(input.projectId)
-      })
+    repairProjectFolder: t.procedure.input<RepairProjectFolderInput>().action(async ({ input }) => {
+      return await ProjectService.repairProjectFolder(input.projectId)
+    })
   }
 }

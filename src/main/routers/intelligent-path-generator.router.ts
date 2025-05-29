@@ -1,187 +1,141 @@
 import { IntelligentPathGeneratorService } from '../services/intelligent-path-generator.service'
+import { ITipc } from '../types'
 
-export function intelligentPathGeneratorRouter(t: any) {
+export function intelligentPathGeneratorRouter(t: ITipc) {
   return {
     // 生成项目文档路径
-    generateDocumentPath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          projectName: string
-          projectId: string
-          logicalDocumentName: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    generateDocumentPath: t.procedure
+      .input<{
+        projectName: string
+        projectId: string
+        logicalDocumentName: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateDocumentPath(input)
-      }
-    ),
+      }),
 
     // 生成项目资产路径
-    generateProjectAssetPath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          projectName: string
-          projectId: string
-          assetType: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    generateProjectAssetPath: t.procedure
+      .input<{
+        projectName: string
+        projectId: string
+        assetType: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateProjectAssetPath(input)
-      }
-    ),
+      }),
 
     // 生成项目经费报销路径
-    generateProjectExpensePath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          projectName: string
-          projectId: string
-          expenseDescription: string
-          applicantName?: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    generateProjectExpensePath: t.procedure
+      .input<{
+        projectName: string
+        projectId: string
+        expenseDescription: string
+        applicantName?: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateProjectExpensePath(input)
-      }
-    ),
+      }),
 
     // 生成共享资源路径
-    generateSharedResourcePath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          resourceType: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    generateSharedResourcePath: t.procedure
+      .input<{
+        resourceType: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateSharedResourcePath(input)
-      }
-    ),
+      }),
 
     // 生成比赛资料路径
-    generateCompetitionPath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          seriesName: string
-          levelName: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    generateCompetitionPath: t.procedure
+      .input<{
+        seriesName: string
+        levelName: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateCompetitionPath(input)
-      }
-    ),
+      }),
 
     // 生成临时文件路径（Inbox）
-    generateInboxPath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          clarityFileRoot?: string
-          date?: string
-        }
-      }) => {
+    generateInboxPath: t.procedure
+      .input<{
+        clarityFileRoot?: string
+        date?: string
+      }>()
+      .action(async ({ input }) => {
         const params = {
           ...input,
           date: input.date ? new Date(input.date) : undefined
         }
         return await IntelligentPathGeneratorService.generateInboxPath(params)
-      }
-    ),
+      }),
 
     // 生成系统文件路径
-    generateSystemPath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          subType: 'database' | 'config' | 'logs' | 'temp'
-          clarityFileRoot?: string
-        }
-      }) => {
+    generateSystemPath: t.procedure
+      .input<{
+        subType: 'database' | 'config' | 'logs' | 'temp'
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateSystemPath(input)
-      }
-    ),
+      }),
 
     // 生成完整文件路径
-    generateCompleteFilePath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
-          pathParams: any
-          fileName: string
-        }
-      }) => {
+    generateCompleteFilePath: t.procedure
+      .input<{
+        type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+        pathParams: any
+        fileName: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateCompleteFilePath(input)
-      }
-    ),
+      }),
 
     // 确保路径存在
-    ensurePathExists: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          targetPath: string
-        }
-      }) => {
+    ensurePathExists: t.procedure
+      .input<{
+        targetPath: string
+      }>()
+      .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.ensurePathExists(input.targetPath)
-      }
-    ),
+      }),
 
     // 验证路径
-    validatePath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          filePath: string
-        }
-      }) => {
+    validatePath: t.procedure
+      .input<{
+        filePath: string
+      }>()
+      .action(async ({ input }) => {
         return IntelligentPathGeneratorService.validatePath(input.filePath)
-      }
-    ),
+      }),
 
     // 获取相对显示路径
-    getRelativeDisplayPath: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          fullPath: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    getRelativeDisplayPath: t.procedure
+      .input<{
+        fullPath: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         return IntelligentPathGeneratorService.getRelativeDisplayPath(
           input.fullPath,
           input.clarityFileRoot
         )
-      }
-    ),
+      }),
 
     // 预览完整的文件存储方案
-    previewFileStorageScheme: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
-          pathParams: any
-          fileName: string
-          clarityFileRoot?: string
-        }
-      }) => {
+    previewFileStorageScheme: t.procedure
+      .input<{
+        type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+        pathParams: any
+        fileName: string
+        clarityFileRoot?: string
+      }>()
+      .action(async ({ input }) => {
         try {
           const { type, pathParams, fileName, clarityFileRoot } = input
 
@@ -264,7 +218,6 @@ export function intelligentPathGeneratorRouter(t: any) {
             pathLength: 0
           }
         }
-      }
-    )
+      })
   }
 }

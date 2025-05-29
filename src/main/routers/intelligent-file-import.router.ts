@@ -1,22 +1,23 @@
 import { IntelligentFileImportService } from '../services/intelligent-file-import.service'
 import type { FileImportContext } from '../services/intelligent-file-import.service'
+import { ITipc } from '../types'
 
-export function intelligentFileImportRouter(t: any) {
+export function intelligentFileImportRouter(t: ITipc) {
   return {
     // 导入单个文件
-    importFile: t.procedure.input().action(async ({ input }: { input: FileImportContext }) => {
+    importFile: t.procedure.input<FileImportContext>().action(async ({ input }) => {
       return await IntelligentFileImportService.importFile(input)
     }),
 
     // 预览文件导入方案
-    previewImport: t.procedure.input().action(async ({ input }: { input: FileImportContext }) => {
+    previewImport: t.procedure.input<FileImportContext>().action(async ({ input }) => {
       return await IntelligentFileImportService.previewImport(input)
     }),
 
     // 批量导入文件
     batchImportFiles: t.procedure
-      .input()
-      .action(async ({ input }: { input: { contexts: FileImportContext[] } }) => {
+      .input<{ contexts: FileImportContext[] }>()
+      .action(async ({ input }) => {
         return await IntelligentFileImportService.batchImportFiles(input.contexts)
       }),
 
@@ -27,8 +28,8 @@ export function intelligentFileImportRouter(t: any) {
 
     // 验证文件类型是否支持
     isFileTypeSupported: t.procedure
-      .input()
-      .action(async ({ input }: { input: { fileName: string; importType: string } }) => {
+      .input<{ fileName: string; importType: string }>()
+      .action(async ({ input }) => {
         return IntelligentFileImportService.isFileTypeSupported(input.fileName, input.importType)
       }),
 
@@ -143,109 +144,105 @@ export function intelligentFileImportRouter(t: any) {
     }),
 
     // 验证导入上下文
-    validateImportContext: t.procedure
-      .input()
-      .action(async ({ input }: { input: FileImportContext }) => {
-        // 使用私有方法的逻辑来验证
-        const errors: string[] = []
+    validateImportContext: t.procedure.input<FileImportContext>().action(async ({ input }) => {
+      // 使用私有方法的逻辑来验证
+      const errors: string[] = []
 
-        // 基本信息验证
-        if (!input.sourcePath) {
-          errors.push('源文件路径不能为空')
-        }
-        if (!input.originalFileName) {
-          errors.push('原始文件名不能为空')
-        }
-        if (!input.importType) {
-          errors.push('导入类型不能为空')
-        }
+      // 基本信息验证
+      if (!input.sourcePath) {
+        errors.push('源文件路径不能为空')
+      }
+      if (!input.originalFileName) {
+        errors.push('原始文件名不能为空')
+      }
+      if (!input.importType) {
+        errors.push('导入类型不能为空')
+      }
 
-        // 根据导入类型验证必需字段
-        switch (input.importType) {
-          case 'document':
-            if (!input.projectId) errors.push('项目ID不能为空')
-            if (!input.projectName) errors.push('项目名称不能为空')
-            if (!input.logicalDocumentName) errors.push('逻辑文档名称不能为空')
-            if (!input.logicalDocumentType) errors.push('逻辑文档类型不能为空')
-            if (!input.versionTag) errors.push('版本标签不能为空')
-            break
+      // 根据导入类型验证必需字段
+      switch (input.importType) {
+        case 'document':
+          if (!input.projectId) errors.push('项目ID不能为空')
+          if (!input.projectName) errors.push('项目名称不能为空')
+          if (!input.logicalDocumentName) errors.push('逻辑文档名称不能为空')
+          if (!input.logicalDocumentType) errors.push('逻辑文档类型不能为空')
+          if (!input.versionTag) errors.push('版本标签不能为空')
+          break
 
-          case 'asset':
-            if (!input.projectId) errors.push('项目ID不能为空')
-            if (!input.projectName) errors.push('项目名称不能为空')
-            if (!input.assetType) errors.push('资产类型不能为空')
-            if (!input.assetName) errors.push('资产名称不能为空')
-            break
+        case 'asset':
+          if (!input.projectId) errors.push('项目ID不能为空')
+          if (!input.projectName) errors.push('项目名称不能为空')
+          if (!input.assetType) errors.push('资产类型不能为空')
+          if (!input.assetName) errors.push('资产名称不能为空')
+          break
 
-          case 'expense':
-            if (!input.projectId) errors.push('项目ID不能为空')
-            if (!input.projectName) errors.push('项目名称不能为空')
-            if (!input.expenseDescription) errors.push('报销事项描述不能为空')
-            break
+        case 'expense':
+          if (!input.projectId) errors.push('项目ID不能为空')
+          if (!input.projectName) errors.push('项目名称不能为空')
+          if (!input.expenseDescription) errors.push('报销事项描述不能为空')
+          break
 
-          case 'shared':
-            if (!input.resourceType) errors.push('资源类型不能为空')
-            if (!input.resourceName) errors.push('资源名称不能为空')
-            break
+        case 'shared':
+          if (!input.resourceType) errors.push('资源类型不能为空')
+          if (!input.resourceName) errors.push('资源名称不能为空')
+          break
 
-          case 'competition':
-            if (!input.seriesName) errors.push('赛事系列名称不能为空')
-            if (!input.levelName) errors.push('赛事级别不能为空')
-            break
+        case 'competition':
+          if (!input.seriesName) errors.push('赛事系列名称不能为空')
+          if (!input.levelName) errors.push('赛事级别不能为空')
+          break
 
-          case 'inbox':
-            // Inbox 类型不需要额外验证
-            break
+        case 'inbox':
+          // Inbox 类型不需要额外验证
+          break
 
-          default:
-            errors.push('不支持的导入类型')
-        }
+        default:
+          errors.push('不支持的导入类型')
+      }
 
-        return {
-          isValid: errors.length === 0,
-          errors
-        }
-      }),
+      return {
+        isValid: errors.length === 0,
+        errors
+      }
+    }),
 
     // 生成导入预览的完整信息
-    generateImportPreview: t.procedure
-      .input()
-      .action(async ({ input }: { input: FileImportContext }) => {
-        try {
-          // 获取预览信息
-          const preview = await IntelligentFileImportService.previewImport(input)
+    generateImportPreview: t.procedure.input<FileImportContext>().action(async ({ input }) => {
+      try {
+        // 获取预览信息
+        const preview = await IntelligentFileImportService.previewImport(input)
 
-          // 获取文件类型支持信息
-          const isSupported = IntelligentFileImportService.isFileTypeSupported(
-            input.originalFileName,
-            input.importType
-          )
+        // 获取文件类型支持信息
+        const isSupported = IntelligentFileImportService.isFileTypeSupported(
+          input.originalFileName,
+          input.importType
+        )
 
-          // 获取支持的文件类型列表
-          const supportedTypes = IntelligentFileImportService.getSupportedFileTypes()
+        // 获取支持的文件类型列表
+        const supportedTypes = IntelligentFileImportService.getSupportedFileTypes()
 
-          return {
-            ...preview,
-            fileTypeSupported: isSupported,
-            supportedExtensions: supportedTypes[input.importType] || [],
-            importType: input.importType,
-            originalFileName: input.originalFileName
-          }
-        } catch (error) {
-          return {
-            generatedFileName: '',
-            targetPath: '',
-            relativePath: '',
-            fullPath: '',
-            isValid: false,
-            errors: [error instanceof Error ? error.message : '预览生成失败'],
-            warnings: [],
-            fileTypeSupported: false,
-            supportedExtensions: [],
-            importType: input.importType,
-            originalFileName: input.originalFileName
-          }
+        return {
+          ...preview,
+          fileTypeSupported: isSupported,
+          supportedExtensions: supportedTypes[input.importType] || [],
+          importType: input.importType,
+          originalFileName: input.originalFileName
         }
-      })
+      } catch (error) {
+        return {
+          generatedFileName: '',
+          targetPath: '',
+          relativePath: '',
+          fullPath: '',
+          isValid: false,
+          errors: [error instanceof Error ? error.message : '预览生成失败'],
+          warnings: [],
+          fileTypeSupported: false,
+          supportedExtensions: [],
+          importType: input.importType,
+          originalFileName: input.originalFileName
+        }
+      }
+    })
   }
 }
