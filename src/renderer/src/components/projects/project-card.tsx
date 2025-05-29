@@ -10,6 +10,7 @@ import { Calendar, Edit, FolderOpen, MoreHorizontal, Trash2 } from 'lucide-react
 import { cn } from '@renderer/lib/utils'
 import type { Project } from './index'
 import { motion } from 'framer-motion'
+import { Link } from '@tanstack/react-router'
 
 interface ProjectCardProps {
   project: Project
@@ -49,7 +50,7 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
   return (
     <motion.div
       layoutId={`project-${project.id}`}
-      className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer"
+      className="group border-b border-border/50 relative"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -60,73 +61,92 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
         layout: { duration: 0.4 }
       }}
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <motion.div
-          layoutId={`project-icon-${project.id}`}
-          className="w-8 h-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0"
-          transition={{ duration: 0.4 }}
-        >
-          <FolderOpen className="w-4 h-4 text-primary" />
-        </motion.div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <motion.h3
-              layoutId={`project-title-${project.id}`}
-              className="font-medium text-sm truncate"
-              transition={{ duration: 0.4 }}
-            >
-              {project.name}
-            </motion.h3>
-            <motion.span
-              layoutId={`project-status-${project.id}`}
-              className={cn(
-                'px-1.5 py-0.5 rounded text-xs font-medium shrink-0',
-                getStatusColor(project.status)
-              )}
-              transition={{ duration: 0.4 }}
-            >
-              {getStatusText(project.status)}
-            </motion.span>
-          </div>
-          {project.description && (
-            <motion.p
-              layoutId={`project-description-${project.id}`}
-              className="text-xs text-muted-foreground line-clamp-1 mb-1"
-              transition={{ duration: 0.4 }}
-            >
-              {project.description}
-            </motion.p>
-          )}
+      <Link
+        to="/projects/$projectId"
+        params={{ projectId: project.id }}
+        className="flex items-center py-3 px-4 pr-16 hover:bg-muted/30 transition-colors cursor-pointer"
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <motion.div
-            layoutId={`project-date-${project.id}`}
-            className="flex items-center gap-1 text-xs text-muted-foreground"
+            layoutId={`project-icon-${project.id}`}
+            className="w-8 h-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0"
             transition={{ duration: 0.4 }}
           >
-            <Calendar className="w-3 h-3" />
-            {new Date(project.createdAt).toLocaleDateString()}
+            <FolderOpen className="w-4 h-4 text-primary" />
           </motion.div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <motion.h3
+                layoutId={`project-title-${project.id}`}
+                className="font-medium text-sm truncate"
+                transition={{ duration: 0.4 }}
+              >
+                {project.name}
+              </motion.h3>
+              <motion.span
+                layoutId={`project-status-${project.id}`}
+                className={cn(
+                  'px-1.5 py-0.5 rounded text-xs font-medium shrink-0',
+                  getStatusColor(project.status)
+                )}
+                transition={{ duration: 0.4 }}
+              >
+                {getStatusText(project.status)}
+              </motion.span>
+            </div>
+            {project.description && (
+              <motion.p
+                layoutId={`project-description-${project.id}`}
+                className="text-xs text-muted-foreground line-clamp-1 mb-1"
+                transition={{ duration: 0.4 }}
+              >
+                {project.description}
+              </motion.p>
+            )}
+            <motion.div
+              layoutId={`project-date-${project.id}`}
+              className="flex items-center gap-1 text-xs text-muted-foreground"
+              transition={{ duration: 0.4 }}
+            >
+              <Calendar className="w-3 h-3" />
+              {new Date(project.createdAt).toLocaleDateString()}
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </Link>
 
-      <motion.div layoutId={`project-actions-${project.id}`} transition={{ duration: 0.4 }}>
+      <motion.div
+        layoutId={`project-actions-${project.id}`}
+        transition={{ duration: 0.4 }}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2"
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
               className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+              onClick={(e) => e.preventDefault()}
             >
               <MoreHorizontal className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(project)}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.preventDefault()
+                onEdit(project)
+              }}
+            >
               <Edit className="w-4 h-4 mr-2" />
               编辑
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => onDelete(project.id, project.name)}
+              onClick={(e) => {
+                e.preventDefault()
+                onDelete(project.id, project.name)
+              }}
               disabled={isDeleting}
               className="text-destructive"
             >

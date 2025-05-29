@@ -28,7 +28,7 @@ import {
   type Project
 } from '@renderer/components/projects'
 
-export const Route = createFileRoute('/projects')({
+export const Route = createFileRoute('/projects/')({
   component: ProjectsPage
 })
 
