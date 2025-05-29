@@ -16,7 +16,7 @@ import { Route as ErrorTestImport } from './routes/error-test'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProjectsIndexImport } from './routes/projects/index'
-import { Route as ProjectsProjectIdImport } from './routes/projects/$projectId
+import { Route as ProjectsProjectIdImport } from './routes/projects/$projectId'
 
 // Create/Update Routes
 
