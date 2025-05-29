@@ -2,10 +2,8 @@ import { db } from '../db'
 import { managedFiles } from '../../db/schema'
 import { eq, like, count, sum } from 'drizzle-orm'
 import { FilesystemOperations } from '../utils/filesystem-operations'
-import { PathUtils } from '../utils/path-utils'
 import crypto from 'crypto'
 import fs from 'fs'
-import path from 'path'
 import type { SuccessResponse } from '../types/outputs'
 
 export interface CreateManagedFileInput {
@@ -30,16 +28,24 @@ export interface DeleteManagedFileInput {
   deletePhysicalFile?: boolean
 }
 
-export interface ImportFileInput {
-  sourcePath: string
-  targetDirectory: string
-  displayName?: string
-  preserveOriginalName?: boolean
+export interface GetManagedFilesInput {
+  limit?: number
+  offset?: number
 }
 
 /**
  * 受管文件服务
- * 负责文件的导入、存储、管理和元数据处理
+ * 负责 managed_files 表的 CRUD 操作和文件物理层管理
+ *
+ * 职责：
+ * - 管理 managed_files 表的数据操作
+ * - 处理文件的物理存储、哈希计算、去重
+ * - 文件完整性验证
+ *
+ * 不负责：
+ * - 文件导入的业务逻辑（由 IntelligentFileImportService 处理）
+ * - 文件路径和命名规则（由专门的算法服务处理）
+ * - MIME类型检测（由 IntelligentFileImportService 处理）
  */
 export class ManagedFileService {
   /**
@@ -54,115 +60,6 @@ export class ManagedFileService {
       stream.on('end', () => resolve(hash.digest('hex')))
       stream.on('error', reject)
     })
-  }
-
-  /**
-   * 获取文件MIME类型
-   */
-  private static getMimeType(filePath: string): string {
-    const ext = path.extname(filePath).toLowerCase()
-    const mimeTypes: Record<string, string> = {
-      '.pdf': 'application/pdf',
-      '.doc': 'application/msword',
-      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      '.ppt': 'application/vnd.ms-powerpoint',
-      '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      '.xls': 'application/vnd.ms-excel',
-      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      '.txt': 'text/plain',
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.gif': 'image/gif',
-      '.zip': 'application/zip',
-      '.rar': 'application/x-rar-compressed'
-    }
-
-    return mimeTypes[ext] || 'application/octet-stream'
-  }
-
-  /**
-   * 导入文件到受管存储
-   */
-  static async importFile(input: ImportFileInput) {
-    try {
-      // 检查源文件是否存在
-      if (!(await FilesystemOperations.fileExists(input.sourcePath))) {
-        throw new Error('源文件不存在')
-      }
-
-      // 获取文件信息
-      const stats = await FilesystemOperations.getFileStats(input.sourcePath)
-      if (!stats) {
-        throw new Error('无法获取文件信息')
-      }
-
-      const originalFileName = path.basename(input.sourcePath)
-      const displayName = input.displayName || originalFileName
-
-      // 生成目标文件名
-      let targetFileName = originalFileName
-      if (!input.preserveOriginalName) {
-        const ext = path.extname(originalFileName)
-        const baseName = path.basename(originalFileName, ext)
-        const sanitizedName = PathUtils.sanitizeFileName(baseName)
-        targetFileName = `${sanitizedName}${ext}`
-      }
-
-      // 确保目标目录存在
-      await PathUtils.ensurePathExists(input.targetDirectory)
-
-      // 生成唯一的目标路径
-      let targetPath = path.join(input.targetDirectory, targetFileName)
-      let counter = 1
-      while (await FilesystemOperations.fileExists(targetPath)) {
-        const ext = path.extname(targetFileName)
-        const baseName = path.basename(targetFileName, ext)
-        targetPath = path.join(input.targetDirectory, `${baseName}_${counter}${ext}`)
-        counter++
-      }
-
-      // 复制文件
-      const copySuccess = await FilesystemOperations.copyFile(input.sourcePath, targetPath)
-      if (!copySuccess) {
-        throw new Error('文件复制失败')
-      }
-
-      // 计算文件哈希
-      const fileHash = await this.calculateFileHash(targetPath)
-
-      // 检查是否已存在相同哈希的文件
-      const existingFile = await db
-        .select()
-        .from(managedFiles)
-        .where(eq(managedFiles.fileHash, fileHash))
-        .limit(1)
-
-      if (existingFile.length > 0) {
-        // 删除刚复制的文件，使用已存在的文件
-        await FilesystemOperations.deleteFile(targetPath)
-        console.log(`文件已存在，使用现有文件: ${existingFile[0].name}`)
-        return existingFile[0]
-      }
-
-      // 创建受管文件记录
-      const managedFile = await this.createManagedFile({
-        name: displayName,
-        originalFileName,
-        physicalPath: targetPath,
-        mimeType: this.getMimeType(targetPath),
-        fileSizeBytes: stats.size
-      })
-
-      // 更新文件哈希
-      await db.update(managedFiles).set({ fileHash }).where(eq(managedFiles.id, managedFile.id))
-
-      console.log(`文件导入成功: ${displayName}`)
-      return { ...managedFile, fileHash }
-    } catch (error) {
-      console.error('文件导入失败:', error)
-      throw new Error(`文件导入失败: ${error instanceof Error ? error.message : String(error)}`)
-    }
   }
 
   /**
@@ -195,6 +92,23 @@ export class ManagedFileService {
       .limit(1)
 
     return result[0] || null
+  }
+
+  /**
+   * 分页获取受管文件列表
+   */
+  static async getManagedFiles(input: GetManagedFilesInput) {
+    const limit = input.limit || 50
+    const offset = input.offset || 0
+
+    const result = await db
+      .select()
+      .from(managedFiles)
+      .orderBy(managedFiles.createdAt)
+      .limit(limit)
+      .offset(offset)
+
+    return result
   }
 
   /**

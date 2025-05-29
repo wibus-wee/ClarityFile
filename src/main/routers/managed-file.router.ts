@@ -4,15 +4,17 @@ import type {
   UpdateManagedFileInput,
   GetManagedFileInput,
   DeleteManagedFileInput,
-  ImportFileInput
+  GetManagedFilesInput
 } from '../services/managed-file.service'
 
 export function managedFileRouter(t: any) {
   return {
-    // 导入文件
-    importFile: t.procedure.input().action(async ({ input }: { input: ImportFileInput }) => {
-      return await ManagedFileService.importFile(input)
-    }),
+    // 分页获取受管文件列表
+    getManagedFiles: t.procedure
+      .input()
+      .action(async ({ input }: { input: GetManagedFilesInput }) => {
+        return await ManagedFileService.getManagedFiles(input)
+      }),
 
     // 创建受管文件记录
     createManagedFile: t.procedure

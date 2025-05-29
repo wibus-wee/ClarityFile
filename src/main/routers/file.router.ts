@@ -1,28 +1,15 @@
-import { FileManagementService } from '../services/file-management.service'
+import { ManagedFileService, type CreateManagedFileInput } from '../services/managed-file.service'
 import { FilesystemService } from '../services/filesystem.service'
 import { TagService } from '../services/tag.service'
-import type {
-  GetManagedFilesInput,
-  CreateManagedFileInput,
-  CreateTagInput,
-  SelectDirectoryInput,
-  SelectFileInput
-} from '../types/inputs'
+import type { CreateTagInput, SelectDirectoryInput, SelectFileInput } from '../types/inputs'
 
 export function fileRouter(t: any) {
   return {
-    // 获取管理的文件
-    getManagedFiles: t.procedure
-      .input()
-      .action(async ({ input }: { input: GetManagedFilesInput }) => {
-        return await FileManagementService.getManagedFiles(input)
-      }),
-
     // 创建管理的文件记录
     createManagedFile: t.procedure
       .input()
       .action(async ({ input }: { input: CreateManagedFileInput }) => {
-        return await FileManagementService.createManagedFile(input)
+        return await ManagedFileService.createManagedFile(input)
       }),
 
     // 获取所有标签

@@ -342,13 +342,33 @@ export function useIntelligentFileImport() {
       }: {
         arg: {
           sourcePath: string
-          projectId: string
-          importType: string
+          originalFileName: string
+          displayName?: string
+          importType: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+          projectId?: string
+          projectName?: string
+          logicalDocumentId?: string
           logicalDocumentName?: string
           logicalDocumentType?: string
           versionTag?: string
           isGenericVersion?: boolean
-          displayName?: string
+          competitionInfo?: {
+            seriesName?: string
+            levelName?: string
+            projectName?: string
+          }
+          assetType?: string
+          assetName?: string
+          expenseDescription?: string
+          applicantName?: string
+          resourceType?: string
+          resourceName?: string
+          customFields?: Record<string, any>
+          seriesName?: string
+          levelName?: string
+          year?: number
+          clarityFileRoot?: string
+          preserveOriginalName?: boolean
           notes?: string
         }
       }
@@ -356,14 +376,62 @@ export function useIntelligentFileImport() {
       const result = await tipcClient.importFile(arg)
       // 重新验证相关数据
       mutate('all-documents')
-      mutate(['project-documents', arg.projectId])
+      if (arg.logicalDocumentId) {
+        mutate(['logical-document-with-versions', arg.logicalDocumentId])
+      }
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
       return result
     }
   )
 }
 
-// 文档上传相关的 hooks
+export function usePreviewFileImport() {
+  return useSWRMutation(
+    'preview-file-import',
+    async (
+      _mutationKey,
+      {
+        arg
+      }: {
+        arg: {
+          sourcePath: string
+          originalFileName: string
+          displayName?: string
+          importType: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+          projectId?: string
+          projectName?: string
+          logicalDocumentId?: string
+          logicalDocumentName?: string
+          logicalDocumentType?: string
+          versionTag?: string
+          isGenericVersion?: boolean
+          competitionInfo?: {
+            seriesName?: string
+            levelName?: string
+            projectName?: string
+          }
+          assetType?: string
+          assetName?: string
+          expenseDescription?: string
+          applicantName?: string
+          resourceType?: string
+          resourceName?: string
+          customFields?: Record<string, any>
+          seriesName?: string
+          levelName?: string
+          year?: number
+          clarityFileRoot?: string
+          preserveOriginalName?: boolean
+          notes?: string
+        }
+      }
+    ) => {
+      return await tipcClient.previewImport(arg)
+    }
+  )
+}
+
+// 文档上传相关的 hooks (基于智能文件导入)
 export function useUploadDocumentVersion() {
   return useSWRMutation(
     'upload-document-version',
@@ -374,23 +442,100 @@ export function useUploadDocumentVersion() {
       }: {
         arg: {
           sourcePath: string
-          targetDirectory: string
-          displayName: string
-          preserveOriginalName?: boolean
-          logicalDocumentId: string
+          originalFileName: string
+          displayName?: string
+          projectId: string
+          projectName: string
+          logicalDocumentId?: string
+          logicalDocumentName: string
+          logicalDocumentType: string
           versionTag: string
           isGenericVersion?: boolean
-          competitionProjectName?: string
+          competitionInfo?: {
+            seriesName?: string
+            levelName?: string
+            projectName?: string
+          }
           notes?: string
+          clarityFileRoot?: string
         }
       }
     ) => {
-      const result = await tipcClient.uploadDocumentVersion(arg)
+      // 构造智能文件导入的上下文
+      const importContext = {
+        ...arg,
+        importType: 'document' as const
+      }
+
+      const result = await tipcClient.uploadDocumentVersion(importContext)
+
       // 重新验证相关数据
       mutate('all-documents')
-      mutate(['logical-document-with-versions', arg.logicalDocumentId])
+      if (arg.logicalDocumentId) {
+        mutate(['logical-document-with-versions', arg.logicalDocumentId])
+      }
+      mutate(['project-documents', arg.projectId])
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+
       return result
+    }
+  )
+}
+
+export function usePreviewDocumentUpload() {
+  return useSWRMutation(
+    'preview-document-upload',
+    async (
+      _mutationKey,
+      {
+        arg
+      }: {
+        arg: {
+          sourcePath: string
+          originalFileName: string
+          displayName?: string
+          projectId: string
+          projectName: string
+          logicalDocumentId?: string
+          logicalDocumentName: string
+          logicalDocumentType: string
+          versionTag: string
+          isGenericVersion?: boolean
+          competitionInfo?: {
+            seriesName?: string
+            levelName?: string
+            projectName?: string
+          }
+          notes?: string
+          clarityFileRoot?: string
+        }
+      }
+    ) => {
+      // 构造智能文件导入的上下文
+      const importContext = {
+        ...arg,
+        importType: 'document' as const
+      }
+
+      return await tipcClient.previewDocumentUpload(importContext)
+    }
+  )
+}
+
+export function useCheckFileUploadability() {
+  return useSWRMutation(
+    'check-file-uploadability',
+    async (_mutationKey, { arg }: { arg: { filePath: string } }) => {
+      return await tipcClient.checkFileUploadability(arg)
+    }
+  )
+}
+
+export function useGenerateVersionTag() {
+  return useSWRMutation(
+    'generate-version-tag',
+    async (_mutationKey, { arg }: { arg: { prefix?: string } }) => {
+      return await tipcClient.generateVersionTag(arg)
     }
   )
 }

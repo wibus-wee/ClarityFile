@@ -1,5 +1,5 @@
 import { DocumentVersionService } from '../services/document/document-version.service'
-import { DocumentUploadService } from '../services/document/document-upload.service'
+import { IntelligentFileImportService } from '../services/intelligent-file-import.service'
 import type {
   CreateDocumentVersionInput,
   UpdateDocumentVersionInput,
@@ -7,103 +7,142 @@ import type {
   DeleteDocumentVersionInput,
   GetLogicalDocumentVersionsInput
 } from '../services/document/document-version.service'
+import type { FileImportContext } from '../services/intelligent-file-import.service'
+import { ITipc } from '../types'
 
-export function documentVersionRouter(t: any) {
+export function documentVersionRouter(t: ITipc) {
   return {
     // 创建文档版本
-    createDocumentVersion: t.procedure
-      .input()
-      .action(async ({ input }: { input: CreateDocumentVersionInput }) => {
-        return await DocumentVersionService.createDocumentVersion(input)
-      }),
+    createDocumentVersion: t.procedure.input().action(async ({ input }) => {
+      return await DocumentVersionService.createDocumentVersion(input as CreateDocumentVersionInput)
+    }),
 
     // 获取单个文档版本
-    getDocumentVersion: t.procedure
-      .input()
-      .action(async ({ input }: { input: GetDocumentVersionInput }) => {
-        return await DocumentVersionService.getDocumentVersion(input)
-      }),
+    getDocumentVersion: t.procedure.input().action(async ({ input }) => {
+      return await DocumentVersionService.getDocumentVersion(input as GetDocumentVersionInput)
+    }),
 
     // 获取逻辑文档的所有版本
-    getLogicalDocumentVersions: t.procedure
-      .input()
-      .action(async ({ input }: { input: GetLogicalDocumentVersionsInput }) => {
-        return await DocumentVersionService.getLogicalDocumentVersions(input)
-      }),
+    getLogicalDocumentVersions: t.procedure.input().action(async ({ input }) => {
+      return await DocumentVersionService.getLogicalDocumentVersions(
+        input as GetLogicalDocumentVersionsInput
+      )
+    }),
 
     // 更新文档版本
-    updateDocumentVersion: t.procedure
-      .input()
-      .action(async ({ input }: { input: UpdateDocumentVersionInput }) => {
-        return await DocumentVersionService.updateDocumentVersion(input)
-      }),
+    updateDocumentVersion: t.procedure.input().action(async ({ input }) => {
+      return await DocumentVersionService.updateDocumentVersion(input as UpdateDocumentVersionInput)
+    }),
 
     // 删除文档版本
-    deleteDocumentVersion: t.procedure
-      .input()
-      .action(async ({ input }: { input: DeleteDocumentVersionInput }) => {
-        return await DocumentVersionService.deleteDocumentVersion(input)
-      }),
+    deleteDocumentVersion: t.procedure.input().action(async ({ input }) => {
+      return await DocumentVersionService.deleteDocumentVersion(input as DeleteDocumentVersionInput)
+    }),
 
     // 复制文档版本
-    duplicateDocumentVersion: t.procedure
-      .input()
-      .action(async ({ input }: { input: { versionId: string; newVersionTag: string } }) => {
-        return await DocumentVersionService.duplicateDocumentVersion(
-          input.versionId,
-          input.newVersionTag
-        )
-      }),
+    duplicateDocumentVersion: t.procedure.input().action(async ({ input }) => {
+      const { versionId, newVersionTag } = input as { versionId: string; newVersionTag: string }
+      return await DocumentVersionService.duplicateDocumentVersion(versionId, newVersionTag)
+    }),
 
     // 获取版本统计信息
-    getVersionStats: t.procedure
-      .input()
-      .action(async ({ input }: { input: { logicalDocumentId: string } }) => {
-        return await DocumentVersionService.getVersionStats(input.logicalDocumentId)
-      }),
+    getVersionStats: t.procedure.input().action(async ({ input }) => {
+      const { logicalDocumentId } = input as { logicalDocumentId: string }
+      return await DocumentVersionService.getVersionStats(logicalDocumentId)
+    }),
 
     // 按文件类型分组版本
-    getVersionsByFileType: t.procedure
-      .input()
-      .action(async ({ input }: { input: { logicalDocumentId: string } }) => {
-        return await DocumentVersionService.getVersionsByFileType(input.logicalDocumentId)
-      }),
+    getVersionsByFileType: t.procedure.input().action(async ({ input }) => {
+      const { logicalDocumentId } = input as { logicalDocumentId: string }
+      return await DocumentVersionService.getVersionsByFileType(logicalDocumentId)
+    }),
 
-    // 上传文档版本（原子操作）
-    uploadDocumentVersion: t.procedure.input().action(
-      async ({
-        input
-      }: {
-        input: {
-          sourcePath: string
-          targetDirectory: string
-          displayName: string
-          preserveOriginalName?: boolean
-          logicalDocumentId: string
-          versionTag: string
-          isGenericVersion?: boolean
-          competitionProjectName?: string
-          notes?: string
-        }
-      }) => {
-        return await DocumentUploadService.uploadDocumentVersion(input)
+    // 智能文档上传（原子操作）
+    uploadDocumentVersion: t.procedure.input().action(async ({ input }) => {
+      const importContext = input as FileImportContext
+      // 验证导入类型必须是 document
+      if (importContext.importType !== 'document') {
+        throw new Error('此接口只支持文档类型的导入')
       }
-    ),
+
+      // 使用智能文件导入服务处理文档上传
+      const result = await IntelligentFileImportService.importFile(importContext)
+
+      if (!result.success) {
+        throw new Error(`文档上传失败: ${result.errors?.join(', ')}`)
+      }
+
+      return {
+        success: true,
+        managedFileId: result.managedFileId,
+        logicalDocumentId: result.logicalDocumentId,
+        documentVersionId: result.documentVersionId,
+        finalPath: result.finalPath,
+        relativePath: result.relativePath,
+        generatedFileName: result.generatedFileName,
+        warnings: result.warnings
+      }
+    }),
+
+    // 预览文档上传方案
+    previewDocumentUpload: t.procedure.input().action(async ({ input }) => {
+      const importContext = input as FileImportContext
+      // 验证导入类型必须是 document
+      if (importContext.importType !== 'document') {
+        throw new Error('此接口只支持文档类型的预览')
+      }
+
+      // 使用智能文件导入服务预览文档上传
+      return await IntelligentFileImportService.previewImport(importContext)
+    }),
 
     // 检查文件上传能力
-    checkFileUploadability: t.procedure
-      .input()
-      .action(async ({ input }: { input: { filePath: string } }) => {
-        return await DocumentUploadService.checkFileUploadability(input.filePath)
-      }),
+    checkFileUploadability: t.procedure.input().action(async ({ input }) => {
+      const { filePath } = input as { filePath: string }
+      try {
+        // 检查文件是否存在
+        const fs = await import('fs')
+        const fileExists = fs.existsSync(filePath)
+
+        if (!fileExists) {
+          return {
+            canUpload: false,
+            reason: '文件不存在'
+          }
+        }
+
+        // 检查文件类型是否支持
+        const isSupported = IntelligentFileImportService.isFileTypeSupported(filePath, 'document')
+
+        if (!isSupported) {
+          return {
+            canUpload: false,
+            reason: '不支持的文件类型'
+          }
+        }
+
+        return {
+          canUpload: true,
+          reason: '文件可以上传'
+        }
+      } catch (error) {
+        return {
+          canUpload: false,
+          reason: error instanceof Error ? error.message : '检查失败'
+        }
+      }
+    }),
 
     // 生成版本标签
-    generateVersionTag: t.procedure
-      .input()
-      .action(async ({ input }: { input: { prefix?: string } }) => {
-        return {
-          versionTag: DocumentUploadService.generateVersionTag(input.prefix)
-        }
-      })
+    generateVersionTag: t.procedure.input().action(async ({ input }) => {
+      const { prefix } = input as { prefix?: string }
+      const now = new Date()
+      const timestamp = now.toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '_')
+      const prefixValue = prefix || 'v'
+
+      return {
+        versionTag: `${prefixValue}${timestamp}`
+      }
+    })
   }
 }

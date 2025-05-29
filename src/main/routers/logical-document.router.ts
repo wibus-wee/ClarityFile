@@ -1,11 +1,11 @@
-import { LogicalDocumentService } from '../services/logical-document.service'
+import { LogicalDocumentService } from '../services/document/logical-document.service'
 import type {
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   GetLogicalDocumentInput,
   DeleteLogicalDocumentInput,
   GetProjectDocumentsInput
-} from '../services/logical-document.service'
+} from '../services/document/logical-document.service'
 
 export function logicalDocumentRouter(t: any) {
   return {

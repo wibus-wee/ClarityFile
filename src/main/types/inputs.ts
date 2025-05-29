@@ -51,17 +51,8 @@ export interface CreateTagInput {
   color?: string
 }
 
-// 文件相关输入类型
-export interface GetManagedFilesInput {
-  limit?: number
-  offset?: number
-}
-
-export interface CreateManagedFileInput {
-  name: string
-  physicalPath: string
-  fileHash?: string
-}
+// 文件相关输入类型已移至各自的服务文件中
+// 避免类型重复定义
 
 // 设置相关输入类型
 export interface GetSettingsByCategoryInput {

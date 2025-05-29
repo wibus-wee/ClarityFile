@@ -617,6 +617,7 @@ export class IntelligentFileImportService {
 
   /**
    * 获取文件MIME类型
+   * 集中在此服务中，避免重复实现
    */
   private static getMimeType(filePath: string): string {
     const ext = path.extname(filePath).toLowerCase()
