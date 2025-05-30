@@ -1,5 +1,5 @@
 import path from 'path'
-import { PathUtils } from '../utils/path-utils'
+import { PathUtils } from '../../utils/path-utils'
 
 /**
  * 文档类型缩写映射

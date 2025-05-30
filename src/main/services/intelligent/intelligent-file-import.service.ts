@@ -51,7 +51,6 @@ export interface FileImportContext {
   year?: number
 
   // 其他选项
-  clarityFileRoot?: string
   preserveOriginalName?: boolean
   notes?: string
 }
@@ -192,10 +191,7 @@ export class IntelligentFileImportService {
       }
 
       // 15. 生成相对路径用于显示
-      const relativePath = IntelligentPathGeneratorService.getRelativeDisplayPath(
-        finalPath,
-        context.clarityFileRoot
-      )
+      const relativePath = await IntelligentPathGeneratorService.getRelativeDisplayPath(finalPath)
 
       return {
         success: true,
@@ -257,10 +253,7 @@ export class IntelligentFileImportService {
       const fullPath = path.join(targetPath, generatedFileName)
 
       // 生成相对路径
-      const relativePath = IntelligentPathGeneratorService.getRelativeDisplayPath(
-        fullPath,
-        context.clarityFileRoot
-      )
+      const relativePath = await IntelligentPathGeneratorService.getRelativeDisplayPath(fullPath)
 
       // 验证路径
       const pathValidation = IntelligentPathGeneratorService.validatePath(fullPath)
@@ -419,16 +412,14 @@ export class IntelligentFileImportService {
         return await IntelligentPathGeneratorService.generateDocumentPath({
           projectName: context.projectName!,
           projectId: context.projectId!,
-          logicalDocumentName: context.logicalDocumentName!,
-          clarityFileRoot: context.clarityFileRoot
+          logicalDocumentName: context.logicalDocumentName!
         })
 
       case 'asset':
         return await IntelligentPathGeneratorService.generateProjectAssetPath({
           projectName: context.projectName!,
           projectId: context.projectId!,
-          assetType: context.assetType!,
-          clarityFileRoot: context.clarityFileRoot
+          assetType: context.assetType!
         })
 
       case 'expense':
@@ -436,27 +427,22 @@ export class IntelligentFileImportService {
           projectName: context.projectName!,
           projectId: context.projectId!,
           expenseDescription: context.expenseDescription!,
-          applicantName: context.applicantName,
-          clarityFileRoot: context.clarityFileRoot
+          applicantName: context.applicantName
         })
 
       case 'shared':
         return await IntelligentPathGeneratorService.generateSharedResourcePath({
-          resourceType: context.resourceType!,
-          clarityFileRoot: context.clarityFileRoot
+          resourceType: context.resourceType!
         })
 
       case 'competition':
         return await IntelligentPathGeneratorService.generateCompetitionPath({
           seriesName: context.seriesName!,
-          levelName: context.levelName!,
-          clarityFileRoot: context.clarityFileRoot
+          levelName: context.levelName!
         })
 
       case 'inbox':
-        return await IntelligentPathGeneratorService.generateInboxPath({
-          clarityFileRoot: context.clarityFileRoot
-        })
+        return await IntelligentPathGeneratorService.generateInboxPath({})
 
       default:
         throw new Error(`不支持的导入类型: ${context.importType}`)

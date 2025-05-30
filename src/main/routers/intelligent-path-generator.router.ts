@@ -9,7 +9,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
         projectName: string
         projectId: string
         logicalDocumentName: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateDocumentPath(input)
@@ -21,7 +20,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
         projectName: string
         projectId: string
         assetType: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateProjectAssetPath(input)
@@ -34,7 +32,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
         projectId: string
         expenseDescription: string
         applicantName?: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateProjectExpensePath(input)
@@ -44,7 +41,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
     generateSharedResourcePath: t.procedure
       .input<{
         resourceType: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateSharedResourcePath(input)
@@ -55,7 +51,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
       .input<{
         seriesName: string
         levelName: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateCompetitionPath(input)
@@ -64,12 +59,10 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
     // 生成临时文件路径（Inbox）
     generateInboxPath: t.procedure
       .input<{
-        clarityFileRoot?: string
         date?: string
       }>()
       .action(async ({ input }) => {
         const params = {
-          ...input,
           date: input.date ? new Date(input.date) : undefined
         }
         return await IntelligentPathGeneratorService.generateInboxPath(params)
@@ -79,7 +72,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
     generateSystemPath: t.procedure
       .input<{
         subType: 'database' | 'config' | 'logs' | 'temp'
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         return await IntelligentPathGeneratorService.generateSystemPath(input)
@@ -118,13 +110,9 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
     getRelativeDisplayPath: t.procedure
       .input<{
         fullPath: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
-        return IntelligentPathGeneratorService.getRelativeDisplayPath(
-          input.fullPath,
-          input.clarityFileRoot
-        )
+        return await IntelligentPathGeneratorService.getRelativeDisplayPath(input.fullPath)
       }),
 
     // 预览完整的文件存储方案
@@ -133,50 +121,35 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
         type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
         pathParams: any
         fileName: string
-        clarityFileRoot?: string
       }>()
       .action(async ({ input }) => {
         try {
-          const { type, pathParams, fileName, clarityFileRoot } = input
+          const { type, pathParams, fileName } = input
 
           // 生成目录路径
           let directoryPath: string
           switch (type) {
             case 'document':
-              directoryPath = await IntelligentPathGeneratorService.generateDocumentPath({
-                ...pathParams,
-                clarityFileRoot
-              })
+              directoryPath = await IntelligentPathGeneratorService.generateDocumentPath(pathParams)
               break
             case 'asset':
-              directoryPath = await IntelligentPathGeneratorService.generateProjectAssetPath({
-                ...pathParams,
-                clarityFileRoot
-              })
+              directoryPath =
+                await IntelligentPathGeneratorService.generateProjectAssetPath(pathParams)
               break
             case 'expense':
-              directoryPath = await IntelligentPathGeneratorService.generateProjectExpensePath({
-                ...pathParams,
-                clarityFileRoot
-              })
+              directoryPath =
+                await IntelligentPathGeneratorService.generateProjectExpensePath(pathParams)
               break
             case 'shared':
-              directoryPath = await IntelligentPathGeneratorService.generateSharedResourcePath({
-                ...pathParams,
-                clarityFileRoot
-              })
+              directoryPath =
+                await IntelligentPathGeneratorService.generateSharedResourcePath(pathParams)
               break
             case 'competition':
-              directoryPath = await IntelligentPathGeneratorService.generateCompetitionPath({
-                ...pathParams,
-                clarityFileRoot
-              })
+              directoryPath =
+                await IntelligentPathGeneratorService.generateCompetitionPath(pathParams)
               break
             case 'inbox':
-              directoryPath = await IntelligentPathGeneratorService.generateInboxPath({
-                ...pathParams,
-                clarityFileRoot
-              })
+              directoryPath = await IntelligentPathGeneratorService.generateInboxPath(pathParams)
               break
             default:
               throw new Error(`不支持的文件类型: ${type}`)
@@ -185,7 +158,7 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
           // 生成完整文件路径
           const fullPath = await IntelligentPathGeneratorService.generateCompleteFilePath({
             type,
-            pathParams: { ...pathParams, clarityFileRoot },
+            pathParams,
             fileName
           })
 
@@ -193,10 +166,8 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
           const validation = IntelligentPathGeneratorService.validatePath(fullPath)
 
           // 获取相对显示路径
-          const relativePath = IntelligentPathGeneratorService.getRelativeDisplayPath(
-            fullPath,
-            clarityFileRoot
-          )
+          const relativePath =
+            await IntelligentPathGeneratorService.getRelativeDisplayPath(fullPath)
 
           return {
             directoryPath,

@@ -1,6 +1,6 @@
 import path from 'path'
-import { PathUtils } from '../utils/path-utils'
-import { FilesystemOperations } from '../utils/filesystem-operations'
+import { PathUtils } from '../../utils/path-utils'
+import { FilesystemOperations } from '../../utils/filesystem-operations'
 
 /**
  * 智能路径生成服务
@@ -15,12 +15,11 @@ export class IntelligentPathGeneratorService {
     projectName: string
     projectId: string
     logicalDocumentName: string
-    clarityFileRoot?: string
   }): Promise<string> {
-    const { projectName, projectId, logicalDocumentName, clarityFileRoot } = params
+    const { projectName, projectId, logicalDocumentName } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 生成项目文件夹名称：[项目名称_简短ID后几位]
     const projectFolderName = this.generateProjectFolderName(projectName, projectId)
@@ -42,12 +41,11 @@ export class IntelligentPathGeneratorService {
     projectName: string
     projectId: string
     assetType: string
-    clarityFileRoot?: string
   }): Promise<string> {
-    const { projectName, projectId, assetType, clarityFileRoot } = params
+    const { projectName, projectId, assetType } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 生成项目文件夹名称
     const projectFolderName = this.generateProjectFolderName(projectName, projectId)
@@ -70,12 +68,11 @@ export class IntelligentPathGeneratorService {
     projectId: string
     expenseDescription: string
     applicantName?: string
-    clarityFileRoot?: string
   }): Promise<string> {
-    const { projectName, projectId, expenseDescription, applicantName, clarityFileRoot } = params
+    const { projectName, projectId, expenseDescription, applicantName } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 生成项目文件夹名称
     const projectFolderName = this.generateProjectFolderName(projectName, projectId)
@@ -106,14 +103,11 @@ export class IntelligentPathGeneratorService {
    * 生成共享资源的完整存储路径
    * 路径格式: CLARITY_FILE_ROOT/SharedResources/[资源类型]/
    */
-  static async generateSharedResourcePath(params: {
-    resourceType: string
-    clarityFileRoot?: string
-  }): Promise<string> {
-    const { resourceType, clarityFileRoot } = params
+  static async generateSharedResourcePath(params: { resourceType: string }): Promise<string> {
+    const { resourceType } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 清理资源类型名称
     const cleanResourceType = PathUtils.sanitizeFileName(resourceType)
@@ -131,12 +125,11 @@ export class IntelligentPathGeneratorService {
   static async generateCompetitionPath(params: {
     seriesName: string
     levelName: string
-    clarityFileRoot?: string
   }): Promise<string> {
-    const { seriesName, levelName, clarityFileRoot } = params
+    const { seriesName, levelName } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 清理赛事名称
     const cleanSeriesName = PathUtils.sanitizeFileName(seriesName)
@@ -152,16 +145,11 @@ export class IntelligentPathGeneratorService {
    * 生成临时文件的存储路径（Inbox）
    * 路径格式: CLARITY_FILE_ROOT/Inbox/[日期]/
    */
-  static async generateInboxPath(
-    params: {
-      clarityFileRoot?: string
-      date?: Date
-    } = {}
-  ): Promise<string> {
-    const { clarityFileRoot, date } = params
+  static async generateInboxPath(params: { date?: Date } = {}): Promise<string> {
+    const { date } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 生成日期文件夹名称
     const targetDate = date || new Date()
@@ -179,12 +167,11 @@ export class IntelligentPathGeneratorService {
    */
   static async generateSystemPath(params: {
     subType: 'database' | 'config' | 'logs' | 'temp'
-    clarityFileRoot?: string
   }): Promise<string> {
-    const { subType, clarityFileRoot } = params
+    const { subType } = params
 
     // 获取根目录
-    const rootPath = clarityFileRoot || (await PathUtils.getDefaultProjectPath())
+    const rootPath = await PathUtils.getDefaultProjectPath()
 
     // 组合完整路径
     const fullPath = path.join(rootPath, 'System', subType)
@@ -296,10 +283,14 @@ export class IntelligentPathGeneratorService {
   /**
    * 获取路径的相对显示名称（用于UI显示）
    */
-  static getRelativeDisplayPath(fullPath: string, clarityFileRoot?: string): string {
-    const rootPath = clarityFileRoot || process.env.CLARITY_FILE_ROOT || ''
-    if (rootPath && fullPath.startsWith(rootPath)) {
-      return path.relative(rootPath, fullPath)
+  static async getRelativeDisplayPath(fullPath: string): Promise<string> {
+    try {
+      const rootPath = await PathUtils.getDefaultProjectPath()
+      if (rootPath && fullPath.startsWith(rootPath)) {
+        return path.relative(rootPath, fullPath)
+      }
+    } catch (error) {
+      console.warn('获取默认项目路径失败，使用完整路径:', error)
     }
     return fullPath
   }
