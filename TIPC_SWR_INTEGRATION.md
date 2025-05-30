@@ -18,14 +18,17 @@
 ## 文件结构
 
 ### 主进程 (Main Process)
+
 - `src/main/tipc.ts` - TIPC 路由器定义
 - `src/main/index.ts` - 注册 TIPC 路由器
 
 ### Preload 脚本
+
 - `src/preload/index.ts` - 暴露 `ipcInvoke` 方法
 - `src/preload/index.d.ts` - 类型定义
 
 ### 渲染进程 (Renderer Process)
+
 - `src/renderer/src/lib/tipc-client.ts` - TIPC 客户端
 - `src/renderer/src/hooks/use-tipc.ts` - SWR 集成的 hooks
 - `src/renderer/src/providers/swr-provider.tsx` - SWR 配置提供者
@@ -33,26 +36,32 @@
 ## 主要功能
 
 ### 1. 项目管理 API
+
 - `getProjects()` - 获取所有项目
 - `getProject(id)` - 获取单个项目
+- `getProjectDetails(id)` - 获取项目详细信息（聚合所有相关数据）
 - `createProject(data)` - 创建项目
 - `updateProject(data)` - 更新项目
 - `deleteProject(id)` - 删除项目
 - `searchProjects(query)` - 搜索项目
 
 ### 2. 文档管理 API
+
 - `getProjectDocuments(projectId)` - 获取项目文档
 - `createLogicalDocument(data)` - 创建逻辑文档
 
 ### 3. 标签管理 API
+
 - `getTags()` - 获取所有标签
 - `createTag(data)` - 创建标签
 
 ### 4. 文件管理 API
+
 - `getManagedFiles(options)` - 获取管理的文件
 - `createManagedFile(data)` - 创建文件记录
 
 ### 5. 系统信息 API
+
 - `getSystemInfo()` - 获取系统统计信息
 
 ## 使用示例
@@ -65,20 +74,20 @@ import { useProjects, useCreateProject } from '@renderer/hooks/use-tipc'
 function ProjectList() {
   // 获取项目列表
   const { data: projects, error, isLoading } = useProjects()
-  
+
   // 创建项目
   const { trigger: createProject, isMutating } = useCreateProject()
-  
+
   const handleCreate = async () => {
     await createProject({
       name: '新项目',
       description: '项目描述'
     })
   }
-  
+
   if (isLoading) return <div>加载中...</div>
   if (error) return <div>加载失败</div>
-  
+
   return (
     <div>
       {projects?.map(project => (
@@ -97,6 +106,9 @@ function ProjectList() {
 ```typescript
 // 带参数的查询
 const { data: project } = useProject(projectId)
+
+// 获取项目详细信息（聚合所有相关数据）
+const { data: projectDetails } = useTipc('getProjectDetails', { id: projectId })
 
 // 搜索功能
 const { trigger: search, data: results } = useSearchProjects()
