@@ -1,14 +1,14 @@
-import { DocumentVersionService } from '../services/document/document-version.service'
-import { IntelligentFileImportService } from '../services/intelligent-file-import.service'
+import { DocumentVersionService } from '../../services/document/document-version.service'
+import { IntelligentFileImportService } from '../../services/intelligent/intelligent-file-import.service'
 import type {
   CreateDocumentVersionInput,
   UpdateDocumentVersionInput,
   GetDocumentVersionInput,
   DeleteDocumentVersionInput,
   GetLogicalDocumentVersionsInput
-} from '../services/document/document-version.service'
-import type { FileImportContext } from '../services/intelligent-file-import.service'
-import { ITipc } from '../types'
+} from '../../services/document/document-version.service'
+import type { FileImportContext } from '../../services/intelligent/intelligent-file-import.service'
+import { ITipc } from '../../types'
 
 export function documentVersionRouter(t: ITipc) {
   return {

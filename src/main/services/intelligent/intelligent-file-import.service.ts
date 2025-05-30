@@ -1,11 +1,11 @@
 import path from 'path'
 import { IntelligentNamingService } from './intelligent-naming.service'
 import { IntelligentPathGeneratorService } from './intelligent-path-generator.service'
-import { ManagedFileService } from './managed-file.service'
-import { LogicalDocumentService } from './document/logical-document.service'
-import { DocumentVersionService } from './document/document-version.service'
-import { FilesystemOperations } from '../utils/filesystem-operations'
-import { PathUtils } from '../utils/path-utils'
+import { ManagedFileService } from '../managed-file.service'
+import { LogicalDocumentService } from '../document/logical-document.service'
+import { DocumentVersionService } from '../document/document-version.service'
+import { FilesystemOperations } from '../../utils/filesystem-operations'
+import { PathUtils } from '../../utils/path-utils'
 
 export interface FileImportContext {
   // 文件基本信息

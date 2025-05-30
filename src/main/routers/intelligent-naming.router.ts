@@ -1,4 +1,4 @@
-import { IntelligentNamingService } from '../services/intelligent-naming.service'
+import { IntelligentNamingService } from '../services/intelligent/intelligent-naming.service'
 import { ITipc } from '../types'
 
 export function intelligentNamingRouter(t: ITipc) {

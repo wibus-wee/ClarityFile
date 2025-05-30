@@ -1,12 +1,12 @@
-import { LogicalDocumentService } from '../services/document/logical-document.service'
+import { LogicalDocumentService } from '../../services/document/logical-document.service'
 import type {
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   GetLogicalDocumentInput,
   DeleteLogicalDocumentInput,
   GetProjectDocumentsInput
-} from '../services/document/logical-document.service'
-import { ITipc } from '../types'
+} from '../../services/document/logical-document.service'
+import { ITipc } from '../../types'
 
 export function logicalDocumentRouter(t: ITipc) {
   return {

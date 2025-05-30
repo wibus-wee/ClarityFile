@@ -1,4 +1,4 @@
-import { IntelligentPathGeneratorService } from '../services/intelligent-path-generator.service'
+import { IntelligentPathGeneratorService } from '../services/intelligent/intelligent-path-generator.service'
 import { ITipc } from '../types'
 
 export function intelligentPathGeneratorRouter(t: ITipc) {

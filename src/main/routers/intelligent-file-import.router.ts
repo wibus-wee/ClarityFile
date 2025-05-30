@@ -1,5 +1,5 @@
-import { IntelligentFileImportService } from '../services/intelligent-file-import.service'
-import type { FileImportContext } from '../services/intelligent-file-import.service'
+import { IntelligentFileImportService } from '../services/intelligent/intelligent-file-import.service'
+import type { FileImportContext } from '../services/intelligent/intelligent-file-import.service'
 import { ITipc } from '../types'
 
 export function intelligentFileImportRouter(t: ITipc) {
