@@ -1,4 +1,5 @@
 import path from 'path'
+import { z } from 'zod'
 import { IntelligentNamingService } from './intelligent-naming.service'
 import { IntelligentPathGeneratorService } from './intelligent-path-generator.service'
 import { ManagedFileService } from '../managed-file.service'
@@ -7,53 +8,202 @@ import { DocumentVersionService } from '../document/document-version.service'
 import { FilesystemOperations } from '../../utils/filesystem-operations'
 import { PathUtils } from '../../utils/path-utils'
 
-export interface FileImportContext {
-  // 文件基本信息
-  sourcePath: string
-  originalFileName: string
-  displayName?: string
+const fileImportContextSchema = z
+  .object({
+    // 文件基本信息
+    sourcePath: z.string().min(1, '源文件路径不能为空'),
+    originalFileName: z.string().min(1, '原始文件名不能为空'),
+    displayName: z.string().optional(),
 
-  // 导入类型
-  importType: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+    // 导入类型
+    importType: z.enum(['document', 'asset', 'expense', 'shared', 'competition', 'inbox'], {
+      errorMap: () => ({ message: '不支持的导入类型' })
+    }),
 
-  // 项目相关信息（当 importType 为 document/asset/expense 时必需）
-  projectId?: string
-  projectName?: string
+    // 项目相关信息（当 importType 为 document/asset/expense 时必需）
+    projectId: z.string().optional(),
+    projectName: z.string().optional(),
 
-  // 文档相关信息（当 importType 为 document 时必需）
-  logicalDocumentId?: string
-  logicalDocumentName?: string
-  logicalDocumentType?: string
-  versionTag?: string
-  isGenericVersion?: boolean
-  competitionInfo?: {
-    seriesName?: string
-    levelName?: string
-    projectName?: string
-  }
+    // 文档相关信息（当 importType 为 document 时必需）
+    logicalDocumentId: z.string().optional(),
+    logicalDocumentName: z.string().optional(),
+    logicalDocumentType: z.string().optional(),
+    versionTag: z.string().optional(),
+    isGenericVersion: z.boolean().optional(),
+    competitionInfo: z
+      .object({
+        seriesName: z.string().optional(),
+        levelName: z.string().optional(),
+        projectName: z.string().optional()
+      })
+      .optional(),
 
-  // 资产相关信息（当 importType 为 asset 时必需）
-  assetType?: string
-  assetName?: string
+    // 资产相关信息（当 importType 为 asset 时必需）
+    assetType: z.string().optional(),
+    assetName: z.string().optional(),
 
-  // 经费相关信息（当 importType 为 expense 时必需）
-  expenseDescription?: string
-  applicantName?: string
+    // 经费相关信息（当 importType 为 expense 时必需）
+    expenseDescription: z.string().optional(),
+    applicantName: z.string().optional(),
 
-  // 共享资源相关信息（当 importType 为 shared 时必需）
-  resourceType?: string
-  resourceName?: string
-  customFields?: Record<string, any>
+    // 共享资源相关信息（当 importType 为 shared 时必需）
+    resourceType: z.string().optional(),
+    resourceName: z.string().optional(),
+    customFields: z.record(z.any()).optional(),
 
-  // 比赛相关信息（当 importType 为 competition 时必需）
-  seriesName?: string
-  levelName?: string
-  year?: number
+    // 比赛相关信息（当 importType 为 competition 时必需）
+    seriesName: z.string().optional(),
+    levelName: z.string().optional(),
+    year: z.number().optional(),
 
-  // 其他选项
-  preserveOriginalName?: boolean
-  notes?: string
-}
+    // 其他选项
+    preserveOriginalName: z.boolean().optional(),
+    notes: z.string().optional()
+  })
+  .superRefine((data, ctx) => {
+    // 根据导入类型验证必需字段，提供详细的错误信息
+    switch (data.importType) {
+      case 'document':
+        if (!data.projectId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '项目ID不能为空',
+            path: ['projectId']
+          })
+        }
+        if (!data.projectName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '项目名称不能为空',
+            path: ['projectName']
+          })
+        }
+        if (!data.logicalDocumentName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '逻辑文档名称不能为空',
+            path: ['logicalDocumentName']
+          })
+        }
+        if (!data.logicalDocumentType) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '逻辑文档类型不能为空',
+            path: ['logicalDocumentType']
+          })
+        }
+        if (!data.versionTag) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '版本标签不能为空',
+            path: ['versionTag']
+          })
+        }
+        break
+
+      case 'asset':
+        if (!data.projectId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '项目ID不能为空',
+            path: ['projectId']
+          })
+        }
+        if (!data.projectName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '项目名称不能为空',
+            path: ['projectName']
+          })
+        }
+        if (!data.assetType) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '资产类型不能为空',
+            path: ['assetType']
+          })
+        }
+        if (!data.assetName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '资产名称不能为空',
+            path: ['assetName']
+          })
+        }
+        break
+
+      case 'expense':
+        if (!data.projectId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '项目ID不能为空',
+            path: ['projectId']
+          })
+        }
+        if (!data.projectName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '项目名称不能为空',
+            path: ['projectName']
+          })
+        }
+        if (!data.expenseDescription) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '报销事项描述不能为空',
+            path: ['expenseDescription']
+          })
+        }
+        break
+
+      case 'shared':
+        if (!data.resourceType) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '资源类型不能为空',
+            path: ['resourceType']
+          })
+        }
+        if (!data.resourceName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '资源名称不能为空',
+            path: ['resourceName']
+          })
+        }
+        break
+
+      case 'competition':
+        if (!data.seriesName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '赛事系列名称不能为空',
+            path: ['seriesName']
+          })
+        }
+        if (!data.levelName) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '赛事级别不能为空',
+            path: ['levelName']
+          })
+        }
+        break
+
+      case 'inbox':
+        // Inbox 类型不需要额外验证
+        break
+
+      default:
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: '不支持的导入类型',
+          path: ['importType']
+        })
+    }
+  })
+
+export type FileImportContext = z.infer<typeof fileImportContextSchema>
 
 export interface FileImportResult {
   success: boolean
@@ -103,14 +253,7 @@ export class IntelligentFileImportService {
         warnings.push(`文件类型可能不适合 ${context.importType} 类型的导入`)
       }
 
-      // 4. 检查是否为项目资源，如果是则验证项目信息
-      const isProjectResource = this.isProjectResource(context.importType)
-      if (isProjectResource && !this.validateProjectContext(context)) {
-        return {
-          success: false,
-          errors: ['项目资源导入需要完整的项目信息']
-        }
-      }
+      // 4. 验证已经在 zod schema 中完成，无需额外检查
 
       // 5. 生成智能文件名（按照设计文档规范）
       const generatedFileName = await this.generateIntelligentFileName(context)
@@ -292,69 +435,34 @@ export class IntelligentFileImportService {
   }
 
   /**
-   * 验证导入上下文
+   * 验证导入上下文（使用 Zod 进行验证）
    */
   private static validateImportContext(context: FileImportContext): {
     isValid: boolean
     errors: string[]
   } {
-    const errors: string[] = []
+    try {
+      // 使用 zod schema 进行验证
+      fileImportContextSchema.parse(context)
+      return {
+        isValid: true,
+        errors: []
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // 提取所有验证错误信息
+        const errors = error.errors.map((err) => err.message)
+        return {
+          isValid: false,
+          errors
+        }
+      }
 
-    // 基本信息验证
-    if (!context.sourcePath) {
-      errors.push('源文件路径不能为空')
-    }
-    if (!context.originalFileName) {
-      errors.push('原始文件名不能为空')
-    }
-    if (!context.importType) {
-      errors.push('导入类型不能为空')
-    }
-
-    // 根据导入类型验证必需字段
-    switch (context.importType) {
-      case 'document':
-        if (!context.projectId) errors.push('项目ID不能为空')
-        if (!context.projectName) errors.push('项目名称不能为空')
-        if (!context.logicalDocumentName) errors.push('逻辑文档名称不能为空')
-        if (!context.logicalDocumentType) errors.push('逻辑文档类型不能为空')
-        if (!context.versionTag) errors.push('版本标签不能为空')
-        break
-
-      case 'asset':
-        if (!context.projectId) errors.push('项目ID不能为空')
-        if (!context.projectName) errors.push('项目名称不能为空')
-        if (!context.assetType) errors.push('资产类型不能为空')
-        if (!context.assetName) errors.push('资产名称不能为空')
-        break
-
-      case 'expense':
-        if (!context.projectId) errors.push('项目ID不能为空')
-        if (!context.projectName) errors.push('项目名称不能为空')
-        if (!context.expenseDescription) errors.push('报销事项描述不能为空')
-        break
-
-      case 'shared':
-        if (!context.resourceType) errors.push('资源类型不能为空')
-        if (!context.resourceName) errors.push('资源名称不能为空')
-        break
-
-      case 'competition':
-        if (!context.seriesName) errors.push('赛事系列名称不能为空')
-        if (!context.levelName) errors.push('赛事级别不能为空')
-        break
-
-      case 'inbox':
-        // Inbox 类型不需要额外验证
-        break
-
-      default:
-        errors.push('不支持的导入类型')
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
+      // 处理其他类型的错误
+      return {
+        isValid: false,
+        errors: [error instanceof Error ? error.message : '验证失败']
+      }
     }
   }
 
@@ -571,34 +679,6 @@ export class IntelligentFileImportService {
     }
 
     return typesForImport.includes('.*') || typesForImport.includes(fileExt)
-  }
-
-  /**
-   * 检查导入类型是否为项目资源
-   */
-  private static isProjectResource(importType: string): boolean {
-    return ['document', 'asset', 'expense'].includes(importType)
-  }
-
-  /**
-   * 验证项目相关的上下文信息
-   */
-  private static validateProjectContext(context: FileImportContext): boolean {
-    if (!context.projectId || !context.projectName) {
-      return false
-    }
-
-    // 根据不同的导入类型验证特定字段
-    switch (context.importType) {
-      case 'document':
-        return !!(context.logicalDocumentName && context.logicalDocumentType && context.versionTag)
-      case 'asset':
-        return !!(context.assetType && context.assetName)
-      case 'expense':
-        return !!context.expenseDescription
-      default:
-        return true
-    }
   }
 
   /**

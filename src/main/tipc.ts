@@ -3,12 +3,12 @@ import { projectRouter } from './routers/project.router'
 import { fileRouter } from './routers/file.router'
 import { settingsRouter } from './routers/settings.router'
 import { systemRouter } from './routers/system.router'
-import { logicalDocumentRouter } from './routers/logical-document.router'
-import { documentVersionRouter } from './routers/document-version.router'
+import { logicalDocumentRouter } from './routers/document/logical-document.router'
 import { managedFileRouter } from './routers/managed-file.router'
 import { intelligentNamingRouter } from './routers/intelligent-naming.router'
 import { intelligentPathGeneratorRouter } from './routers/intelligent-path-generator.router'
 import { intelligentFileImportRouter } from './routers/intelligent-file-import.router'
+import { documentVersionRouter } from './routers/document/document-version.router'
 
 const t = tipc.create()
 

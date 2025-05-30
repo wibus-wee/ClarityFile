@@ -143,68 +143,68 @@ export function intelligentFileImportRouter(t: ITipc) {
       }
     }),
 
-    // 验证导入上下文
-    validateImportContext: t.procedure.input<FileImportContext>().action(async ({ input }) => {
-      // 使用私有方法的逻辑来验证
-      const errors: string[] = []
+    // // 验证导入上下文
+    // validateImportContext: t.procedure.input<FileImportContext>().action(async ({ input }) => {
+    //   // 使用私有方法的逻辑来验证
+    //   const errors: string[] = []
 
-      // 基本信息验证
-      if (!input.sourcePath) {
-        errors.push('源文件路径不能为空')
-      }
-      if (!input.originalFileName) {
-        errors.push('原始文件名不能为空')
-      }
-      if (!input.importType) {
-        errors.push('导入类型不能为空')
-      }
+    //   // 基本信息验证
+    //   if (!input.sourcePath) {
+    //     errors.push('源文件路径不能为空')
+    //   }
+    //   if (!input.originalFileName) {
+    //     errors.push('原始文件名不能为空')
+    //   }
+    //   if (!input.importType) {
+    //     errors.push('导入类型不能为空')
+    //   }
 
-      // 根据导入类型验证必需字段
-      switch (input.importType) {
-        case 'document':
-          if (!input.projectId) errors.push('项目ID不能为空')
-          if (!input.projectName) errors.push('项目名称不能为空')
-          if (!input.logicalDocumentName) errors.push('逻辑文档名称不能为空')
-          if (!input.logicalDocumentType) errors.push('逻辑文档类型不能为空')
-          if (!input.versionTag) errors.push('版本标签不能为空')
-          break
+    //   // 根据导入类型验证必需字段
+    //   switch (input.importType) {
+    //     case 'document':
+    //       if (!input.projectId) errors.push('项目ID不能为空')
+    //       if (!input.projectName) errors.push('项目名称不能为空')
+    //       if (!input.logicalDocumentName) errors.push('逻辑文档名称不能为空')
+    //       if (!input.logicalDocumentType) errors.push('逻辑文档类型不能为空')
+    //       if (!input.versionTag) errors.push('版本标签不能为空')
+    //       break
 
-        case 'asset':
-          if (!input.projectId) errors.push('项目ID不能为空')
-          if (!input.projectName) errors.push('项目名称不能为空')
-          if (!input.assetType) errors.push('资产类型不能为空')
-          if (!input.assetName) errors.push('资产名称不能为空')
-          break
+    //     case 'asset':
+    //       if (!input.projectId) errors.push('项目ID不能为空')
+    //       if (!input.projectName) errors.push('项目名称不能为空')
+    //       if (!input.assetType) errors.push('资产类型不能为空')
+    //       if (!input.assetName) errors.push('资产名称不能为空')
+    //       break
 
-        case 'expense':
-          if (!input.projectId) errors.push('项目ID不能为空')
-          if (!input.projectName) errors.push('项目名称不能为空')
-          if (!input.expenseDescription) errors.push('报销事项描述不能为空')
-          break
+    //     case 'expense':
+    //       if (!input.projectId) errors.push('项目ID不能为空')
+    //       if (!input.projectName) errors.push('项目名称不能为空')
+    //       if (!input.expenseDescription) errors.push('报销事项描述不能为空')
+    //       break
 
-        case 'shared':
-          if (!input.resourceType) errors.push('资源类型不能为空')
-          if (!input.resourceName) errors.push('资源名称不能为空')
-          break
+    //     case 'shared':
+    //       if (!input.resourceType) errors.push('资源类型不能为空')
+    //       if (!input.resourceName) errors.push('资源名称不能为空')
+    //       break
 
-        case 'competition':
-          if (!input.seriesName) errors.push('赛事系列名称不能为空')
-          if (!input.levelName) errors.push('赛事级别不能为空')
-          break
+    //     case 'competition':
+    //       if (!input.seriesName) errors.push('赛事系列名称不能为空')
+    //       if (!input.levelName) errors.push('赛事级别不能为空')
+    //       break
 
-        case 'inbox':
-          // Inbox 类型不需要额外验证
-          break
+    //     case 'inbox':
+    //       // Inbox 类型不需要额外验证
+    //       break
 
-        default:
-          errors.push('不支持的导入类型')
-      }
+    //     default:
+    //       errors.push('不支持的导入类型')
+    //   }
 
-      return {
-        isValid: errors.length === 0,
-        errors
-      }
-    }),
+    //   return {
+    //     isValid: errors.length === 0,
+    //     errors
+    //   }
+    // }),
 
     // 生成导入预览的完整信息
     generateImportPreview: t.procedure.input<FileImportContext>().action(async ({ input }) => {

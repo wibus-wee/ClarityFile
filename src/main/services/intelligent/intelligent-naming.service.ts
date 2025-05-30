@@ -10,8 +10,6 @@ const DOCUMENT_TYPE_ABBREVIATIONS: Record<string, string> = {
   report: '报告',
   proposal: '提案',
   specification: '说明书',
-  manual: '手册',
-  contract: '合同',
   other: '其他'
 }
 
