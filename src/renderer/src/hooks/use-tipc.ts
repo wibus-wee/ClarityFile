@@ -1,6 +1,23 @@
 import useSWR, { mutate } from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { tipcClient } from '../lib/tipc-client'
+import type {
+  CreateProjectInput,
+  UpdateProjectInput,
+  DeleteProjectInput,
+  SearchProjectsInput,
+  CreateLogicalDocumentInput,
+  CreateTagInput,
+  SetSettingInput,
+  SetSettingsInput,
+  DeleteSettingInput,
+  ResetSettingsInput,
+  SelectDirectoryInput,
+  SelectFileInput
+} from '../../../main/types/inputs'
+import type { CreateManagedFileInput } from '../../../main/services/managed-file.service'
+import type { FileImportContext } from '../../../main/services/intelligent/intelligent-file-import.service'
+import type { CreateDocumentVersionInput } from '../../../main/services/document/document-version.service'
 
 // 项目相关的 hooks
 export function useProjects() {
@@ -12,35 +29,26 @@ export function useProject(id: string | null) {
 }
 
 export function useCreateProject() {
-  return useSWRMutation(
-    'projects',
-    async (key, { arg }: { arg: { name: string; description?: string; status?: string } }) => {
-      const result = await tipcClient.createProject(arg)
-      // 重新验证项目列表
-      mutate('projects')
-      return result
-    }
-  )
+  return useSWRMutation('projects', async (_key, { arg }: { arg: CreateProjectInput }) => {
+    const result = await tipcClient.createProject(arg)
+    // 重新验证项目列表
+    mutate('projects')
+    return result
+  })
 }
 
 export function useUpdateProject() {
-  return useSWRMutation(
-    'projects',
-    async (
-      key,
-      { arg }: { arg: { id: string; name?: string; description?: string; status?: string } }
-    ) => {
-      const result = await tipcClient.updateProject(arg)
-      // 重新验证项目列表和单个项目
-      mutate('projects')
-      mutate(['project', arg.id])
-      return result
-    }
-  )
+  return useSWRMutation('projects', async (_key, { arg }: { arg: UpdateProjectInput }) => {
+    const result = await tipcClient.updateProject(arg)
+    // 重新验证项目列表和单个项目
+    mutate('projects')
+    mutate(['project', arg.id])
+    return result
+  })
 }
 
 export function useDeleteProject() {
-  return useSWRMutation('projects', async (key, { arg }: { arg: { id: string } }) => {
+  return useSWRMutation('projects', async (_key, { arg }: { arg: DeleteProjectInput }) => {
     const result = await tipcClient.deleteProject(arg)
     // 重新验证项目列表
     mutate('projects')
@@ -49,7 +57,7 @@ export function useDeleteProject() {
 }
 
 export function useSearchProjects() {
-  return useSWRMutation('search-projects', async (key, { arg }: { arg: { query: string } }) => {
+  return useSWRMutation('search-projects', async (_key, { arg }: { arg: SearchProjectsInput }) => {
     return tipcClient.searchProjects(arg)
   })
 }
@@ -68,20 +76,7 @@ export function useProjectDocuments(projectId: string | null) {
 export function useCreateLogicalDocument() {
   return useSWRMutation(
     'logical-documents',
-    async (
-      key,
-      {
-        arg
-      }: {
-        arg: {
-          projectId: string
-          name: string
-          type: string
-          description?: string
-          defaultStoragePathSegment?: string
-        }
-      }
-    ) => {
+    async (_key, { arg }: { arg: CreateLogicalDocumentInput }) => {
       const result = await tipcClient.createLogicalDocument(arg)
       // 重新验证所有文档列表和项目文档列表
       mutate('all-documents')
@@ -113,7 +108,7 @@ export function useTags() {
 }
 
 export function useCreateTag() {
-  return useSWRMutation('tags', async (key, { arg }: { arg: { name: string; color?: string } }) => {
+  return useSWRMutation('tags', async (_key, { arg }: { arg: CreateTagInput }) => {
     const result = await tipcClient.createTag(arg)
     // 重新验证标签列表
     mutate('tags')
@@ -129,15 +124,12 @@ export function useManagedFiles(limit?: number, offset?: number) {
 }
 
 export function useCreateManagedFile() {
-  return useSWRMutation(
-    'managed-files',
-    async (key, { arg }: { arg: { name: string; physicalPath: string; fileHash?: string } }) => {
-      const result = await tipcClient.createManagedFile(arg)
-      // 重新验证文件列表
-      mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
-      return result
-    }
-  )
+  return useSWRMutation('managed-files', async (_key, { arg }: { arg: CreateManagedFileInput }) => {
+    const result = await tipcClient.createManagedFile(arg)
+    // 重新验证文件列表
+    mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+    return result
+  })
 }
 
 // 系统信息相关的 hooks
@@ -178,70 +170,38 @@ export function useSetting(key: string | null) {
 }
 
 export function useSetSetting() {
-  return useSWRMutation(
-    'settings',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          key: string
-          value: any
-          category: string
-          description?: string
-          isUserModifiable?: boolean
-        }
-      }
-    ) => {
-      const result = await tipcClient.setSetting(arg)
-      // 重新验证相关的设置数据
-      mutate('settings')
-      mutate(['setting', arg.key])
-      mutate(['settings-by-category', arg.category])
-      mutate('settings-categories')
-      return result
-    }
-  )
+  return useSWRMutation('settings', async (_mutationKey, { arg }: { arg: SetSettingInput }) => {
+    const result = await tipcClient.setSetting(arg)
+    // 重新验证相关的设置数据
+    mutate('settings')
+    mutate(['setting', arg.key])
+    mutate(['settings-by-category', arg.category])
+    mutate('settings-categories')
+    return result
+  })
 }
 
 export function useSetSettings() {
-  return useSWRMutation(
-    'settings',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: Array<{
-          key: string
-          value: any
-          category: string
-          description?: string
-          isUserModifiable?: boolean
-        }>
-      }
-    ) => {
-      const result = await tipcClient.setSettings(arg)
-      // 重新验证所有设置相关数据
-      mutate('settings')
-      mutate('settings-categories')
-      // 重新验证涉及的分类
-      const categories = [...new Set(arg.map((setting) => setting.category))]
-      categories.forEach((category) => {
-        mutate(['settings-by-category', category])
-      })
-      // 重新验证涉及的单个设置
-      arg.forEach((setting) => {
-        mutate(['setting', setting.key])
-      })
-      return result
-    }
-  )
+  return useSWRMutation('settings', async (_mutationKey, { arg }: { arg: SetSettingsInput }) => {
+    const result = await tipcClient.setSettings(arg)
+    // 重新验证所有设置相关数据
+    mutate('settings')
+    mutate('settings-categories')
+    // 重新验证涉及的分类
+    const categories = [...new Set(arg.map((setting) => setting.category))]
+    categories.forEach((category) => {
+      mutate(['settings-by-category', category])
+    })
+    // 重新验证涉及的单个设置
+    arg.forEach((setting) => {
+      mutate(['setting', setting.key])
+    })
+    return result
+  })
 }
 
 export function useDeleteSetting() {
-  return useSWRMutation('settings', async (_mutationKey, { arg }: { arg: { key: string } }) => {
+  return useSWRMutation('settings', async (_mutationKey, { arg }: { arg: DeleteSettingInput }) => {
     const result = await tipcClient.deleteSetting(arg)
     // 重新验证设置数据
     mutate('settings')
@@ -253,25 +213,22 @@ export function useDeleteSetting() {
 }
 
 export function useResetSettings() {
-  return useSWRMutation(
-    'settings',
-    async (_mutationKey, { arg }: { arg: { category?: string } }) => {
-      const result = await tipcClient.resetSettings(arg)
-      // 重新验证所有设置相关数据
-      mutate('settings')
-      mutate('settings-categories')
-      if (arg.category) {
-        // 如果指定了分类，只重新验证该分类
-        mutate(['settings-by-category', arg.category])
-      } else {
-        // 如果没有指定分类，重新验证所有分类
-        mutate((key) => Array.isArray(key) && key[0] === 'settings-by-category')
-      }
-      // 重新验证所有单个设置
-      mutate((key) => Array.isArray(key) && key[0] === 'setting')
-      return result
+  return useSWRMutation('settings', async (_mutationKey, { arg }: { arg: ResetSettingsInput }) => {
+    const result = await tipcClient.resetSettings(arg)
+    // 重新验证所有设置相关数据
+    mutate('settings')
+    mutate('settings-categories')
+    if (arg.category) {
+      // 如果指定了分类，只重新验证该分类
+      mutate(['settings-by-category', arg.category])
+    } else {
+      // 如果没有指定分类，重新验证所有分类
+      mutate((key) => Array.isArray(key) && key[0] === 'settings-by-category')
     }
-  )
+    // 重新验证所有单个设置
+    mutate((key) => Array.isArray(key) && key[0] === 'setting')
+    return result
+  })
 }
 
 export function useSettingsCategories() {
@@ -282,19 +239,7 @@ export function useSettingsCategories() {
 export function useImportFile() {
   return useSWRMutation(
     'import-file',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          sourcePath: string
-          targetDirectory: string
-          displayName?: string
-          preserveOriginalName?: boolean
-        }
-      }
-    ) => {
+    async (_mutationKey, { arg }: { arg: FileImportContext }) => {
       const result = await tipcClient.importFile(arg)
       // 重新验证文件列表
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
@@ -307,21 +252,7 @@ export function useImportFile() {
 export function useCreateDocumentVersion() {
   return useSWRMutation(
     'document-versions',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          logicalDocumentId: string
-          managedFileId: string
-          versionTag: string
-          isGenericVersion?: boolean
-          competitionProjectName?: string
-          notes?: string
-        }
-      }
-    ) => {
+    async (_mutationKey, { arg }: { arg: CreateDocumentVersionInput }) => {
       const result = await tipcClient.createDocumentVersion(arg)
       // 重新验证相关数据
       mutate(['logical-document-with-versions', arg.logicalDocumentId])
@@ -335,44 +266,7 @@ export function useCreateDocumentVersion() {
 export function useIntelligentFileImport() {
   return useSWRMutation(
     'intelligent-file-import',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          sourcePath: string
-          originalFileName: string
-          displayName?: string
-          importType: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
-          projectId?: string
-          projectName?: string
-          logicalDocumentId?: string
-          logicalDocumentName?: string
-          logicalDocumentType?: string
-          versionTag?: string
-          isGenericVersion?: boolean
-          competitionInfo?: {
-            seriesName?: string
-            levelName?: string
-            projectName?: string
-          }
-          assetType?: string
-          assetName?: string
-          expenseDescription?: string
-          applicantName?: string
-          resourceType?: string
-          resourceName?: string
-          customFields?: Record<string, any>
-          seriesName?: string
-          levelName?: string
-          year?: number
-          clarityFileRoot?: string
-          preserveOriginalName?: boolean
-          notes?: string
-        }
-      }
-    ) => {
+    async (_mutationKey, { arg }: { arg: FileImportContext }) => {
       const result = await tipcClient.importFile(arg)
       // 重新验证相关数据
       mutate('all-documents')
@@ -388,44 +282,7 @@ export function useIntelligentFileImport() {
 export function usePreviewFileImport() {
   return useSWRMutation(
     'preview-file-import',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          sourcePath: string
-          originalFileName: string
-          displayName?: string
-          importType: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
-          projectId?: string
-          projectName?: string
-          logicalDocumentId?: string
-          logicalDocumentName?: string
-          logicalDocumentType?: string
-          versionTag?: string
-          isGenericVersion?: boolean
-          competitionInfo?: {
-            seriesName?: string
-            levelName?: string
-            projectName?: string
-          }
-          assetType?: string
-          assetName?: string
-          expenseDescription?: string
-          applicantName?: string
-          resourceType?: string
-          resourceName?: string
-          customFields?: Record<string, any>
-          seriesName?: string
-          levelName?: string
-          year?: number
-          clarityFileRoot?: string
-          preserveOriginalName?: boolean
-          notes?: string
-        }
-      }
-    ) => {
+    async (_mutationKey, { arg }: { arg: FileImportContext }) => {
       return await tipcClient.previewImport(arg)
     }
   )
@@ -435,46 +292,17 @@ export function usePreviewFileImport() {
 export function useUploadDocumentVersion() {
   return useSWRMutation(
     'upload-document-version',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          sourcePath: string
-          originalFileName: string
-          displayName?: string
-          projectId: string
-          projectName: string
-          logicalDocumentId?: string
-          logicalDocumentName: string
-          logicalDocumentType: string
-          versionTag: string
-          isGenericVersion?: boolean
-          competitionInfo?: {
-            seriesName?: string
-            levelName?: string
-            projectName?: string
-          }
-          notes?: string
-          clarityFileRoot?: string
-        }
-      }
-    ) => {
-      // 构造智能文件导入的上下文
-      const importContext = {
-        ...arg,
-        importType: 'document' as const
-      }
-
-      const result = await tipcClient.uploadDocumentVersion(importContext)
+    async (_mutationKey, { arg }: { arg: FileImportContext }) => {
+      const result = await tipcClient.uploadDocumentVersion(arg)
 
       // 重新验证相关数据
       mutate('all-documents')
       if (arg.logicalDocumentId) {
         mutate(['logical-document-with-versions', arg.logicalDocumentId])
       }
-      mutate(['project-documents', arg.projectId])
+      if (arg.projectId) {
+        mutate(['project-documents', arg.projectId])
+      }
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
 
       return result
@@ -485,48 +313,17 @@ export function useUploadDocumentVersion() {
 export function usePreviewDocumentUpload() {
   return useSWRMutation(
     'preview-document-upload',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          sourcePath: string
-          originalFileName: string
-          displayName?: string
-          projectId: string
-          projectName: string
-          logicalDocumentId?: string
-          logicalDocumentName: string
-          logicalDocumentType: string
-          versionTag: string
-          isGenericVersion?: boolean
-          competitionInfo?: {
-            seriesName?: string
-            levelName?: string
-            projectName?: string
-          }
-          notes?: string
-          clarityFileRoot?: string
-        }
-      }
-    ) => {
-      // 构造智能文件导入的上下文
-      const importContext = {
-        ...arg,
-        importType: 'document' as const
-      }
-
-      return await tipcClient.previewDocumentUpload(importContext)
+    async (_mutationKey, { arg }: { arg: FileImportContext }) => {
+      return await tipcClient.previewDocumentUpload(arg)
     }
   )
 }
 
-export function useCheckFileUploadability() {
+export function useCheckFileUploadAbility() {
   return useSWRMutation(
-    'check-file-uploadability',
+    'check-file-upload-ability',
     async (_mutationKey, { arg }: { arg: { filePath: string } }) => {
-      return await tipcClient.checkFileUploadability(arg)
+      return await tipcClient.checkFileUploadAbility(arg)
     }
   )
 }
@@ -544,28 +341,14 @@ export function useGenerateVersionTag() {
 export function useSelectDirectory() {
   return useSWRMutation(
     'select-directory',
-    async (_mutationKey, { arg }: { arg: { title?: string; defaultPath?: string } }) => {
+    async (_mutationKey, { arg }: { arg: SelectDirectoryInput }) => {
       return await tipcClient.selectDirectory(arg)
     }
   )
 }
 
 export function useSelectFile() {
-  return useSWRMutation(
-    'select-file',
-    async (
-      _mutationKey,
-      {
-        arg
-      }: {
-        arg: {
-          title?: string
-          defaultPath?: string
-          filters?: Array<{ name: string; extensions: string[] }>
-        }
-      }
-    ) => {
-      return await tipcClient.selectFile(arg)
-    }
-  )
+  return useSWRMutation('select-file', async (_mutationKey, { arg }: { arg: SelectFileInput }) => {
+    return await tipcClient.selectFile(arg)
+  })
 }

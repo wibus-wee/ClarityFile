@@ -22,6 +22,11 @@ export function projectRouter(t: ITipc) {
       return await ProjectService.getProject(input)
     }),
 
+    // 获取项目详细信息（聚合所有相关数据）
+    getProjectDetails: t.procedure.input<GetProjectInput>().action(async ({ input }) => {
+      return await ProjectService.getProjectDetails(input)
+    }),
+
     // 创建项目
     createProject: t.procedure.input<CreateProjectInput>().action(async ({ input }) => {
       return await ProjectService.createProject(input)
