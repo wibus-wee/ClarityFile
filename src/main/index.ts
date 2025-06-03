@@ -5,12 +5,18 @@ import icon from '../../resources/icon.png?asset'
 import { runMigrate } from './db'
 import { registerIpcMain } from '@egoist/tipc/main'
 import { router } from './tipc'
+import { WindowManager } from './managers/window.manager'
 
-function createWindow(): void {
+async function createWindow(): Promise<void> {
+  // 创建窗口管理器实例
+  const windowManager = new WindowManager()
+
+  // 获取窗口配置选项
+  const windowOptions = await windowManager.getWindowOptions()
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    ...windowOptions,
     show: false,
     titleBarStyle: 'hiddenInset',
     autoHideMenuBar: true,
@@ -21,8 +27,13 @@ function createWindow(): void {
     }
   })
 
-  mainWindow.on('ready-to-show', () => {
+  // 设置窗口事件监听器
+  windowManager.setupWindowListeners(mainWindow)
+
+  mainWindow.on('ready-to-show', async () => {
     mainWindow.show()
+    // 恢复窗口状态（如最大化状态）
+    await windowManager.restoreWindowState()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -60,12 +71,12 @@ app.whenReady().then(async () => {
   registerIpcMain(router)
 
   await runMigrate()
-  createWindow()
+  await createWindow()
 
-  app.on('activate', function () {
+  app.on('activate', async function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) await createWindow()
   })
 })
 

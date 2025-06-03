@@ -92,3 +92,23 @@ export interface SelectFileInput {
   defaultPath?: string
   filters?: Array<{ name: string; extensions: string[] }>
 }
+
+// 窗口相关输入类型
+export interface WindowBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface WindowState {
+  isMaximized: boolean
+  isMinimized: boolean
+  isFullScreen: boolean
+}
+
+export interface WindowConfig {
+  bounds: WindowBounds
+  state: WindowState
+  displayId?: number // 用于多显示器支持
+}
