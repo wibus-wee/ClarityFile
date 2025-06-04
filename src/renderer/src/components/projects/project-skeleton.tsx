@@ -5,6 +5,8 @@ interface ProjectSkeletonProps {
 }
 
 export function ProjectSkeleton({ viewMode }: ProjectSkeletonProps) {
+  // viewMode 参数暂时未使用，但保留以备将来扩展
+  void viewMode
   return (
     <div className="flex items-center justify-between py-3 px-4">
       <div className="flex items-center gap-3 min-w-0 flex-1">

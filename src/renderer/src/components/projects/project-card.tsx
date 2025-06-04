@@ -10,6 +10,7 @@ import { Calendar, Edit, FolderOpen, MoreHorizontal, Trash2 } from 'lucide-react
 import { cn } from '@renderer/lib/utils'
 import type { Project } from './index'
 import { motion } from 'framer-motion'
+import { Link } from '@tanstack/react-router'
 
 interface ProjectCardProps {
   project: Project
@@ -49,7 +50,7 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
   return (
     <motion.div
       layoutId={`project-${project.id}`}
-      className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer"
+      className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -60,7 +61,12 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
         layout: { duration: 0.4 }
       }}
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      <Link
+        to="/projects/$projectId"
+        params={{ projectId: project.id }}
+        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+        viewTransition
+      >
         <motion.div
           layoutId={`project-icon-${project.id}`}
           className="w-8 h-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0"
@@ -106,7 +112,7 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
             {new Date(project.createdAt).toLocaleDateString()}
           </motion.div>
         </div>
-      </div>
+      </Link>
 
       <motion.div layoutId={`project-actions-${project.id}`} transition={{ duration: 0.4 }}>
         <DropdownMenu>

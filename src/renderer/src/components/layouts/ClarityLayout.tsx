@@ -15,7 +15,6 @@ import useBreadcrumb from '@renderer/hooks/use-breadcrumb'
 import { useScrollTop } from '@renderer/hooks/use-scroll-top'
 
 import { NavActions } from '../nav-actions'
-import { SettingsDialog } from '../settings-dialog'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@renderer/lib/utils'
 
@@ -54,7 +53,9 @@ export function ClarityLayout({ children }: PropsWithChildren) {
                           <BreadcrumbPage>{item.label}</BreadcrumbPage>
                         ) : (
                           <BreadcrumbLink asChild>
-                            <Link to={item.path}>{item.label}</Link>
+                            <Link to={item.path} viewTransition>
+                              {item.label}
+                            </Link>
                           </BreadcrumbLink>
                         )}
                       </BreadcrumbItem>

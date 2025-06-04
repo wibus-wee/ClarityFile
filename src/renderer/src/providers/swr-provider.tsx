@@ -1,4 +1,5 @@
 import { PropsWithChildren } from 'react'
+import { toast } from 'sonner'
 import { SWRConfig } from 'swr'
 
 export function SWRProvider({ children }: PropsWithChildren) {
@@ -15,19 +16,20 @@ export function SWRProvider({ children }: PropsWithChildren) {
         // 错误处理
         onError: (error, key) => {
           console.error('SWR Error:', error, 'Key:', key)
-          // 这里可以添加全局错误处理，比如显示 toast
+          toast(`数据加载失败: ${error.message}`)
         },
 
-        // 成功处理
-        onSuccess: (data, key, config) => {
-          // 可以在这里添加全局成功处理逻辑
-          console.log('SWR Success:', key)
-        },
+        // // 成功处理
+        // onSuccess: (_, key) => {
+        //   // 可以在这里添加全局成功处理逻辑
+        //   console.log('SWR Success:', key)
+        // },
 
         // 加载状态处理
-        onLoadingSlow: (key, config) => {
-          console.warn('SWR Loading Slow:', key)
+        onLoadingSlow: () => {
+          // console.warn('SWR Loading Slow:', key)
           // 可以在这里显示加载慢的提示
+          toast('数据似乎加载状态很缓慢，有可能陷入了加载死循环')
         }
       }}
     >

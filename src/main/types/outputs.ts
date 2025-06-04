@@ -50,7 +50,7 @@ export interface ProjectDetailsOutput {
     assetType: string
     contextDescription: string | null
     versionInfo: string | null
-    customFields: unknown
+    customFields: Record<string, any> | null
     createdAt: Date
     updatedAt: Date
     fileName: string
@@ -136,7 +136,7 @@ export interface ProjectDetailsOutput {
     resourceName: string
     resourceType: string
     resourceDescription: string | null
-    resourceCustomFields: unknown
+    resourceCustomFields: Record<string, any> | null
     resourceCreatedAt: Date
     resourceUpdatedAt: Date
     fileName: string
