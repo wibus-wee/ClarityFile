@@ -208,7 +208,10 @@ export class ProjectService {
       project.currentCoverAssetId
         ? ProjectAssetsService.getProjectCoverAsset(project.currentCoverAssetId)
         : Promise.resolve(null)
-    ])
+    ]).catch((error) => {
+      console.error('获取项目详情失败:', error)
+      throw new Error(`获取项目详情失败: ${error instanceof Error ? error.message : String(error)}`)
+    })
 
     // 3. 组装完整的项目详情
     return {

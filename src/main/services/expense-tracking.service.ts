@@ -110,10 +110,7 @@ export class ExpenseTrackingService {
    * 删除经费记录
    */
   static async deleteExpenseTracking(id: string) {
-    const result = await db
-      .delete(expenseTrackings)
-      .where(eq(expenseTrackings.id, id))
-      .returning()
+    await db.delete(expenseTrackings).where(eq(expenseTrackings.id, id)).returning()
 
     console.log(`经费记录 "${id}" 删除成功`)
     return { success: true }
@@ -124,12 +121,15 @@ export class ExpenseTrackingService {
    */
   static async getProjectExpensesStatistics(projectId: string) {
     const expenses = await this.getProjectExpenses(projectId)
-    
+
     const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0)
-    const statusCounts = expenses.reduce((acc, expense) => {
-      acc[expense.status] = (acc[expense.status] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
+    const statusCounts = expenses.reduce(
+      (acc, expense) => {
+        acc[expense.status] = (acc[expense.status] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
     return {
       expenseCount: expenses.length,

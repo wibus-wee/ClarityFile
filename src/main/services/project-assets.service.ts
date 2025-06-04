@@ -1,7 +1,6 @@
 import { db } from '../db'
 import { projectAssets, managedFiles } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
-import type { GetProjectInput } from '../types/inputs'
 
 /**
  * 项目资产服务
@@ -133,10 +132,7 @@ export class ProjectAssetsService {
    * 删除项目资产
    */
   static async deleteProjectAsset(id: string) {
-    const result = await db
-      .delete(projectAssets)
-      .where(eq(projectAssets.id, id))
-      .returning()
+    await db.delete(projectAssets).where(eq(projectAssets.id, id)).returning()
 
     console.log(`项目资产 "${id}" 删除成功`)
     return { success: true }
@@ -147,13 +143,16 @@ export class ProjectAssetsService {
    */
   static async getProjectAssetsStatistics(projectId: string) {
     const assets = await this.getProjectAssets(projectId)
-    
+
     return {
       assetCount: assets.length,
-      assetsByType: assets.reduce((acc, asset) => {
-        acc[asset.assetType] = (acc[asset.assetType] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
+      assetsByType: assets.reduce(
+        (acc, asset) => {
+          acc[asset.assetType] = (acc[asset.assetType] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      )
     }
   }
 }

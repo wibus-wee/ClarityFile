@@ -128,7 +128,7 @@ export class SharedResourcesService {
     await db.delete(projectSharedResources).where(eq(projectSharedResources.sharedResourceId, id))
 
     // 再删除共享资源本身
-    const result = await db.delete(sharedResources).where(eq(sharedResources.id, id)).returning()
+    await db.delete(sharedResources).where(eq(sharedResources.id, id)).returning()
 
     console.log(`共享资源 "${id}" 删除成功`)
     return { success: true }
@@ -162,7 +162,7 @@ export class SharedResourcesService {
     projectId: string
     sharedResourceId: string
   }) {
-    const result = await db
+    await db
       .delete(projectSharedResources)
       .where(
         eq(projectSharedResources.projectId, input.projectId) &&

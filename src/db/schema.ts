@@ -323,7 +323,10 @@ export const projectTags = sqliteTable(
       .references(() => projects.id, { onDelete: 'cascade' }),
     tagId: text('tag_id')
       .notNull()
-      .references(() => tags.id, { onDelete: 'cascade' })
+      .references(() => tags.id, { onDelete: 'cascade' }),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(strftime('%s', 'now') * 1000)`)
   },
   (table) => [
     primaryKey({ columns: [table.projectId, table.tagId] }),

@@ -56,10 +56,9 @@ export class TagService {
    * 从项目中移除标签
    */
   static async removeTagFromProject(input: { projectId: string; tagId: string }) {
-    const result = await db
+    await db
       .delete(projectTags)
       .where(eq(projectTags.projectId, input.projectId) && eq(projectTags.tagId, input.tagId))
-      .returning()
 
     console.log(`标签已从项目中移除`)
     return { success: true }
@@ -73,8 +72,7 @@ export class TagService {
       .update(tags)
       .set({
         name: input.name,
-        color: input.color,
-        updatedAt: new Date()
+        color: input.color
       })
       .where(eq(tags.id, input.id))
       .returning()
@@ -91,7 +89,7 @@ export class TagService {
     await db.delete(projectTags).where(eq(projectTags.tagId, id))
 
     // 再删除标签本身
-    const result = await db.delete(tags).where(eq(tags.id, id)).returning()
+    await db.delete(tags).where(eq(tags.id, id))
 
     console.log(`标签 "${id}" 删除成功`)
     return { success: true }

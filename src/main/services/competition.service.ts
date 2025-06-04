@@ -24,14 +24,14 @@ export class CompetitionService {
         // 里程碑信息
         milestoneId: competitionMilestones.id,
         levelName: competitionMilestones.levelName,
-        dueDateMilestone: competitionMilestones.dueDate,
-        milestoneNotes: competitionMilestones.description,
+        dueDateMilestone: competitionMilestones.dueDateMilestone,
+        milestoneNotes: competitionMilestones.notes,
         milestoneCreatedAt: competitionMilestones.createdAt,
         milestoneUpdatedAt: competitionMilestones.updatedAt,
         // 赛事系列信息
         seriesId: competitionSeries.id,
         seriesName: competitionSeries.name,
-        seriesNotes: competitionSeries.description,
+        seriesNotes: competitionSeries.notes,
         seriesCreatedAt: competitionSeries.createdAt,
         seriesUpdatedAt: competitionSeries.updatedAt,
         // 通知文件信息（可能为空）
@@ -78,9 +78,8 @@ export class CompetitionService {
       .select({
         id: competitionMilestones.id,
         levelName: competitionMilestones.levelName,
-        dueDate: competitionMilestones.dueDate,
-        description: competitionMilestones.description,
-        customFields: competitionMilestones.customFields,
+        dueDate: competitionMilestones.dueDateMilestone,
+        description: competitionMilestones.notes,
         createdAt: competitionMilestones.createdAt,
         updatedAt: competitionMilestones.updatedAt,
         // 通知文件信息
@@ -94,7 +93,7 @@ export class CompetitionService {
       .from(competitionMilestones)
       .leftJoin(managedFiles, eq(competitionMilestones.notificationManagedFileId, managedFiles.id))
       .where(eq(competitionMilestones.competitionSeriesId, seriesId))
-      .orderBy(competitionMilestones.dueDate)
+      .orderBy(competitionMilestones.dueDateMilestone)
 
     return milestones
   }
@@ -102,17 +101,12 @@ export class CompetitionService {
   /**
    * 创建赛事系列
    */
-  static async createCompetitionSeries(input: {
-    name: string
-    description?: string
-    customFields?: unknown
-  }) {
+  static async createCompetitionSeries(input: { name: string; notes?: string }) {
     const result = await db
       .insert(competitionSeries)
       .values({
         name: input.name,
-        description: input.description,
-        customFields: input.customFields
+        notes: input.notes
       })
       .returning()
 
@@ -126,20 +120,18 @@ export class CompetitionService {
   static async createCompetitionMilestone(input: {
     competitionSeriesId: string
     levelName: string
-    dueDate?: Date
-    description?: string
+    dueDateMilestone?: Date
+    notes?: string
     notificationManagedFileId?: string
-    customFields?: unknown
   }) {
     const result = await db
       .insert(competitionMilestones)
       .values({
         competitionSeriesId: input.competitionSeriesId,
         levelName: input.levelName,
-        dueDate: input.dueDate,
-        description: input.description,
-        notificationManagedFileId: input.notificationManagedFileId,
-        customFields: input.customFields
+        dueDateMilestone: input.dueDateMilestone,
+        notes: input.notes,
+        notificationManagedFileId: input.notificationManagedFileId
       })
       .returning()
 
@@ -179,8 +171,7 @@ export class CompetitionService {
     const result = await db
       .update(projectCompetitionMilestones)
       .set({
-        statusInMilestone: input.statusInMilestone,
-        updatedAt: new Date()
+        statusInMilestone: input.statusInMilestone
       })
       .where(
         eq(projectCompetitionMilestones.projectId, input.projectId) &&
@@ -211,10 +202,7 @@ export class CompetitionService {
     await db.delete(competitionMilestones).where(eq(competitionMilestones.competitionSeriesId, id))
 
     // 删除赛事系列
-    const result = await db
-      .delete(competitionSeries)
-      .where(eq(competitionSeries.id, id))
-      .returning()
+    await db.delete(competitionSeries).where(eq(competitionSeries.id, id)).returning()
 
     console.log(`赛事系列 "${id}" 删除成功`)
     return { success: true }
