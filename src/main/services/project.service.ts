@@ -1,19 +1,5 @@
 import { db } from '../db'
-import {
-  projects,
-  logicalDocuments,
-  documentVersions,
-  managedFiles,
-  projectAssets,
-  expenseTrackings,
-  projectSharedResources,
-  sharedResources,
-  projectCompetitionMilestones,
-  competitionMilestones,
-  competitionSeries,
-  projectTags,
-  tags
-} from '../../db/schema'
+import { projects } from '../../db/schema'
 import { eq, desc, like, and } from 'drizzle-orm'
 import type {
   CreateProjectInput,
@@ -25,6 +11,13 @@ import type {
 import type { SuccessResponse, ProjectDetailsOutput } from '../types/outputs'
 import { ProjectFolderManager } from '../managers/project-folder.manager'
 import { PathSyncManager } from '../managers/path-sync.manager'
+// 导入专门的服务类
+import { LogicalDocumentService } from './document/logical-document.service'
+import { ProjectAssetsService } from './project-assets.service'
+import { ExpenseTrackingService } from './expense-tracking.service'
+import { SharedResourcesService } from './shared-resources.service'
+import { CompetitionService } from './competition.service'
+import { TagService } from './tag.service'
 
 export class ProjectService {
   // 获取所有项目
@@ -196,217 +189,28 @@ export class ProjectService {
       return null
     }
 
-    // 2. 获取项目的逻辑文档（包含版本信息）
-    const logicalDocs = await db
-      .select({
-        id: logicalDocuments.id,
-        name: logicalDocuments.name,
-        type: logicalDocuments.type,
-        description: logicalDocuments.description,
-        defaultStoragePathSegment: logicalDocuments.defaultStoragePathSegment,
-        status: logicalDocuments.status,
-        currentOfficialVersionId: logicalDocuments.currentOfficialVersionId,
-        createdAt: logicalDocuments.createdAt,
-        updatedAt: logicalDocuments.updatedAt
-      })
-      .from(logicalDocuments)
-      .where(and(eq(logicalDocuments.projectId, input.id), eq(logicalDocuments.status, 'active')))
-      .orderBy(desc(logicalDocuments.updatedAt))
+    // 2. 并行获取所有关联数据，委托给专门的服务类
+    const [
+      documentsWithVersions,
+      assets,
+      expenses,
+      sharedResourcesData,
+      competitions,
+      projectTagsData,
+      coverAsset
+    ] = await Promise.all([
+      LogicalDocumentService.getProjectDocumentsWithVersions(input.id),
+      ProjectAssetsService.getProjectAssets(input.id),
+      ExpenseTrackingService.getProjectExpenses(input.id),
+      SharedResourcesService.getProjectSharedResources(input.id),
+      CompetitionService.getProjectCompetitions(input.id),
+      TagService.getProjectTags(input.id),
+      project.currentCoverAssetId
+        ? ProjectAssetsService.getProjectCoverAsset(project.currentCoverAssetId)
+        : Promise.resolve(null)
+    ])
 
-    // 为每个逻辑文档获取版本列表
-    const documentsWithVersions = await Promise.all(
-      logicalDocs.map(async (doc) => {
-        const versions = await db
-          .select({
-            id: documentVersions.id,
-            versionTag: documentVersions.versionTag,
-            isGenericVersion: documentVersions.isGenericVersion,
-            competitionMilestoneId: documentVersions.competitionMilestoneId,
-            competitionProjectName: documentVersions.competitionProjectName,
-            notes: documentVersions.notes,
-            createdAt: documentVersions.createdAt,
-            updatedAt: documentVersions.updatedAt,
-            // 文件信息
-            fileName: managedFiles.name,
-            originalFileName: managedFiles.originalFileName,
-            physicalPath: managedFiles.physicalPath,
-            mimeType: managedFiles.mimeType,
-            fileSizeBytes: managedFiles.fileSizeBytes,
-            uploadedAt: managedFiles.uploadedAt
-          })
-          .from(documentVersions)
-          .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
-          .where(eq(documentVersions.logicalDocumentId, doc.id))
-          .orderBy(desc(documentVersions.createdAt))
-
-        return {
-          ...doc,
-          versions
-        }
-      })
-    )
-
-    // 3. 获取项目资产
-    const assets = await db
-      .select({
-        id: projectAssets.id,
-        name: projectAssets.name,
-        assetType: projectAssets.assetType,
-        contextDescription: projectAssets.contextDescription,
-        versionInfo: projectAssets.versionInfo,
-        customFields: projectAssets.customFields,
-        createdAt: projectAssets.createdAt,
-        updatedAt: projectAssets.updatedAt,
-        // 文件信息
-        fileName: managedFiles.name,
-        originalFileName: managedFiles.originalFileName,
-        physicalPath: managedFiles.physicalPath,
-        mimeType: managedFiles.mimeType,
-        fileSizeBytes: managedFiles.fileSizeBytes,
-        uploadedAt: managedFiles.uploadedAt
-      })
-      .from(projectAssets)
-      .innerJoin(managedFiles, eq(projectAssets.managedFileId, managedFiles.id))
-      .where(eq(projectAssets.projectId, input.id))
-      .orderBy(desc(projectAssets.createdAt))
-
-    // 4. 获取项目经费记录
-    const expenses = await db
-      .select({
-        id: expenseTrackings.id,
-        itemName: expenseTrackings.itemName,
-        applicant: expenseTrackings.applicant,
-        amount: expenseTrackings.amount,
-        applicationDate: expenseTrackings.applicationDate,
-        status: expenseTrackings.status,
-        reimbursementDate: expenseTrackings.reimbursementDate,
-        notes: expenseTrackings.notes,
-        createdAt: expenseTrackings.createdAt,
-        updatedAt: expenseTrackings.updatedAt,
-        // 发票文件信息（可能为空）
-        invoiceFileName: managedFiles.name,
-        invoiceOriginalFileName: managedFiles.originalFileName,
-        invoicePhysicalPath: managedFiles.physicalPath,
-        invoiceMimeType: managedFiles.mimeType,
-        invoiceFileSizeBytes: managedFiles.fileSizeBytes,
-        invoiceUploadedAt: managedFiles.uploadedAt
-      })
-      .from(expenseTrackings)
-      .leftJoin(managedFiles, eq(expenseTrackings.invoiceManagedFileId, managedFiles.id))
-      .where(eq(expenseTrackings.projectId, input.id))
-      .orderBy(desc(expenseTrackings.applicationDate))
-
-    // 5. 获取项目关联的共享资源
-    const sharedResourcesData = await db
-      .select({
-        // 关联信息
-        usageDescription: projectSharedResources.usageDescription,
-        associatedAt: projectSharedResources.createdAt,
-        // 共享资源信息
-        resourceId: sharedResources.id,
-        resourceName: sharedResources.name,
-        resourceType: sharedResources.type,
-        resourceDescription: sharedResources.description,
-        resourceCustomFields: sharedResources.customFields,
-        resourceCreatedAt: sharedResources.createdAt,
-        resourceUpdatedAt: sharedResources.updatedAt,
-        // 文件信息
-        fileName: managedFiles.name,
-        originalFileName: managedFiles.originalFileName,
-        physicalPath: managedFiles.physicalPath,
-        mimeType: managedFiles.mimeType,
-        fileSizeBytes: managedFiles.fileSizeBytes,
-        uploadedAt: managedFiles.uploadedAt
-      })
-      .from(projectSharedResources)
-      .innerJoin(sharedResources, eq(projectSharedResources.sharedResourceId, sharedResources.id))
-      .innerJoin(managedFiles, eq(sharedResources.managedFileId, managedFiles.id))
-      .where(eq(projectSharedResources.projectId, input.id))
-      .orderBy(desc(projectSharedResources.createdAt))
-
-    // 6. 获取项目参与的赛事里程碑
-    const competitions = await db
-      .select({
-        // 项目在里程碑中的状态
-        statusInMilestone: projectCompetitionMilestones.statusInMilestone,
-        milestoneNotes: projectCompetitionMilestones.notes,
-        participatedAt: projectCompetitionMilestones.createdAt,
-        // 里程碑信息
-        milestoneId: competitionMilestones.id,
-        levelName: competitionMilestones.levelName,
-        dueDateMilestone: competitionMilestones.dueDateMilestone,
-        milestoneCreatedAt: competitionMilestones.createdAt,
-        milestoneUpdatedAt: competitionMilestones.updatedAt,
-        // 赛事系列信息
-        seriesId: competitionSeries.id,
-        seriesName: competitionSeries.name,
-        seriesNotes: competitionSeries.notes,
-        seriesCreatedAt: competitionSeries.createdAt,
-        seriesUpdatedAt: competitionSeries.updatedAt,
-        // 通知文件信息（可能为空）
-        notificationFileName: managedFiles.name,
-        notificationOriginalFileName: managedFiles.originalFileName,
-        notificationPhysicalPath: managedFiles.physicalPath,
-        notificationMimeType: managedFiles.mimeType,
-        notificationFileSizeBytes: managedFiles.fileSizeBytes,
-        notificationUploadedAt: managedFiles.uploadedAt
-      })
-      .from(projectCompetitionMilestones)
-      .innerJoin(
-        competitionMilestones,
-        eq(projectCompetitionMilestones.competitionMilestoneId, competitionMilestones.id)
-      )
-      .innerJoin(
-        competitionSeries,
-        eq(competitionMilestones.competitionSeriesId, competitionSeries.id)
-      )
-      .leftJoin(managedFiles, eq(competitionMilestones.notificationManagedFileId, managedFiles.id))
-      .where(eq(projectCompetitionMilestones.projectId, input.id))
-      .orderBy(desc(projectCompetitionMilestones.createdAt))
-
-    // 7. 获取项目标签
-    const projectTagsData = await db
-      .select({
-        tagId: tags.id,
-        tagName: tags.name,
-        tagColor: tags.color,
-        tagCreatedAt: tags.createdAt
-      })
-      .from(projectTags)
-      .innerJoin(tags, eq(projectTags.tagId, tags.id))
-      .where(eq(projectTags.projectId, input.id))
-      .orderBy(tags.name)
-
-    // 8. 获取项目封面资产信息（如果有）
-    let coverAsset: any = null
-    if (project.currentCoverAssetId) {
-      const coverAssetResult = await db
-        .select({
-          id: projectAssets.id,
-          name: projectAssets.name,
-          assetType: projectAssets.assetType,
-          contextDescription: projectAssets.contextDescription,
-          versionInfo: projectAssets.versionInfo,
-          customFields: projectAssets.customFields,
-          createdAt: projectAssets.createdAt,
-          updatedAt: projectAssets.updatedAt,
-          // 文件信息
-          fileName: managedFiles.name,
-          originalFileName: managedFiles.originalFileName,
-          physicalPath: managedFiles.physicalPath,
-          mimeType: managedFiles.mimeType,
-          fileSizeBytes: managedFiles.fileSizeBytes,
-          uploadedAt: managedFiles.uploadedAt
-        })
-        .from(projectAssets)
-        .innerJoin(managedFiles, eq(projectAssets.managedFileId, managedFiles.id))
-        .where(eq(projectAssets.id, project.currentCoverAssetId))
-        .limit(1)
-
-      coverAsset = coverAssetResult[0] || null
-    }
-
-    // 9. 组装完整的项目详情
+    // 3. 组装完整的项目详情
     return {
       // 项目基本信息
       project,

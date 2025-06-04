@@ -272,6 +272,64 @@ export class LogicalDocumentService {
   }
 
   /**
+   * 获取项目的所有逻辑文档（包含版本信息）
+   * 专门为项目详情页设计
+   */
+  static async getProjectDocumentsWithVersions(projectId: string) {
+    // 先获取基本的逻辑文档信息
+    const documents = await db
+      .select({
+        id: logicalDocuments.id,
+        name: logicalDocuments.name,
+        type: logicalDocuments.type,
+        description: logicalDocuments.description,
+        defaultStoragePathSegment: logicalDocuments.defaultStoragePathSegment,
+        status: logicalDocuments.status,
+        currentOfficialVersionId: logicalDocuments.currentOfficialVersionId,
+        createdAt: logicalDocuments.createdAt,
+        updatedAt: logicalDocuments.updatedAt
+      })
+      .from(logicalDocuments)
+      .where(and(eq(logicalDocuments.projectId, projectId), eq(logicalDocuments.status, 'active')))
+      .orderBy(desc(logicalDocuments.updatedAt))
+
+    // 为每个逻辑文档获取版本列表
+    const documentsWithVersions = await Promise.all(
+      documents.map(async (doc) => {
+        const versions = await db
+          .select({
+            id: documentVersions.id,
+            versionTag: documentVersions.versionTag,
+            isGenericVersion: documentVersions.isGenericVersion,
+            competitionMilestoneId: documentVersions.competitionMilestoneId,
+            competitionProjectName: documentVersions.competitionProjectName,
+            notes: documentVersions.notes,
+            createdAt: documentVersions.createdAt,
+            updatedAt: documentVersions.updatedAt,
+            // 文件信息
+            fileName: managedFiles.name,
+            originalFileName: managedFiles.originalFileName,
+            physicalPath: managedFiles.physicalPath,
+            mimeType: managedFiles.mimeType,
+            fileSizeBytes: managedFiles.fileSizeBytes,
+            uploadedAt: managedFiles.uploadedAt
+          })
+          .from(documentVersions)
+          .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
+          .where(eq(documentVersions.logicalDocumentId, doc.id))
+          .orderBy(desc(documentVersions.createdAt))
+
+        return {
+          ...doc,
+          versions
+        }
+      })
+    )
+
+    return documentsWithVersions
+  }
+
+  /**
    * 获取文档类型列表
    */
   static async getDocumentTypes() {

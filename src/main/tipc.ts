@@ -9,6 +9,10 @@ import { intelligentNamingRouter } from './routers/intelligent-naming.router'
 import { intelligentPathGeneratorRouter } from './routers/intelligent-path-generator.router'
 import { intelligentFileImportRouter } from './routers/intelligent-file-import.router'
 import { documentVersionRouter } from './routers/document/document-version.router'
+import { projectAssetsRouter } from './routers/project-assets.router'
+import { expenseTrackingRouter } from './routers/expense-tracking.router'
+import { sharedResourcesRouter } from './routers/shared-resources.router'
+import { competitionRouter } from './routers/competition.router'
 
 const t = tipc.create()
 
@@ -41,7 +45,19 @@ export const router = {
   ...intelligentPathGeneratorRouter(t),
 
   // 智能文件导入相关路由
-  ...intelligentFileImportRouter(t)
+  ...intelligentFileImportRouter(t),
+
+  // 项目资产相关路由
+  ...projectAssetsRouter(t),
+
+  // 经费追踪相关路由
+  ...expenseTrackingRouter(t),
+
+  // 共享资源相关路由
+  ...sharedResourcesRouter(t),
+
+  // 赛事管理相关路由
+  ...competitionRouter(t)
 }
 
 export type Router = typeof router

@@ -287,7 +287,9 @@ export const documentVersionTags = sqliteTable(
     documentVersionId: text('document_version_id')
       .notNull()
       .references(() => documentVersions.id, { onDelete: 'cascade' }),
-    tagId: text('tag_id').notNull() //.references(() => tags.id, { onDelete: 'cascade' }),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' })
   },
   (table) => [
     primaryKey({ columns: [table.documentVersionId, table.tagId] }),
@@ -302,7 +304,9 @@ export const sharedResourceTags = sqliteTable(
     sharedResourceId: text('shared_resource_id')
       .notNull()
       .references(() => sharedResources.id, { onDelete: 'cascade' }),
-    tagId: text('tag_id').notNull() //.references(() => tags.id, { onDelete: 'cascade' }),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' })
   },
   (table) => [
     primaryKey({ columns: [table.sharedResourceId, table.tagId] }),
@@ -317,7 +321,9 @@ export const projectTags = sqliteTable(
     projectId: text('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
-    tagId: text('tag_id').notNull() //.references(() => tags.id, { onDelete: 'cascade' }),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' })
   },
   (table) => [
     primaryKey({ columns: [table.projectId, table.tagId] }),
@@ -332,7 +338,9 @@ export const projectAssetTags = sqliteTable(
     projectAssetId: text('project_asset_id')
       .notNull()
       .references(() => projectAssets.id, { onDelete: 'cascade' }),
-    tagId: text('tag_id').notNull() //.references(() => tags.id, { onDelete: 'cascade' }),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' })
   },
   (table) => [
     primaryKey({ columns: [table.projectAssetId, table.tagId] }),
