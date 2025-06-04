@@ -1,51 +1,39 @@
 import { ProjectAssetsService } from '../services/project-assets.service'
 import { ITipc } from '../types'
+import type {
+  CreateProjectAssetInput,
+  UpdateProjectAssetInput,
+  DeleteProjectAssetInput,
+  GetProjectAssetsInput,
+  GetProjectCoverAssetInput
+} from '../types/inputs'
 
 export function projectAssetsRouter(t: ITipc) {
   return {
     // 获取项目的所有资产
-    getProjectAssets: t.procedure.input<{ projectId: string }>().action(async ({ input }) => {
+    getProjectAssets: t.procedure.input<GetProjectAssetsInput>().action(async ({ input }) => {
       return await ProjectAssetsService.getProjectAssets(input.projectId)
     }),
 
     // 获取项目封面资产
     getProjectCoverAsset: t.procedure
-      .input<{ coverAssetId: string }>()
+      .input<GetProjectCoverAssetInput>()
       .action(async ({ input }) => {
         return await ProjectAssetsService.getProjectCoverAsset(input.coverAssetId)
       }),
 
     // 创建项目资产
-    createProjectAsset: t.procedure
-      .input<{
-        projectId: string
-        name: string
-        assetType: string
-        managedFileId: string
-        contextDescription?: string
-        versionInfo?: string
-        customFields?: unknown
-      }>()
-      .action(async ({ input }) => {
-        return await ProjectAssetsService.createProjectAsset(input)
-      }),
+    createProjectAsset: t.procedure.input<CreateProjectAssetInput>().action(async ({ input }) => {
+      return await ProjectAssetsService.createProjectAsset(input)
+    }),
 
     // 更新项目资产
-    updateProjectAsset: t.procedure
-      .input<{
-        id: string
-        name?: string
-        assetType?: string
-        contextDescription?: string
-        versionInfo?: string
-        customFields?: unknown
-      }>()
-      .action(async ({ input }) => {
-        return await ProjectAssetsService.updateProjectAsset(input)
-      }),
+    updateProjectAsset: t.procedure.input<UpdateProjectAssetInput>().action(async ({ input }) => {
+      return await ProjectAssetsService.updateProjectAsset(input)
+    }),
 
     // 删除项目资产
-    deleteProjectAsset: t.procedure.input<{ id: string }>().action(async ({ input }) => {
+    deleteProjectAsset: t.procedure.input<DeleteProjectAssetInput>().action(async ({ input }) => {
       return await ProjectAssetsService.deleteProjectAsset(input.id)
     }),
 

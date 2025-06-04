@@ -5,7 +5,7 @@ import type {
   GetLogicalDocumentInput,
   DeleteLogicalDocumentInput,
   GetProjectDocumentsInput
-} from '../../services/document/logical-document.service'
+} from '../../types/inputs'
 import { ITipc } from '../../types'
 
 export function logicalDocumentRouter(t: ITipc) {

@@ -45,14 +45,201 @@ export interface CreateLogicalDocumentInput {
   defaultStoragePathSegment?: string
 }
 
+export interface UpdateLogicalDocumentInput {
+  id: string
+  name?: string
+  type?: string
+  description?: string
+  defaultStoragePathSegment?: string
+  status?: string
+}
+
+export interface GetLogicalDocumentInput {
+  id: string
+}
+
+export interface DeleteLogicalDocumentInput {
+  id: string
+}
+
+// 文档版本相关输入类型
+export interface CreateDocumentVersionInput {
+  logicalDocumentId: string
+  managedFileId: string
+  versionTag: string
+  isGenericVersion?: boolean
+  competitionMilestoneId?: string
+  competitionProjectName?: string
+  notes?: string
+}
+
+export interface UpdateDocumentVersionInput {
+  id: string
+  versionTag?: string
+  isGenericVersion?: boolean
+  competitionMilestoneId?: string
+  competitionProjectName?: string
+  notes?: string
+}
+
+export interface GetDocumentVersionInput {
+  id: string
+}
+
+export interface DeleteDocumentVersionInput {
+  id: string
+}
+
+export interface GetLogicalDocumentVersionsInput {
+  logicalDocumentId: string
+}
+
 // 标签相关输入类型
 export interface CreateTagInput {
   name: string
   color?: string
 }
 
-// 文件相关输入类型已移至各自的服务文件中
-// 避免类型重复定义
+// 项目资产相关输入类型
+export interface CreateProjectAssetInput {
+  projectId: string
+  name: string
+  assetType: string
+  managedFileId: string
+  contextDescription?: string
+  versionInfo?: string
+  customFields?: unknown
+}
+
+export interface UpdateProjectAssetInput {
+  id: string
+  name?: string
+  assetType?: string
+  contextDescription?: string
+  versionInfo?: string
+  customFields?: unknown
+}
+
+export interface DeleteProjectAssetInput {
+  id: string
+}
+
+export interface GetProjectAssetsInput {
+  projectId: string
+}
+
+export interface GetProjectCoverAssetInput {
+  coverAssetId: string
+}
+
+// 经费追踪相关输入类型
+export interface CreateExpenseTrackingInput {
+  itemName: string
+  projectId: string
+  applicant: string
+  amount: number
+  applicationDate: Date
+  status: string
+  invoiceManagedFileId?: string
+  reimbursementDate?: Date
+  notes?: string
+}
+
+export interface UpdateExpenseTrackingInput {
+  id: string
+  itemName?: string
+  applicant?: string
+  amount?: number
+  applicationDate?: Date
+  status?: string
+  invoiceManagedFileId?: string
+  reimbursementDate?: Date
+  notes?: string
+}
+
+export interface DeleteExpenseTrackingInput {
+  id: string
+}
+
+export interface GetProjectExpensesInput {
+  projectId: string
+}
+
+// 共享资源相关输入类型
+export interface CreateSharedResourceInput {
+  name: string
+  type: string
+  managedFileId: string
+  description?: string
+  customFields?: unknown
+}
+
+export interface UpdateSharedResourceInput {
+  id: string
+  name?: string
+  type?: string
+  description?: string
+  customFields?: unknown
+}
+
+export interface DeleteSharedResourceInput {
+  id: string
+}
+
+export interface AssociateResourceToProjectInput {
+  projectId: string
+  sharedResourceId: string
+  usageDescription?: string
+}
+
+export interface DisassociateResourceFromProjectInput {
+  projectId: string
+  sharedResourceId: string
+}
+
+export interface GetProjectSharedResourcesInput {
+  projectId: string
+}
+
+// 赛事管理相关输入类型
+export interface CreateCompetitionSeriesInput {
+  name: string
+  description?: string
+  customFields?: unknown
+}
+
+export interface CreateCompetitionMilestoneInput {
+  competitionSeriesId: string
+  levelName: string
+  dueDate?: Date
+  description?: string
+  notificationManagedFileId?: string
+  customFields?: unknown
+}
+
+export interface AddProjectToCompetitionInput {
+  projectId: string
+  competitionMilestoneId: string
+  statusInMilestone?: string
+}
+
+export interface UpdateProjectCompetitionStatusInput {
+  projectId: string
+  competitionMilestoneId: string
+  statusInMilestone: string
+}
+
+export interface DeleteCompetitionSeriesInput {
+  id: string
+}
+
+export interface GetProjectCompetitionsInput {
+  projectId: string
+}
+
+export interface GetCompetitionMilestonesInput {
+  seriesId: string
+}
 
 // 设置相关输入类型
 export interface GetSettingsByCategoryInput {

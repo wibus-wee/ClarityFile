@@ -1,11 +1,19 @@
 import { SharedResourcesService } from '../services/shared-resources.service'
 import { ITipc } from '../types'
+import type {
+  CreateSharedResourceInput,
+  UpdateSharedResourceInput,
+  DeleteSharedResourceInput,
+  AssociateResourceToProjectInput,
+  DisassociateResourceFromProjectInput,
+  GetProjectSharedResourcesInput
+} from '../types/inputs'
 
 export function sharedResourcesRouter(t: ITipc) {
   return {
     // 获取项目关联的共享资源
     getProjectSharedResources: t.procedure
-      .input<{ projectId: string }>()
+      .input<GetProjectSharedResourcesInput>()
       .action(async ({ input }) => {
         return await SharedResourcesService.getProjectSharedResources(input.projectId)
       }),
@@ -17,52 +25,35 @@ export function sharedResourcesRouter(t: ITipc) {
 
     // 创建共享资源
     createSharedResource: t.procedure
-      .input<{
-        name: string
-        type: string
-        managedFileId: string
-        description?: string
-        customFields?: unknown
-      }>()
+      .input<CreateSharedResourceInput>()
       .action(async ({ input }) => {
         return await SharedResourcesService.createSharedResource(input)
       }),
 
     // 更新共享资源
     updateSharedResource: t.procedure
-      .input<{
-        id: string
-        name?: string
-        type?: string
-        description?: string
-        customFields?: unknown
-      }>()
+      .input<UpdateSharedResourceInput>()
       .action(async ({ input }) => {
         return await SharedResourcesService.updateSharedResource(input)
       }),
 
     // 删除共享资源
-    deleteSharedResource: t.procedure.input<{ id: string }>().action(async ({ input }) => {
-      return await SharedResourcesService.deleteSharedResource(input.id)
-    }),
+    deleteSharedResource: t.procedure
+      .input<DeleteSharedResourceInput>()
+      .action(async ({ input }) => {
+        return await SharedResourcesService.deleteSharedResource(input.id)
+      }),
 
     // 将共享资源关联到项目
     associateResourceToProject: t.procedure
-      .input<{
-        projectId: string
-        sharedResourceId: string
-        usageDescription?: string
-      }>()
+      .input<AssociateResourceToProjectInput>()
       .action(async ({ input }) => {
         return await SharedResourcesService.associateResourceToProject(input)
       }),
 
     // 取消共享资源与项目的关联
     disassociateResourceFromProject: t.procedure
-      .input<{
-        projectId: string
-        sharedResourceId: string
-      }>()
+      .input<DisassociateResourceFromProjectInput>()
       .action(async ({ input }) => {
         return await SharedResourcesService.disassociateResourceFromProject(input)
       }),

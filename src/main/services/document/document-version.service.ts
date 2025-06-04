@@ -2,37 +2,13 @@ import { db } from '../../db'
 import { documentVersions, managedFiles, logicalDocuments } from '../../../db/schema'
 import { eq, desc } from 'drizzle-orm'
 import type { SuccessResponse } from '../../types/outputs'
-
-export interface CreateDocumentVersionInput {
-  logicalDocumentId: string
-  managedFileId: string
-  versionTag: string
-  isGenericVersion?: boolean
-  competitionMilestoneId?: string
-  competitionProjectName?: string
-  notes?: string
-}
-
-export interface UpdateDocumentVersionInput {
-  id: string
-  versionTag?: string
-  isGenericVersion?: boolean
-  competitionMilestoneId?: string
-  competitionProjectName?: string
-  notes?: string
-}
-
-export interface GetDocumentVersionInput {
-  id: string
-}
-
-export interface DeleteDocumentVersionInput {
-  id: string
-}
-
-export interface GetLogicalDocumentVersionsInput {
-  logicalDocumentId: string
-}
+import type {
+  CreateDocumentVersionInput,
+  UpdateDocumentVersionInput,
+  GetDocumentVersionInput,
+  DeleteDocumentVersionInput,
+  GetLogicalDocumentVersionsInput
+} from '../../types/inputs'
 
 /**
  * 文档版本服务

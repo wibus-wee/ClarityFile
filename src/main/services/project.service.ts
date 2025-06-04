@@ -215,6 +215,8 @@ export class ProjectService {
 
     // 3. 组装完整的项目详情
     return {
+      // 项目ID（顶级字段）
+      id: project.id,
       // 项目基本信息
       project,
       // 项目封面
