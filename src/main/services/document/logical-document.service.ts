@@ -4,36 +4,13 @@ import { eq, desc, and, count } from 'drizzle-orm'
 import type { SuccessResponse } from '../../types/outputs'
 import { IntelligentPathGeneratorService } from '../intelligent/intelligent-path-generator.service'
 import { FilesystemOperations } from '../../utils/filesystem-operations'
-import path from 'path'
-
-export interface CreateLogicalDocumentInput {
-  projectId: string
-  name: string
-  type: string
-  description?: string
-  defaultStoragePathSegment?: string
-}
-
-export interface UpdateLogicalDocumentInput {
-  id: string
-  name?: string
-  type?: string
-  description?: string
-  defaultStoragePathSegment?: string
-  status?: string
-}
-
-export interface GetLogicalDocumentInput {
-  id: string
-}
-
-export interface DeleteLogicalDocumentInput {
-  id: string
-}
-
-export interface GetProjectDocumentsInput {
-  projectId: string
-}
+import {
+  CreateLogicalDocumentInput,
+  GetLogicalDocumentInput,
+  GetProjectDocumentsInput,
+  UpdateLogicalDocumentInput,
+  DeleteLogicalDocumentInput
+} from '../../types/inputs'
 
 /**
  * 逻辑文档服务
@@ -161,8 +138,8 @@ export class LogicalDocumentService {
     const { id, ...updateData } = input
 
     // 如果要更新名称，需要先获取旧的文档信息和项目信息
-    let oldDocument = null
-    let project = null
+    let oldDocument: typeof logicalDocuments.$inferSelect | null = null
+    let project: typeof projects.$inferSelect | null = null
     if (updateData.name) {
       // 获取旧的逻辑文档信息
       const oldDocResult = await db

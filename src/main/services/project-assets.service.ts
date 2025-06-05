@@ -34,7 +34,10 @@ export class ProjectAssetsService {
       .where(eq(projectAssets.projectId, projectId))
       .orderBy(desc(projectAssets.createdAt))
 
-    return assets
+    return assets.map((asset) => ({
+      ...asset,
+      customFields: asset.customFields as Record<string, any> | null
+    }))
   }
 
   /**
@@ -68,7 +71,15 @@ export class ProjectAssetsService {
       .where(eq(projectAssets.id, coverAssetId))
       .limit(1)
 
-    return coverAssetResult[0] || null
+    const result = coverAssetResult[0]
+    if (!result) {
+      return null
+    }
+
+    return {
+      ...result,
+      customFields: result.customFields as Record<string, any> | null
+    }
   }
 
   /**

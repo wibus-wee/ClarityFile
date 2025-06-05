@@ -38,7 +38,10 @@ export class SharedResourcesService {
       .where(eq(projectSharedResources.projectId, projectId))
       .orderBy(desc(projectSharedResources.createdAt))
 
-    return sharedResourcesData
+    return sharedResourcesData.map((resource) => ({
+      ...resource,
+      resourceCustomFields: resource.resourceCustomFields as Record<string, any> | null
+    }))
   }
 
   /**

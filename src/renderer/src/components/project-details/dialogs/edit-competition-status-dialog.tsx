@@ -82,7 +82,7 @@ export function EditCompetitionStatusDialog({
   const onSubmit = async (data: EditStatusFormData) => {
     setIsSubmitting(true)
     try {
-      await updateStatus.mutateAsync({
+      await updateStatus.trigger({
         projectId,
         competitionMilestoneId,
         statusInMilestone: data.statusInMilestone
@@ -133,14 +133,19 @@ export function EditCompetitionStatusDialog({
                         {competitionStatuses.map((status) => (
                           <SelectItem key={status.value} value={status.value}>
                             <div className="flex items-center gap-2">
-                              <div 
+                              <div
                                 className={`w-2 h-2 rounded-full ${
-                                  status.value === '已获奖' ? 'bg-yellow-500' :
-                                  status.value === '已完成' || status.value === '已提交' ? 'bg-green-500' :
-                                  status.value === '进行中' ? 'bg-blue-500' :
-                                  status.value === '准备中' ? 'bg-gray-500' :
-                                  status.value === '未获奖' ? 'bg-orange-500' :
-                                  'bg-red-500'
+                                  status.value === '已获奖'
+                                    ? 'bg-yellow-500'
+                                    : status.value === '已完成' || status.value === '已提交'
+                                      ? 'bg-green-500'
+                                      : status.value === '进行中'
+                                        ? 'bg-blue-500'
+                                        : status.value === '准备中'
+                                          ? 'bg-gray-500'
+                                          : status.value === '未获奖'
+                                            ? 'bg-orange-500'
+                                            : 'bg-red-500'
                                 }`}
                               />
                               {status.label}
@@ -149,9 +154,7 @@ export function EditCompetitionStatusDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      选择项目在该赛事里程碑中的当前状态
-                    </FormDescription>
+                    <FormDescription>选择项目在该赛事里程碑中的当前状态</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -169,11 +172,7 @@ export function EditCompetitionStatusDialog({
           >
             取消
           </Button>
-          <Button
-            type="submit"
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          >
+          <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

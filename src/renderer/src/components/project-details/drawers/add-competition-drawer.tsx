@@ -13,7 +13,6 @@ import {
   DrawerTitle
 } from '@renderer/components/ui/drawer'
 import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
 import {
   Form,
   FormControl,
@@ -31,10 +30,10 @@ import {
   SelectValue
 } from '@renderer/components/ui/select'
 import { Trophy, Plus, Loader2 } from 'lucide-react'
-import { 
-  useGetAllCompetitionSeries, 
+import {
+  useGetAllCompetitionSeries,
   useGetCompetitionMilestones,
-  useAddProjectToCompetition 
+  useAddProjectToCompetition
 } from '@renderer/hooks/use-tipc'
 
 const addCompetitionSchema = z.object({
@@ -70,7 +69,7 @@ export function AddCompetitionDrawer({
 }: AddCompetitionDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedSeriesId, setSelectedSeriesId] = useState<string>('')
-  
+
   const { data: competitionSeries, isLoading: isLoadingSeries } = useGetAllCompetitionSeries()
   const { data: milestones, isLoading: isLoadingMilestones } = useGetCompetitionMilestones(
     selectedSeriesId,
@@ -107,7 +106,7 @@ export function AddCompetitionDrawer({
 
     setIsSubmitting(true)
     try {
-      await addProjectToCompetition.mutateAsync({
+      await addProjectToCompetition.trigger({
         projectId,
         competitionMilestoneId: data.milestoneId,
         statusInMilestone: data.statusInMilestone
@@ -151,17 +150,19 @@ export function AddCompetitionDrawer({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>赛事系列 *</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={(value) => {
                           field.onChange(value)
                           setSelectedSeriesId(value)
-                        }} 
+                        }}
                         value={field.value}
                         disabled={isLoadingSeries}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={isLoadingSeries ? "加载中..." : "选择赛事系列"} />
+                            <SelectValue
+                              placeholder={isLoadingSeries ? '加载中...' : '选择赛事系列'}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -170,7 +171,9 @@ export function AddCompetitionDrawer({
                               <div className="flex flex-col items-start">
                                 <span className="font-medium">{series.name}</span>
                                 {series.notes && (
-                                  <span className="text-xs text-muted-foreground">{series.notes}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {series.notes}
+                                  </span>
                                 )}
                               </div>
                             </SelectItem>
@@ -190,21 +193,21 @@ export function AddCompetitionDrawer({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>赛事里程碑 *</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         value={field.value}
                         disabled={!selectedSeriesId || isLoadingMilestones}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue 
+                            <SelectValue
                               placeholder={
-                                !selectedSeriesId 
-                                  ? "请先选择赛事系列" 
-                                  : isLoadingMilestones 
-                                    ? "加载中..." 
-                                    : "选择赛事里程碑"
-                              } 
+                                !selectedSeriesId
+                                  ? '请先选择赛事系列'
+                                  : isLoadingMilestones
+                                    ? '加载中...'
+                                    : '选择赛事里程碑'
+                              }
                             />
                           </SelectTrigger>
                         </FormControl>

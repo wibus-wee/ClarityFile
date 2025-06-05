@@ -42,7 +42,7 @@ export function RemoveCompetitionDialog({
   const handleRemove = async () => {
     setIsRemoving(true)
     try {
-      await removeProjectFromCompetition.mutateAsync({
+      await removeProjectFromCompetition.trigger({
         projectId,
         competitionMilestoneId: competition.milestoneId
       })
@@ -58,14 +58,21 @@ export function RemoveCompetitionDialog({
 
   const getStatusColor = (status: string | null) => {
     switch (status) {
-      case '已获奖': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case '已获奖':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case '已完成':
-      case '已提交': return 'bg-green-100 text-green-800 border-green-200'
-      case '进行中': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case '准备中': return 'bg-gray-100 text-gray-800 border-gray-200'
-      case '未获奖': return 'bg-orange-100 text-orange-800 border-orange-200'
-      case '已放弃': return 'bg-red-100 text-red-800 border-red-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case '已提交':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case '进行中':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case '准备中':
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+      case '未获奖':
+        return 'bg-orange-100 text-orange-800 border-orange-200'
+      case '已放弃':
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -77,9 +84,7 @@ export function RemoveCompetitionDialog({
             <AlertTriangle className="w-5 h-5 text-red-500" />
             取消赛事关联
           </DialogTitle>
-          <DialogDescription>
-            确定要取消项目与该赛事的关联吗？此操作无法撤销。
-          </DialogDescription>
+          <DialogDescription>确定要取消项目与该赛事的关联吗？此操作无法撤销。</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -98,7 +103,7 @@ export function RemoveCompetitionDialog({
                 </Badge>
               )}
             </div>
-            
+
             <div className="text-sm text-muted-foreground">
               <span className="font-medium">里程碑:</span> {competition.levelName}
             </div>
@@ -109,9 +114,7 @@ export function RemoveCompetitionDialog({
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-red-800">
-                  注意事项
-                </p>
+                <p className="text-sm font-medium text-red-800">注意事项</p>
                 <ul className="text-sm text-red-700 space-y-1">
                   <li>• 项目将从该赛事中移除</li>
                   <li>• 相关的参与记录将被删除</li>
@@ -131,12 +134,7 @@ export function RemoveCompetitionDialog({
           >
             取消
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={handleRemove}
-            disabled={isRemoving}
-          >
+          <Button type="button" variant="destructive" onClick={handleRemove} disabled={isRemoving}>
             {isRemoving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

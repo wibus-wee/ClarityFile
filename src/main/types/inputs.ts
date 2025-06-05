@@ -10,6 +10,7 @@ export interface UpdateProjectInput {
   name?: string
   description?: string
   status?: string
+  currentCoverAssetId?: string | null
 }
 
 export interface GetProjectInput {

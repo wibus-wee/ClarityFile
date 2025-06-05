@@ -8,14 +8,7 @@ import {
 } from '@renderer/components/ui/dialog'
 import { Badge } from '@renderer/components/ui/badge'
 import { Separator } from '@renderer/components/ui/separator'
-import { 
-  Trophy, 
-  Calendar, 
-  Clock, 
-  FileText, 
-  Target,
-  Info
-} from 'lucide-react'
+import { Trophy, Clock, FileText, Target, Info } from 'lucide-react'
 
 interface CompetitionDetailsDialogProps {
   competition: {
@@ -52,14 +45,21 @@ export function CompetitionDetailsDialog({
 
   const getStatusColor = (status: string | null) => {
     switch (status) {
-      case '已获奖': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case '已获奖':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case '已完成':
-      case '已提交': return 'bg-green-100 text-green-800 border-green-200'
-      case '进行中': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case '准备中': return 'bg-gray-100 text-gray-800 border-gray-200'
-      case '未获奖': return 'bg-orange-100 text-orange-800 border-orange-200'
-      case '已放弃': return 'bg-red-100 text-red-800 border-red-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case '已提交':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case '进行中':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case '准备中':
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+      case '未获奖':
+        return 'bg-orange-100 text-orange-800 border-orange-200'
+      case '已放弃':
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -78,9 +78,7 @@ export function CompetitionDetailsDialog({
             <Trophy className="w-5 h-5 text-yellow-500" />
             赛事详情
           </DialogTitle>
-          <DialogDescription>
-            查看赛事的详细信息和参与状态
-          </DialogDescription>
+          <DialogDescription>查看赛事的详细信息和参与状态</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -99,7 +97,7 @@ export function CompetitionDetailsDialog({
                 </Badge>
               )}
             </div>
-            
+
             <div className="flex items-center gap-2 text-muted-foreground">
               <Target className="w-4 h-4" />
               <span className="font-medium">{competition.levelName}</span>
@@ -121,7 +119,7 @@ export function CompetitionDetailsDialog({
               <Clock className="w-4 h-4" />
               时间信息
             </h4>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">参与时间:</span>
@@ -129,7 +127,7 @@ export function CompetitionDetailsDialog({
                   {new Date(competition.participatedAt).toLocaleString()}
                 </p>
               </div>
-              
+
               {competition.dueDateMilestone && (
                 <div>
                   <span className="text-muted-foreground">截止时间:</span>
@@ -138,14 +136,14 @@ export function CompetitionDetailsDialog({
                   </p>
                 </div>
               )}
-              
+
               <div>
                 <span className="text-muted-foreground">里程碑创建:</span>
                 <p className="font-medium">
                   {new Date(competition.milestoneCreatedAt).toLocaleString()}
                 </p>
               </div>
-              
+
               <div>
                 <span className="text-muted-foreground">最后更新:</span>
                 <p className="font-medium">
@@ -180,7 +178,7 @@ export function CompetitionDetailsDialog({
                   <FileText className="w-4 h-4" />
                   通知文件
                 </h4>
-                
+
                 <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{competition.notificationOriginalFileName}</span>
@@ -188,7 +186,7 @@ export function CompetitionDetailsDialog({
                       {competition.notificationMimeType || '未知类型'}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span>大小: {formatFileSize(competition.notificationFileSizeBytes)}</span>
                     {competition.notificationUploadedAt && (
@@ -206,7 +204,7 @@ export function CompetitionDetailsDialog({
           <Separator />
           <div className="space-y-3">
             <h4 className="font-medium">赛事系列信息</h4>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">系列创建:</span>
@@ -214,7 +212,7 @@ export function CompetitionDetailsDialog({
                   {new Date(competition.seriesCreatedAt).toLocaleDateString()}
                 </p>
               </div>
-              
+
               <div>
                 <span className="text-muted-foreground">系列更新:</span>
                 <p className="font-medium">
