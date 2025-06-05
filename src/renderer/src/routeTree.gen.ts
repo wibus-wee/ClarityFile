@@ -16,6 +16,7 @@ import { Route as ErrorTestImport } from './routes/error-test'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProjectsIndexImport } from './routes/projects/index'
+import { Route as ProjectsProjectIdImport } from './routes/projects/$projectId'
 
 // Create/Update Routes
 
@@ -46,6 +47,12 @@ const IndexRoute = IndexImport.update({
 const ProjectsIndexRoute = ProjectsIndexImport.update({
   id: '/projects/',
   path: '/projects/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProjectsProjectIdRoute = ProjectsProjectIdImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
+    '/projects/$projectId': {
+      id: '/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdImport
+      parentRoute: typeof rootRoute
+    }
     '/projects/': {
       id: '/projects/'
       path: '/projects'
@@ -98,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/error-test': typeof ErrorTestRoute
   '/settings': typeof SettingsRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects': typeof ProjectsIndexRoute
 }
 
@@ -106,6 +121,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/error-test': typeof ErrorTestRoute
   '/settings': typeof SettingsRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects': typeof ProjectsIndexRoute
 }
 
@@ -115,15 +131,35 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/error-test': typeof ErrorTestRoute
   '/settings': typeof SettingsRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/error-test' | '/settings' | '/projects'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/error-test'
+    | '/settings'
+    | '/projects/$projectId'
+    | '/projects'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/error-test' | '/settings' | '/projects'
-  id: '__root__' | '/' | '/about' | '/error-test' | '/settings' | '/projects/'
+  to:
+    | '/'
+    | '/about'
+    | '/error-test'
+    | '/settings'
+    | '/projects/$projectId'
+    | '/projects'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/error-test'
+    | '/settings'
+    | '/projects/$projectId'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 
@@ -132,6 +168,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ErrorTestRoute: typeof ErrorTestRoute
   SettingsRoute: typeof SettingsRoute
+  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
@@ -140,6 +177,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ErrorTestRoute: ErrorTestRoute,
   SettingsRoute: SettingsRoute,
+  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
 }
 
@@ -157,6 +195,7 @@ export const routeTree = rootRoute
         "/about",
         "/error-test",
         "/settings",
+        "/projects/$projectId",
         "/projects/"
       ]
     },
@@ -171,6 +210,9 @@ export const routeTree = rootRoute
     },
     "/settings": {
       "filePath": "settings.tsx"
+    },
+    "/projects/$projectId": {
+      "filePath": "projects/$projectId.tsx"
     },
     "/projects/": {
       "filePath": "projects/index.tsx"

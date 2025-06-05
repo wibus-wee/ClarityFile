@@ -7,7 +7,26 @@ import type {
   DeleteProjectInput,
   SearchProjectsInput,
   CreateLogicalDocumentInput,
+  UpdateLogicalDocumentInput,
+  DeleteLogicalDocumentInput,
+  CreateDocumentVersionInput,
   CreateTagInput,
+  CreateProjectAssetInput,
+  UpdateProjectAssetInput,
+  DeleteProjectAssetInput,
+  CreateExpenseTrackingInput,
+  UpdateExpenseTrackingInput,
+  DeleteExpenseTrackingInput,
+  CreateSharedResourceInput,
+  UpdateSharedResourceInput,
+  DeleteSharedResourceInput,
+  AssociateResourceToProjectInput,
+  DisassociateResourceFromProjectInput,
+  CreateCompetitionSeriesInput,
+  CreateCompetitionMilestoneInput,
+  AddProjectToCompetitionInput,
+  UpdateProjectCompetitionStatusInput,
+  DeleteCompetitionSeriesInput,
   SetSettingInput,
   SetSettingsInput,
   DeleteSettingInput,
@@ -17,7 +36,6 @@ import type {
 } from '../../../main/types/inputs'
 import type { CreateManagedFileInput } from '../../../main/services/managed-file.service'
 import type { FileImportContext } from '../../../main/services/intelligent/intelligent-file-import.service'
-import type { CreateDocumentVersionInput } from '../../../main/services/document/document-version.service'
 
 // 项目相关的 hooks
 export function useProjects() {
@@ -26,6 +44,12 @@ export function useProjects() {
 
 export function useProject(id: string | null) {
   return useSWR(id ? ['project', id] : null, () => (id ? tipcClient.getProject({ id }) : null))
+}
+
+export function useProjectDetails(id: string | null) {
+  return useSWR(id ? ['project-details', id] : null, () =>
+    id ? tipcClient.getProjectDetails({ id }) : null
+  )
 }
 
 export function useCreateProject() {
@@ -81,6 +105,8 @@ export function useCreateLogicalDocument() {
       // 重新验证所有文档列表和项目文档列表
       mutate('all-documents')
       mutate(['project-documents', arg.projectId])
+      // 重新验证项目详情（包含文档统计信息）
+      mutate(['project-details', arg.projectId])
       return result
     }
   )
@@ -257,6 +283,10 @@ export function useCreateDocumentVersion() {
       // 重新验证相关数据
       mutate(['logical-document-with-versions', arg.logicalDocumentId])
       mutate('all-documents')
+      // 重新验证受管文件列表（因为创建了新的文件记录）
+      mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+      // 重新验证项目详情（更新统计信息）
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
       return result
     }
   )
@@ -272,6 +302,10 @@ export function useIntelligentFileImport() {
       mutate('all-documents')
       if (arg.logicalDocumentId) {
         mutate(['logical-document-with-versions', arg.logicalDocumentId])
+      }
+      if (arg.projectId) {
+        mutate(['project-documents', arg.projectId])
+        mutate(['project-details', arg.projectId])
       }
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
       return result
@@ -295,13 +329,15 @@ export function useUploadDocumentVersion() {
     async (_mutationKey, { arg }: { arg: FileImportContext }) => {
       const result = await tipcClient.uploadDocumentVersion(arg)
 
-      // 重新验证相关数据
+      // 重新验证相关数据 - 更精确的缓存更新
       mutate('all-documents')
       if (arg.logicalDocumentId) {
         mutate(['logical-document-with-versions', arg.logicalDocumentId])
       }
       if (arg.projectId) {
         mutate(['project-documents', arg.projectId])
+        // 只重新验证特定项目的详情，而不是所有项目详情
+        mutate(['project-details', arg.projectId])
       }
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
 
@@ -351,4 +387,232 @@ export function useSelectFile() {
   return useSWRMutation('select-file', async (_mutationKey, { arg }: { arg: SelectFileInput }) => {
     return await tipcClient.selectFile(arg)
   })
+}
+
+// 逻辑文档更新和删除相关的 hooks
+export function useUpdateLogicalDocument() {
+  return useSWRMutation(
+    'logical-documents',
+    async (_key, { arg }: { arg: UpdateLogicalDocumentInput }) => {
+      const result = await tipcClient.updateLogicalDocument(arg)
+      // 重新验证相关数据
+      mutate('all-documents')
+      mutate(['logical-document', arg.id])
+      mutate(['logical-document-with-versions', arg.id])
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useDeleteLogicalDocument() {
+  return useSWRMutation(
+    'logical-documents',
+    async (_key, { arg }: { arg: DeleteLogicalDocumentInput }) => {
+      const result = await tipcClient.deleteLogicalDocument(arg)
+      // 重新验证相关数据
+      mutate('all-documents')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+// 项目资产相关的 hooks
+export function useCreateProjectAsset() {
+  return useSWRMutation(
+    'project-assets',
+    async (_key, { arg }: { arg: CreateProjectAssetInput }) => {
+      const result = await tipcClient.createProjectAsset(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
+export function useUpdateProjectAsset() {
+  return useSWRMutation(
+    'project-assets',
+    async (_key, { arg }: { arg: UpdateProjectAssetInput }) => {
+      const result = await tipcClient.updateProjectAsset(arg)
+      // 重新验证相关数据
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useDeleteProjectAsset() {
+  return useSWRMutation(
+    'project-assets',
+    async (_key, { arg }: { arg: DeleteProjectAssetInput }) => {
+      const result = await tipcClient.deleteProjectAsset(arg)
+      // 重新验证相关数据
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+// 经费追踪相关的 hooks
+export function useCreateExpenseTracking() {
+  return useSWRMutation(
+    'expense-tracking',
+    async (_key, { arg }: { arg: CreateExpenseTrackingInput }) => {
+      const result = await tipcClient.createExpenseTracking(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
+export function useUpdateExpenseTracking() {
+  return useSWRMutation(
+    'expense-tracking',
+    async (_key, { arg }: { arg: UpdateExpenseTrackingInput }) => {
+      const result = await tipcClient.updateExpenseTracking(arg)
+      // 重新验证相关数据
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useDeleteExpenseTracking() {
+  return useSWRMutation(
+    'expense-tracking',
+    async (_key, { arg }: { arg: DeleteExpenseTrackingInput }) => {
+      const result = await tipcClient.deleteExpenseTracking(arg)
+      // 重新验证相关数据
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+// 共享资源相关的 hooks
+export function useCreateSharedResource() {
+  return useSWRMutation(
+    'shared-resources',
+    async (_key, { arg }: { arg: CreateSharedResourceInput }) => {
+      const result = await tipcClient.createSharedResource(arg)
+      // 重新验证所有共享资源
+      mutate('all-shared-resources')
+      return result
+    }
+  )
+}
+
+export function useUpdateSharedResource() {
+  return useSWRMutation(
+    'shared-resources',
+    async (_key, { arg }: { arg: UpdateSharedResourceInput }) => {
+      const result = await tipcClient.updateSharedResource(arg)
+      // 重新验证相关数据
+      mutate('all-shared-resources')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useDeleteSharedResource() {
+  return useSWRMutation(
+    'shared-resources',
+    async (_key, { arg }: { arg: DeleteSharedResourceInput }) => {
+      const result = await tipcClient.deleteSharedResource(arg)
+      // 重新验证相关数据
+      mutate('all-shared-resources')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useAssociateResourceToProject() {
+  return useSWRMutation(
+    'shared-resources',
+    async (_key, { arg }: { arg: AssociateResourceToProjectInput }) => {
+      const result = await tipcClient.associateResourceToProject(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
+export function useDisassociateResourceFromProject() {
+  return useSWRMutation(
+    'shared-resources',
+    async (_key, { arg }: { arg: DisassociateResourceFromProjectInput }) => {
+      const result = await tipcClient.disassociateResourceFromProject(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
+// 赛事管理相关的 hooks
+export function useCreateCompetitionSeries() {
+  return useSWRMutation(
+    'competition-series',
+    async (_key, { arg }: { arg: CreateCompetitionSeriesInput }) => {
+      const result = await tipcClient.createCompetitionSeries(arg)
+      // 重新验证所有赛事系列
+      mutate('all-competition-series')
+      return result
+    }
+  )
+}
+
+export function useCreateCompetitionMilestone() {
+  return useSWRMutation(
+    'competition-milestones',
+    async (_key, { arg }: { arg: CreateCompetitionMilestoneInput }) => {
+      const result = await tipcClient.createCompetitionMilestone(arg)
+      // 重新验证赛事里程碑
+      mutate(['competition-milestones', arg.competitionSeriesId])
+      return result
+    }
+  )
+}
+
+export function useAddProjectToCompetition() {
+  return useSWRMutation(
+    'project-competitions',
+    async (_key, { arg }: { arg: AddProjectToCompetitionInput }) => {
+      const result = await tipcClient.addProjectToCompetition(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
+export function useUpdateProjectCompetitionStatus() {
+  return useSWRMutation(
+    'project-competitions',
+    async (_key, { arg }: { arg: UpdateProjectCompetitionStatusInput }) => {
+      const result = await tipcClient.updateProjectCompetitionStatus(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
+export function useDeleteCompetitionSeries() {
+  return useSWRMutation(
+    'competition-series',
+    async (_key, { arg }: { arg: DeleteCompetitionSeriesInput }) => {
+      const result = await tipcClient.deleteCompetitionSeries(arg)
+      // 重新验证所有赛事系列
+      mutate('all-competition-series')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
 }
