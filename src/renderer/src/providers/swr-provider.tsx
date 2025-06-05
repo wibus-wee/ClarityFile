@@ -16,7 +16,6 @@ export function SWRProvider({ children }: PropsWithChildren) {
         // 错误处理
         onError: (error, key) => {
           console.error('SWR Error:', error, 'Key:', key)
-          toast(`数据加载失败: ${error.message}`)
         },
 
         // // 成功处理
@@ -29,7 +28,7 @@ export function SWRProvider({ children }: PropsWithChildren) {
         onLoadingSlow: () => {
           // console.warn('SWR Loading Slow:', key)
           // 可以在这里显示加载慢的提示
-          toast('数据似乎加载状态很缓慢，有可能陷入了加载死循环')
+          toast.warning('数据似乎加载状态很缓慢，有可能陷入了加载死循环')
         }
       }}
     >
