@@ -1,7 +1,10 @@
 import { db } from '../../db'
-import { logicalDocuments, documentVersions, managedFiles } from '../../../db/schema'
+import { logicalDocuments, documentVersions, managedFiles, projects } from '../../../db/schema'
 import { eq, desc, and, count } from 'drizzle-orm'
 import type { SuccessResponse } from '../../types/outputs'
+import { IntelligentPathGeneratorService } from '../intelligent/intelligent-path-generator.service'
+import { FilesystemOperations } from '../../utils/filesystem-operations'
+import path from 'path'
 
 export interface CreateLogicalDocumentInput {
   projectId: string
@@ -157,6 +160,36 @@ export class LogicalDocumentService {
   static async updateLogicalDocument(input: UpdateLogicalDocumentInput) {
     const { id, ...updateData } = input
 
+    // 如果要更新名称，需要先获取旧的文档信息和项目信息
+    let oldDocument = null
+    let project = null
+    if (updateData.name) {
+      // 获取旧的逻辑文档信息
+      const oldDocResult = await db
+        .select()
+        .from(logicalDocuments)
+        .where(eq(logicalDocuments.id, id))
+        .limit(1)
+
+      if (oldDocResult.length === 0) {
+        throw new Error('逻辑文档不存在')
+      }
+      oldDocument = oldDocResult[0]
+
+      // 获取项目信息
+      const projectResult = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, oldDocument.projectId))
+        .limit(1)
+
+      if (projectResult.length === 0) {
+        throw new Error('关联的项目不存在')
+      }
+      project = projectResult[0]
+    }
+
+    // 更新数据库记录
     const result = await db
       .update(logicalDocuments)
       .set({
@@ -170,8 +203,27 @@ export class LogicalDocumentService {
       throw new Error('逻辑文档不存在')
     }
 
-    console.log(`逻辑文档 "${result[0].name}" 更新成功`)
-    return result[0]
+    const updatedDocument = result[0]
+
+    // 如果名称发生了变化，同步重命名物理文件夹
+    if (updateData.name && oldDocument && project && oldDocument.name !== updateData.name) {
+      try {
+        await this.syncDocumentFolderRename(
+          project.name,
+          project.id,
+          oldDocument.name,
+          updateData.name,
+          id
+        )
+      } catch (error) {
+        console.error('同步文档文件夹重命名失败:', error)
+        // 注意：这里我们不抛出错误，因为数据库记录已经更新成功
+        // 文件夹重命名失败不应该影响逻辑文档的更新
+      }
+    }
+
+    console.log(`逻辑文档 "${updatedDocument.name}" 更新成功`)
+    return updatedDocument
   }
 
   /**
@@ -269,6 +321,111 @@ export class LogicalDocumentService {
 
     console.log(`逻辑文档 "${result[0].name}" 的官方版本已设置`)
     return result[0]
+  }
+
+  /**
+   * 同步逻辑文档文件夹重命名
+   * 当逻辑文档名称变更时，重命名对应的物理文件夹并更新所有相关文件的路径
+   */
+  private static async syncDocumentFolderRename(
+    projectName: string,
+    projectId: string,
+    oldDocumentName: string,
+    newDocumentName: string,
+    documentId: string
+  ): Promise<void> {
+    try {
+      // 生成旧的和新的文件夹路径
+      const oldFolderPath = await IntelligentPathGeneratorService.generateDocumentPath({
+        projectName,
+        projectId,
+        logicalDocumentName: oldDocumentName
+      })
+
+      const newFolderPath = await IntelligentPathGeneratorService.generateDocumentPath({
+        projectName,
+        projectId,
+        logicalDocumentName: newDocumentName
+      })
+
+      // 检查旧文件夹是否存在
+      if (await FilesystemOperations.folderExists(oldFolderPath)) {
+        // 检查新文件夹名是否已存在
+        if (await FilesystemOperations.folderExists(newFolderPath)) {
+          throw new Error(`目标文件夹已存在: ${newFolderPath}`)
+        }
+
+        // 重命名文件夹
+        const success = await FilesystemOperations.renameFolder(oldFolderPath, newFolderPath)
+        if (!success) {
+          throw new Error('重命名文档文件夹失败')
+        }
+
+        console.log(`文档文件夹重命名成功: ${oldFolderPath} -> ${newFolderPath}`)
+
+        // 更新所有相关文件的 physical_path
+        await this.updateManagedFilesPath(documentId, oldFolderPath, newFolderPath)
+      } else {
+        console.warn(`旧文档文件夹不存在，跳过重命名: ${oldFolderPath}`)
+      }
+    } catch (error) {
+      console.error('同步文档文件夹重命名失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 更新受管文件的物理路径
+   * 当文件夹重命名后，更新数据库中所有相关文件的路径记录
+   */
+  private static async updateManagedFilesPath(
+    documentId: string,
+    oldFolderPath: string,
+    newFolderPath: string
+  ): Promise<void> {
+    try {
+      // 获取该逻辑文档下的所有文档版本
+      const versions = await db
+        .select({
+          managedFileId: documentVersions.managedFileId
+        })
+        .from(documentVersions)
+        .where(eq(documentVersions.logicalDocumentId, documentId))
+
+      // 更新每个文件的路径
+      for (const version of versions) {
+        if (version.managedFileId) {
+          // 获取当前文件信息
+          const fileResult = await db
+            .select()
+            .from(managedFiles)
+            .where(eq(managedFiles.id, version.managedFileId))
+            .limit(1)
+
+          if (fileResult.length > 0) {
+            const file = fileResult[0]
+
+            // 如果文件路径包含旧的文件夹路径，则更新
+            if (file.physicalPath && file.physicalPath.startsWith(oldFolderPath)) {
+              const newPhysicalPath = file.physicalPath.replace(oldFolderPath, newFolderPath)
+
+              await db
+                .update(managedFiles)
+                .set({
+                  physicalPath: newPhysicalPath,
+                  updatedAt: new Date()
+                })
+                .where(eq(managedFiles.id, version.managedFileId))
+
+              console.log(`文件路径已更新: ${file.physicalPath} -> ${newPhysicalPath}`)
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('更新受管文件路径失败:', error)
+      throw error
+    }
   }
 
   /**

@@ -7,6 +7,27 @@ import { useManagedFiles } from '@renderer/hooks/use-tipc'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 
+// 确保文件名包含扩展名的工具函数
+const ensureFileExtension = (fileName: string, originalFileName: string): string => {
+  // 检查文件名是否已经包含扩展名
+  const fileNameParts = fileName.split('.')
+  const hasExtension =
+    fileNameParts.length > 1 && fileNameParts[fileNameParts.length - 1].length > 0
+
+  if (hasExtension) {
+    return fileName
+  }
+
+  // 从原始文件名中提取扩展名
+  const originalParts = originalFileName.split('.')
+  if (originalParts.length > 1) {
+    const originalExt = originalParts[originalParts.length - 1]
+    return `${fileName}.${originalExt}`
+  }
+
+  return fileName
+}
+
 // 文件类型图标映射
 const getFileIcon = (fileName: string) => {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -82,7 +103,9 @@ export function RecentDocumentsSection() {
       ) : (
         <div className="space-y-3">
           {recentFiles.map((file, index) => {
-            const fileIcon = getFileIcon(file.name)
+            // 确保文件名包含扩展名
+            const displayFileName = ensureFileExtension(file.name, file.originalFileName)
+            const fileIcon = getFileIcon(displayFileName)
             const FileIcon = fileIcon.icon
 
             return (
@@ -102,7 +125,7 @@ export function RecentDocumentsSection() {
                   {/* 文件信息 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-sm truncate">{file.name}</h3>
+                      <h3 className="font-medium text-sm truncate">{displayFileName}</h3>
                       <Badge
                         variant="outline"
                         className="text-xs bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50"
@@ -112,7 +135,7 @@ export function RecentDocumentsSection() {
                     </div>
 
                     <p className="text-xs text-muted-foreground truncate mb-2">
-                      {file.physicalPath}
+                      {file.originalFileName}
                     </p>
 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">

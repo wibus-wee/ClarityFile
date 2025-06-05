@@ -9,7 +9,7 @@ import { FilesystemOperations } from '../../utils/filesystem-operations'
 export class IntelligentPathGeneratorService {
   /**
    * 生成项目文档的完整存储路径
-   * 路径格式: CLARITY_FILE_ROOT/Projects/[项目名称_ID]/[逻辑文档名称]/
+   * 路径格式: CLARITY_FILE_ROOT/Projects/[项目名称_ID]/Documents/[逻辑文档名称]/
    */
   static async generateDocumentPath(params: {
     projectName: string
@@ -27,8 +27,14 @@ export class IntelligentPathGeneratorService {
     // 清理逻辑文档名称
     const cleanDocumentName = PathUtils.sanitizeFileName(logicalDocumentName)
 
-    // 组合完整路径
-    const fullPath = path.join(rootPath, 'Projects', projectFolderName, cleanDocumentName)
+    // 组合完整路径 - 按照 DIRECTORY_DESIGN.md 规范，文档应存储在 Documents 文件夹下
+    const fullPath = path.join(
+      rootPath,
+      'Projects',
+      projectFolderName,
+      'Documents',
+      cleanDocumentName
+    )
 
     return fullPath
   }
@@ -181,16 +187,12 @@ export class IntelligentPathGeneratorService {
 
   /**
    * 生成项目文件夹名称
-   * 格式: [项目名称_简短ID后几位]
+   * 格式: [项目名称_简短ID前几位]
+   * 注意：与 PathUtils.generateProjectFolderName() 保持一致
    */
   private static generateProjectFolderName(projectName: string, projectId: string): string {
-    // 清理项目名称
-    const cleanProjectName = PathUtils.sanitizeFileName(projectName)
-
-    // 获取ID的后8位作为简短标识
-    const shortId = projectId.slice(-8)
-
-    return `${cleanProjectName}_${shortId}`
+    // 直接使用 PathUtils 的方法确保一致性
+    return PathUtils.generateProjectFolderName(projectName, projectId)
   }
 
   /**
