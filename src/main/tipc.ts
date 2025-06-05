@@ -13,6 +13,7 @@ import { projectAssetsRouter } from './routers/project-assets.router'
 import { expenseTrackingRouter } from './routers/expense-tracking.router'
 import { sharedResourcesRouter } from './routers/shared-resources.router'
 import { competitionRouter } from './routers/competition.router'
+import { fileAccessRouter } from './routers/file-access.router'
 
 const t = tipc.create()
 
@@ -57,7 +58,10 @@ export const router = {
   ...sharedResourcesRouter(t),
 
   // 赛事管理相关路由
-  ...competitionRouter(t)
+  ...competitionRouter(t),
+
+  // 文件访问相关路由
+  ...fileAccessRouter(t)
 }
 
 export type Router = typeof router

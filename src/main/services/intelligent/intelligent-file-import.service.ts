@@ -7,6 +7,10 @@ import { LogicalDocumentService } from '../document/logical-document.service'
 import { DocumentVersionService } from '../document/document-version.service'
 import { FilesystemOperations } from '../../utils/filesystem-operations'
 import { PathUtils } from '../../utils/path-utils'
+import { MimeTypeUtils } from '../../utils/mime-type-utils'
+import { db } from '../../db'
+import { projects } from '../../../db/schema'
+import { eq } from 'drizzle-orm'
 
 const fileImportContextSchema = z
   .object({
@@ -71,13 +75,6 @@ const fileImportContextSchema = z
             path: ['projectId']
           })
         }
-        if (!data.projectName) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '项目名称不能为空',
-            path: ['projectName']
-          })
-        }
         if (!data.logicalDocumentName) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -109,13 +106,6 @@ const fileImportContextSchema = z
             path: ['projectId']
           })
         }
-        if (!data.projectName) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '项目名称不能为空',
-            path: ['projectName']
-          })
-        }
         if (!data.assetType) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -138,13 +128,6 @@ const fileImportContextSchema = z
             code: z.ZodIssueCode.custom,
             message: '项目ID不能为空',
             path: ['projectId']
-          })
-        }
-        if (!data.projectName) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '项目名称不能为空',
-            path: ['projectName']
           })
         }
         if (!data.expenseDescription) {
@@ -316,7 +299,7 @@ export class IntelligentFileImportService {
         name: context.displayName || context.originalFileName,
         originalFileName: context.originalFileName,
         physicalPath: finalPath,
-        mimeType: this.getMimeType(finalPath),
+        mimeType: MimeTypeUtils.getMimeType(finalPath),
         fileSizeBytes: fileStats.size
       })
 
@@ -435,6 +418,19 @@ export class IntelligentFileImportService {
   }
 
   /**
+   * 通过项目ID获取项目信息
+   */
+  private static async getProjectById(projectId: string) {
+    const result = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1)
+
+    if (result.length === 0) {
+      throw new Error(`项目不存在: ${projectId}`)
+    }
+
+    return result[0]
+  }
+
+  /**
    * 验证导入上下文（使用 Zod 进行验证）
    */
   private static validateImportContext(context: FileImportContext): {
@@ -517,22 +513,28 @@ export class IntelligentFileImportService {
   private static async generateTargetPath(context: FileImportContext): Promise<string> {
     switch (context.importType) {
       case 'document':
+        // 通过 projectId 查询项目名称
+        const projectForDoc = await this.getProjectById(context.projectId!)
         return await IntelligentPathGeneratorService.generateDocumentPath({
-          projectName: context.projectName!,
+          projectName: projectForDoc.name,
           projectId: context.projectId!,
           logicalDocumentName: context.logicalDocumentName!
         })
 
       case 'asset':
+        // 通过 projectId 查询项目名称
+        const projectForAsset = await this.getProjectById(context.projectId!)
         return await IntelligentPathGeneratorService.generateProjectAssetPath({
-          projectName: context.projectName!,
+          projectName: projectForAsset.name,
           projectId: context.projectId!,
           assetType: context.assetType!
         })
 
       case 'expense':
+        // 通过 projectId 查询项目名称
+        const projectForExpense = await this.getProjectById(context.projectId!)
         return await IntelligentPathGeneratorService.generateProjectExpensePath({
-          projectName: context.projectName!,
+          projectName: projectForExpense.name,
           projectId: context.projectId!,
           expenseDescription: context.expenseDescription!,
           applicantName: context.applicantName
@@ -671,44 +673,12 @@ export class IntelligentFileImportService {
    */
   static isFileTypeSupported(fileName: string, importType: string): boolean {
     const supportedTypes = this.getSupportedFileTypes()
-    const fileExt = path.extname(fileName).toLowerCase()
-
     const typesForImport = supportedTypes[importType]
+
     if (!typesForImport) {
       return false
     }
 
-    return typesForImport.includes('.*') || typesForImport.includes(fileExt)
-  }
-
-  /**
-   * 获取文件MIME类型
-   * 集中在此服务中，避免重复实现
-   */
-  private static getMimeType(filePath: string): string {
-    const ext = path.extname(filePath).toLowerCase()
-    const mimeTypes: Record<string, string> = {
-      '.pdf': 'application/pdf',
-      '.doc': 'application/msword',
-      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      '.ppt': 'application/vnd.ms-powerpoint',
-      '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      '.xls': 'application/vnd.ms-excel',
-      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      '.txt': 'text/plain',
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.mp4': 'video/mp4',
-      '.mov': 'video/quicktime',
-      '.mp3': 'audio/mpeg',
-      '.wav': 'audio/wav',
-      '.zip': 'application/zip',
-      '.rar': 'application/x-rar-compressed'
-    }
-
-    return mimeTypes[ext] || 'application/octet-stream'
+    return MimeTypeUtils.isFileTypeSupported(fileName, typesForImport)
   }
 }
