@@ -7,7 +7,8 @@ import type {
   UpdateProjectCompetitionStatusInput,
   DeleteCompetitionSeriesInput,
   GetProjectCompetitionsInput,
-  GetCompetitionMilestonesInput
+  GetCompetitionMilestonesInput,
+  RemoveProjectFromCompetitionInput
 } from '../types/inputs'
 
 export function competitionRouter(t: ITipc) {
@@ -57,6 +58,13 @@ export function competitionRouter(t: ITipc) {
       .input<UpdateProjectCompetitionStatusInput>()
       .action(async ({ input }) => {
         return await CompetitionService.updateProjectCompetitionStatus(input)
+      }),
+
+    // 移除项目与赛事的关联
+    removeProjectFromCompetition: t.procedure
+      .input<RemoveProjectFromCompetitionInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.removeProjectFromCompetition(input)
       }),
 
     // 删除赛事系列

@@ -237,6 +237,11 @@ export interface GetProjectCompetitionsInput {
   projectId: string
 }
 
+export interface RemoveProjectFromCompetitionInput {
+  projectId: string
+  competitionMilestoneId: string
+}
+
 export interface GetCompetitionMilestonesInput {
   seriesId: string
 }

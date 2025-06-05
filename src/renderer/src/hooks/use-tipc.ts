@@ -26,6 +26,7 @@ import type {
   CreateCompetitionMilestoneInput,
   AddProjectToCompetitionInput,
   UpdateProjectCompetitionStatusInput,
+  RemoveProjectFromCompetitionInput,
   DeleteCompetitionSeriesInput,
   SetSettingInput,
   SetSettingsInput,
@@ -556,6 +557,17 @@ export function useDisassociateResourceFromProject() {
 }
 
 // 赛事管理相关的 hooks
+export function useGetAllCompetitionSeries() {
+  return useSWR('all-competition-series', () => tipcClient.getAllCompetitionSeries())
+}
+
+export function useGetCompetitionMilestones(seriesId: string, options?: { enabled?: boolean }) {
+  return useSWR(
+    seriesId && options?.enabled !== false ? ['competition-milestones', seriesId] : null,
+    () => (seriesId ? tipcClient.getCompetitionMilestones({ seriesId }) : null)
+  )
+}
+
 export function useCreateCompetitionSeries() {
   return useSWRMutation(
     'competition-series',
@@ -604,6 +616,18 @@ export function useUpdateProjectCompetitionStatus() {
   )
 }
 
+export function useRemoveProjectFromCompetition() {
+  return useSWRMutation(
+    'project-competitions',
+    async (_key, { arg }: { arg: RemoveProjectFromCompetitionInput }) => {
+      const result = await tipcClient.removeProjectFromCompetition(arg)
+      // 重新验证项目详情
+      mutate(['project-details', arg.projectId])
+      return result
+    }
+  )
+}
+
 export function useDeleteCompetitionSeries() {
   return useSWRMutation(
     'competition-series',
@@ -614,5 +638,24 @@ export function useDeleteCompetitionSeries() {
       mutate((key) => Array.isArray(key) && key[0] === 'project-details')
       return result
     }
+  )
+}
+
+// 文件访问相关的 hooks
+export function useGenerateFileDataUrl() {
+  return useSWRMutation(['file-data-url'], (_, { arg }: { arg: { filePath: string } }) =>
+    tipcClient.generateFileDataUrl(arg)
+  )
+}
+
+export function useGetFileData() {
+  return useSWRMutation(['file-data'], (_, { arg }: { arg: { filePath: string } }) =>
+    tipcClient.getFileData(arg)
+  )
+}
+
+export function useIsImageFile() {
+  return useSWRMutation(['is-image-file'], (_, { arg }: { arg: { filePath: string } }) =>
+    tipcClient.isImageFile(arg)
   )
 }

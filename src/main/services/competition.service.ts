@@ -184,6 +184,24 @@ export class CompetitionService {
   }
 
   /**
+   * 移除项目与赛事的关联
+   */
+  static async removeProjectFromCompetition(input: {
+    projectId: string
+    competitionMilestoneId: string
+  }) {
+    await db
+      .delete(projectCompetitionMilestones)
+      .where(
+        eq(projectCompetitionMilestones.projectId, input.projectId) &&
+          eq(projectCompetitionMilestones.competitionMilestoneId, input.competitionMilestoneId)
+      )
+
+    console.log(`项目已从赛事中移除`)
+    return { success: true }
+  }
+
+  /**
    * 删除赛事系列
    */
   static async deleteCompetitionSeries(id: string) {

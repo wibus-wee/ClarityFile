@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import { 
-  Trophy, 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  Trophy,
+  Plus,
+  Search,
+  Filter,
   Calendar,
   FileText,
   Download,
@@ -33,6 +33,10 @@ import {
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
+import { AddCompetitionDrawer } from './drawers/add-competition-drawer'
+import { EditCompetitionStatusDialog } from './dialogs/edit-competition-status-dialog'
+import { CompetitionDetailsDialog } from './dialogs/competition-details-dialog'
+import { RemoveCompetitionDialog } from './dialogs/remove-competition-dialog'
 import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
 
 interface CompetitionsTabProps {
@@ -42,17 +46,59 @@ interface CompetitionsTabProps {
 export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
   const { competitions } = projectDetails
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'series' | 'level' | 'participated' | 'deadline'>('participated')
+  const [sortBy, setSortBy] = useState<'series' | 'level' | 'participated' | 'deadline'>(
+    'participated'
+  )
   const [filterStatus, setFilterStatus] = useState<string>('all')
 
+  // Dialog 和 Drawer 状态
+  const [addCompetitionOpen, setAddCompetitionOpen] = useState(false)
+  const [editStatusOpen, setEditStatusOpen] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [removeOpen, setRemoveOpen] = useState(false)
+  const [selectedCompetition, setSelectedCompetition] = useState<(typeof competitions)[0] | null>(
+    null
+  )
+
+  // 事件处理函数
+  const handleSuccess = () => {
+    // 刷新数据的逻辑会通过 SWR 自动处理
+  }
+
+  const handleEditStatus = (competition: (typeof competitions)[0]) => {
+    setSelectedCompetition(competition)
+    setEditStatusOpen(true)
+  }
+
+  const handleViewDetails = (competition: (typeof competitions)[0]) => {
+    setSelectedCompetition(competition)
+    setDetailsOpen(true)
+  }
+
+  const handleRemoveCompetition = (competition: (typeof competitions)[0]) => {
+    setSelectedCompetition(competition)
+    setRemoveOpen(true)
+  }
+
+  const handleDownloadNotification = (competition: (typeof competitions)[0]) => {
+    if (competition.notificationPhysicalPath) {
+      // 在 Electron 中，我们可以使用 shell.openPath 来打开文件
+      // 这里暂时使用 alert 提示，实际应该调用后端接口
+      alert(`下载文件: ${competition.notificationOriginalFileName}`)
+    }
+  }
+
   // 获取所有状态
-  const statuses = Array.from(new Set(competitions.map(comp => comp.statusInMilestone).filter(Boolean)))
+  const statuses = Array.from(
+    new Set(competitions.map((comp) => comp.statusInMilestone).filter(Boolean))
+  )
 
   // 过滤和排序赛事
   const filteredCompetitions = competitions
-    .filter(comp => {
-      const matchesSearch = comp.seriesName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           comp.levelName.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter((comp) => {
+      const matchesSearch =
+        comp.seriesName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        comp.levelName.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = filterStatus === 'all' || comp.statusInMilestone === filterStatus
       return matchesSearch && matchesStatus
     })
@@ -76,7 +122,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
   const getStatusColor = (status: string | null) => {
     if (!status) return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-    
+
     switch (status.toLowerCase()) {
       case 'submitted':
       case '已提交':
@@ -98,7 +144,9 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
   const isDeadlineApproaching = (deadline: Date | null) => {
     if (!deadline) return false
     const now = new Date()
-    const diffDays = Math.ceil((new Date(deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const diffDays = Math.ceil(
+      (new Date(deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    )
     return diffDays <= 7 && diffDays >= 0
   }
 
@@ -121,7 +169,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
               className="pl-10"
             />
           </div>
-          
+
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-32">
               <Filter className="w-4 h-4 mr-2" />
@@ -129,8 +177,10 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部状态</SelectItem>
-              {statuses.map(status => (
-                <SelectItem key={status} value={status!}>{status}</SelectItem>
+              {statuses.map((status) => (
+                <SelectItem key={status} value={status!}>
+                  {status}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -149,7 +199,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button>
+          <Button onClick={() => setAddCompetitionOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             关联到新赛事
           </Button>
@@ -180,12 +230,14 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                         {competition.levelName}
                       </Badge>
                       {competition.statusInMilestone && (
-                        <Badge className={cn('text-xs', getStatusColor(competition.statusInMilestone))}>
+                        <Badge
+                          className={cn('text-xs', getStatusColor(competition.statusInMilestone))}
+                        >
                           {competition.statusInMilestone}
                         </Badge>
                       )}
                     </div>
-                    
+
                     {competition.seriesNotes && (
                       <p className="text-muted-foreground mb-3">{competition.seriesNotes}</p>
                     )}
@@ -196,33 +248,45 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                         <span className="text-muted-foreground">参与时间：</span>
                         <span>{new Date(competition.participatedAt).toLocaleDateString()}</span>
                       </div>
-                      
+
                       {competition.dueDateMilestone && (
                         <div className="flex items-center gap-2">
-                          <Clock className={cn(
-                            "w-4 h-4",
-                            isOverdue(competition.dueDateMilestone) 
-                              ? "text-red-500" 
-                              : isDeadlineApproaching(competition.dueDateMilestone)
-                                ? "text-yellow-500"
-                                : "text-muted-foreground"
-                          )} />
+                          <Clock
+                            className={cn(
+                              'w-4 h-4',
+                              isOverdue(competition.dueDateMilestone)
+                                ? 'text-red-500'
+                                : isDeadlineApproaching(competition.dueDateMilestone)
+                                  ? 'text-yellow-500'
+                                  : 'text-muted-foreground'
+                            )}
+                          />
                           <span className="text-muted-foreground">截止时间：</span>
-                          <span className={cn(
-                            isOverdue(competition.dueDateMilestone) 
-                              ? "text-red-600 font-medium" 
-                              : isDeadlineApproaching(competition.dueDateMilestone)
-                                ? "text-yellow-600 font-medium"
-                                : ""
-                          )}>
+                          <span
+                            className={cn(
+                              isOverdue(competition.dueDateMilestone)
+                                ? 'text-red-600 font-medium'
+                                : isDeadlineApproaching(competition.dueDateMilestone)
+                                  ? 'text-yellow-600 font-medium'
+                                  : ''
+                            )}
+                          >
                             {new Date(competition.dueDateMilestone).toLocaleDateString()}
                           </span>
                           {isOverdue(competition.dueDateMilestone) && (
-                            <Badge variant="destructive" className="text-xs ml-1">已逾期</Badge>
+                            <Badge variant="destructive" className="text-xs ml-1">
+                              已逾期
+                            </Badge>
                           )}
-                          {isDeadlineApproaching(competition.dueDateMilestone) && !isOverdue(competition.dueDateMilestone) && (
-                            <Badge variant="secondary" className="text-xs ml-1 bg-yellow-100 text-yellow-800">即将截止</Badge>
-                          )}
+                          {isDeadlineApproaching(competition.dueDateMilestone) &&
+                            !isOverdue(competition.dueDateMilestone) && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs ml-1 bg-yellow-100 text-yellow-800"
+                              >
+                                即将截止
+                              </Badge>
+                            )}
                         </div>
                       )}
 
@@ -248,7 +312,12 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                         <span className="text-sm text-blue-800 dark:text-blue-300">
                           通知文件：{competition.notificationOriginalFileName}
                         </span>
-                        <Button variant="ghost" size="sm" className="ml-auto">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-auto"
+                          onClick={() => handleDownloadNotification(competition)}
+                        >
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -256,11 +325,15 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditStatus(competition)}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       编辑状态
                     </Button>
-                    
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -268,7 +341,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDetails(competition)}>
                           <Eye className="w-4 h-4 mr-2" />
                           查看详情
                         </DropdownMenuItem>
@@ -277,13 +350,16 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                           编辑信息
                         </DropdownMenuItem>
                         {competition.notificationFileName && (
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDownloadNotification(competition)}>
                             <Download className="w-4 h-4 mr-2" />
                             下载通知
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleRemoveCompetition(competition)}
+                        >
                           取消关联
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -300,13 +376,55 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
             <p className="text-muted-foreground mb-4">
               {searchQuery || filterStatus !== 'all' ? '没有找到匹配的赛事' : '开始关联项目到赛事'}
             </p>
-            <Button>
+            <Button onClick={() => setAddCompetitionOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               关联到新赛事
             </Button>
           </div>
         )}
       </div>
+
+      {/* Dialog 和 Drawer 组件 */}
+      <AddCompetitionDrawer
+        projectId={projectDetails.id}
+        open={addCompetitionOpen}
+        onOpenChange={setAddCompetitionOpen}
+        onSuccess={handleSuccess}
+      />
+
+      <EditCompetitionStatusDialog
+        projectId={projectDetails.id}
+        competitionMilestoneId={selectedCompetition?.milestoneId || ''}
+        currentStatus={selectedCompetition?.statusInMilestone || null}
+        competitionName={selectedCompetition?.seriesName || ''}
+        levelName={selectedCompetition?.levelName || ''}
+        open={editStatusOpen}
+        onOpenChange={setEditStatusOpen}
+        onSuccess={handleSuccess}
+      />
+
+      <CompetitionDetailsDialog
+        competition={selectedCompetition}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+      />
+
+      <RemoveCompetitionDialog
+        projectId={projectDetails.id}
+        competition={
+          selectedCompetition
+            ? {
+                milestoneId: selectedCompetition.milestoneId,
+                seriesName: selectedCompetition.seriesName,
+                levelName: selectedCompetition.levelName,
+                statusInMilestone: selectedCompetition.statusInMilestone
+              }
+            : null
+        }
+        open={removeOpen}
+        onOpenChange={setRemoveOpen}
+        onSuccess={handleSuccess}
+      />
     </div>
   )
 }
