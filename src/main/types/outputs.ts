@@ -222,3 +222,43 @@ export interface LogicalDocumentWithVersionsOutput {
   updatedAt: Date
   versions: DocumentVersionOutput[]
 }
+
+// 赛事中心相关输出类型
+export interface CompetitionSeriesWithStatsOutput {
+  id: string
+  name: string
+  notes: string | null
+  createdAt: Date
+  updatedAt: Date
+  milestoneCount: number
+}
+
+export interface CompetitionOverviewOutput {
+  seriesWithStats: CompetitionSeriesWithStatsOutput[]
+  totalStats: {
+    totalSeries: number
+    totalMilestones: number
+    totalParticipations: number
+  }
+}
+
+export interface MilestoneWithProjectsOutput {
+  id: string
+  levelName: string
+  dueDate: Date | null
+  notes: string | null
+  seriesId: string
+  seriesName: string
+  participatingProjectsCount: number
+}
+
+export interface CompetitionTimelineItemOutput {
+  id: string
+  type: string
+  title: string
+  date: Date | null
+  description: string | null
+  seriesId: string
+  seriesName: string
+  participatingProjectsCount: number
+}

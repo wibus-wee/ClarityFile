@@ -205,15 +205,15 @@ export interface GetProjectSharedResourcesInput {
 // 赛事管理相关输入类型
 export interface CreateCompetitionSeriesInput {
   name: string
-  description?: string
+  notes?: string
   customFields?: unknown
 }
 
 export interface CreateCompetitionMilestoneInput {
   competitionSeriesId: string
   levelName: string
-  dueDate?: Date
-  description?: string
+  dueDateMilestone?: Date
+  notes?: string
   notificationManagedFileId?: string
   customFields?: unknown
 }
@@ -245,6 +245,33 @@ export interface RemoveProjectFromCompetitionInput {
 
 export interface GetCompetitionMilestonesInput {
   seriesId: string
+}
+
+export interface UpdateCompetitionSeriesInput {
+  id: string
+  name?: string
+  notes?: string
+}
+
+export interface UpdateCompetitionMilestoneInput {
+  id: string
+  levelName?: string
+  dueDateMilestone?: Date
+  notes?: string
+  notificationManagedFileId?: string
+}
+
+export interface DeleteCompetitionMilestoneInput {
+  id: string
+}
+
+export interface GetUpcomingMilestonesInput {
+  limit?: number
+}
+
+export interface GetMilestonesByDateRangeInput {
+  startDate: Date
+  endDate: Date
 }
 
 // 设置相关输入类型

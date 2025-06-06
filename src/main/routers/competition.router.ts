@@ -8,7 +8,12 @@ import type {
   DeleteCompetitionSeriesInput,
   GetProjectCompetitionsInput,
   GetCompetitionMilestonesInput,
-  RemoveProjectFromCompetitionInput
+  RemoveProjectFromCompetitionInput,
+  UpdateCompetitionSeriesInput,
+  UpdateCompetitionMilestoneInput,
+  DeleteCompetitionMilestoneInput,
+  GetUpcomingMilestonesInput,
+  GetMilestonesByDateRangeInput
 } from '../types/inputs'
 
 export function competitionRouter(t: ITipc) {
@@ -73,6 +78,51 @@ export function competitionRouter(t: ITipc) {
       .action(async ({ input }) => {
         return await CompetitionService.deleteCompetitionSeries(input.id)
       }),
+
+    // 更新赛事系列
+    updateCompetitionSeries: t.procedure
+      .input<UpdateCompetitionSeriesInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.updateCompetitionSeries(input.id, input)
+      }),
+
+    // 更新赛事里程碑
+    updateCompetitionMilestone: t.procedure
+      .input<UpdateCompetitionMilestoneInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.updateCompetitionMilestone(input.id, input)
+      }),
+
+    // 删除赛事里程碑
+    deleteCompetitionMilestone: t.procedure
+      .input<DeleteCompetitionMilestoneInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.deleteCompetitionMilestone(input.id)
+      }),
+
+    // 获取赛事中心概览
+    getCompetitionOverview: t.procedure.action(async () => {
+      return await CompetitionService.getCompetitionOverview()
+    }),
+
+    // 获取即将到来的里程碑
+    getUpcomingMilestones: t.procedure
+      .input<GetUpcomingMilestonesInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.getUpcomingMilestones(input.limit)
+      }),
+
+    // 按日期范围获取里程碑
+    getMilestonesByDateRange: t.procedure
+      .input<GetMilestonesByDateRangeInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.getMilestonesByDateRange(input.startDate, input.endDate)
+      }),
+
+    // 获取赛事时间轴
+    getCompetitionTimeline: t.procedure.action(async () => {
+      return await CompetitionService.getCompetitionTimeline()
+    }),
 
     // 获取赛事统计信息
     getCompetitionStatistics: t.procedure.action(async () => {
