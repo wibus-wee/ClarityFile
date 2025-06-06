@@ -28,6 +28,9 @@ import type {
   UpdateProjectCompetitionStatusInput,
   RemoveProjectFromCompetitionInput,
   DeleteCompetitionSeriesInput,
+  UpdateCompetitionSeriesInput,
+  UpdateCompetitionMilestoneInput,
+  DeleteCompetitionMilestoneInput,
   SetSettingInput,
   SetSettingsInput,
   DeleteSettingInput,
@@ -635,6 +638,78 @@ export function useDeleteCompetitionSeries() {
       const result = await tipcClient.deleteCompetitionSeries(arg)
       // 重新验证所有赛事系列
       mutate('all-competition-series')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+// 赛事中心专用的 hooks
+export function useCompetitionOverview() {
+  return useSWR('competition-overview', () => tipcClient.getCompetitionOverview())
+}
+
+export function useUpcomingMilestones(limit?: number) {
+  return useSWR(['upcoming-milestones', limit], () =>
+    tipcClient.getUpcomingMilestones({ limit: limit || 10 })
+  )
+}
+
+export function useMilestonesByDateRange(
+  startDate: Date,
+  endDate: Date,
+  options?: { enabled?: boolean }
+) {
+  return useSWR(
+    options?.enabled !== false
+      ? ['milestones-by-date-range', startDate.toISOString(), endDate.toISOString()]
+      : null,
+    () => tipcClient.getMilestonesByDateRange({ startDate, endDate })
+  )
+}
+
+export function useCompetitionTimeline() {
+  return useSWR('competition-timeline', () => tipcClient.getCompetitionTimeline())
+}
+
+export function useUpdateCompetitionSeries() {
+  return useSWRMutation(
+    'competition-series',
+    async (_key, { arg }: { arg: UpdateCompetitionSeriesInput }) => {
+      const result = await tipcClient.updateCompetitionSeries(arg)
+      // 重新验证所有赛事系列和概览
+      mutate('all-competition-series')
+      mutate('competition-overview')
+      return result
+    }
+  )
+}
+
+export function useUpdateCompetitionMilestone() {
+  return useSWRMutation(
+    'competition-milestones',
+    async (_key, { arg }: { arg: UpdateCompetitionMilestoneInput }) => {
+      const result = await tipcClient.updateCompetitionMilestone(arg)
+      // 重新验证相关数据
+      mutate((key) => Array.isArray(key) && key[0] === 'competition-milestones')
+      mutate('competition-overview')
+      mutate((key) => Array.isArray(key) && key[0] === 'upcoming-milestones')
+      mutate('competition-timeline')
+      return result
+    }
+  )
+}
+
+export function useDeleteCompetitionMilestone() {
+  return useSWRMutation(
+    'competition-milestones',
+    async (_key, { arg }: { arg: DeleteCompetitionMilestoneInput }) => {
+      const result = await tipcClient.deleteCompetitionMilestone(arg)
+      // 重新验证相关数据
+      mutate((key) => Array.isArray(key) && key[0] === 'competition-milestones')
+      mutate('competition-overview')
+      mutate((key) => Array.isArray(key) && key[0] === 'upcoming-milestones')
+      mutate('competition-timeline')
       mutate((key) => Array.isArray(key) && key[0] === 'project-details')
       return result
     }

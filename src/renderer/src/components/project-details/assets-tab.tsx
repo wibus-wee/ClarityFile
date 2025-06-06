@@ -32,7 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
-import { cn } from '@renderer/lib/utils'
+import { cn, formatFileSize } from '@renderer/lib/utils'
 import { SafeImage } from '@renderer/components/ui/safe-image'
 import { CreateAssetDrawer } from './drawers/create-asset-drawer'
 import { EditAssetDrawer } from './drawers/edit-asset-drawer'
@@ -128,13 +128,6 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
           return 0
       }
     })
-
-  const formatFileSize = (bytes: number | null) => {
-    if (!bytes) return '未知大小'
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
 
   const isCurrentCover = (assetId: string) => {
     return project.currentCoverAssetId === assetId

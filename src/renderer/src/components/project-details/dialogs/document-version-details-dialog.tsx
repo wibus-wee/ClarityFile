@@ -9,6 +9,7 @@ import {
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
+import { formatFileSize } from '@renderer/lib/utils'
 import { FileText, Calendar, Download, HardDrive, FileType } from 'lucide-react'
 import type { DocumentVersionOutput } from '../../../../../main/types/outputs'
 
@@ -51,9 +52,7 @@ export function DocumentVersionDetailsDialog({
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-medium text-lg">{version.versionTag}</span>
-              {version.isGenericVersion && (
-                <Badge variant="secondary">通用版本</Badge>
-              )}
+              {version.isGenericVersion && <Badge variant="secondary">通用版本</Badge>}
             </div>
 
             {version.competitionProjectName && (
@@ -71,7 +70,7 @@ export function DocumentVersionDetailsDialog({
           {/* 文件信息 */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium">文件信息</h4>
-            
+
             <div className="grid grid-cols-1 gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <FileType className="w-4 h-4 text-muted-foreground" />
@@ -83,7 +82,7 @@ export function DocumentVersionDetailsDialog({
                 <div className="flex items-center gap-2">
                   <HardDrive className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">文件大小：</span>
-                  <span>{(version.fileSizeBytes / 1024).toFixed(1)} KB</span>
+                  <span>{formatFileSize(version.fileSizeBytes)}</span>
                 </div>
               )}
 

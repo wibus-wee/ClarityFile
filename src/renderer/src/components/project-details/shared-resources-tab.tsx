@@ -32,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
+import { formatFileSize } from '@renderer/lib/utils'
 
 import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
 
@@ -74,13 +75,6 @@ export function SharedResourcesTab({ projectDetails }: SharedResourcesTabProps) 
           return 0
       }
     })
-
-  const formatFileSize = (bytes: number | null) => {
-    if (!bytes) return '未知大小'
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
 
   return (
     <div className="space-y-6">

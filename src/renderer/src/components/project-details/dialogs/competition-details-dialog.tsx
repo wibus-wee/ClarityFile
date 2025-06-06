@@ -8,6 +8,7 @@ import {
 } from '@renderer/components/ui/dialog'
 import { Badge } from '@renderer/components/ui/badge'
 import { Separator } from '@renderer/components/ui/separator'
+import { formatFileSize } from '@renderer/lib/utils'
 import { Trophy, Clock, FileText, Target, Info } from 'lucide-react'
 
 interface CompetitionDetailsDialogProps {
@@ -61,13 +62,6 @@ export function CompetitionDetailsDialog({
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200'
     }
-  }
-
-  const formatFileSize = (bytes: number | null) => {
-    if (!bytes) return '未知大小'
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
   }
 
   return (

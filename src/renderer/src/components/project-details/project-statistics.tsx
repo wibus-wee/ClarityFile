@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { FileText, Image, DollarSign, Trophy, TrendingUp, Share2, Tag } from 'lucide-react'
-import { cn } from '@renderer/lib/utils'
+import { cn, formatFileSize } from '@renderer/lib/utils'
 import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
 
 interface ProjectStatisticsProps {
@@ -34,15 +34,6 @@ export function ProjectStatistics({ projectDetails, className }: ProjectStatisti
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
-  }
-
-  // 格式化文件大小
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
   // 计算总文件大小

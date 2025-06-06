@@ -10,6 +10,7 @@ import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { SafeImage } from '@renderer/components/ui/safe-image'
+import { formatFileSize } from '@renderer/lib/utils'
 import { Image, Calendar, Download, HardDrive, FileType, Star } from 'lucide-react'
 
 interface AssetDetailsDialogProps {
@@ -29,13 +30,6 @@ export function AssetDetailsDialog({
     if (!asset) return
     // TODO: 实现下载功能
     console.log('下载资产:', asset.id)
-  }
-
-  const formatFileSize = (bytes: number | null) => {
-    if (!bytes) return '未知大小'
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
   if (!asset) return null
