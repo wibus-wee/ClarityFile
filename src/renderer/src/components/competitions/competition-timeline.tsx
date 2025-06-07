@@ -51,10 +51,10 @@ function TimelineItem({
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className="relative"
     >
       {/* 时间轴线条 */}
@@ -74,8 +74,9 @@ function TimelineItem({
       <div className="ml-12 pb-8">
         <motion.div
           whileHover={{ y: -1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           className={cn(
-            'rounded-xl border bg-background/50 backdrop-blur-sm p-6 transition-all duration-200',
+            'rounded-xl border bg-background/50 backdrop-blur-sm p-6',
             'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20',
             isPast && 'opacity-75',
             isToday && 'ring-2 ring-primary/20 bg-primary/5'
@@ -157,11 +158,14 @@ function TimelineItem({
           <AnimatePresence>
             {isExpanded && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="mt-4 ml-11 pt-4 border-t border-border"
+                initial={{ opacity: 0, height: 0, paddingTop: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: 'auto', paddingTop: 16, marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, paddingTop: 0, marginTop: 0 }}
+                transition={{
+                  duration: 0.3,
+                  ease: [0.4, 0.0, 0.2, 1]
+                }}
+                className="ml-11 border-t border-border overflow-hidden"
               >
                 {item.description && (
                   <div className="space-y-2">
@@ -365,7 +369,7 @@ export function CompetitionTimeline({ searchQuery }: CompetitionTimelineProps) {
       {/* 时间轴 */}
       {filteredAndSortedItems.length > 0 ? (
         <div className="relative">
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {filteredAndSortedItems.map((item) => (
               <TimelineItem
                 key={item.id}

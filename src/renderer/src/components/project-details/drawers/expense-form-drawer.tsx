@@ -78,6 +78,13 @@ interface ExpenseFormDrawerProps {
     reimbursementDate?: Date | null
     notes?: string | null
     projectId: string
+    // 发票文件信息
+    invoiceFileName?: string | null
+    invoiceOriginalFileName?: string | null
+    invoicePhysicalPath?: string | null
+    invoiceMimeType?: string | null
+    invoiceFileSizeBytes?: number | null
+    invoiceUploadedAt?: Date | null
   } | null
   onSuccess?: () => void
 }
@@ -90,8 +97,12 @@ export function ExpenseFormDrawer({
   expense,
   onSuccess
 }: ExpenseFormDrawerProps) {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
-  const [currentInvoiceFile, setCurrentInvoiceFile] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<string>('')
+  const [existingInvoiceFile, setExistingInvoiceFile] = useState<{
+    fileName: string
+    originalFileName: string
+    filePath: string
+  } | null>(null)
 
   const { trigger: createExpense, isMutating: isCreating } = useCreateExpenseTracking()
   const { trigger: updateExpense, isMutating: isUpdating } = useUpdateExpenseTracking()
@@ -130,6 +141,20 @@ export function ExpenseFormDrawer({
           : undefined,
         notes: expense.notes || ''
       })
+
+      // 设置已存在的发票文件信息
+      if (expense.invoiceFileName && expense.invoicePhysicalPath) {
+        setExistingInvoiceFile({
+          fileName: expense.invoiceFileName,
+          originalFileName: expense.invoiceOriginalFileName || expense.invoiceFileName,
+          filePath: expense.invoicePhysicalPath
+        })
+      } else {
+        setExistingInvoiceFile(null)
+      }
+
+      // 清空新选择的文件
+      setSelectedFile('')
     } else if (mode === 'create') {
       form.reset({
         projectId: projectId || '',
@@ -141,6 +166,8 @@ export function ExpenseFormDrawer({
         reimbursementDate: undefined,
         notes: ''
       })
+      setExistingInvoiceFile(null)
+      setSelectedFile('')
     }
   }, [mode, expense, projectId, form])
 
@@ -196,10 +223,10 @@ export function ExpenseFormDrawer({
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
-      let invoiceManagedFileId: string | undefined
+      let invoiceManagedFileId: string | null = null
 
       // 如果选择了发票文件，先上传
-      if (selectedFile) {
+      if (selectedFile && selectedFile.trim()) {
         invoiceManagedFileId = await uploadInvoiceFile(selectedFile, data)
       }
 
@@ -239,7 +266,7 @@ export function ExpenseFormDrawer({
       // 重置表单和文件选择
       if (mode === 'create') {
         form.reset()
-        setSelectedFile(null)
+        setSelectedFile('')
       }
     } catch (error) {
       toast.error(mode === 'create' ? '创建失败，请重试' : '更新失败，请重试')
@@ -472,24 +499,69 @@ export function ExpenseFormDrawer({
               {/* 发票文件上传 */}
               <div className="space-y-2">
                 <Label>发票文件</Label>
-                {selectedFile ? (
-                  <div className="border rounded-lg p-4 bg-muted/20">
+
+                {/* 显示已存在的发票文件 */}
+                {existingInvoiceFile && !selectedFile && (
+                  <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-green-600" />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {existingInvoiceFile.originalFileName}
+                          </span>
+                          <span className="text-xs text-muted-foreground">已上传的发票文件</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSelectFile}
+                        >
+                          更换文件
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setExistingInvoiceFile(null)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 显示新选择的文件 */}
+                {selectedFile && selectedFile.trim() && (
+                  <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm font-medium">{selectedFile.split('/').pop()}</span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {selectedFile.split('/').pop()}
+                          </span>
+                          <span className="text-xs text-muted-foreground">新选择的文件</span>
+                        </div>
                       </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => setSelectedFile(null)}
+                        onClick={() => setSelectedFile('')}
                       >
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
-                ) : (
+                )}
+
+                {/* 文件选择区域 */}
+                {!existingInvoiceFile && !selectedFile && (
                   <div
                     className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
                     onClick={handleSelectFile}
