@@ -21,103 +21,138 @@ import {
   FormLabel,
   FormMessage
 } from '@renderer/components/ui/form'
-import { Edit, Loader2 } from 'lucide-react'
-import { useUpdateCompetitionSeries } from '@renderer/hooks/use-tipc'
+import { Trophy, Loader2, Plus, Edit } from 'lucide-react'
+import { 
+  useCreateCompetitionSeries,
+  useUpdateCompetitionSeries 
+} from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
-import { updateCompetitionSeriesSchema } from '../../../../../main/types/competition-schemas'
-import type { UpdateCompetitionSeriesInput, CompetitionSeriesWithStatsOutput } from '../../../../../main/types/competition-schemas'
+import { 
+  createCompetitionSeriesSchema,
+  updateCompetitionSeriesSchema 
+} from '../../../../../main/types/competition-schemas'
+import type { 
+  CreateCompetitionSeriesInput,
+  UpdateCompetitionSeriesInput,
+  CompetitionSeriesWithStatsOutput 
+} from '../../../../../main/types/competition-schemas'
 
-interface EditCompetitionSeriesDialogProps {
-  series: CompetitionSeriesWithStatsOutput | null
-  isOpen: boolean
+interface CompetitionSeriesDialogProps {
+  open: boolean
   onOpenChange: (open: boolean) => void
+  series?: CompetitionSeriesWithStatsOutput | null // 编辑时传入，创建时为空
   onSuccess?: () => void
 }
 
-// 使用统一的 zod Schema
-type SeriesFormData = z.infer<typeof updateCompetitionSeriesSchema>
+// 根据模式选择合适的 Schema
+const getFormSchema = (isEdit: boolean) => 
+  isEdit ? updateCompetitionSeriesSchema : createCompetitionSeriesSchema
 
-export function EditCompetitionSeriesDialog({
-  series,
-  isOpen,
+type SeriesFormData = z.infer<typeof createCompetitionSeriesSchema> & 
+  Partial<z.infer<typeof updateCompetitionSeriesSchema>>
+
+export function CompetitionSeriesDialog({
+  open,
   onOpenChange,
+  series,
   onSuccess
-}: EditCompetitionSeriesDialogProps) {
-  const { trigger: updateSeries, isMutating } = useUpdateCompetitionSeries()
+}: CompetitionSeriesDialogProps) {
+  const isEdit = !!series
+  const { trigger: createSeries, isMutating: isCreating } = useCreateCompetitionSeries()
+  const { trigger: updateSeries, isMutating: isUpdating } = useUpdateCompetitionSeries()
+  
+  const isMutating = isCreating || isUpdating
 
   const form = useForm<SeriesFormData>({
-    resolver: zodResolver(updateCompetitionSeriesSchema),
+    resolver: zodResolver(getFormSchema(isEdit)),
     defaultValues: {
-      id: '',
       name: '',
-      notes: ''
+      notes: '',
+      ...(isEdit && { id: '' })
     }
   })
 
   // 当系列数据变化时更新表单
   useEffect(() => {
     if (series) {
+      // 编辑模式
       form.reset({
         id: series.id,
         name: series.name,
         notes: series.notes || ''
       })
+    } else {
+      // 创建模式
+      form.reset({
+        name: '',
+        notes: ''
+      })
     }
   }, [series, form])
 
   const onSubmit = async (data: SeriesFormData) => {
-    if (!series) return
-
     try {
-      const input: UpdateCompetitionSeriesInput = {
-        id: series.id,
-        name: data.name?.trim(),
-        notes: data.notes?.trim() || undefined
+      if (isEdit && series) {
+        // 编辑模式
+        const input: UpdateCompetitionSeriesInput = {
+          id: series.id,
+          name: data.name?.trim(),
+          notes: data.notes?.trim() || undefined
+        }
+        await updateSeries(input)
+        
+        toast.success('赛事系列更新成功', {
+          description: `"${data.name}" 已成功更新`
+        })
+      } else {
+        // 创建模式
+        const input: CreateCompetitionSeriesInput = {
+          name: data.name!.trim(),
+          notes: data.notes?.trim() || undefined
+        }
+        await createSeries(input)
+        
+        toast.success('赛事系列创建成功', {
+          description: `"${data.name}" 已成功创建`
+        })
       }
 
-      await updateSeries(input)
-
-      toast.success('赛事系列更新成功', {
-        description: `"${data.name}" 已成功更新`
-      })
-
+      // 重置表单
+      form.reset()
+      
       // 关闭对话框
       onOpenChange(false)
-
+      
       // 调用成功回调
       onSuccess?.()
     } catch (error) {
-      console.error('更新赛事系列失败:', error)
-      toast.error('更新赛事系列失败', {
+      console.error(`${isEdit ? '更新' : '创建'}赛事系列失败:`, error)
+      toast.error(`${isEdit ? '更新' : '创建'}赛事系列失败`, {
         description: error instanceof Error ? error.message : '请稍后重试'
       })
     }
   }
 
   const handleCancel = () => {
-    if (series) {
-      form.reset({
-        id: series.id,
-        name: series.name,
-        notes: series.notes || ''
-      })
-    }
+    form.reset()
     onOpenChange(false)
   }
 
-  if (!series) return null
-
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2">
-              <Edit className="h-5 w-5 text-primary" />
+              <Trophy className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DialogTitle>编辑赛事系列</DialogTitle>
-              <DialogDescription>修改赛事系列的基本信息</DialogDescription>
+              <DialogTitle>
+                {isEdit ? '编辑赛事系列' : '创建赛事系列'}
+              </DialogTitle>
+              <DialogDescription>
+                {isEdit ? '修改赛事系列的基本信息' : '创建一个新的赛事系列来管理相关比赛'}
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -192,12 +227,12 @@ export function EditCompetitionSeriesDialog({
                 {isMutating ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    更新中...
+                    {isEdit ? '更新中...' : '创建中...'}
                   </>
                 ) : (
                   <>
-                    <Edit className="h-4 w-4" />
-                    更新系列
+                    {isEdit ? <Edit className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    {isEdit ? '更新系列' : '创建系列'}
                   </>
                 )}
               </Button>

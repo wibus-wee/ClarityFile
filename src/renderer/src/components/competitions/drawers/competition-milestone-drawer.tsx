@@ -31,81 +31,127 @@ import {
 } from '@renderer/components/ui/select'
 import { Calendar } from '@renderer/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
-import { Target, Calendar as CalendarIcon, Loader2, Trophy } from 'lucide-react'
-import { useCreateCompetitionMilestone, useGetAllCompetitionSeries } from '@renderer/hooks/use-tipc'
+import { Target, Calendar as CalendarIcon, Loader2, Trophy, Plus, Edit } from 'lucide-react'
+import { 
+  useCreateCompetitionMilestone, 
+  useUpdateCompetitionMilestone,
+  useGetAllCompetitionSeries 
+} from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { cn } from '@renderer/lib/utils'
-import { createCompetitionMilestoneSchema } from '../../../../../main/types/competition-schemas'
-import type { CreateCompetitionMilestoneInput } from '../../../../../main/types/competition-schemas'
+import { 
+  createCompetitionMilestoneSchema,
+  updateCompetitionMilestoneSchema 
+} from '../../../../../main/types/competition-schemas'
+import type { 
+  CreateCompetitionMilestoneInput,
+  UpdateCompetitionMilestoneInput,
+  CompetitionMilestoneOutput 
+} from '../../../../../main/types/competition-schemas'
 
-interface CreateCompetitionMilestoneDrawerProps {
+interface CompetitionMilestoneDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedSeriesId?: string
+  milestone?: CompetitionMilestoneOutput | null // 编辑时传入，创建时为空
+  selectedSeriesId?: string // 创建时可以预选系列
   onSuccess?: () => void
 }
 
-// 使用统一的 zod Schema
-type MilestoneFormData = z.infer<typeof createCompetitionMilestoneSchema>
+// 根据模式选择合适的 Schema
+const getFormSchema = (isEdit: boolean) => 
+  isEdit ? updateCompetitionMilestoneSchema : createCompetitionMilestoneSchema
 
-export function CreateCompetitionMilestoneDrawer({
+type MilestoneFormData = z.infer<typeof createCompetitionMilestoneSchema> & 
+  Partial<z.infer<typeof updateCompetitionMilestoneSchema>>
+
+export function CompetitionMilestoneDrawer({
   open,
   onOpenChange,
+  milestone,
   selectedSeriesId,
   onSuccess
-}: CreateCompetitionMilestoneDrawerProps) {
+}: CompetitionMilestoneDrawerProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
-
+  
+  const isEdit = !!milestone
   const { data: competitionSeries } = useGetAllCompetitionSeries()
-  const { trigger: createMilestone, isMutating } = useCreateCompetitionMilestone()
+  const { trigger: createMilestone, isMutating: isCreating } = useCreateCompetitionMilestone()
+  const { trigger: updateMilestone, isMutating: isUpdating } = useUpdateCompetitionMilestone()
+  
+  const isMutating = isCreating || isUpdating
 
   const form = useForm<MilestoneFormData>({
-    resolver: zodResolver(createCompetitionMilestoneSchema),
+    resolver: zodResolver(getFormSchema(isEdit)),
     defaultValues: {
       competitionSeriesId: selectedSeriesId || '',
       levelName: '',
       dueDateMilestone: undefined,
-      notes: ''
+      notes: '',
+      ...(isEdit && { id: '' })
     }
   })
 
-  // 当选中的系列ID变化时，更新表单
+  // 当里程碑数据或选中系列变化时更新表单
   useEffect(() => {
-    if (selectedSeriesId) {
+    if (milestone) {
+      // 编辑模式
+      form.reset({
+        id: milestone.id,
+        competitionSeriesId: milestone.competitionSeriesId,
+        levelName: milestone.levelName,
+        dueDateMilestone: milestone.dueDate ? new Date(milestone.dueDate) : undefined,
+        notes: milestone.description || ''
+      })
+    } else if (selectedSeriesId) {
+      // 创建模式，预选系列
       form.setValue('competitionSeriesId', selectedSeriesId)
     }
-  }, [selectedSeriesId, form])
+  }, [milestone, selectedSeriesId, form])
 
   const onSubmit = async (data: MilestoneFormData) => {
     try {
-      const input: CreateCompetitionMilestoneInput = {
-        competitionSeriesId: data.competitionSeriesId,
-        levelName: data.levelName.trim(),
-        dueDateMilestone: data.dueDateMilestone,
-        notes: data.notes?.trim() || undefined
+      if (isEdit && milestone) {
+        // 编辑模式
+        const input: UpdateCompetitionMilestoneInput = {
+          id: milestone.id,
+          levelName: data.levelName?.trim(),
+          dueDateMilestone: data.dueDateMilestone,
+          notes: data.notes?.trim() || undefined
+        }
+        await updateMilestone(input)
+        
+        toast.success('里程碑更新成功', {
+          description: `"${data.levelName}" 已成功更新`
+        })
+      } else {
+        // 创建模式
+        const input: CreateCompetitionMilestoneInput = {
+          competitionSeriesId: data.competitionSeriesId!,
+          levelName: data.levelName!.trim(),
+          dueDateMilestone: data.dueDateMilestone,
+          notes: data.notes?.trim() || undefined
+        }
+        await createMilestone(input)
+        
+        const selectedSeries = competitionSeries?.find((s) => s.id === data.competitionSeriesId)
+        toast.success('赛事里程碑创建成功', {
+          description: `"${data.levelName}" 已添加到 "${selectedSeries?.name}"`
+        })
       }
-
-      await createMilestone(input)
-
-      const selectedSeries = competitionSeries?.find((s) => s.id === data.competitionSeriesId)
-
-      toast.success('赛事里程碑创建成功', {
-        description: `"${data.levelName}" 已添加到 "${selectedSeries?.name}"`
-      })
 
       // 重置表单
       form.reset()
-
+      
       // 关闭抽屉
       onOpenChange(false)
-
+      
       // 调用成功回调
       onSuccess?.()
     } catch (error) {
-      console.error('创建赛事里程碑失败:', error)
-      toast.error('创建赛事里程碑失败', {
+      console.error(`${isEdit ? '更新' : '创建'}赛事里程碑失败:`, error)
+      toast.error(`${isEdit ? '更新' : '创建'}赛事里程碑失败`, {
         description: error instanceof Error ? error.message : '请稍后重试'
       })
     }
@@ -125,8 +171,12 @@ export function CreateCompetitionMilestoneDrawer({
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DrawerTitle>创建赛事里程碑</DrawerTitle>
-              <DrawerDescription>为赛事系列添加新的里程碑节点</DrawerDescription>
+              <DrawerTitle>
+                {isEdit ? '编辑赛事里程碑' : '创建赛事里程碑'}
+              </DrawerTitle>
+              <DrawerDescription>
+                {isEdit ? '修改里程碑的详细信息' : '为赛事系列添加新的里程碑节点'}
+              </DrawerDescription>
             </div>
           </div>
         </DrawerHeader>
@@ -138,36 +188,38 @@ export function CreateCompetitionMilestoneDrawer({
             onSubmit={form.handleSubmit(onSubmit)}
             className="px-4 pb-4 overflow-y-auto space-y-6"
           >
-            {/* 赛事系列选择 */}
-            <FormField
-              control={form.control}
-              name="competitionSeriesId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    赛事系列 <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="选择赛事系列" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {competitionSeries?.map((series) => (
-                        <SelectItem key={series.id} value={series.id}>
-                          <div className="flex items-center gap-2">
-                            <Trophy className="h-4 w-4 text-primary" />
-                            {series.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* 赛事系列选择 - 仅在创建模式显示 */}
+            {!isEdit && (
+              <FormField
+                control={form.control}
+                name="competitionSeriesId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      赛事系列 <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择赛事系列" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {competitionSeries?.map((series) => (
+                          <SelectItem key={series.id} value={series.id}>
+                            <div className="flex items-center gap-2">
+                              <Trophy className="h-4 w-4 text-primary" />
+                              {series.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* 里程碑名称 */}
             <FormField
@@ -186,7 +238,7 @@ export function CreateCompetitionMilestoneDrawer({
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">{field.value.length}/100 字符</p>
+                  <p className="text-xs text-muted-foreground">{field.value?.length || 0}/100 字符</p>
                 </FormItem>
               )}
             />
@@ -292,12 +344,12 @@ export function CreateCompetitionMilestoneDrawer({
               {isMutating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  创建中...
+                  {isEdit ? '更新中...' : '创建中...'}
                 </>
               ) : (
                 <>
-                  <Target className="h-4 w-4" />
-                  创建里程碑
+                  {isEdit ? <Edit className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  {isEdit ? '更新里程碑' : '创建里程碑'}
                 </>
               )}
             </Button>

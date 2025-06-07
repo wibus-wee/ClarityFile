@@ -18,8 +18,8 @@ import { cn } from '@renderer/lib/utils'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useNavigate } from '@tanstack/react-router'
-import { CreateCompetitionSeriesDialog } from './dialogs/create-competition-series-dialog'
-import { CreateCompetitionMilestoneDrawer } from './drawers/create-competition-milestone-drawer'
+import { CompetitionSeriesDialog } from './dialogs/competition-series-dialog'
+import { CompetitionMilestoneDrawer } from './drawers/competition-milestone-drawer'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
 import type { MilestoneWithProjectsOutput } from '../../../../main/types/outputs'
 
@@ -326,13 +326,13 @@ export function CompetitionOverview() {
       </div>
 
       {/* 对话框和抽屉组件 */}
-      <CreateCompetitionSeriesDialog
-        isOpen={createSeriesOpen}
+      <CompetitionSeriesDialog
+        open={createSeriesOpen}
         onOpenChange={setCreateSeriesOpen}
         onSuccess={handleSuccess}
       />
 
-      <CreateCompetitionMilestoneDrawer
+      <CompetitionMilestoneDrawer
         open={createMilestoneOpen}
         onOpenChange={setCreateMilestoneOpen}
         onSuccess={handleSuccess}

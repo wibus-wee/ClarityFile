@@ -16,8 +16,8 @@ import { CompetitionOverview } from '@renderer/components/competitions/competiti
 import { CompetitionSeriesList } from '@renderer/components/competitions/competition-series-list'
 import { CompetitionTimeline } from '@renderer/components/competitions/competition-timeline'
 import { UpcomingMilestones } from '@renderer/components/competitions/upcoming-milestones'
-import { CreateCompetitionSeriesDialog } from '@renderer/components/competitions/dialogs/create-competition-series-dialog'
-import { CreateCompetitionMilestoneDrawer } from '@renderer/components/competitions/drawers/create-competition-milestone-drawer'
+import { CompetitionSeriesDialog } from '@renderer/components/competitions/dialogs/competition-series-dialog'
+import { CompetitionMilestoneDrawer } from '@renderer/components/competitions/drawers/competition-milestone-drawer'
 
 // 视图模式类型
 type ViewMode = 'overview' | 'series' | 'timeline' | 'upcoming'
@@ -227,16 +227,16 @@ function CompetitionsPage() {
       </AnimatePresence>
 
       {/* 对话框和抽屉 */}
-      <CreateCompetitionSeriesDialog
-        isOpen={createSeriesOpen}
+      <CompetitionSeriesDialog
+        open={createSeriesOpen}
         onOpenChange={setCreateSeriesOpen}
         onSuccess={handleSuccess}
       />
 
-      <CreateCompetitionMilestoneDrawer
+      <CompetitionMilestoneDrawer
         open={createMilestoneOpen}
         onOpenChange={setCreateMilestoneOpen}
-        selectedSeriesId={selectedSeriesId}
+        selectedSeriesId={selectedSeriesId || undefined}
         onSuccess={handleSuccess}
       />
     </div>
