@@ -25,7 +25,7 @@ import { useGetCompetitionMilestones } from '@renderer/hooks/use-tipc'
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { cn } from '@renderer/lib/utils'
-import { EditCompetitionMilestoneDialog } from './dialogs/edit-competition-milestone-dialog'
+import { EditCompetitionMilestoneDrawer } from './drawers/edit-competition-milestone-drawer'
 import { DeleteCompetitionMilestoneDialog } from './dialogs/delete-competition-milestone-dialog'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
 import type { CompetitionMilestoneOutput } from '../../../../main/types/outputs'
@@ -322,10 +322,10 @@ export function CompetitionMilestoneList({
         </motion.div>
       )}
 
-      {/* 对话框组件 */}
-      <EditCompetitionMilestoneDialog
+      {/* 抽屉组件 */}
+      <EditCompetitionMilestoneDrawer
         milestone={editingMilestone}
-        isOpen={editDialogOpen}
+        open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onSuccess={handleSuccess}
       />

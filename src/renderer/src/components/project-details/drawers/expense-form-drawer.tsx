@@ -1,0 +1,518 @@
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Button } from '@renderer/components/ui/button'
+import { Input } from '@renderer/components/ui/input'
+import { Label } from '@renderer/components/ui/label'
+import { Textarea } from '@renderer/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@renderer/components/ui/select'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle
+} from '@renderer/components/ui/drawer'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@renderer/components/ui/form'
+import { Calendar } from '@renderer/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+import { CalendarIcon, Upload, FileText, X } from 'lucide-react'
+import { format } from 'date-fns'
+import { zhCN } from 'date-fns/locale'
+import { cn } from '@renderer/lib/utils'
+import {
+  useCreateExpenseTracking,
+  useUpdateExpenseTracking,
+  useProjects,
+  useSelectFile
+} from '@renderer/hooks/use-tipc'
+import { tipcClient } from '@renderer/lib/tipc-client'
+import { toast } from 'sonner'
+import type {
+  CreateExpenseTrackingInput,
+  UpdateExpenseTrackingInput
+} from '../../../../../main/types/inputs'
+
+// 表单验证Schema
+const expenseFormSchema = z.object({
+  projectId: z.string().min(1, '请选择项目'),
+  itemName: z.string().min(1, '请填写报销项目').max(100, '报销项目名称不能超过100个字符'),
+  applicant: z.string().min(1, '请填写申请人').max(50, '申请人姓名不能超过50个字符'),
+  amount: z.number().positive('金额必须大于0'),
+  status: z.string().min(1, '请选择状态'),
+  applicationDate: z.date(),
+  reimbursementDate: z.date().optional(),
+  notes: z.string().optional()
+})
+
+type ExpenseFormData = z.infer<typeof expenseFormSchema>
+
+interface ExpenseFormDrawerProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  mode: 'create' | 'edit'
+  projectId?: string // 创建时可选，编辑时从expense获取
+  expense?: {
+    id: string
+    itemName: string
+    applicant: string
+    amount: number
+    applicationDate: Date
+    status: string
+    reimbursementDate?: Date | null
+    notes?: string | null
+    projectId: string
+  } | null
+  onSuccess?: () => void
+}
+
+export function ExpenseFormDrawer({
+  open,
+  onOpenChange,
+  mode,
+  projectId,
+  expense,
+  onSuccess
+}: ExpenseFormDrawerProps) {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [currentInvoiceFile, setCurrentInvoiceFile] = useState<string | null>(null)
+
+  const { trigger: createExpense, isMutating: isCreating } = useCreateExpenseTracking()
+  const { trigger: updateExpense, isMutating: isUpdating } = useUpdateExpenseTracking()
+  const { data: projects } = useProjects()
+  const { trigger: selectFile } = useSelectFile()
+
+  const isMutating = isCreating || isUpdating
+
+  // 表单初始化
+  const form = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseFormSchema),
+    defaultValues: {
+      projectId: projectId || '',
+      itemName: '',
+      applicant: '',
+      amount: 0,
+      status: 'pending',
+      applicationDate: new Date(),
+      reimbursementDate: undefined,
+      notes: ''
+    }
+  })
+
+  // 当expense变化时更新表单数据（编辑模式）
+  useEffect(() => {
+    if (mode === 'edit' && expense) {
+      form.reset({
+        projectId: expense.projectId,
+        itemName: expense.itemName,
+        applicant: expense.applicant,
+        amount: expense.amount,
+        status: expense.status,
+        applicationDate: new Date(expense.applicationDate),
+        reimbursementDate: expense.reimbursementDate
+          ? new Date(expense.reimbursementDate)
+          : undefined,
+        notes: expense.notes || ''
+      })
+    } else if (mode === 'create') {
+      form.reset({
+        projectId: projectId || '',
+        itemName: '',
+        applicant: '',
+        amount: 0,
+        status: 'pending',
+        applicationDate: new Date(),
+        reimbursementDate: undefined,
+        notes: ''
+      })
+    }
+  }, [mode, expense, projectId, form])
+
+  // 处理文件选择
+  const handleSelectFile = async () => {
+    try {
+      const result = await selectFile({
+        title: '选择发票文件',
+        filters: [
+          { name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp'] },
+          { name: 'PDF文件', extensions: ['pdf'] },
+          { name: '所有文件', extensions: ['*'] }
+        ]
+      })
+
+      if (result && !result.canceled && result.path) {
+        setSelectedFile(result.path)
+        toast.success('文件选择成功！')
+      }
+    } catch (error) {
+      console.error('选择文件失败:', error)
+      toast.error('选择文件失败')
+    }
+  }
+
+  // 上传发票文件
+  const uploadInvoiceFile = async (
+    filePath: string,
+    formData: ExpenseFormData
+  ): Promise<string | null> => {
+    try {
+      const importResult = await tipcClient.importFile({
+        sourcePath: filePath,
+        projectId: formData.projectId,
+        importType: 'expense',
+        originalFileName: filePath.split('/').pop() || '',
+        displayName: `发票_${formData.itemName}_${new Date().toLocaleDateString()}`,
+        expenseDescription: formData.itemName,
+        applicantName: formData.applicant,
+        preserveOriginalName: false
+      })
+
+      if (importResult.success && importResult.managedFileId) {
+        return importResult.managedFileId
+      } else {
+        throw new Error(`文件上传失败: ${importResult.errors?.join(', ')}`)
+      }
+    } catch (error) {
+      console.error('上传发票文件失败:', error)
+      throw error
+    }
+  }
+
+  const onSubmit = async (data: ExpenseFormData) => {
+    try {
+      let invoiceManagedFileId: string | undefined
+
+      // 如果选择了发票文件，先上传
+      if (selectedFile) {
+        invoiceManagedFileId = await uploadInvoiceFile(selectedFile, data)
+      }
+
+      if (mode === 'create') {
+        await createExpense({
+          projectId: data.projectId,
+          itemName: data.itemName,
+          applicant: data.applicant,
+          amount: data.amount,
+          applicationDate: data.applicationDate,
+          status: data.status,
+          reimbursementDate: data.reimbursementDate,
+          notes: data.notes,
+          invoiceManagedFileId
+        } as CreateExpenseTrackingInput)
+
+        toast.success('经费记录创建成功')
+      } else if (expense) {
+        await updateExpense({
+          id: expense.id,
+          itemName: data.itemName,
+          applicant: data.applicant,
+          amount: data.amount,
+          applicationDate: data.applicationDate,
+          status: data.status,
+          reimbursementDate: data.reimbursementDate,
+          notes: data.notes,
+          invoiceManagedFileId
+        } as UpdateExpenseTrackingInput)
+
+        toast.success('经费记录更新成功')
+      }
+
+      onOpenChange(false)
+      onSuccess?.()
+
+      // 重置表单和文件选择
+      if (mode === 'create') {
+        form.reset()
+        setSelectedFile(null)
+      }
+    } catch (error) {
+      toast.error(mode === 'create' ? '创建失败，请重试' : '更新失败，请重试')
+      console.error(`${mode === 'create' ? '创建' : '更新'}经费记录失败:`, error)
+    }
+  }
+
+  const getTitle = () => (mode === 'create' ? '添加新报销' : '编辑经费记录')
+  const getDescription = () => (mode === 'create' ? '创建新的经费报销记录' : '修改经费报销记录信息')
+  const getSubmitText = () => {
+    if (isMutating) {
+      return mode === 'create' ? '创建中...' : '更新中...'
+    }
+    return mode === 'create' ? '创建' : '更新'
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader>
+          <DrawerTitle>{getTitle()}</DrawerTitle>
+          <DrawerDescription>{getDescription()}</DrawerDescription>
+        </DrawerHeader>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-4 pb-4 overflow-y-auto"
+        >
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* 项目选择（仅在创建模式且未指定项目时显示） */}
+              {mode === 'create' && !projectId && (
+                <FormField
+                  control={form.control}
+                  name="projectId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>关联项目 *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择项目" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {projects?.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="itemName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>报销项目 *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="如：购买打印机" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="applicant"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>申请人 *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="申请人姓名" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>金额 *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>状态</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="pending">待审核</SelectItem>
+                          <SelectItem value="approved">已批准</SelectItem>
+                          <SelectItem value="reimbursed">已报销</SelectItem>
+                          <SelectItem value="rejected">已拒绝</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="applicationDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>申请时间</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                'w-full justify-start text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, 'PPP', { locale: zhCN })
+                              ) : (
+                                <span>选择日期</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="reimbursementDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>报销时间</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                'w-full justify-start text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, 'PPP', { locale: zhCN })
+                              ) : (
+                                <span>选择日期（可选）</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>备注</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="添加备注信息..." rows={3} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* 发票文件上传 */}
+              <div className="space-y-2">
+                <Label>发票文件</Label>
+                {selectedFile ? (
+                  <div className="border rounded-lg p-4 bg-muted/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium">{selectedFile.split('/').pop()}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedFile(null)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
+                    onClick={handleSelectFile}
+                  >
+                    <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">点击选择发票文件</p>
+                    <p className="text-xs text-muted-foreground mt-1">支持 PDF、图片等格式</p>
+                  </div>
+                )}
+              </div>
+            </form>
+          </Form>
+        </motion.div>
+
+        <DrawerFooter>
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isMutating}>
+            {getSubmitText()}
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}

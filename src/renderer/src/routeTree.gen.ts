@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
+import { Route as ExpensesImport } from './routes/expenses'
 import { Route as ErrorTestImport } from './routes/error-test'
 import { Route as CompetitionsImport } from './routes/competitions'
 import { Route as AboutImport } from './routes/about'
@@ -24,6 +25,12 @@ import { Route as ProjectsProjectIdImport } from './routes/projects/$projectId'
 const SettingsRoute = SettingsImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ExpensesRoute = ExpensesImport.update({
+  id: '/expenses',
+  path: '/expenses',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -95,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErrorTestImport
       parentRoute: typeof rootRoute
     }
+    '/expenses': {
+      id: '/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof ExpensesImport
+      parentRoute: typeof rootRoute
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -126,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/competitions': typeof CompetitionsRoute
   '/error-test': typeof ErrorTestRoute
+  '/expenses': typeof ExpensesRoute
   '/settings': typeof SettingsRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects': typeof ProjectsIndexRoute
@@ -136,6 +151,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/competitions': typeof CompetitionsRoute
   '/error-test': typeof ErrorTestRoute
+  '/expenses': typeof ExpensesRoute
   '/settings': typeof SettingsRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects': typeof ProjectsIndexRoute
@@ -147,6 +163,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/competitions': typeof CompetitionsRoute
   '/error-test': typeof ErrorTestRoute
+  '/expenses': typeof ExpensesRoute
   '/settings': typeof SettingsRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects/': typeof ProjectsIndexRoute
@@ -159,6 +176,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/competitions'
     | '/error-test'
+    | '/expenses'
     | '/settings'
     | '/projects/$projectId'
     | '/projects'
@@ -168,6 +186,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/competitions'
     | '/error-test'
+    | '/expenses'
     | '/settings'
     | '/projects/$projectId'
     | '/projects'
@@ -177,6 +196,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/competitions'
     | '/error-test'
+    | '/expenses'
     | '/settings'
     | '/projects/$projectId'
     | '/projects/'
@@ -188,6 +208,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CompetitionsRoute: typeof CompetitionsRoute
   ErrorTestRoute: typeof ErrorTestRoute
+  ExpensesRoute: typeof ExpensesRoute
   SettingsRoute: typeof SettingsRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
@@ -198,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   CompetitionsRoute: CompetitionsRoute,
   ErrorTestRoute: ErrorTestRoute,
+  ExpensesRoute: ExpensesRoute,
   SettingsRoute: SettingsRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
@@ -217,6 +239,7 @@ export const routeTree = rootRoute
         "/about",
         "/competitions",
         "/error-test",
+        "/expenses",
         "/settings",
         "/projects/$projectId",
         "/projects/"
@@ -233,6 +256,9 @@ export const routeTree = rootRoute
     },
     "/error-test": {
       "filePath": "error-test.tsx"
+    },
+    "/expenses": {
+      "filePath": "expenses.tsx"
     },
     "/settings": {
       "filePath": "settings.tsx"

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
-} from '@renderer/components/ui/dialog'
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle
+} from '@renderer/components/ui/drawer'
 import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
@@ -22,9 +23,9 @@ import { cn } from '@renderer/lib/utils'
 import type { UpdateCompetitionMilestoneInput } from '../../../../../main/types/inputs'
 import type { CompetitionMilestoneOutput } from '../../../../../main/types/outputs'
 
-interface EditCompetitionMilestoneDialogProps {
+interface EditCompetitionMilestoneDrawerProps {
   milestone: CompetitionMilestoneOutput | null
-  isOpen: boolean
+  open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
 }
@@ -35,12 +36,12 @@ interface FormData {
   description: string
 }
 
-export function EditCompetitionMilestoneDialog({
+export function EditCompetitionMilestoneDrawer({
   milestone,
-  isOpen,
+  open,
   onOpenChange,
   onSuccess
-}: EditCompetitionMilestoneDialogProps) {
+}: EditCompetitionMilestoneDrawerProps) {
   const [formData, setFormData] = useState<FormData>({
     levelName: '',
     dueDate: undefined,
@@ -67,14 +68,12 @@ export function EditCompetitionMilestoneDialog({
     const newErrors: Partial<FormData> = {}
 
     if (!formData.levelName.trim()) {
-      newErrors.levelName = '里程碑名称不能为空'
-    } else if (formData.levelName.trim().length < 2) {
-      newErrors.levelName = '里程碑名称至少需要2个字符'
+      newErrors.levelName = '请输入里程碑名称'
     } else if (formData.levelName.trim().length > 100) {
       newErrors.levelName = '里程碑名称不能超过100个字符'
     }
 
-    if (formData.description.trim().length > 500) {
+    if (formData.description.length > 500) {
       newErrors.description = '描述不能超过500个字符'
     }
 
@@ -103,7 +102,7 @@ export function EditCompetitionMilestoneDialog({
         description: `"${formData.levelName}" 已成功更新`
       })
 
-      // 关闭对话框
+      // 关闭抽屉
       onOpenChange(false)
 
       // 调用成功回调
@@ -140,25 +139,25 @@ export function EditCompetitionMilestoneDialog({
   if (!milestone) return null
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader>
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2">
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DialogTitle>编辑里程碑</DialogTitle>
-              <DialogDescription>修改里程碑的基本信息</DialogDescription>
+              <DrawerTitle>编辑里程碑</DrawerTitle>
+              <DrawerDescription>修改里程碑的基本信息</DrawerDescription>
             </div>
           </div>
-        </DialogHeader>
+        </DrawerHeader>
 
         <motion.form
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="space-y-6"
+          className="px-4 space-y-6 overflow-y-auto"
         >
           {/* 里程碑名称 */}
           <div className="space-y-2">
@@ -262,9 +261,10 @@ export function EditCompetitionMilestoneDialog({
             )}
             <p className="text-xs text-muted-foreground">{formData.description.length}/500 字符</p>
           </div>
+        </motion.form>
 
-          {/* 操作按钮 */}
-          <div className="flex items-center gap-3 pt-4">
+        <DrawerFooter>
+          <div className="flex gap-2 w-full">
             <Button
               type="button"
               variant="outline"
@@ -276,7 +276,7 @@ export function EditCompetitionMilestoneDialog({
             </Button>
 
             <Button
-              type="submit"
+              onClick={handleSubmit}
               disabled={isMutating || !formData.levelName.trim()}
               className="flex-1 gap-2"
             >
@@ -293,8 +293,8 @@ export function EditCompetitionMilestoneDialog({
               )}
             </Button>
           </div>
-        </motion.form>
-      </DialogContent>
-    </Dialog>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

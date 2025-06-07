@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import { 
-  DollarSign, 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  DollarSign,
+  Plus,
+  Search,
+  Filter,
   Calendar,
   FileText,
   Download,
@@ -35,6 +35,8 @@ import {
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
+
+import { ExpenseFormDrawer } from './drawers/expense-form-drawer'
 import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
 
 interface ExpensesTabProps {
@@ -42,20 +44,47 @@ interface ExpensesTabProps {
 }
 
 export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
-  const { expenses, statistics } = projectDetails
+  const { expenses, statistics, project } = projectDetails
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'amount' | 'application' | 'reimbursement' | 'status'>('application')
+  const [sortBy, setSortBy] = useState<'amount' | 'application' | 'reimbursement' | 'status'>(
+    'application'
+  )
   const [filterStatus, setFilterStatus] = useState<string>('all')
 
+  // Drawer 状态
+  const [expenseFormOpen, setExpenseFormOpen] = useState(false)
+  const [expenseFormMode, setExpenseFormMode] = useState<'create' | 'edit'>('create')
+  const [selectedExpense, setSelectedExpense] = useState<any>(null)
+
+  // 处理创建操作
+  const handleCreate = () => {
+    setExpenseFormMode('create')
+    setSelectedExpense(null)
+    setExpenseFormOpen(true)
+  }
+
+  // 处理编辑操作
+  const handleEdit = (expense: any) => {
+    setExpenseFormMode('edit')
+    setSelectedExpense(expense)
+    setExpenseFormOpen(true)
+  }
+
+  // 处理成功回调
+  const handleSuccess = () => {
+    // SWR 会自动重新验证数据
+  }
+
   // 获取所有状态
-  const statuses = Array.from(new Set(expenses.map(expense => expense.status)))
+  const statuses = Array.from(new Set(expenses.map((expense) => expense.status)))
 
   // 过滤和排序经费
   const filteredExpenses = expenses
-    .filter(expense => {
-      const matchesSearch = expense.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           expense.applicant.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           expense.notes?.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter((expense) => {
+      const matchesSearch =
+        expense.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        expense.applicant.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        expense.notes?.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = filterStatus === 'all' || expense.status === filterStatus
       return matchesSearch && matchesStatus
     })
@@ -113,11 +142,11 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
 
   // 计算统计数据
   const pendingAmount = filteredExpenses
-    .filter(e => e.status.toLowerCase() === 'pending')
+    .filter((e) => e.status.toLowerCase() === 'pending')
     .reduce((sum, e) => sum + e.amount, 0)
-  
+
   const reimbursedAmount = filteredExpenses
-    .filter(e => e.status.toLowerCase() === 'reimbursed')
+    .filter((e) => e.status.toLowerCase() === 'reimbursed')
     .reduce((sum, e) => sum + e.amount, 0)
 
   return (
@@ -196,7 +225,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
               className="pl-10"
             />
           </div>
-          
+
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-32">
               <Filter className="w-4 h-4 mr-2" />
@@ -204,8 +233,10 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部状态</SelectItem>
-              {statuses.map(status => (
-                <SelectItem key={status} value={status}>{getStatusText(status)}</SelectItem>
+              {statuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {getStatusText(status)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -224,7 +255,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button>
+          <Button onClick={handleCreate}>
             <Plus className="w-4 h-4 mr-2" />
             添加新报销
           </Button>
@@ -257,14 +288,14 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                         ¥{expense.amount.toLocaleString()}
                       </span>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-muted-foreground" />
                         <span className="text-muted-foreground">申请人：</span>
                         <span>{expense.applicant}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
                         <span className="text-muted-foreground">申请时间：</span>
@@ -308,11 +339,11 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(expense)}>
                       <Edit className="w-4 h-4 mr-2" />
                       编辑
                     </Button>
-                    
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -324,7 +355,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                           <Eye className="w-4 h-4 mr-2" />
                           查看详情
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(expense)}>
                           <Edit className="w-4 h-4 mr-2" />
                           编辑信息
                         </DropdownMenuItem>
@@ -340,9 +371,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                           更新状态
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
-                          删除记录
-                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -355,15 +384,27 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
             <DollarSign className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="text-lg font-medium mb-2">暂无经费记录</h3>
             <p className="text-muted-foreground mb-4">
-              {searchQuery || filterStatus !== 'all' ? '没有找到匹配的经费记录' : '开始添加项目经费记录'}
+              {searchQuery || filterStatus !== 'all'
+                ? '没有找到匹配的经费记录'
+                : '开始添加项目经费记录'}
             </p>
-            <Button>
+            <Button onClick={handleCreate}>
               <Plus className="w-4 h-4 mr-2" />
               添加新报销
             </Button>
           </div>
         )}
       </div>
+
+      {/* 统一的表单抽屉 */}
+      <ExpenseFormDrawer
+        open={expenseFormOpen}
+        onOpenChange={setExpenseFormOpen}
+        mode={expenseFormMode}
+        projectId={project.id}
+        expense={selectedExpense}
+        onSuccess={handleSuccess}
+      />
     </div>
   )
 }
