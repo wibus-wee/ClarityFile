@@ -52,6 +52,7 @@ interface ExpenseDetailsDialogProps {
   onOpenChange: (open: boolean) => void
   expense: ExpenseDetails | null
   onEdit?: (expense: ExpenseDetails) => void
+  onUpdateStatus?: (expense: ExpenseDetails) => void
   onDelete?: (expense: ExpenseDetails) => void
 }
 
@@ -60,6 +61,7 @@ export function ExpenseDetailsDialog({
   onOpenChange,
   expense,
   onEdit,
+  onUpdateStatus,
   onDelete
 }: ExpenseDetailsDialogProps) {
   if (!expense) return null
@@ -242,6 +244,12 @@ export function ExpenseDetailsDialog({
                 <Button variant="outline" size="sm" onClick={() => onEdit(expense)}>
                   <Edit className="w-4 h-4 mr-2" />
                   编辑
+                </Button>
+              )}
+              {onUpdateStatus && (
+                <Button variant="outline" size="sm" onClick={() => onUpdateStatus(expense)}>
+                  <Receipt className="w-4 h-4 mr-2" />
+                  更新状态
                 </Button>
               )}
               {onDelete && (

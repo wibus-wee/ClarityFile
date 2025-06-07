@@ -10,15 +10,14 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import { Plus, Search, TrendingUp, Clock, BarChart3, Receipt } from 'lucide-react'
+import { Plus, Search, TrendingUp, Receipt } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { ExpenseOverview } from '@renderer/components/expenses/expense-overview'
 import { ExpenseList } from '@renderer/components/expenses/expense-list'
-import { ExpenseStatistics } from '@renderer/components/expenses/expense-statistics'
 import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/expense-form-drawer'
 
 // 视图模式类型
-type ViewMode = 'overview' | 'list' | 'statistics'
+type ViewMode = 'overview' | 'list'
 
 interface ViewTab {
   id: ViewMode
@@ -39,12 +38,6 @@ const viewTabs: ViewTab[] = [
     label: '经费列表',
     icon: Receipt,
     description: '查看和管理所有经费记录'
-  },
-  {
-    id: 'statistics',
-    label: '统计分析',
-    icon: BarChart3,
-    description: '经费数据统计和分析'
   }
 ]
 
@@ -202,7 +195,6 @@ function ExpensesPage() {
               projectId={projectId}
             />
           )}
-          {currentView === 'statistics' && <ExpenseStatistics />}
         </motion.div>
       </AnimatePresence>
 

@@ -16,6 +16,7 @@ import useSWR from 'swr'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from './expense-details-dialog'
+import { ExpenseStatusDialog } from './expense-status-dialog'
 
 interface ExpenseListProps {
   searchQuery: string
@@ -49,6 +50,7 @@ type ExpenseItem = {
 export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: ExpenseListProps) {
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<ExpenseItem | null>(null)
 
   // 获取经费数据
@@ -68,6 +70,11 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
     setDetailsDialogOpen(false)
     setSelectedExpense(expense)
     setEditDrawerOpen(true)
+  }
+
+  const handleUpdateStatus = (expense: ExpenseItem) => {
+    setSelectedExpense(expense)
+    setStatusDialogOpen(true)
   }
 
   const handleSuccess = () => {
@@ -239,7 +246,7 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
                             编辑信息
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(expense)}>
                             <Receipt className="w-4 h-4 mr-2" />
                             更新状态
                           </DropdownMenuItem>
@@ -294,6 +301,18 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
         onOpenChange={setDetailsDialogOpen}
         expense={selectedExpense}
         onEdit={handleEditFromDetails}
+        onUpdateStatus={(expense) => {
+          setDetailsDialogOpen(false)
+          handleUpdateStatus(expense)
+        }}
+      />
+
+      {/* 状态更新对话框 */}
+      <ExpenseStatusDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        expense={selectedExpense}
+        onSuccess={handleSuccess}
       />
     </div>
   )
