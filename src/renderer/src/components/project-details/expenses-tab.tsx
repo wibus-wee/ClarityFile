@@ -25,7 +25,10 @@ import {
   User,
   Receipt,
   TrendingUp,
-  AlertCircle
+  TrendingDown,
+  CheckCircle,
+  Clock,
+  BarChart3
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -37,7 +40,69 @@ import {
 import { cn } from '@renderer/lib/utils'
 
 import { ExpenseFormDrawer } from './drawers/expense-form-drawer'
+import { ExpenseDetailsDialog } from '../expenses/expense-details-dialog'
+import { ExpenseStatusDialog } from '../expenses/expense-status-dialog'
 import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+
+// 统计卡片组件
+interface ExpenseStatCardProps {
+  title: string
+  value: string | number
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+  trend?: {
+    value: number
+    isPositive: boolean
+  }
+  delay?: number
+}
+
+function ExpenseStatCard({
+  title,
+  value,
+  icon: Icon,
+  color,
+  trend,
+  delay = 0
+}: ExpenseStatCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay }}
+      whileHover={{ scale: 1.02 }}
+      className="p-4 border border-border rounded-lg bg-card hover:bg-accent/30 transition-colors"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className={cn('p-2 rounded-lg', color)}>
+          <Icon className="w-4 h-4" />
+        </div>
+        {trend && (
+          <div
+            className={cn(
+              'flex items-center gap-1 text-xs',
+              trend.isPositive
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-600 dark:text-red-400'
+            )}
+          >
+            {trend.isPositive ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
+            )}
+            <span>{Math.abs(trend.value)}%</span>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-xs text-muted-foreground">{title}</div>
+      </div>
+    </motion.div>
+  )
+}
 
 interface ExpensesTabProps {
   projectDetails: ProjectDetailsOutput
@@ -51,9 +116,11 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   )
   const [filterStatus, setFilterStatus] = useState<string>('all')
 
-  // Drawer 状态
+  // Drawer 和 Dialog 状态
   const [expenseFormOpen, setExpenseFormOpen] = useState(false)
   const [expenseFormMode, setExpenseFormMode] = useState<'create' | 'edit'>('create')
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<any>(null)
 
   // 处理创建操作
@@ -67,6 +134,26 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   const handleEdit = (expense: any) => {
     setExpenseFormMode('edit')
     setSelectedExpense(expense)
+    setExpenseFormOpen(true)
+  }
+
+  // 处理查看详情
+  const handleViewDetails = (expense: any) => {
+    setSelectedExpense(expense)
+    setDetailsDialogOpen(true)
+  }
+
+  // 处理状态更新
+  const handleUpdateStatus = (expense: any) => {
+    setSelectedExpense(expense)
+    setStatusDialogOpen(true)
+  }
+
+  // 从详情页面跳转到编辑
+  const handleEditFromDetails = (expense: any) => {
+    setDetailsDialogOpen(false)
+    setSelectedExpense(expense)
+    setExpenseFormMode('edit')
     setExpenseFormOpen(true)
   }
 
@@ -141,76 +228,72 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   }
 
   // 计算统计数据
-  const pendingAmount = filteredExpenses
+  const pendingAmount = expenses
     .filter((e) => e.status.toLowerCase() === 'pending')
     .reduce((sum, e) => sum + e.amount, 0)
 
-  const reimbursedAmount = filteredExpenses
+  const reimbursedAmount = expenses
     .filter((e) => e.status.toLowerCase() === 'reimbursed')
     .reduce((sum, e) => sum + e.amount, 0)
+
+  const approvedAmount = expenses
+    .filter((e) => e.status.toLowerCase() === 'approved')
+    .reduce((sum, e) => sum + e.amount, 0)
+
+  // 计算报销率
+  const reimbursementRate =
+    expenses.length > 0
+      ? (expenses.filter((e) => e.status.toLowerCase() === 'reimbursed').length / expenses.length) *
+        100
+      : 0
+
+  // 统计卡片数据
+  const statCards = [
+    {
+      title: '总经费',
+      value: `¥${statistics.totalExpenseAmount.toLocaleString()}`,
+      icon: DollarSign,
+      color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+      trend: { value: 12, isPositive: true }
+    },
+    {
+      title: '已报销',
+      value: `¥${reimbursedAmount.toLocaleString()}`,
+      icon: CheckCircle,
+      color: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+      trend: { value: 8, isPositive: true }
+    },
+    {
+      title: '待处理',
+      value: `¥${(pendingAmount + approvedAmount).toLocaleString()}`,
+      icon: Clock,
+      color: 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
+      trend: { value: 5, isPositive: false }
+    },
+    {
+      title: '报销率',
+      value: `${Math.round(reimbursementRate)}%`,
+      icon: BarChart3,
+      color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+      trend: { value: 15, isPositive: true }
+    }
+  ]
 
   return (
     <div className="space-y-6">
       {/* 统计概览 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-800"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-green-600" />
-            <span className="text-sm font-medium text-green-800 dark:text-green-300">总经费</span>
-          </div>
-          <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-            ¥{statistics.totalExpenseAmount.toLocaleString()}
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Receipt className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">已报销</span>
-          </div>
-          <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-            ¥{reimbursedAmount.toLocaleString()}
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-lg border border-yellow-200 dark:border-yellow-800"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="w-5 h-5 text-yellow-600" />
-            <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">待处理</span>
-          </div>
-          <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
-            ¥{pendingAmount.toLocaleString()}
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-800"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-5 h-5 text-purple-600" />
-            <span className="text-sm font-medium text-purple-800 dark:text-purple-300">记录数</span>
-          </div>
-          <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-            {statistics.expenseCount}
-          </p>
-        </motion.div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((card, index) => (
+          <ExpenseStatCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            icon={card.icon}
+            color={card.color}
+            trend={card.trend}
+            delay={index * 0.1}
+          />
+        ))}
       </div>
 
       {/* 头部操作栏 */}
@@ -265,130 +348,129 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
       <Separator />
 
       {/* 经费列表 */}
-      <div className="space-y-4">
+      <div className="space-y-0">
         {filteredExpenses.length > 0 ? (
           <AnimatePresence>
             {filteredExpenses.map((expense, index) => (
               <motion.div
                 key={expense.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: index * 0.05 }}
-                className="border border-border rounded-lg p-6 hover:shadow-md transition-all"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{
+                  delay: index * 0.03,
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 25
+                }}
+                className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold">{expense.itemName}</h3>
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  {/* 左侧：项目信息 */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-sm truncate">{expense.itemName}</h3>
                       <Badge className={cn('text-xs', getStatusColor(expense.status))}>
                         {getStatusText(expense.status)}
                       </Badge>
-                      <span className="text-lg font-bold text-primary">
-                        ¥{expense.amount.toLocaleString()}
-                      </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">申请人：</span>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
                         <span>{expense.applicant}</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">申请时间：</span>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
                         <span>{new Date(expense.applicationDate).toLocaleDateString()}</span>
                       </div>
 
                       {expense.reimbursementDate && (
-                        <div className="flex items-center gap-2">
-                          <Receipt className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">报销时间：</span>
+                        <div className="flex items-center gap-1">
+                          <Receipt className="w-3 h-3" />
                           <span>{new Date(expense.reimbursementDate).toLocaleDateString()}</span>
+                        </div>
+                      )}
+
+                      {expense.invoiceFileName && (
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-3 h-3" />
+                          <span>有发票</span>
                         </div>
                       )}
                     </div>
 
                     {expense.notes && (
-                      <div className="mb-3 p-3 bg-muted/20 rounded border">
-                        <p className="text-sm text-muted-foreground">
-                          <strong>备注：</strong> {expense.notes}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* 发票信息 */}
-                    {expense.invoiceFileName && (
-                      <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                        <FileText className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm text-blue-800 dark:text-blue-300">
-                          发票：{expense.invoiceOriginalFileName}
-                        </span>
-                        {expense.invoiceFileSizeBytes && (
-                          <span className="text-xs text-blue-600 dark:text-blue-400">
-                            ({(expense.invoiceFileSizeBytes / 1024).toFixed(1)} KB)
-                          </span>
-                        )}
-                        <Button variant="ghost" size="sm" className="ml-auto">
-                          <Download className="w-4 h-4" />
-                        </Button>
+                      <div className="mt-2 p-2 bg-muted/20 rounded text-xs text-muted-foreground">
+                        <strong>备注：</strong> {expense.notes}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(expense)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      编辑
-                    </Button>
+                  {/* 右侧：金额和操作 */}
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-primary">
+                        ¥{expense.amount.toLocaleString()}
+                      </div>
+                      {expense.reimbursementDate && (
+                        <div className="text-xs text-muted-foreground">已报销</div>
+                      )}
+                    </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="w-4 h-4 mr-2" />
-                          查看详情
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(expense)}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          编辑信息
-                        </DropdownMenuItem>
-                        {expense.invoiceFileName && (
-                          <DropdownMenuItem>
-                            <Download className="w-4 h-4 mr-2" />
-                            下载发票
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(expense)}>
+                        <Edit className="w-3 h-3 mr-1" />
+                        编辑
+                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetails(expense)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            查看详情
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Receipt className="w-4 h-4 mr-2" />
-                          更新状态
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <DropdownMenuItem onClick={() => handleEdit(expense)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            编辑信息
+                          </DropdownMenuItem>
+                          {expense.invoiceFileName && (
+                            <DropdownMenuItem>
+                              <Download className="w-4 h-4 mr-2" />
+                              下载发票
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(expense)}>
+                            <Receipt className="w-4 h-4 mr-2" />
+                            更新状态
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
         ) : (
-          <div className="text-center py-12">
-            <DollarSign className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-medium mb-2">暂无经费记录</h3>
-            <p className="text-muted-foreground mb-4">
+          <div className="text-center py-8 border border-dashed border-border rounded-lg">
+            <DollarSign className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+            <h3 className="text-base font-medium mb-2">暂无经费记录</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               {searchQuery || filterStatus !== 'all'
                 ? '没有找到匹配的经费记录'
                 : '开始添加项目经费记录'}
             </p>
-            <Button onClick={handleCreate}>
+            <Button onClick={handleCreate} size="sm">
               <Plus className="w-4 h-4 mr-2" />
               添加新报销
             </Button>
@@ -402,6 +484,26 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
         onOpenChange={setExpenseFormOpen}
         mode={expenseFormMode}
         projectId={project.id}
+        expense={selectedExpense}
+        onSuccess={handleSuccess}
+      />
+
+      {/* 详情对话框 */}
+      <ExpenseDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        expense={selectedExpense}
+        onEdit={handleEditFromDetails}
+        onUpdateStatus={(expense) => {
+          setDetailsDialogOpen(false)
+          handleUpdateStatus(expense)
+        }}
+      />
+
+      {/* 状态更新对话框 */}
+      <ExpenseStatusDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
         expense={selectedExpense}
         onSuccess={handleSuccess}
       />
