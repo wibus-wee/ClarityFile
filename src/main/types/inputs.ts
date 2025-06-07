@@ -274,6 +274,10 @@ export interface GetMilestonesByDateRangeInput {
   endDate: Date
 }
 
+export interface GetMilestoneParticipatingProjectsInput {
+  milestoneId: string
+}
+
 // 设置相关输入类型
 export interface GetSettingsByCategoryInput {
   category: string

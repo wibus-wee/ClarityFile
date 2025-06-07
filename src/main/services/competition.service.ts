@@ -3,7 +3,8 @@ import {
   competitionSeries,
   competitionMilestones,
   projectCompetitionMilestones,
-  managedFiles
+  managedFiles,
+  projects
 } from '../../db/schema'
 import { eq, desc, gte, lte, and, count, sql } from 'drizzle-orm'
 
@@ -59,15 +60,27 @@ export class CompetitionService {
   }
 
   /**
-   * 获取所有赛事系列
+   * 获取所有赛事系列（包含统计信息）
    */
   static async getAllCompetitionSeries() {
-    const series = await db
-      .select()
+    const seriesWithStats = await db
+      .select({
+        id: competitionSeries.id,
+        name: competitionSeries.name,
+        notes: competitionSeries.notes,
+        createdAt: competitionSeries.createdAt,
+        updatedAt: competitionSeries.updatedAt,
+        milestoneCount: count(competitionMilestones.id)
+      })
       .from(competitionSeries)
+      .leftJoin(
+        competitionMilestones,
+        eq(competitionSeries.id, competitionMilestones.competitionSeriesId)
+      )
+      .groupBy(competitionSeries.id)
       .orderBy(desc(competitionSeries.createdAt))
 
-    return series
+    return seriesWithStats
   }
 
   /**
@@ -110,7 +123,6 @@ export class CompetitionService {
       })
       .returning()
 
-    console.log(`赛事系列 "${input.name}" 创建成功`)
     return result[0]
   }
 
@@ -135,7 +147,6 @@ export class CompetitionService {
       })
       .returning()
 
-    console.log(`赛事里程碑 "${input.levelName}" 创建成功`)
     return result[0]
   }
 
@@ -156,7 +167,6 @@ export class CompetitionService {
       })
       .returning()
 
-    console.log(`项目已参与赛事里程碑`)
     return result[0]
   }
 
@@ -179,7 +189,6 @@ export class CompetitionService {
       )
       .returning()
 
-    console.log(`项目赛事状态已更新`)
     return result[0]
   }
 
@@ -197,7 +206,6 @@ export class CompetitionService {
           eq(projectCompetitionMilestones.competitionMilestoneId, input.competitionMilestoneId)
       )
 
-    console.log(`项目已从赛事中移除`)
     return { success: true }
   }
 
@@ -222,7 +230,6 @@ export class CompetitionService {
     // 删除赛事系列
     await db.delete(competitionSeries).where(eq(competitionSeries.id, id)).returning()
 
-    console.log(`赛事系列 "${id}" 删除成功`)
     return { success: true }
   }
 
@@ -240,7 +247,6 @@ export class CompetitionService {
       .where(eq(competitionSeries.id, id))
       .returning()
 
-    console.log(`赛事系列 "${id}" 更新成功`)
     return result[0]
   }
 
@@ -268,7 +274,6 @@ export class CompetitionService {
       .where(eq(competitionMilestones.id, id))
       .returning()
 
-    console.log(`赛事里程碑 "${id}" 更新成功`)
     return result[0]
   }
 
@@ -284,7 +289,6 @@ export class CompetitionService {
     // 删除里程碑
     await db.delete(competitionMilestones).where(eq(competitionMilestones.id, id))
 
-    console.log(`赛事里程碑 "${id}" 删除成功`)
     return { success: true }
   }
 
@@ -447,5 +451,27 @@ export class CompetitionService {
       seriesCount: series.length,
       milestoneCount: totalMilestones
     }
+  }
+
+  /**
+   * 获取参与特定里程碑的项目列表
+   */
+  static async getMilestoneParticipatingProjects(milestoneId: string) {
+    const participatingProjects = await db
+      .select({
+        projectId: projects.id,
+        projectName: projects.name,
+        projectDescription: projects.description,
+        statusInMilestone: projectCompetitionMilestones.statusInMilestone,
+        participatedAt: projectCompetitionMilestones.createdAt,
+        projectCreatedAt: projects.createdAt,
+        projectUpdatedAt: projects.updatedAt
+      })
+      .from(projectCompetitionMilestones)
+      .innerJoin(projects, eq(projectCompetitionMilestones.projectId, projects.id))
+      .where(eq(projectCompetitionMilestones.competitionMilestoneId, milestoneId))
+      .orderBy(desc(projectCompetitionMilestones.createdAt))
+
+    return participatingProjects
   }
 }

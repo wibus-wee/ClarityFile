@@ -13,7 +13,8 @@ import type {
   UpdateCompetitionMilestoneInput,
   DeleteCompetitionMilestoneInput,
   GetUpcomingMilestonesInput,
-  GetMilestonesByDateRangeInput
+  GetMilestonesByDateRangeInput,
+  GetMilestoneParticipatingProjectsInput
 } from '../types/inputs'
 
 export function competitionRouter(t: ITipc) {
@@ -127,6 +128,13 @@ export function competitionRouter(t: ITipc) {
     // 获取赛事统计信息
     getCompetitionStatistics: t.procedure.action(async () => {
       return await CompetitionService.getCompetitionStatistics()
-    })
+    }),
+
+    // 获取参与特定里程碑的项目列表
+    getMilestoneParticipatingProjects: t.procedure
+      .input<GetMilestoneParticipatingProjectsInput>()
+      .action(async ({ input }) => {
+        return await CompetitionService.getMilestoneParticipatingProjects(input.milestoneId)
+      })
   }
 }

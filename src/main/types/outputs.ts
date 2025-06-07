@@ -242,6 +242,22 @@ export interface CompetitionOverviewOutput {
   }
 }
 
+export interface CompetitionMilestoneOutput {
+  id: string
+  levelName: string
+  dueDate: Date | null
+  description: string | null
+  createdAt: Date
+  updatedAt: Date
+  participatingProjectsCount?: number
+  notificationFileName?: string | null
+  notificationOriginalFileName?: string | null
+  notificationPhysicalPath?: string | null
+  notificationMimeType?: string | null
+  notificationFileSizeBytes?: number | null
+  notificationUploadedAt?: Date | null
+}
+
 export interface MilestoneWithProjectsOutput {
   id: string
   levelName: string
@@ -261,4 +277,14 @@ export interface CompetitionTimelineItemOutput {
   seriesId: string
   seriesName: string
   participatingProjectsCount: number
+}
+
+export interface MilestoneParticipatingProjectOutput {
+  projectId: string
+  projectName: string
+  projectDescription: string | null
+  statusInMilestone: string | null
+  participatedAt: Date
+  projectCreatedAt: Date
+  projectUpdatedAt: Date
 }
