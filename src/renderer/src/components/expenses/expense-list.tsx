@@ -9,23 +9,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
-import {
-  DollarSign,
-  Calendar,
-  FileText,
-  Download,
-  Edit,
-  Eye,
-  MoreHorizontal,
-  User,
-  Receipt,
-  Plus
-} from 'lucide-react'
+import { DollarSign, Calendar, Edit, Eye, MoreHorizontal, User, Receipt, Plus } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { Link } from '@tanstack/react-router'
 import useSWR from 'swr'
 import { tipcClient } from '@renderer/lib/tipc-client'
-import { EditExpenseDrawer } from '@renderer/components/project-details/drawers/edit-expense-drawer'
+import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/expense-form-drawer'
+import { ExpenseDetailsDialog } from './expense-details-dialog'
 
 interface ExpenseListProps {
   searchQuery: string
@@ -34,14 +24,48 @@ interface ExpenseListProps {
   projectId?: string
 }
 
+// 使用getAllExpenses返回的类型定义（包含发票文件信息）
+type ExpenseItem = {
+  id: string
+  itemName: string
+  projectId: string | null
+  applicant: string
+  amount: number
+  applicationDate: Date
+  status: string
+  reimbursementDate: Date | null
+  notes: string | null
+  createdAt: Date
+  updatedAt: Date
+  // 发票文件信息
+  invoiceFileName: string | null
+  invoiceOriginalFileName: string | null
+  invoicePhysicalPath: string | null
+  invoiceMimeType: string | null
+  invoiceFileSizeBytes: number | null
+  invoiceUploadedAt: Date | null
+}
+
 export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: ExpenseListProps) {
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
-  const [selectedExpense, setSelectedExpense] = useState<any>(null)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseItem | null>(null)
 
   // 获取经费数据
   const { data: allExpenses, isLoading } = useSWR('all-expenses', () => tipcClient.getAllExpenses())
 
-  const handleEdit = (expense: any) => {
+  const handleEdit = (expense: ExpenseItem) => {
+    setSelectedExpense(expense)
+    setEditDrawerOpen(true)
+  }
+
+  const handleViewDetails = (expense: ExpenseItem) => {
+    setSelectedExpense(expense)
+    setDetailsDialogOpen(true)
+  }
+
+  const handleEditFromDetails = (expense: ExpenseItem) => {
+    setDetailsDialogOpen(false)
     setSelectedExpense(expense)
     setEditDrawerOpen(true)
   }
@@ -121,116 +145,124 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
   return (
     <div className="space-y-6">
       {/* 经费列表 */}
-      <div className="space-y-4">
+      <div className="space-y-0">
         {filteredExpenses.length > 0 ? (
           <AnimatePresence>
             {filteredExpenses.map((expense, index) => (
               <motion.div
                 key={expense.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: index * 0.05 }}
-                className="border border-border rounded-lg p-6 hover:shadow-md transition-all"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{
+                  delay: index * 0.03,
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 25
+                }}
+                className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold">{expense.itemName}</h3>
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  {/* 左侧：项目信息 */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-sm truncate">{expense.itemName}</h3>
                       <Badge className={cn('text-xs', getStatusColor(expense.status))}>
                         {getStatusText(expense.status)}
                       </Badge>
-                      <span className="text-lg font-bold text-primary">
-                        ¥{expense.amount.toLocaleString()}
-                      </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">申请人：</span>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
                         <span>{expense.applicant}</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">申请时间：</span>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
                         <span>{new Date(expense.applicationDate).toLocaleDateString()}</span>
                       </div>
 
                       {expense.reimbursementDate && (
-                        <div className="flex items-center gap-2">
-                          <Receipt className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">报销时间：</span>
+                        <div className="flex items-center gap-1">
+                          <Receipt className="w-3 h-3" />
                           <span>{new Date(expense.reimbursementDate).toLocaleDateString()}</span>
                         </div>
                       )}
-                    </div>
 
-                    {expense.projectId && (
-                      <div className="mb-3">
-                        <Button asChild variant="link" size="sm" className="p-0 h-auto">
+                      {expense.projectId && (
+                        <Button asChild variant="link" size="sm" className="p-0 h-auto text-xs">
                           <Link to="/projects/$projectId" params={{ projectId: expense.projectId }}>
-                            查看关联项目
+                            查看项目
                           </Link>
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {expense.notes && (
-                      <div className="mb-3 p-3 bg-muted/20 rounded border">
-                        <p className="text-sm text-muted-foreground">
-                          <strong>备注：</strong> {expense.notes}
-                        </p>
+                      <div className="mt-2 p-2 bg-muted/20 rounded text-xs text-muted-foreground">
+                        <strong>备注：</strong> {expense.notes}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(expense)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      编辑
-                    </Button>
+                  {/* 右侧：金额和操作 */}
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-primary">
+                        ¥{expense.amount.toLocaleString()}
+                      </div>
+                      {expense.reimbursementDate && (
+                        <div className="text-xs text-muted-foreground">已报销</div>
+                      )}
+                    </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="w-4 h-4 mr-2" />
-                          查看详情
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(expense)}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          编辑信息
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Receipt className="w-4 h-4 mr-2" />
-                          更新状态
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(expense)}>
+                        <Edit className="w-3 h-3 mr-1" />
+                        编辑
+                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetails(expense)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            查看详情
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEdit(expense)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            编辑信息
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Receipt className="w-4 h-4 mr-2" />
+                            更新状态
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
         ) : (
-          <div className="text-center py-12">
-            <DollarSign className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-medium mb-2">暂无经费记录</h3>
-            <p className="text-muted-foreground mb-4">
+          <div className="text-center py-8 border border-dashed border-border rounded-lg">
+            <DollarSign className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+            <h3 className="text-base font-medium mb-2">暂无经费记录</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               {searchQuery || filterStatus !== 'all'
                 ? '没有找到匹配的经费记录'
                 : '开始添加经费记录'}
             </p>
-            <Button asChild>
+            <Button asChild size="sm">
               <Link to="/expenses" search={{ view: 'overview' }}>
                 <Plus className="w-4 h-4 mr-2" />
                 添加经费记录
@@ -241,11 +273,27 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
       </div>
 
       {/* 编辑抽屉 */}
-      <EditExpenseDrawer
+      <ExpenseFormDrawer
         open={editDrawerOpen}
         onOpenChange={setEditDrawerOpen}
-        expense={selectedExpense}
+        mode="edit"
+        expense={
+          selectedExpense && selectedExpense.projectId
+            ? {
+                ...selectedExpense,
+                projectId: selectedExpense.projectId
+              }
+            : null
+        }
         onSuccess={handleSuccess}
+      />
+
+      {/* 详情对话框 */}
+      <ExpenseDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        expense={selectedExpense}
+        onEdit={handleEditFromDetails}
       />
     </div>
   )
