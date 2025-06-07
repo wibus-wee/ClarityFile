@@ -74,27 +74,46 @@ function SeriesCard({
               variant="ghost"
               size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onViewMilestones(series)}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onViewMilestones(series)
+              }}
+            >
               <List className="h-4 w-4 mr-2" />
               查看里程碑
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onCreateMilestone(series.id)}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onCreateMilestone(series.id)
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
               添加里程碑
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onEdit(series)}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(series)
+              }}
+            >
               <Edit className="h-4 w-4 mr-2" />
               编辑系列
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => onDelete(series)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(series)
+              }}
               className="text-destructive focus:text-destructive"
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -131,7 +150,10 @@ function SeriesCard({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onCreateMilestone(series.id)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onCreateMilestone(series.id)
+          }}
           className="gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <Plus className="h-4 w-4" />
@@ -226,6 +248,9 @@ export function CompetitionSeriesList({
   const handleBackFromMilestones = () => {
     setShowMilestonesList(false)
     setViewingMilestonesSeries(null)
+    // 清理可能的编辑状态，防止返回时意外显示 Dialog
+    setEditDialogOpen(false)
+    setEditingSeries(null)
   }
 
   const handleSuccess = () => {
