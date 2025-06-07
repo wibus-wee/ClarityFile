@@ -22,6 +22,14 @@ import type {
   DeleteSharedResourceInput,
   AssociateResourceToProjectInput,
   DisassociateResourceFromProjectInput,
+  SetSettingInput,
+  SetSettingsInput,
+  DeleteSettingInput,
+  ResetSettingsInput,
+  SelectDirectoryInput,
+  SelectFileInput
+} from '../../../main/types/inputs'
+import type {
   CreateCompetitionSeriesInput,
   CreateCompetitionMilestoneInput,
   AddProjectToCompetitionInput,
@@ -30,14 +38,8 @@ import type {
   DeleteCompetitionSeriesInput,
   UpdateCompetitionSeriesInput,
   UpdateCompetitionMilestoneInput,
-  DeleteCompetitionMilestoneInput,
-  SetSettingInput,
-  SetSettingsInput,
-  DeleteSettingInput,
-  ResetSettingsInput,
-  SelectDirectoryInput,
-  SelectFileInput
-} from '../../../main/types/inputs'
+  DeleteCompetitionMilestoneInput
+} from '../../../main/types/competition-schemas'
 import type { CreateManagedFileInput } from '../../../main/services/managed-file.service'
 import type { FileImportContext } from '../../../main/services/intelligent/intelligent-file-import.service'
 

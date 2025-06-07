@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   Drawer,
   DrawerContent,
@@ -11,7 +14,14 @@ import {
 import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
-import { Label } from '@renderer/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@renderer/components/ui/form'
 import { Calendar } from '@renderer/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
 import { Target, Calendar as CalendarIcon, Loader2 } from 'lucide-react'
@@ -20,8 +30,11 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { cn } from '@renderer/lib/utils'
-import type { UpdateCompetitionMilestoneInput } from '../../../../../main/types/inputs'
-import type { CompetitionMilestoneOutput } from '../../../../../main/types/outputs'
+import { updateCompetitionMilestoneSchema } from '../../../../../main/types/competition-schemas'
+import type {
+  UpdateCompetitionMilestoneInput,
+  CompetitionMilestoneOutput
+} from '../../../../../main/types/competition-schemas'
 
 interface EditCompetitionMilestoneDrawerProps {
   milestone: CompetitionMilestoneOutput | null
@@ -30,11 +43,8 @@ interface EditCompetitionMilestoneDrawerProps {
   onSuccess?: () => void
 }
 
-interface FormData {
-  levelName: string
-  dueDate: Date | undefined
-  description: string
-}
+// 使用统一的 zod Schema
+type MilestoneFormData = z.infer<typeof updateCompetitionMilestoneSchema>
 
 export function EditCompetitionMilestoneDrawer({
   milestone,
@@ -42,64 +52,45 @@ export function EditCompetitionMilestoneDrawer({
   onOpenChange,
   onSuccess
 }: EditCompetitionMilestoneDrawerProps) {
-  const [formData, setFormData] = useState<FormData>({
-    levelName: '',
-    dueDate: undefined,
-    description: ''
-  })
-  const [errors, setErrors] = useState<Partial<FormData>>({})
-  const [calendarOpen, setCalendarOpen] = useState(false)
-
   const { trigger: updateMilestone, isMutating } = useUpdateCompetitionMilestone()
+
+  const form = useForm<MilestoneFormData>({
+    resolver: zodResolver(updateCompetitionMilestoneSchema),
+    defaultValues: {
+      id: '',
+      levelName: '',
+      dueDateMilestone: undefined,
+      notes: ''
+    }
+  })
 
   // 当里程碑数据变化时更新表单
   useEffect(() => {
     if (milestone) {
-      setFormData({
+      form.reset({
+        id: milestone.id,
         levelName: milestone.levelName,
-        dueDate: milestone.dueDate ? new Date(milestone.dueDate) : undefined,
-        description: milestone.description || ''
+        dueDateMilestone: milestone.dueDate ? new Date(milestone.dueDate) : undefined,
+        notes: milestone.description || ''
       })
-      setErrors({})
     }
-  }, [milestone])
+  }, [milestone, form])
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {}
-
-    if (!formData.levelName.trim()) {
-      newErrors.levelName = '请输入里程碑名称'
-    } else if (formData.levelName.trim().length > 100) {
-      newErrors.levelName = '里程碑名称不能超过100个字符'
-    }
-
-    if (formData.description.length > 500) {
-      newErrors.description = '描述不能超过500个字符'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!milestone || !validateForm()) {
-      return
-    }
+  const onSubmit = async (data: MilestoneFormData) => {
+    if (!milestone) return
 
     try {
       const input: UpdateCompetitionMilestoneInput = {
         id: milestone.id,
-        levelName: formData.levelName.trim(),
-        dueDateMilestone: formData.dueDate,
-        notes: formData.description.trim() || undefined
+        levelName: data.levelName?.trim(),
+        dueDateMilestone: data.dueDateMilestone,
+        notes: data.notes?.trim() || undefined
       }
 
       await updateMilestone(input)
 
       toast.success('里程碑更新成功', {
-        description: `"${formData.levelName}" 已成功更新`
+        description: `"${data.levelName}" 已成功更新`
       })
 
       // 关闭抽屉
@@ -117,23 +108,14 @@ export function EditCompetitionMilestoneDrawer({
 
   const handleCancel = () => {
     if (milestone) {
-      setFormData({
+      form.reset({
+        id: milestone.id,
         levelName: milestone.levelName,
-        dueDate: milestone.dueDate ? new Date(milestone.dueDate) : undefined,
-        description: milestone.description || ''
+        dueDateMilestone: milestone.dueDate ? new Date(milestone.dueDate) : undefined,
+        notes: milestone.description || ''
       })
     }
-    setErrors({})
     onOpenChange(false)
-  }
-
-  const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-
-    // 清除对应字段的错误
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
   }
 
   if (!milestone) return null
@@ -153,115 +135,108 @@ export function EditCompetitionMilestoneDrawer({
           </div>
         </DrawerHeader>
 
-        <motion.form
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          onSubmit={handleSubmit}
-          className="px-4 space-y-6 overflow-y-auto"
-        >
-          {/* 里程碑名称 */}
-          <div className="space-y-2">
-            <Label htmlFor="levelName" className="text-sm font-medium">
-              里程碑名称 <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="levelName"
-              placeholder="例如：初赛、复赛、决赛"
-              value={formData.levelName}
-              onChange={(e) => handleInputChange('levelName', e.target.value)}
-              className={
-                errors.levelName ? 'border-destructive focus-visible:ring-destructive' : ''
-              }
-              maxLength={100}
+        <Form {...form}>
+          <motion.form
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="px-4 space-y-6 overflow-y-auto"
+          >
+            {/* 里程碑名称 */}
+            <FormField
+              control={form.control}
+              name="levelName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    里程碑名称 <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="例如：初赛、复赛、决赛" maxLength={100} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  <p className="text-xs text-muted-foreground">
+                    {field.value?.length || 0}/100 字符
+                  </p>
+                </FormItem>
+              )}
             />
-            {errors.levelName && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-destructive"
-              >
-                {errors.levelName}
-              </motion.p>
-            )}
-            <p className="text-xs text-muted-foreground">{formData.levelName.length}/100 字符</p>
-          </div>
 
-          {/* 截止日期 */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">截止日期（可选）</Label>
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !formData.dueDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.dueDate
-                    ? format(formData.dueDate, 'yyyy年MM月dd日', { locale: zhCN })
-                    : '选择截止日期'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.dueDate}
-                  onSelect={(date) => {
-                    handleInputChange('dueDate', date)
-                    setCalendarOpen(false)
-                  }}
-                  locale={zhCN}
-                  initialFocus
-                />
-                {formData.dueDate && (
-                  <div className="p-3 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        handleInputChange('dueDate', undefined)
-                        setCalendarOpen(false)
-                      }}
-                      className="w-full"
-                    >
-                      清除日期
-                    </Button>
-                  </div>
-                )}
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* 描述 */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium">
-              描述（可选）
-            </Label>
-            <Textarea
-              id="description"
-              placeholder="描述这个里程碑的要求、目标或注意事项..."
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              className={
-                errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
-              }
-              rows={3}
-              maxLength={500}
+            {/* 截止日期 */}
+            <FormField
+              control={form.control}
+              name="dueDateMilestone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>截止日期（可选）</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !field.value && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(field.value, 'yyyy年MM月dd日', { locale: zhCN })
+                            : '选择截止日期'}
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        locale={zhCN}
+                        initialFocus
+                      />
+                      {field.value && (
+                        <div className="p-3 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => field.onChange(undefined)}
+                            className="w-full"
+                          >
+                            清除日期
+                          </Button>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.description && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-destructive"
-              >
-                {errors.description}
-              </motion.p>
-            )}
-            <p className="text-xs text-muted-foreground">{formData.description.length}/500 字符</p>
-          </div>
-        </motion.form>
+
+            {/* 描述 */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>描述（可选）</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="描述这个里程碑的要求、目标或注意事项..."
+                      rows={3}
+                      maxLength={500}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <p className="text-xs text-muted-foreground">
+                    {field.value?.length || 0}/500 字符
+                  </p>
+                </FormItem>
+              )}
+            />
+          </motion.form>
+        </Form>
 
         <DrawerFooter>
           <div className="flex gap-2 w-full">
@@ -276,8 +251,8 @@ export function EditCompetitionMilestoneDrawer({
             </Button>
 
             <Button
-              onClick={handleSubmit}
-              disabled={isMutating || !formData.levelName.trim()}
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isMutating}
               className="flex-1 gap-2"
             >
               {isMutating ? (

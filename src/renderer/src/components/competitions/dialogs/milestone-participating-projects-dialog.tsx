@@ -8,19 +8,15 @@ import {
 } from '@renderer/components/ui/dialog'
 import { Button } from '@renderer/components/ui/button'
 import { Badge } from '@renderer/components/ui/badge'
-import { 
-  Users, 
-  Calendar, 
-  ExternalLink, 
-  Loader2,
-  FolderOpen,
-  Clock
-} from 'lucide-react'
+import { Users, Calendar, ExternalLink, Loader2, FolderOpen, Clock } from 'lucide-react'
 import { useMilestoneParticipatingProjects } from '@renderer/hooks/use-tipc'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useNavigate } from '@tanstack/react-router'
-import type { MilestoneWithProjectsOutput, CompetitionMilestoneOutput } from '../../../../../main/types/outputs'
+import type {
+  MilestoneWithProjectsOutput,
+  CompetitionMilestoneOutput
+} from '../../../../../main/types/outputs'
 
 interface MilestoneParticipatingProjectsDialogProps {
   milestone: MilestoneWithProjectsOutput | CompetitionMilestoneOutput | null
@@ -71,11 +67,7 @@ export function MilestoneParticipatingProjectsDialog({
               <span className="ml-2 text-muted-foreground">加载参与项目...</span>
             </div>
           ) : projects && projects.length > 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               {projects.map((project, index) => (
                 <motion.div
                   key={project.projectId}
@@ -119,14 +111,20 @@ export function MilestoneParticipatingProjectsDialog({
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       <span>
-                        参与于 {format(new Date(project.participatedAt), 'yyyy年MM月dd日', { locale: zhCN })}
+                        参与于{' '}
+                        {format(new Date(project.participatedAt), 'yyyy年MM月dd日', {
+                          locale: zhCN
+                        })}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Clock className="h-4 w-4" />
                       <span>
-                        创建于 {format(new Date(project.projectCreatedAt), 'yyyy年MM月dd日', { locale: zhCN })}
+                        创建于{' '}
+                        {format(new Date(project.projectCreatedAt), 'yyyy年MM月dd日', {
+                          locale: zhCN
+                        })}
                       </span>
                     </div>
                   </div>
@@ -154,9 +152,7 @@ export function MilestoneParticipatingProjectsDialog({
             >
               <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
               <h3 className="text-lg font-semibold mb-2">暂无参与项目</h3>
-              <p className="text-muted-foreground">
-                还没有项目参与这个里程碑
-              </p>
+              <p className="text-muted-foreground">还没有项目参与这个里程碑</p>
             </motion.div>
           )}
         </div>
@@ -166,7 +162,7 @@ export function MilestoneParticipatingProjectsDialog({
           <div className="text-sm text-muted-foreground">
             {projects ? `共 ${projects.length} 个项目` : ''}
           </div>
-          
+
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             关闭
           </Button>

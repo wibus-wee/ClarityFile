@@ -15,7 +15,7 @@ import type {
   GetUpcomingMilestonesInput,
   GetMilestonesByDateRangeInput,
   GetMilestoneParticipatingProjectsInput
-} from '../types/inputs'
+} from '../types/competition-schemas'
 
 export function competitionRouter(t: ITipc) {
   return {

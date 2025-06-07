@@ -7,6 +7,13 @@ import {
   projects
 } from '../../db/schema'
 import { eq, desc, gte, lte, and, count, sql } from 'drizzle-orm'
+import {
+  validateCreateCompetitionSeries,
+  validateUpdateCompetitionSeries,
+  validateCreateCompetitionMilestone,
+  validateUpdateCompetitionMilestone,
+  validateAddProjectToCompetition
+} from '../types/competition-schemas'
 
 /**
  * 赛事管理服务
@@ -115,11 +122,14 @@ export class CompetitionService {
    * 创建赛事系列
    */
   static async createCompetitionSeries(input: { name: string; notes?: string }) {
+    // 使用 zod 验证输入
+    const validatedInput = validateCreateCompetitionSeries(input)
+
     const result = await db
       .insert(competitionSeries)
       .values({
-        name: input.name,
-        notes: input.notes
+        name: validatedInput.name,
+        notes: validatedInput.notes
       })
       .returning()
 
@@ -136,14 +146,17 @@ export class CompetitionService {
     notes?: string
     notificationManagedFileId?: string
   }) {
+    // 使用 zod 验证输入
+    const validatedInput = validateCreateCompetitionMilestone(input)
+
     const result = await db
       .insert(competitionMilestones)
       .values({
-        competitionSeriesId: input.competitionSeriesId,
-        levelName: input.levelName,
-        dueDateMilestone: input.dueDateMilestone,
-        notes: input.notes,
-        notificationManagedFileId: input.notificationManagedFileId
+        competitionSeriesId: validatedInput.competitionSeriesId,
+        levelName: validatedInput.levelName,
+        dueDateMilestone: validatedInput.dueDateMilestone,
+        notes: validatedInput.notes,
+        notificationManagedFileId: validatedInput.notificationManagedFileId
       })
       .returning()
 
@@ -158,12 +171,15 @@ export class CompetitionService {
     competitionMilestoneId: string
     statusInMilestone?: string
   }) {
+    // 使用 zod 验证输入
+    const validatedInput = validateAddProjectToCompetition(input)
+
     const result = await db
       .insert(projectCompetitionMilestones)
       .values({
-        projectId: input.projectId,
-        competitionMilestoneId: input.competitionMilestoneId,
-        statusInMilestone: input.statusInMilestone
+        projectId: validatedInput.projectId,
+        competitionMilestoneId: validatedInput.competitionMilestoneId,
+        statusInMilestone: validatedInput.statusInMilestone
       })
       .returning()
 
@@ -237,11 +253,14 @@ export class CompetitionService {
    * 更新赛事系列
    */
   static async updateCompetitionSeries(id: string, input: { name?: string; notes?: string }) {
+    // 使用 zod 验证输入
+    const validatedInput = validateUpdateCompetitionSeries({ id, ...input })
+
     const result = await db
       .update(competitionSeries)
       .set({
-        name: input.name,
-        notes: input.notes,
+        name: validatedInput.name,
+        notes: validatedInput.notes,
         updatedAt: new Date()
       })
       .where(eq(competitionSeries.id, id))
@@ -262,13 +281,16 @@ export class CompetitionService {
       notificationManagedFileId?: string
     }
   ) {
+    // 使用 zod 验证输入
+    const validatedInput = validateUpdateCompetitionMilestone({ id, ...input })
+
     const result = await db
       .update(competitionMilestones)
       .set({
-        levelName: input.levelName,
-        dueDateMilestone: input.dueDateMilestone,
-        notes: input.notes,
-        notificationManagedFileId: input.notificationManagedFileId,
+        levelName: validatedInput.levelName,
+        dueDateMilestone: validatedInput.dueDateMilestone,
+        notes: validatedInput.notes,
+        notificationManagedFileId: validatedInput.notificationManagedFileId,
         updatedAt: new Date()
       })
       .where(eq(competitionMilestones.id, id))

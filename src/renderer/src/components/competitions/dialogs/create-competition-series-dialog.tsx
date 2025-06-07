@@ -23,7 +23,8 @@ import {
 import { Trophy, Loader2 } from 'lucide-react'
 import { useCreateCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
-import type { CreateCompetitionSeriesInput } from '../../../../../main/types/inputs'
+import { createCompetitionSeriesSchema } from '../../../../../main/types/competition-schemas'
+import type { CreateCompetitionSeriesInput } from '../../../../../main/types/competition-schemas'
 
 interface CreateCompetitionSeriesDialogProps {
   isOpen: boolean
@@ -31,13 +32,8 @@ interface CreateCompetitionSeriesDialogProps {
   onSuccess?: () => void
 }
 
-// 表单验证Schema
-const competitionSeriesSchema = z.object({
-  name: z.string().min(1, '请输入赛事系列名称').max(100, '赛事系列名称不能超过100个字符'),
-  description: z.string().max(500, '描述不能超过500个字符').optional()
-})
-
-type CompetitionSeriesFormData = z.infer<typeof competitionSeriesSchema>
+// 使用统一的 zod Schema
+type CompetitionSeriesFormData = z.infer<typeof createCompetitionSeriesSchema>
 
 export function CreateCompetitionSeriesDialog({
   isOpen,
@@ -47,10 +43,10 @@ export function CreateCompetitionSeriesDialog({
   const { trigger: createSeries, isMutating } = useCreateCompetitionSeries()
 
   const form = useForm<CompetitionSeriesFormData>({
-    resolver: zodResolver(competitionSeriesSchema),
+    resolver: zodResolver(createCompetitionSeriesSchema),
     defaultValues: {
       name: '',
-      description: ''
+      notes: ''
     }
   })
 
@@ -58,7 +54,7 @@ export function CreateCompetitionSeriesDialog({
     try {
       const input: CreateCompetitionSeriesInput = {
         name: data.name.trim(),
-        notes: data.description?.trim() || undefined
+        notes: data.notes?.trim() || undefined
       }
 
       await createSeries(input)
@@ -131,7 +127,7 @@ export function CreateCompetitionSeriesDialog({
             {/* 描述 */}
             <FormField
               control={form.control}
-              name="description"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>描述（可选）</FormLabel>
