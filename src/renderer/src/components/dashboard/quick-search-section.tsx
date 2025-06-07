@@ -2,28 +2,13 @@ import { useState } from 'react'
 import { Input } from '@renderer/components/ui/input'
 import { Button } from '@renderer/components/ui/button'
 import { Badge } from '@renderer/components/ui/badge'
-import { 
-  Search, 
-  Clock,
-  TrendingUp,
-  Hash
-} from 'lucide-react'
+import { Search, Clock, TrendingUp, Hash } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // 模拟的热门搜索和最近搜索
-const popularSearches = [
-  '商业计划书',
-  '项目汇报',
-  'PPT模板',
-  '技术文档',
-  '比赛资料'
-]
+const popularSearches = ['商业计划书', '项目汇报', 'PPT模板', '技术文档', '比赛资料']
 
-const recentSearches = [
-  '挑战杯',
-  '创新创业',
-  '专利申请'
-]
+const recentSearches = ['挑战杯', '创新创业', '专利申请']
 
 export function QuickSearchSection() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -46,7 +31,7 @@ export function QuickSearchSection() {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">快速搜索</h2>
-      
+
       {/* 搜索输入框 */}
       <div className="relative">
         <div className="relative">
@@ -85,10 +70,10 @@ export function QuickSearchSection() {
                     onClick={() => handleSearch(searchQuery)}
                   >
                     <Search className="w-4 h-4 mr-2" />
-                    搜索 "{searchQuery}"
+                    搜索 &quot;{searchQuery}&quot;
                   </Button>
                 )}
-                
+
                 {recentSearches.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-2">
@@ -121,14 +106,10 @@ export function QuickSearchSection() {
           <TrendingUp className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">热门搜索</span>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           {popularSearches.map((search) => (
-            <motion.div
-              key={search}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div key={search} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Badge
                 variant="outline"
                 className="cursor-pointer hover:bg-accent hover:border-primary/50 transition-colors text-xs"
@@ -145,7 +126,9 @@ export function QuickSearchSection() {
       {/* 搜索提示 */}
       <div className="p-3 bg-muted/30 rounded-lg border border-dashed border-border">
         <p className="text-xs text-muted-foreground">
-          💡 提示：使用 <kbd className="px-1 py-0.5 bg-background border rounded text-xs">Cmd+K</kbd> 快速打开全局搜索
+          💡 提示：使用{' '}
+          <kbd className="px-1 py-0.5 bg-background border rounded text-xs">Cmd+K</kbd>{' '}
+          快速打开全局搜索
         </p>
       </div>
     </div>

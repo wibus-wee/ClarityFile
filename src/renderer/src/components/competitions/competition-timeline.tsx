@@ -1,0 +1,420 @@
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Button } from '@renderer/components/ui/button'
+import { Badge } from '@renderer/components/ui/badge'
+import {
+  Calendar,
+  Clock,
+  Trophy,
+  Target,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Filter
+} from 'lucide-react'
+import { useCompetitionTimeline } from '@renderer/hooks/use-tipc'
+import { cn } from '@renderer/lib/utils'
+import { format, isAfter, isBefore, startOfDay } from 'date-fns'
+import { zhCN } from 'date-fns/locale'
+import { useNavigate } from '@tanstack/react-router'
+import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
+import { MilestoneParticipatingProjectsDialog } from './dialogs/milestone-participating-projects-dialog'
+import type { CompetitionTimelineItemOutput } from '../../../../main/types/outputs'
+
+interface CompetitionTimelineProps {
+  searchQuery: string
+  sortBy: 'name' | 'created' | 'milestones'
+}
+
+interface TimelineItemProps {
+  item: CompetitionTimelineItemOutput
+  isExpanded: boolean
+  onToggle: () => void
+  onViewDetails: (item: CompetitionTimelineItemOutput) => void
+  onViewSeries: (item: CompetitionTimelineItemOutput) => void
+  onViewProjects: (item: CompetitionTimelineItemOutput) => void
+}
+
+function TimelineItem({
+  item,
+  isExpanded,
+  onToggle,
+  onViewDetails,
+  onViewSeries,
+  onViewProjects
+}: TimelineItemProps) {
+  const now = new Date()
+  const itemDate = item.date ? new Date(item.date) : null
+  const isPast = itemDate ? isBefore(itemDate, startOfDay(now)) : false
+  const isToday = itemDate ? format(itemDate, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd') : false
+  const isFuture = itemDate ? isAfter(itemDate, startOfDay(now)) : false
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className="relative"
+    >
+      {/* 时间轴线条 */}
+      <div className="absolute left-6 top-12 bottom-0 w-px bg-border" />
+
+      {/* 时间轴节点 */}
+      <div
+        className={cn(
+          'absolute left-4 top-8 w-4 h-4 rounded-full border-2 bg-background',
+          isPast && 'border-muted-foreground bg-muted-foreground',
+          isToday && 'border-primary bg-primary animate-pulse',
+          isFuture && 'border-primary bg-background'
+        )}
+      />
+
+      {/* 内容卡片 */}
+      <div className="ml-12 pb-8">
+        <motion.div
+          whileHover={{ y: -1 }}
+          className={cn(
+            'rounded-xl border bg-background/50 backdrop-blur-sm p-6 transition-all duration-200',
+            'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20',
+            isPast && 'opacity-75',
+            isToday && 'ring-2 ring-primary/20 bg-primary/5'
+          )}
+        >
+          {/* 头部信息 */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    'rounded-lg p-2',
+                    isPast && 'bg-muted/50',
+                    isToday && 'bg-primary/10',
+                    isFuture && 'bg-primary/10'
+                  )}
+                >
+                  <Target
+                    className={cn(
+                      'h-5 w-5',
+                      isPast && 'text-muted-foreground',
+                      isToday && 'text-primary',
+                      isFuture && 'text-primary'
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-lg">{item.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {item.seriesName}
+                    </Badge>
+                    {isToday && <Badge className="text-xs bg-primary/20 text-primary">今天</Badge>}
+                  </div>
+                </div>
+              </div>
+
+              {/* 日期和时间 */}
+              {itemDate && (
+                <div className="flex items-center gap-4 text-sm text-muted-foreground ml-11">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {format(itemDate, 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
+                  </span>
+
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {isPast ? '已过期' : isFuture ? '即将到来' : '今天'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <Button variant="ghost" size="sm" onClick={onToggle} className="gap-2">
+              {isExpanded ? (
+                <>
+                  收起
+                  <ChevronUp className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  详情
+                  <ChevronDown className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* 基本信息 */}
+          <div className="flex items-center gap-6 text-sm text-muted-foreground ml-11">
+            <span className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              {item.participatingProjectsCount} 个项目参与
+            </span>
+          </div>
+
+          {/* 展开的详细信息 */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="mt-4 ml-11 pt-4 border-t border-border"
+              >
+                {item.description && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">描述</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-4 mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => onViewDetails(item)}
+                  >
+                    <Target className="h-4 w-4" />
+                    查看详情
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => onViewSeries(item)}
+                  >
+                    <Trophy className="h-4 w-4" />
+                    查看赛事系列
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => onViewProjects(item)}
+                  >
+                    <Users className="h-4 w-4" />
+                    查看参与项目
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+export function CompetitionTimeline({ searchQuery }: CompetitionTimelineProps) {
+  const navigate = useNavigate()
+  const { data: timelineItems, isLoading } = useCompetitionTimeline()
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
+  const [timeFilter, setTimeFilter] = useState<'all' | 'past' | 'upcoming' | 'today'>('all')
+  const [selectedItem, setSelectedItem] = useState<any>(null)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [projectsDialogOpen, setProjectsDialogOpen] = useState(false)
+
+  // 处理操作
+  const handleViewDetails = (item: CompetitionTimelineItemOutput) => {
+    setSelectedItem(item)
+    setDetailsDialogOpen(true)
+  }
+
+  const handleViewSeries = (item: CompetitionTimelineItemOutput) => {
+    // 跳转到赛事系列页面并直接显示该系列的里程碑列表
+    navigate({
+      to: '/competitions',
+      search: {
+        view: 'series',
+        seriesId: item.seriesId,
+        showMilestones: 'true'
+      }
+    })
+  }
+
+  const handleViewProjects = (item: CompetitionTimelineItemOutput) => {
+    setSelectedItem(item)
+    setProjectsDialogOpen(true)
+  }
+
+  // 过滤和排序逻辑
+  const filteredAndSortedItems = useMemo(() => {
+    if (!timelineItems) return []
+
+    const filtered = timelineItems.filter((item) => {
+      // 搜索过滤
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        if (
+          !item.title.toLowerCase().includes(query) &&
+          !item.seriesName.toLowerCase().includes(query) &&
+          !item.description?.toLowerCase().includes(query)
+        ) {
+          return false
+        }
+      }
+
+      // 时间过滤
+      if (timeFilter !== 'all' && item.date) {
+        const now = new Date()
+        const itemDate = new Date(item.date)
+        const today = format(now, 'yyyy-MM-dd')
+        const itemDateStr = format(itemDate, 'yyyy-MM-dd')
+
+        switch (timeFilter) {
+          case 'past':
+            return isBefore(itemDate, startOfDay(now))
+          case 'today':
+            return today === itemDateStr
+          case 'upcoming':
+            return isAfter(itemDate, startOfDay(now))
+        }
+      }
+
+      return true
+    })
+
+    // 排序 - 按日期排序，最新的在前
+    filtered.sort((a, b) => {
+      if (!a.date && !b.date) return 0
+      if (!a.date) return 1
+      if (!b.date) return -1
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
+    })
+
+    return filtered
+  }, [timelineItems, searchQuery, timeFilter])
+
+  const toggleExpanded = (itemId: string) => {
+    setExpandedItems((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId)
+      } else {
+        newSet.add(itemId)
+      }
+      return newSet
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex gap-4">
+            <div className="w-4 h-4 rounded-full bg-muted/50 animate-pulse mt-8" />
+            <div className="flex-1 h-32 rounded-xl bg-muted/50 animate-pulse" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (!timelineItems || timelineItems.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center py-16"
+      >
+        <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+        <h3 className="text-lg font-semibold mb-2">暂无赛事时间轴</h3>
+        <p className="text-muted-foreground">创建赛事系列和里程碑后，时间轴将显示在这里</p>
+      </motion.div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 时间过滤器 */}
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2">
+          {[
+            { key: 'all', label: '全部' },
+            { key: 'upcoming', label: '即将到来' },
+            { key: 'today', label: '今天' },
+            { key: 'past', label: '已过期' }
+          ].map((filter) => (
+            <Button
+              key={filter.key}
+              variant={timeFilter === filter.key ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setTimeFilter(filter.key as any)}
+            >
+              {filter.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* 结果统计 */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          找到 {filteredAndSortedItems.length} 个里程碑
+        </p>
+      </div>
+
+      {/* 时间轴 */}
+      {filteredAndSortedItems.length > 0 ? (
+        <div className="relative">
+          <AnimatePresence>
+            {filteredAndSortedItems.map((item) => (
+              <TimelineItem
+                key={item.id}
+                item={item}
+                isExpanded={expandedItems.has(item.id)}
+                onToggle={() => toggleExpanded(item.id)}
+                onViewDetails={handleViewDetails}
+                onViewSeries={() => handleViewSeries(item)}
+                onViewProjects={handleViewProjects}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-16"
+        >
+          <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+          <h3 className="text-lg font-semibold mb-2">未找到匹配的里程碑</h3>
+          <p className="text-muted-foreground">尝试调整搜索条件或时间筛选器</p>
+        </motion.div>
+      )}
+
+      {/* 对话框组件 */}
+      <MilestoneDetailsDialog
+        milestone={selectedItem}
+        isOpen={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        onViewSeries={() => {
+          if (selectedItem) {
+            setDetailsDialogOpen(false)
+            handleViewSeries(selectedItem)
+          }
+        }}
+        onViewProjects={() => {
+          setDetailsDialogOpen(false)
+          setSelectedItem(selectedItem)
+          setProjectsDialogOpen(true)
+        }}
+      />
+
+      {/* 参与项目对话框 */}
+      <MilestoneParticipatingProjectsDialog
+        milestone={selectedItem}
+        isOpen={projectsDialogOpen}
+        onOpenChange={setProjectsDialogOpen}
+      />
+    </div>
+  )
+}

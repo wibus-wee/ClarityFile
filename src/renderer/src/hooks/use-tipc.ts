@@ -734,3 +734,13 @@ export function useIsImageFile() {
     tipcClient.isImageFile(arg)
   )
 }
+
+export function useCompetitionStatistics() {
+  return useSWR('competition-statistics', () => tipcClient.getCompetitionStatistics())
+}
+
+export function useMilestoneParticipatingProjects(milestoneId: string | null) {
+  return useSWR(milestoneId ? ['milestone-participating-projects', milestoneId] : null, () =>
+    milestoneId ? tipcClient.getMilestoneParticipatingProjects({ milestoneId }) : null
+  )
+}
