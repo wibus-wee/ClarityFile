@@ -155,9 +155,17 @@ export class ExpenseTrackingService {
         reimbursementDate: expenseTrackings.reimbursementDate,
         notes: expenseTrackings.notes,
         createdAt: expenseTrackings.createdAt,
-        updatedAt: expenseTrackings.updatedAt
+        updatedAt: expenseTrackings.updatedAt,
+        // 发票文件信息（可能为空）
+        invoiceFileName: managedFiles.name,
+        invoiceOriginalFileName: managedFiles.originalFileName,
+        invoicePhysicalPath: managedFiles.physicalPath,
+        invoiceMimeType: managedFiles.mimeType,
+        invoiceFileSizeBytes: managedFiles.fileSizeBytes,
+        invoiceUploadedAt: managedFiles.uploadedAt
       })
       .from(expenseTrackings)
+      .leftJoin(managedFiles, eq(expenseTrackings.invoiceManagedFileId, managedFiles.id))
       .orderBy(desc(expenseTrackings.applicationDate))
 
     return expenses
