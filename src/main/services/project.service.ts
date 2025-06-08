@@ -19,6 +19,7 @@ import type {
   SyncProjectFolderPathInput,
   RepairProjectFolderInput,
   ProjectDetailsOutput,
+  ProjectStatus,
   SuccessResponse
 } from '../types/project-schemas'
 import { ProjectFolderManager } from '../managers/project-folder.manager'
@@ -231,7 +232,7 @@ export class ProjectService {
       coverAsset
     ] = await Promise.all([
       LogicalDocumentService.getProjectDocumentsWithVersions(validatedInput.id),
-      ProjectAssetsService.getProjectAssets(validatedInput.id),
+      ProjectAssetsService.getProjectAssets({ projectId: validatedInput.id }),
       ExpenseTrackingService.getProjectExpenses(validatedInput.id),
       SharedResourcesService.getProjectSharedResources(validatedInput.id),
       CompetitionService.getProjectCompetitions(validatedInput.id),
@@ -246,10 +247,11 @@ export class ProjectService {
 
     // 3. 组装完整的项目详情
     return {
-      // 项目ID（顶级字段）
-      id: project.id,
       // 项目基本信息
-      project,
+      project: {
+        ...project,
+        status: project.status as ProjectStatus
+      },
       // 项目封面
       coverAsset,
       // 文档相关
