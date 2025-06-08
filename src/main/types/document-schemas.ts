@@ -7,13 +7,29 @@ export const documentStatusSchema = z.enum(['active', 'archived', 'deleted'], {
   errorMap: () => ({ message: '文档状态必须是 active、archived 或 deleted' })
 })
 
-// 文档类型枚举
-export const documentTypeSchema = z.enum(
-  ['需求文档', '设计文档', '技术文档', '测试文档', '用户手册', '项目计划', '会议纪要', '其他'],
-  {
-    errorMap: () => ({ message: '请选择有效的文档类型' })
-  }
-)
+// 文档类型 Schema - 使用字符串类型以支持自定义类型
+export const documentTypeSchema = z
+  .string()
+  .min(1, '文档类型不能为空')
+  .max(50, '文档类型不能超过50个字符')
+  .refine((type) => type.trim().length > 0, '文档类型不能只包含空格')
+
+// 常用文档类型选项（供前端 autocomplete 使用）
+export const COMMON_DOCUMENT_TYPES = [
+  { value: 'business_plan', label: '商业计划书', description: '项目商业计划书文档' },
+  { value: 'presentation', label: 'PPT演示', description: '项目演示文稿' },
+  { value: 'project_report', label: '项目报告', description: '项目相关报告文档' },
+  { value: 'project_proposal', label: '项目提案', description: '项目提案文档' },
+  { value: 'specification', label: '项目说明书', description: '项目技术或功能说明' },
+  { value: 'user_manual', label: '使用手册', description: '产品或系统使用手册' },
+  { value: 'contract', label: '合同文档', description: '项目相关合同文件' },
+  { value: 'requirements', label: '需求文档', description: '项目需求分析文档' },
+  { value: 'design_doc', label: '设计文档', description: '项目设计方案文档' },
+  { value: 'technical_doc', label: '技术文档', description: '技术实现相关文档' },
+  { value: 'test_doc', label: '测试文档', description: '测试计划和报告文档' },
+  { value: 'meeting_minutes', label: '会议纪要', description: '项目会议记录文档' },
+  { value: 'other', label: '其他', description: '其他类型文档' }
+] as const
 
 // 创建逻辑文档 Schema
 export const createLogicalDocumentSchema = z.object({
