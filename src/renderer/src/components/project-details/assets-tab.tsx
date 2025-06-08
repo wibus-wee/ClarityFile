@@ -166,91 +166,112 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* 头部操作栏 */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="搜索资产..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+      {/* 头部操作栏 - 现代化设计 */}
+      <div className="space-y-4">
+        {/* 标题和统计 */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold tracking-tight">项目资产</h2>
+            <p className="text-sm text-muted-foreground">
+              共 {filteredAssets.length} 个资产
+              {searchQuery && ` · 搜索 "${searchQuery}"`}
+              {filterType !== 'all' && ` · 类型 "${filterType}"`}
+            </p>
           </div>
 
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-32">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部类型</SelectItem>
-              {assetTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created">最新创建</SelectItem>
-              <SelectItem value="name">名称</SelectItem>
-              <SelectItem value="type">类型</SelectItem>
-              <SelectItem value="size">文件大小</SelectItem>
-            </SelectContent>
-          </Select>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button onClick={() => setCreateAssetOpen(true)} className="gap-2">
+              <Plus className="w-4 h-4" />
+              添加资产
+            </Button>
+          </motion.div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center border rounded-md">
+        {/* 搜索和筛选栏 */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="搜索资产名称或描述..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-9 bg-background/50 border-border/50 focus:bg-background focus:border-border"
+              />
+            </div>
+
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[140px] h-9 bg-background/50 border-border/50">
+                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="类型" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部类型</SelectItem>
+                {assetTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-[120px] h-9 bg-background/50 border-border/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created">最新创建</SelectItem>
+                <SelectItem value="name">名称</SelectItem>
+                <SelectItem value="type">类型</SelectItem>
+                <SelectItem value="size">文件大小</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 视图切换 */}
+          <div className="flex items-center bg-muted/50 rounded-lg p-1 border border-border/30">
             <motion.div whileTap={{ scale: 0.95 }}>
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="rounded-r-none"
+                className={cn(
+                  'h-8 px-3 rounded-md transition-all border-0',
+                  viewMode === 'grid'
+                    ? 'bg-background text-foreground shadow-sm border border-border/50'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                )}
               >
                 <Grid3X3 className="w-4 h-4" />
               </Button>
             </motion.div>
             <motion.div whileTap={{ scale: 0.95 }}>
               <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="rounded-l-none"
+                className={cn(
+                  'h-8 px-3 rounded-md transition-all border-0',
+                  viewMode === 'list'
+                    ? 'bg-background text-foreground shadow-sm border border-border/50'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                )}
               >
                 <List className="w-4 h-4" />
               </Button>
             </motion.div>
           </div>
-
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button onClick={() => setCreateAssetOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              添加新资产
-            </Button>
-          </motion.div>
         </div>
       </div>
 
       <Separator />
 
       {/* 资产列表/网格 */}
-      <motion.div
-        layout
-        layoutId="assets-container"
-        transition={ANIMATION_CONFIG.layout}
+      <div
         className={cn(
           viewMode === 'grid'
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-            : 'space-y-3'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'
+            : 'space-y-4'
         )}
       >
         {filteredAssets.length > 0 ? (
@@ -258,77 +279,102 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
             {filteredAssets.map((asset, index) => (
               <motion.div
                 key={asset.id}
-                layout
-                layoutId={`asset-${asset.id}`}
                 initial={{
                   opacity: 0,
-                  scale: 0.9,
-                  ...(viewMode === 'grid' ? { y: 20 } : { x: -20 })
+                  scale: 0.95
                 }}
-                animate={ANIMATION_CONFIG.fadeIn}
-                exit={ANIMATION_CONFIG.fadeOut}
-                whileHover={ANIMATION_CONFIG.hover}
-                whileTap={ANIMATION_CONFIG.tap}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 transition={{
-                  ...ANIMATION_CONFIG.spring,
-                  delay: Math.min(index * 0.05, 0.3), // 限制最大延迟
-                  layout: ANIMATION_CONFIG.layout
+                  duration: 0.2,
+                  delay: Math.min(index * 0.03, 0.2)
                 }}
-                className={cn(
-                  'border border-border rounded-lg overflow-hidden cursor-pointer',
-                  'hover:shadow-lg hover:border-primary/20 transition-shadow duration-200',
-                  viewMode === 'grid' ? 'aspect-square' : 'h-auto'
-                )}
+                className="overflow-hidden"
               >
                 {viewMode === 'grid' ? (
-                  // 网格视图
-                  <div className="h-full flex flex-col">
-                    <div className="flex-1 bg-muted/20 flex items-center justify-center relative overflow-hidden">
+                  // 网格视图 - 现代化设计
+                  <div
+                    className="group h-full flex flex-col bg-card border border-border rounded-xl overflow-hidden hover:bg-card/90 hover:border-border hover:shadow-md transition-all duration-200"
+                    onClick={() => handleViewAsset(asset)}
+                  >
+                    {/* 预览区域 */}
+                    <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden">
                       {asset.mimeType?.startsWith('image/') ? (
                         <SafeImage
                           filePath={asset.physicalPath}
                           alt={asset.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           fallbackClassName="w-full h-full"
                         />
                       ) : (
-                        <Image className="w-12 h-12 text-muted-foreground" />
-                      )}
-
-                      {isCurrentCover(asset.id) && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="bg-yellow-500 text-yellow-50">
-                            <Star className="w-3 h-3 mr-1" />
-                            封面
-                          </Badge>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                            <Image className="w-8 h-8 text-primary/60" />
+                          </div>
                         </div>
                       )}
-                    </div>
 
-                    <div className="p-3">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-medium text-sm truncate flex-1">{asset.name}</h3>
+                      {/* 覆盖层 */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+
+                      {/* 封面标识 */}
+                      {isCurrentCover(asset.id) && (
+                        <div className="absolute top-3 left-3">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/90 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+                            <Star className="w-3 h-3 fill-current" />
+                            封面
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 操作按钮 */}
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewAsset(asset)}>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleViewAsset(asset)
+                              }}
+                            >
                               <Eye className="w-4 h-4 mr-2" />
-                              查看
+                              查看详情
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDownloadAsset(asset)}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownloadAsset(asset)
+                              }}
+                            >
                               <Download className="w-4 h-4 mr-2" />
-                              下载
+                              下载文件
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditAsset(asset)}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditAsset(asset)
+                              }}
+                            >
                               <Edit className="w-4 h-4 mr-2" />
-                              编辑
+                              编辑信息
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleSetCover(asset)}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSetCover(asset)
+                              }}
+                            >
                               {isCurrentCover(asset.id) ? (
                                 <>
                                   <StarOff className="w-4 h-4 mr-2" />
@@ -343,89 +389,178 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleDeleteAsset(asset)}
+                              className="text-destructive focus:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteAsset(asset)
+                              }}
                             >
                               删除资产
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
+                    </div>
 
-                      <div className="space-y-1">
-                        <Badge variant="outline" className="text-xs">
-                          {asset.assetType}
-                        </Badge>
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(asset.fileSizeBytes)}
+                    {/* 信息区域 */}
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-2">
+                        <h3 className="font-medium text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                          {asset.name}
+                        </h3>
+
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs px-2 py-0.5 bg-muted text-muted-foreground border border-border/50"
+                          >
+                            {asset.assetType}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatFileSize(asset.fileSizeBytes)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {asset.contextDescription && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                          {asset.contextDescription}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(asset.createdAt).toLocaleDateString()}
-                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{new Date(asset.createdAt).toLocaleDateString('zh-CN')}</span>
+                        {asset.versionInfo && (
+                          <span className="px-1.5 py-0.5 bg-muted border border-border/50 rounded text-xs">
+                            {asset.versionInfo}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  // 列表视图
-                  <div className="flex items-center gap-4 p-4">
-                    <div className="w-12 h-12 bg-muted/20 rounded flex items-center justify-center shrink-0 overflow-hidden">
+                  // 列表视图 - 现代化设计
+                  <div
+                    className="group flex items-center gap-4 p-4 bg-card border border-border rounded-lg hover:bg-muted/30 hover:border-border transition-all duration-200 cursor-pointer"
+                    onClick={() => handleViewAsset(asset)}
+                  >
+                    {/* 缩略图 */}
+                    <div className="relative w-14 h-14 bg-muted/50 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                       {asset.mimeType?.startsWith('image/') ? (
                         <SafeImage
                           filePath={asset.physicalPath}
                           alt={asset.name}
-                          className="w-full h-full object-cover rounded"
-                          fallbackClassName="w-full h-full rounded"
+                          className="w-full h-full object-cover rounded-xl"
+                          fallbackClassName="w-full h-full rounded-xl"
                         />
                       ) : (
-                        <Image className="w-6 h-6 text-muted-foreground" />
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Image className="w-5 h-5 text-primary/60" />
+                        </div>
+                      )}
+
+                      {isCurrentCover(asset.id) && (
+                        <div className="absolute -top-1 -right-1">
+                          <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                            <Star className="w-3 h-3 text-white fill-current" />
+                          </div>
+                        </div>
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium truncate">{asset.name}</h3>
-                        <Badge variant="outline" className="text-xs">
+                    {/* 主要信息 */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                          {asset.name}
+                        </h3>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs px-2 py-0.5 bg-muted text-muted-foreground border border-border/50 shrink-0"
+                        >
                           {asset.assetType}
                         </Badge>
-                        {isCurrentCover(asset.id) && (
-                          <Badge className="bg-yellow-500 text-yellow-50 text-xs">
-                            <Star className="w-3 h-3 mr-1" />
-                            封面
-                          </Badge>
+                        {asset.versionInfo && (
+                          <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted border border-border/50 rounded shrink-0">
+                            {asset.versionInfo}
+                          </span>
                         )}
                       </div>
+
                       {asset.contextDescription && (
-                        <p className="text-sm text-muted-foreground line-clamp-1 mb-1">
+                        <p className="text-sm text-muted-foreground line-clamp-1 leading-relaxed">
                           {asset.contextDescription}
                         </p>
                       )}
+
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{formatFileSize(asset.fileSizeBytes)}</span>
-                        <span>{new Date(asset.createdAt).toLocaleDateString()}</span>
-                        <span>{asset.originalFileName}</span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-1 h-1 bg-muted-foreground/40 rounded-full"></span>
+                          {formatFileSize(asset.fileSizeBytes)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-1 h-1 bg-muted-foreground/40 rounded-full"></span>
+                          {new Date(asset.createdAt).toLocaleDateString('zh-CN')}
+                        </span>
+                        <span className="flex items-center gap-1 truncate">
+                          <span className="w-1 h-1 bg-muted-foreground/40 rounded-full"></span>
+                          {asset.originalFileName}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleDownloadAsset(asset)}>
+                    {/* 操作按钮 */}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDownloadAsset(asset)
+                        }}
+                      >
                         <Download className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleViewAsset(asset)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleViewAsset(asset)
+                        }}
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditAsset(asset)}>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditAsset(asset)
+                            }}
+                          >
                             <Edit className="w-4 h-4 mr-2" />
-                            编辑
+                            编辑信息
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleSetCover(asset)}>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSetCover(asset)
+                            }}
+                          >
                             {isCurrentCover(asset.id) ? (
                               <>
                                 <StarOff className="w-4 h-4 mr-2" />
@@ -440,8 +575,11 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteAsset(asset)}
+                            className="text-destructive focus:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteAsset(asset)
+                            }}
                           >
                             删除资产
                           </DropdownMenuItem>
@@ -459,28 +597,40 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={ANIMATION_CONFIG.spring}
-            className="col-span-full text-center py-12"
+            className="col-span-full"
           >
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...ANIMATION_CONFIG.spring, delay: 0.1 }}
+              className="text-center py-16 px-6"
             >
-              <Image className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-medium mb-2">暂无资产</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery || filterType !== 'all' ? '没有找到匹配的资产' : '开始添加项目资产'}
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-muted border border-border/50 flex items-center justify-center">
+                <Image className="w-10 h-10 text-muted-foreground" />
+              </div>
+
+              <h3 className="text-xl font-semibold mb-3 text-foreground">
+                {searchQuery || filterType !== 'all' ? '没有找到匹配的资产' : '暂无项目资产'}
+              </h3>
+
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+                {searchQuery || filterType !== 'all'
+                  ? '尝试调整搜索条件或筛选器来查找您需要的资产'
+                  : '开始上传图片、文档、视频等资产文件，让您的项目更加丰富'}
               </p>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button onClick={() => setCreateAssetOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  添加新资产
-                </Button>
-              </motion.div>
+
+              {!searchQuery && filterType === 'all' && (
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button onClick={() => setCreateAssetOpen(true)} size="lg" className="gap-2">
+                    <Plus className="w-5 h-5" />
+                    添加第一个资产
+                  </Button>
+                </motion.div>
+              )}
             </motion.div>
           </motion.div>
         )}
-      </motion.div>
+      </div>
 
       {/* Dialog 和 Drawer 组件 */}
       <AssetFormDrawer
