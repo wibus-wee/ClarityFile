@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 import {
   Dialog,
@@ -79,7 +80,21 @@ export function EditCompetitionStatusDialog({
     }
   })
 
+  // 当currentStatus变化时更新表单值
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        statusInMilestone: currentStatus || '准备中'
+      })
+    }
+  }, [currentStatus, open, form])
+
   const onSubmit = async (data: EditStatusFormData) => {
+    if (!competitionMilestoneId) {
+      toast.error('缺少赛事里程碑信息')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       await updateStatus.trigger({
@@ -88,10 +103,17 @@ export function EditCompetitionStatusDialog({
         statusInMilestone: data.statusInMilestone
       })
 
+      toast.success('赛事状态更新成功', {
+        description: `项目在"${competitionName} - ${levelName}"中的状态已更新为"${data.statusInMilestone}"`
+      })
+
       onOpenChange(false)
       onSuccess?.()
     } catch (error) {
       console.error('更新状态失败:', error)
+      toast.error('更新赛事状态失败', {
+        description: error instanceof Error ? error.message : '请检查网络连接后重试'
+      })
     } finally {
       setIsSubmitting(false)
     }

@@ -37,7 +37,7 @@ import { AddCompetitionDrawer } from './drawers/add-competition-drawer'
 import { EditCompetitionStatusDialog } from './dialogs/edit-competition-status-dialog'
 import { CompetitionDetailsDialog } from './dialogs/competition-details-dialog'
 import { RemoveCompetitionDialog } from './dialogs/remove-competition-dialog'
-import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 
 interface CompetitionsTabProps {
   projectDetails: ProjectDetailsOutput
@@ -345,10 +345,6 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                           <Eye className="w-4 h-4 mr-2" />
                           查看详情
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="w-4 h-4 mr-2" />
-                          编辑信息
-                        </DropdownMenuItem>
                         {competition.notificationFileName && (
                           <DropdownMenuItem onClick={() => handleDownloadNotification(competition)}>
                             <Download className="w-4 h-4 mr-2" />
@@ -386,14 +382,14 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
       {/* Dialog 和 Drawer 组件 */}
       <AddCompetitionDrawer
-        projectId={projectDetails.id}
+        projectId={projectDetails.project.id}
         open={addCompetitionOpen}
         onOpenChange={setAddCompetitionOpen}
         onSuccess={handleSuccess}
       />
 
       <EditCompetitionStatusDialog
-        projectId={projectDetails.id}
+        projectId={projectDetails.project.id}
         competitionMilestoneId={selectedCompetition?.milestoneId || ''}
         currentStatus={selectedCompetition?.statusInMilestone || null}
         competitionName={selectedCompetition?.seriesName || ''}
@@ -410,7 +406,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
       />
 
       <RemoveCompetitionDialog
-        projectId={projectDetails.id}
+        projectId={projectDetails.project.id}
         competition={
           selectedCompetition
             ? {

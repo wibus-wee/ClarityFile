@@ -200,8 +200,10 @@ export class CompetitionService {
         statusInMilestone: input.statusInMilestone
       })
       .where(
-        eq(projectCompetitionMilestones.projectId, input.projectId) &&
+        and(
+          eq(projectCompetitionMilestones.projectId, input.projectId),
           eq(projectCompetitionMilestones.competitionMilestoneId, input.competitionMilestoneId)
+        )
       )
       .returning()
 
@@ -218,8 +220,10 @@ export class CompetitionService {
     await db
       .delete(projectCompetitionMilestones)
       .where(
-        eq(projectCompetitionMilestones.projectId, input.projectId) &&
+        and(
+          eq(projectCompetitionMilestones.projectId, input.projectId),
           eq(projectCompetitionMilestones.competitionMilestoneId, input.competitionMilestoneId)
+        )
       )
 
     return { success: true }

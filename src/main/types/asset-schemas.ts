@@ -2,19 +2,29 @@ import { z } from 'zod'
 
 // ===== 资产管理相关 Schema =====
 
-// 资产类型枚举
-export const assetTypeSchema = z.enum([
-  '图片',
-  '视频',
-  '音频',
-  '文档',
-  '代码',
-  '数据',
-  '模型',
-  '其他'
-], {
-  errorMap: () => ({ message: '请选择有效的资产类型' })
-})
+// 资产类型 Schema - 使用字符串类型以支持自定义类型
+export const assetTypeSchema = z
+  .string()
+  .min(1, '资产类型不能为空')
+  .max(50, '资产类型不能超过50个字符')
+  .refine((type) => type.trim().length > 0, '资产类型不能只包含空格')
+
+// 常用资产类型选项（供前端 autocomplete 使用）
+export const COMMON_ASSET_TYPES = [
+  { value: 'image', label: '图片', description: '图片文件（JPG、PNG、GIF等）' },
+  { value: 'video', label: '视频', description: '视频文件（MP4、AVI、MOV等）' },
+  { value: 'audio', label: '音频', description: '音频文件（MP3、WAV、AAC等）' },
+  { value: 'document', label: '文档', description: '文档文件（PDF、DOC、TXT等）' },
+  { value: 'code', label: '代码', description: '代码文件和项目源码' },
+  { value: 'data', label: '数据', description: '数据文件（CSV、JSON、XML等）' },
+  { value: 'model', label: '模型', description: '3D模型、AI模型等文件' },
+  { value: 'design', label: '设计', description: '设计文件（PSD、AI、Sketch等）' },
+  { value: 'archive', label: '压缩包', description: '压缩文件（ZIP、RAR、7Z等）' },
+  { value: 'font', label: '字体', description: '字体文件（TTF、OTF、WOFF等）' },
+  { value: 'presentation', label: '演示', description: '演示文稿（PPT、KEY等）' },
+  { value: 'spreadsheet', label: '表格', description: '电子表格（XLS、CSV等）' },
+  { value: 'other', label: '其他', description: '其他类型资产' }
+] as const
 
 // 创建项目资产 Schema
 export const createProjectAssetSchema = z.object({
@@ -25,14 +35,8 @@ export const createProjectAssetSchema = z.object({
     .max(100, '资产名称不能超过100个字符')
     .refine((name) => name.trim().length > 0, '资产名称不能只包含空格'),
   assetType: assetTypeSchema,
-  contextDescription: z
-    .string()
-    .max(500, '上下文描述不能超过500个字符')
-    .optional(),
-  versionInfo: z
-    .string()
-    .max(100, '版本信息不能超过100个字符')
-    .optional(),
+  contextDescription: z.string().max(500, '上下文描述不能超过500个字符').optional(),
+  versionInfo: z.string().max(100, '版本信息不能超过100个字符').optional(),
   customFields: z.record(z.any()).optional(),
   managedFileId: z.string().min(1, '受管文件ID不能为空')
 })
@@ -47,14 +51,8 @@ export const updateProjectAssetSchema = z.object({
     .refine((name) => name.trim().length > 0, '资产名称不能只包含空格')
     .optional(),
   assetType: assetTypeSchema.optional(),
-  contextDescription: z
-    .string()
-    .max(500, '上下文描述不能超过500个字符')
-    .optional(),
-  versionInfo: z
-    .string()
-    .max(100, '版本信息不能超过100个字符')
-    .optional(),
+  contextDescription: z.string().max(500, '上下文描述不能超过500个字符').optional(),
+  versionInfo: z.string().max(100, '版本信息不能超过100个字符').optional(),
   customFields: z.record(z.any()).optional()
 })
 

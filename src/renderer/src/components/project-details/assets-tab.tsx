@@ -34,12 +34,12 @@ import {
 } from '@renderer/components/ui/dropdown-menu'
 import { cn, formatFileSize } from '@renderer/lib/utils'
 import { SafeImage } from '@renderer/components/ui/safe-image'
-import { CreateAssetDrawer } from './drawers/create-asset-drawer'
-import { EditAssetDrawer } from './drawers/edit-asset-drawer'
+import { AssetFormDrawer } from './drawers/asset-form-drawer'
 import { AssetDetailsDialog } from './dialogs/asset-details-dialog'
 import { DeleteAssetDialog } from './dialogs/delete-asset-dialog'
 import { SetCoverDialog } from './dialogs/set-cover-dialog'
-import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
+import type { ProjectAssetOutput } from '../../../../main/types/asset-schemas'
 
 interface AssetsTabProps {
   projectDetails: ProjectDetailsOutput
@@ -100,7 +100,7 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
   const [setCoverOpen, setSetCoverOpen] = useState(false)
 
   // 当前选中的资产
-  const [selectedAsset, setSelectedAsset] = useState<any>(null)
+  const [selectedAsset, setSelectedAsset] = useState<ProjectAssetOutput | null>(null)
 
   // 获取所有资产类型
   const assetTypes = Array.from(new Set(assets.map((asset) => asset.assetType)))
@@ -134,27 +134,27 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
   }
 
   // 事件处理函数
-  const handleViewAsset = (asset: any) => {
+  const handleViewAsset = (asset: ProjectAssetOutput) => {
     setSelectedAsset(asset)
     setAssetDetailsOpen(true)
   }
 
-  const handleEditAsset = (asset: any) => {
+  const handleEditAsset = (asset: ProjectAssetOutput) => {
     setSelectedAsset(asset)
     setEditAssetOpen(true)
   }
 
-  const handleDeleteAsset = (asset: any) => {
+  const handleDeleteAsset = (asset: ProjectAssetOutput) => {
     setSelectedAsset(asset)
     setDeleteAssetOpen(true)
   }
 
-  const handleSetCover = (asset: any) => {
+  const handleSetCover = (asset: ProjectAssetOutput) => {
     setSelectedAsset(asset)
     setSetCoverOpen(true)
   }
 
-  const handleDownloadAsset = (asset: any) => {
+  const handleDownloadAsset = (asset: ProjectAssetOutput) => {
     // TODO: 实现下载功能
     console.log('下载资产:', asset.id)
   }
@@ -483,14 +483,15 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
       </motion.div>
 
       {/* Dialog 和 Drawer 组件 */}
-      <CreateAssetDrawer
-        projectId={projectDetails.id}
+      <AssetFormDrawer
+        projectId={projectDetails.project.id}
         open={createAssetOpen}
         onOpenChange={setCreateAssetOpen}
         onSuccess={handleSuccess}
       />
 
-      <EditAssetDrawer
+      <AssetFormDrawer
+        projectId={projectDetails.project.id}
         asset={selectedAsset}
         open={editAssetOpen}
         onOpenChange={setEditAssetOpen}
@@ -514,7 +515,7 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
 
       <SetCoverDialog
         asset={selectedAsset}
-        projectId={projectDetails.id}
+        projectId={projectDetails.project.id}
         open={setCoverOpen}
         onOpenChange={setSetCoverOpen}
         onSuccess={handleSuccess}
