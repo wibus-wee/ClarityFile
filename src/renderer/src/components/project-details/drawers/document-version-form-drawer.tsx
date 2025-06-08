@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,54 +33,68 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import { FileText, Upload, FolderOpen, Trophy, Target } from 'lucide-react'
+import { Badge } from '@renderer/components/ui/badge'
+import { FileText, Upload, FolderOpen, Trophy, Target, Edit } from 'lucide-react'
 import {
   useSelectFile,
   useUploadDocumentVersion,
+  useUpdateDocumentVersion,
   useGetAllCompetitionSeries,
   useGetCompetitionMilestones
 } from '@renderer/hooks/use-tipc'
 import type { ProjectDetailsOutput } from '../../../../../main/types/project-schemas'
-import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/document-schemas'
+import type {
+  LogicalDocumentWithVersionsOutput,
+  DocumentVersionOutput
+} from '../../../../../main/types/document-schemas'
 
-const addVersionSchema = z.object({
+const versionFormSchema = z.object({
   versionTag: z.string().min(1, '版本标签不能为空').max(50, '版本标签不能超过50个字符'),
   notes: z.string().optional(),
   isGenericVersion: z.boolean(),
   competitionMilestoneId: z.string().optional(),
-  filePath: z.string().min(1, '请选择要上传的文件')
+  filePath: z.string().optional() // 仅在创建模式下需要
 })
 
-type AddVersionFormData = z.infer<typeof addVersionSchema>
+type VersionFormData = z.infer<typeof versionFormSchema>
 
-interface AddDocumentVersionDrawerProps {
+interface DocumentVersionFormDrawerProps {
+  mode: 'create' | 'edit'
   document: LogicalDocumentWithVersionsOutput | null
+  version?: DocumentVersionOutput | null // 编辑模式下的版本数据
   projectDetails: ProjectDetailsOutput | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
 }
 
-export function AddDocumentVersionDrawer({
+export function DocumentVersionFormDrawer({
+  mode,
   document,
+  version,
   projectDetails,
   open,
   onOpenChange,
   onSuccess
-}: AddDocumentVersionDrawerProps) {
+}: DocumentVersionFormDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState<string>('')
   const [selectedSeriesId, setSelectedSeriesId] = useState<string>('')
 
   const selectFile = useSelectFile()
   const uploadDocumentVersion = useUploadDocumentVersion()
+  const updateDocumentVersion = useUpdateDocumentVersion()
   const { data: competitionSeries } = useGetAllCompetitionSeries()
   const { data: milestones } = useGetCompetitionMilestones(selectedSeriesId, {
     enabled: !!selectedSeriesId
   })
 
-  const form = useForm<AddVersionFormData>({
-    resolver: zodResolver(addVersionSchema),
+  const isEdit = mode === 'edit'
+  const title = isEdit ? '编辑文档版本' : '添加文档版本'
+  const description = isEdit ? '修改版本信息，注意不能更改关联的文件' : '为此逻辑文档添加新版本'
+
+  const form = useForm<VersionFormData>({
+    resolver: zodResolver(versionFormSchema),
     defaultValues: {
       versionTag: '',
       notes: '',
@@ -90,7 +104,38 @@ export function AddDocumentVersionDrawer({
     }
   })
 
+  // 编辑模式下预填充数据
+  useEffect(() => {
+    if (isEdit && version && open) {
+      form.reset({
+        versionTag: version.versionTag,
+        notes: version.notes || '',
+        isGenericVersion: version.isGenericVersion,
+        competitionMilestoneId: version.competitionMilestoneId || '',
+        filePath: '' // 编辑模式下不需要文件路径
+      })
+
+      // 如果有赛事里程碑，需要设置对应的系列ID
+      if (version.competitionMilestone) {
+        setSelectedSeriesId(version.competitionMilestone.series.id)
+      }
+    } else if (!isEdit && open) {
+      // 创建模式下重置表单
+      form.reset({
+        versionTag: '',
+        notes: '',
+        isGenericVersion: true,
+        competitionMilestoneId: '',
+        filePath: ''
+      })
+      setSelectedFile('')
+      setSelectedSeriesId('')
+    }
+  }, [isEdit, version, open, form])
+
   const handleSelectFile = async () => {
+    if (isEdit) return // 编辑模式下不允许选择文件
+
     try {
       const result = await selectFile.trigger({
         title: '选择文档文件',
@@ -100,10 +145,8 @@ export function AddDocumentVersionDrawer({
         ]
       })
 
-      // 根据 FilesystemService.selectFile 的实际返回结构处理结果
       if (result && !result.canceled && result.path) {
         const filePath = result.path
-
         setSelectedFile(filePath)
         form.setValue('filePath', filePath)
 
@@ -116,9 +159,6 @@ export function AddDocumentVersionDrawer({
         }
 
         toast.success('文件选择成功！')
-      } else if (result?.canceled) {
-        // 用户主动取消，不显示提示
-        console.log('用户取消了文件选择')
       }
     } catch (error) {
       console.error('选择文件失败:', error)
@@ -126,92 +166,79 @@ export function AddDocumentVersionDrawer({
     }
   }
 
-  const onSubmit = async (data: AddVersionFormData) => {
-    if (!document || !projectDetails) {
-      toast.error('缺少必要信息，无法上传文档版本')
-      return
-    }
+  const onSubmit = async (data: VersionFormData) => {
+    if (!document || !projectDetails) return
 
     setIsSubmitting(true)
     try {
-      // 从文件路径中提取原始文件名
-      const originalFileName = data.filePath.split(/[/\\]/).pop() || 'unknown'
+      if (isEdit && version) {
+        // 编辑模式
+        await updateDocumentVersion.trigger({
+          id: version.id,
+          versionTag: data.versionTag,
+          isGenericVersion: data.isGenericVersion,
+          competitionMilestoneId: data.isGenericVersion
+            ? null
+            : data.competitionMilestoneId || null,
+          notes: data.notes
+        })
 
-      // 从原始文件名中提取扩展名
-      const fileExtension = originalFileName.includes('.')
-        ? '.' + originalFileName.split('.').pop()
-        : ''
-
-      // 构建文件导入上下文
-      const importContext = {
-        // 文件基本信息
-        sourcePath: data.filePath,
-        originalFileName,
-        displayName: `${document.name} - ${data.versionTag}${fileExtension}`,
-
-        // 导入类型
-        importType: 'document' as const,
-
-        // 项目信息（必需字段）
-        projectId: projectDetails.project.id,
-        projectName: projectDetails.project.name,
-
-        // 文档相关信息（必需字段）
-        logicalDocumentId: document.id,
-        logicalDocumentName: document.name,
-        logicalDocumentType: document.type,
-        versionTag: data.versionTag,
-        isGenericVersion: data.isGenericVersion,
-
-        // 比赛相关信息（如果不是通用版本）
-        competitionMilestoneId: !data.isGenericVersion ? data.competitionMilestoneId : undefined,
-
-        // 其他选项
-        notes: data.notes,
-        preserveOriginalName: false
-      }
-
-      // 调用文档上传API
-      const result = await uploadDocumentVersion.trigger(importContext)
-
-      if (result.success) {
-        toast.success(`文档版本 "${data.versionTag}" 上传成功！`)
-
-        // 重置表单并关闭抽屉
-        form.reset()
-        setSelectedFile('')
-        onOpenChange(false)
-        onSuccess?.()
-
-        // 显示警告信息（如果有）
-        if (result.warnings && result.warnings.length > 0) {
-          result.warnings.forEach((warning) => {
-            toast.warning(warning)
-          })
-        }
+        toast.success('文档版本更新成功！')
       } else {
-        throw new Error('上传失败')
+        // 创建模式
+        if (!data.filePath) {
+          toast.error('请选择要上传的文件')
+          return
+        }
+
+        const fileExtension = data.filePath.split('.').pop() || ''
+        const originalFileName = data.filePath.split('/').pop() || data.filePath
+
+        // 构建文件导入上下文
+        const importContext = {
+          sourcePath: data.filePath,
+          originalFileName,
+          displayName: `${document.name} - ${data.versionTag}${fileExtension ? '.' + fileExtension : ''}`,
+          importType: 'document' as const,
+          projectId: projectDetails.project.id,
+          projectName: projectDetails.project.name,
+          logicalDocumentId: document.id,
+          logicalDocumentName: document.name,
+          logicalDocumentType: document.type,
+          versionTag: data.versionTag,
+          isGenericVersion: data.isGenericVersion,
+          competitionMilestoneId: !data.isGenericVersion ? data.competitionMilestoneId : undefined,
+          notes: data.notes,
+          preserveOriginalName: false
+        }
+
+        await uploadDocumentVersion.trigger(importContext)
+        toast.success('文档版本添加成功！')
       }
+
+      onOpenChange(false)
+      onSuccess?.()
     } catch (error) {
-      console.error('添加版本失败:', error)
-      const errorMessage = error instanceof Error ? error.message : '未知错误'
-      toast.error(`添加文档版本失败: ${errorMessage}`)
+      console.error('操作失败:', error)
+      toast.error(isEdit ? '更新文档版本失败' : '添加文档版本失败')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  if (!document) return null
-
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent className="max-w-2xl mx-auto">
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            添加文档版本
+            {isEdit ? (
+              <Edit className="w-5 h-5 text-primary" />
+            ) : (
+              <Upload className="w-5 h-5 text-primary" />
+            )}
+            {title}
           </DrawerTitle>
-          <DrawerDescription>为 &ldquo;{document.name}&rdquo; 添加新的版本文件</DrawerDescription>
+          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
 
         <motion.div
@@ -221,53 +248,76 @@ export function AddDocumentVersionDrawer({
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* 文件选择 */}
-              <FormField
-                control={form.control}
-                name="filePath"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>选择文件 *</FormLabel>
-                    <div className="space-y-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleSelectFile}
-                        className="w-full justify-start"
-                      >
-                        <FolderOpen className="w-4 h-4 mr-2" />
-                        {selectedFile ? '更换文件' : '选择文件'}
-                      </Button>
-                      {selectedFile && (
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="text-sm font-medium">已选择文件：</p>
-                          <p className="text-xs text-muted-foreground font-mono break-all">
-                            {selectedFile}
-                          </p>
-                        </div>
-                      )}
+              {/* 文件信息显示（编辑模式）或文件选择（创建模式） */}
+              {isEdit && version ? (
+                <div className="rounded-lg border p-4 bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">关联文件</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <div>{version.originalFileName}</div>
+                    <div className="text-xs mt-1">
+                      文件大小:{' '}
+                      {version.fileSizeBytes
+                        ? `${(version.fileSizeBytes / 1024).toFixed(1)} KB`
+                        : '未知'}
                     </div>
-                    <FormDescription>选择要上传的文档文件</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </div>
+                  <Badge variant="secondary" className="mt-2">
+                    编辑模式下不可更改文件
+                  </Badge>
+                </div>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="filePath"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>选择文件</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleSelectFile}
+                            className="w-full justify-start"
+                            disabled={isSubmitting}
+                          >
+                            <FolderOpen className="w-4 h-4 mr-2" />
+                            {selectedFile ? '重新选择文件' : '选择文档文件'}
+                          </Button>
+                          {selectedFile && (
+                            <div className="text-sm text-muted-foreground p-2 bg-muted rounded">
+                              已选择: {selectedFile.split('/').pop()}
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormDescription>支持 PDF、Word、文本等文档格式</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
+              {/* 版本标签 */}
               <FormField
                 control={form.control}
                 name="versionTag"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>版本标签 *</FormLabel>
+                    <FormLabel>版本标签</FormLabel>
                     <FormControl>
-                      <Input placeholder="如：v1.0, 初稿, 最终版" {...field} />
+                      <Input placeholder="如: v1.0, 初稿, 终稿等" {...field} />
                     </FormControl>
-                    <FormDescription>用于标识这个版本的标签</FormDescription>
+                    <FormDescription>用于标识此版本的简短描述</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* 通用版本开关 */}
               <FormField
                 control={form.control}
                 name="isGenericVersion"
@@ -284,6 +334,7 @@ export function AddDocumentVersionDrawer({
                 )}
               />
 
+              {/* 赛事选择器 */}
               {!form.watch('isGenericVersion') && (
                 <div className="space-y-4">
                   {/* 赛事系列选择 */}
@@ -352,6 +403,7 @@ export function AddDocumentVersionDrawer({
                 </div>
               )}
 
+              {/* 版本备注 */}
               <FormField
                 control={form.control}
                 name="notes"
@@ -386,15 +438,19 @@ export function AddDocumentVersionDrawer({
             </Button>
             <Button
               onClick={form.handleSubmit(onSubmit)}
-              disabled={isSubmitting || !selectedFile}
+              disabled={isSubmitting || (!isEdit && !selectedFile)}
               className="flex-1"
             >
               {isSubmitting ? (
-                '上传中...'
+                isEdit ? (
+                  '更新中...'
+                ) : (
+                  '上传中...'
+                )
               ) : (
                 <>
-                  <Upload className="w-4 h-4 mr-2" />
-                  添加版本
+                  {isEdit ? <Edit className="w-4 h-4 mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                  {isEdit ? '更新版本' : '添加版本'}
                 </>
               )}
             </Button>

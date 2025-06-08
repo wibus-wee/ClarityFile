@@ -26,7 +26,8 @@ import {
   Download,
   Edit,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  Trash2
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -36,10 +37,11 @@ import {
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
 import { DocumentDrawer } from './drawers/document-drawer'
-import { AddDocumentVersionDrawer } from './drawers/add-document-version-drawer'
+import { DocumentVersionFormDrawer } from './drawers/document-version-form-drawer'
 import { DocumentDetailsDialog } from './dialogs/document-details-dialog'
 import { DeleteDocumentDialog } from './dialogs/delete-document-dialog'
 import { DocumentVersionDetailsDialog } from './dialogs/document-version-details-dialog'
+import { DeleteDocumentVersionDialog } from './dialogs/delete-document-version-dialog'
 import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 import type {
   LogicalDocumentWithVersionsOutput,
@@ -60,10 +62,12 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
   // Dialog/Drawer 状态管理
   const [createDocumentOpen, setCreateDocumentOpen] = useState(false)
   const [editDocumentOpen, setEditDocumentOpen] = useState(false)
-  const [addVersionOpen, setAddVersionOpen] = useState(false)
+  const [versionFormOpen, setVersionFormOpen] = useState(false)
+  const [versionFormMode, setVersionFormMode] = useState<'create' | 'edit'>('create')
   const [documentDetailsOpen, setDocumentDetailsOpen] = useState(false)
   const [deleteDocumentOpen, setDeleteDocumentOpen] = useState(false)
   const [versionDetailsOpen, setVersionDetailsOpen] = useState(false)
+  const [deleteVersionOpen, setDeleteVersionOpen] = useState(false)
 
   // 当前选中的文档和版本
   const [selectedDocument, setSelectedDocument] =
@@ -125,7 +129,27 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
 
   const handleAddVersion = (document: LogicalDocumentWithVersionsOutput) => {
     setSelectedDocument(document)
-    setAddVersionOpen(true)
+    setSelectedVersion(null)
+    setVersionFormMode('create')
+    setVersionFormOpen(true)
+  }
+
+  const handleEditVersion = (
+    document: LogicalDocumentWithVersionsOutput,
+    version: DocumentVersionOutput
+  ) => {
+    setSelectedDocument(document)
+    setSelectedVersion(version)
+    setVersionFormMode('edit')
+    setVersionFormOpen(true)
+  }
+
+  const handleDeleteVersion = (
+    version: DocumentVersionOutput,
+    isOfficialVersion: boolean = false
+  ) => {
+    setSelectedVersion(version)
+    setDeleteVersionOpen(true)
   }
 
   const handleViewVersionDetails = (version: DocumentVersionOutput) => {
@@ -317,66 +341,103 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
                               文档版本 ({document.versions.length})
                             </h4>
                             <div className="space-y-2">
-                              {document.versions.map((version) => (
-                                <div
-                                  key={version.id}
-                                  className="flex items-center justify-between p-3 bg-background rounded border"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <FileText className="w-4 h-4 text-muted-foreground" />
-                                    <div>
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium text-sm">
-                                          {version.versionTag}
-                                        </span>
-                                        {version.isGenericVersion && (
-                                          <Badge variant="secondary" className="text-xs">
-                                            通用版本
-                                          </Badge>
-                                        )}
-                                        {version.competitionProjectName && (
-                                          <Badge variant="outline" className="text-xs">
-                                            {version.competitionProjectName}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                        <span>{version.originalFileName}</span>
-                                        <span>
-                                          {new Date(version.createdAt).toLocaleDateString()}
-                                        </span>
-                                        {version.fileSizeBytes && (
-                                          <span>
-                                            {(version.fileSizeBytes / 1024).toFixed(1)} KB
+                              {document.versions.map((version: DocumentVersionOutput) => {
+                                const isOfficialVersion =
+                                  document.currentOfficialVersionId === version.id
+
+                                return (
+                                  <div
+                                    key={version.id}
+                                    className="flex items-center justify-between p-3 bg-background rounded border"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <FileText className="w-4 h-4 text-muted-foreground" />
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium text-sm">
+                                            {version.versionTag}
                                           </span>
+                                          {version.isGenericVersion && (
+                                            <Badge variant="secondary" className="text-xs">
+                                              通用版本
+                                            </Badge>
+                                          )}
+                                          {isOfficialVersion && (
+                                            <Badge variant="default" className="text-xs">
+                                              官方版本
+                                            </Badge>
+                                          )}
+                                          {version.competitionMilestone && (
+                                            <Badge variant="outline" className="text-xs">
+                                              {version.competitionMilestone.series.name} -{' '}
+                                              {version.competitionMilestone.levelName}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                          <span>{version.originalFileName}</span>
+                                          <span>
+                                            {new Date(version.createdAt).toLocaleDateString()}
+                                          </span>
+                                          {version.fileSizeBytes && (
+                                            <span>
+                                              {(version.fileSizeBytes / 1024).toFixed(1)} KB
+                                            </span>
+                                          )}
+                                        </div>
+                                        {version.notes && (
+                                          <p className="text-xs text-muted-foreground mt-1">
+                                            {version.notes}
+                                          </p>
                                         )}
                                       </div>
-                                      {version.notes && (
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                          {version.notes}
-                                        </p>
-                                      )}
+                                    </div>
+
+                                    <div className="flex items-center gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDownloadVersion(version)}
+                                      >
+                                        <Download className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleViewVersionDetails(version)}
+                                      >
+                                        <Eye className="w-4 h-4" />
+                                      </Button>
+
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" size="sm">
+                                            <MoreHorizontal className="w-4 h-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem
+                                            onClick={() => handleEditVersion(document, version)}
+                                          >
+                                            <Edit className="w-4 h-4 mr-2" />
+                                            编辑版本
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem
+                                            className="text-destructive"
+                                            onClick={() =>
+                                              handleDeleteVersion(version, isOfficialVersion)
+                                            }
+                                          >
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            删除版本
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
                                     </div>
                                   </div>
-
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleDownloadVersion(version)}
-                                    >
-                                      <Download className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleViewVersionDetails(version)}
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
+                                )
+                              })}
                             </div>
                           </div>
                         ) : (
@@ -431,11 +492,13 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
         onSuccess={handleSuccess}
       />
 
-      <AddDocumentVersionDrawer
+      <DocumentVersionFormDrawer
+        mode={versionFormMode}
         document={selectedDocument}
+        version={versionFormMode === 'edit' ? selectedVersion : null}
         projectDetails={projectDetails}
-        open={addVersionOpen}
-        onOpenChange={setAddVersionOpen}
+        open={versionFormOpen}
+        onOpenChange={setVersionFormOpen}
         onSuccess={handleSuccess}
       />
 
@@ -456,6 +519,14 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
         version={selectedVersion}
         open={versionDetailsOpen}
         onOpenChange={setVersionDetailsOpen}
+      />
+
+      <DeleteDocumentVersionDialog
+        version={selectedVersion}
+        isOfficialVersion={selectedDocument?.currentOfficialVersionId === selectedVersion?.id}
+        open={deleteVersionOpen}
+        onOpenChange={setDeleteVersionOpen}
+        onSuccess={handleSuccess}
       />
     </div>
   )

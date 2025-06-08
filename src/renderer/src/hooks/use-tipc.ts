@@ -5,7 +5,9 @@ import type {
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   DeleteLogicalDocumentInput,
-  CreateDocumentVersionInput
+  CreateDocumentVersionInput,
+  UpdateDocumentVersionInput,
+  DeleteDocumentVersionInput
 } from '../../../main/types/document-schemas'
 import type {
   CreateProjectAssetInput,
@@ -302,6 +304,34 @@ export function useCreateDocumentVersion() {
       mutate('all-documents')
       // 重新验证受管文件列表（因为创建了新的文件记录）
       mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+      // 重新验证项目详情（更新统计信息）
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useUpdateDocumentVersion() {
+  return useSWRMutation(
+    'document-versions',
+    async (_mutationKey, { arg }: { arg: UpdateDocumentVersionInput }) => {
+      const result = await tipcClient.updateDocumentVersion(arg)
+      // 重新验证相关数据
+      mutate('all-documents')
+      // 重新验证项目详情（更新统计信息）
+      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      return result
+    }
+  )
+}
+
+export function useDeleteDocumentVersion() {
+  return useSWRMutation(
+    'document-versions',
+    async (_mutationKey, { arg }: { arg: DeleteDocumentVersionInput }) => {
+      const result = await tipcClient.deleteDocumentVersion(arg)
+      // 重新验证相关数据
+      mutate('all-documents')
       // 重新验证项目详情（更新统计信息）
       mutate((key) => Array.isArray(key) && key[0] === 'project-details')
       return result
