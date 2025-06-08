@@ -44,22 +44,15 @@ import {
 } from '@renderer/hooks/use-tipc'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { toast } from 'sonner'
-import type {
-  CreateExpenseTrackingInput,
-  UpdateExpenseTrackingInput
-} from '../../../../../main/types/inputs'
+import {
+  createExpenseTrackingSchema,
+  type CreateExpenseTrackingInput,
+  type UpdateExpenseTrackingInput,
+  type ExpenseStatus
+} from '../../../../../main/types/expense-schemas'
 
-// 表单验证Schema
-const expenseFormSchema = z.object({
-  projectId: z.string().min(1, '请选择项目'),
-  itemName: z.string().min(1, '请填写报销项目').max(100, '报销项目名称不能超过100个字符'),
-  applicant: z.string().min(1, '请填写申请人').max(50, '申请人姓名不能超过50个字符'),
-  amount: z.number().positive('金额必须大于0'),
-  status: z.string().min(1, '请选择状态'),
-  applicationDate: z.date(),
-  reimbursementDate: z.date().optional(),
-  notes: z.string().optional()
-})
+// 表单验证Schema - 使用创建schema作为基础表单schema
+const expenseFormSchema = createExpenseTrackingSchema
 
 type ExpenseFormData = z.infer<typeof expenseFormSchema>
 
@@ -134,7 +127,7 @@ export function ExpenseFormDrawer({
         itemName: expense.itemName,
         applicant: expense.applicant,
         amount: expense.amount,
-        status: expense.status,
+        status: expense.status as ExpenseStatus,
         applicationDate: new Date(expense.applicationDate),
         reimbursementDate: expense.reimbursementDate
           ? new Date(expense.reimbursementDate)

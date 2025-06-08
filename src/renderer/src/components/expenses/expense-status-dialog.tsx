@@ -27,6 +27,7 @@ import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useUpdateExpenseTracking } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
+import type { ExpenseStatus } from '../../../../main/types/expense-schemas'
 
 // 经费项目类型定义
 type ExpenseItem = {
@@ -86,7 +87,7 @@ export function ExpenseStatusDialog({
   expense,
   onSuccess
 }: ExpenseStatusDialogProps) {
-  const [newStatus, setNewStatus] = useState<string>('')
+  const [newStatus, setNewStatus] = useState<ExpenseStatus | ''>('')
   const [reimbursementDate, setReimbursementDate] = useState<Date | undefined>(undefined)
   const [statusNotes, setStatusNotes] = useState('')
 
@@ -95,7 +96,7 @@ export function ExpenseStatusDialog({
   // 当dialog打开时，初始化状态
   const handleOpenChange = (open: boolean) => {
     if (open && expense) {
-      setNewStatus(expense.status)
+      setNewStatus(expense.status as ExpenseStatus)
       setReimbursementDate(
         expense.reimbursementDate ? new Date(expense.reimbursementDate) : undefined
       )
@@ -174,7 +175,10 @@ export function ExpenseStatusDialog({
           {/* 新状态选择 */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">更新为</Label>
-            <Select value={newStatus} onValueChange={setNewStatus}>
+            <Select
+              value={newStatus}
+              onValueChange={(value) => setNewStatus(value as ExpenseStatus)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="选择新状态" />
               </SelectTrigger>

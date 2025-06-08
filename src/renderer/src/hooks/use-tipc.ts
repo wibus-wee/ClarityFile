@@ -17,9 +17,6 @@ import type {
 } from '../../../main/types/asset-schemas'
 import type {
   CreateTagInput,
-  CreateExpenseTrackingInput,
-  UpdateExpenseTrackingInput,
-  DeleteExpenseTrackingInput,
   CreateSharedResourceInput,
   UpdateSharedResourceInput,
   DeleteSharedResourceInput,
@@ -32,6 +29,11 @@ import type {
   SelectDirectoryInput,
   SelectFileInput
 } from '../../../main/types/inputs'
+import type {
+  CreateExpenseTrackingInput,
+  UpdateExpenseTrackingInput,
+  DeleteExpenseTrackingInput
+} from '../../../main/types/expense-schemas'
 import type {
   CreateProjectInput,
   UpdateProjectInput,

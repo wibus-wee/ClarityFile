@@ -1,6 +1,10 @@
 import { db } from '../db'
 import { expenseTrackings, managedFiles } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
+import type {
+  CreateExpenseTrackingInput,
+  UpdateExpenseTrackingInput
+} from '../types/expense-schemas'
 
 /**
  * 经费追踪服务
@@ -42,17 +46,7 @@ export class ExpenseTrackingService {
   /**
    * 创建经费记录
    */
-  static async createExpenseTracking(input: {
-    itemName: string
-    projectId: string
-    applicant: string
-    amount: number
-    applicationDate: Date
-    status: string
-    invoiceManagedFileId?: string
-    reimbursementDate?: Date
-    notes?: string
-  }) {
+  static async createExpenseTracking(input: CreateExpenseTrackingInput) {
     const result = await db
       .insert(expenseTrackings)
       .values({
@@ -75,17 +69,7 @@ export class ExpenseTrackingService {
   /**
    * 更新经费记录
    */
-  static async updateExpenseTracking(input: {
-    id: string
-    itemName?: string
-    applicant?: string
-    amount?: number
-    applicationDate?: Date
-    status?: string
-    invoiceManagedFileId?: string
-    reimbursementDate?: Date
-    notes?: string
-  }) {
+  static async updateExpenseTracking(input: UpdateExpenseTrackingInput) {
     const result = await db
       .update(expenseTrackings)
       .set({

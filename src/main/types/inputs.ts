@@ -4,39 +4,6 @@ export interface CreateTagInput {
   color?: string
 }
 
-// 经费追踪相关输入类型
-export interface CreateExpenseTrackingInput {
-  itemName: string
-  projectId: string
-  applicant: string
-  amount: number
-  applicationDate: Date
-  status: string
-  invoiceManagedFileId?: string
-  reimbursementDate?: Date
-  notes?: string
-}
-
-export interface UpdateExpenseTrackingInput {
-  id: string
-  itemName?: string
-  applicant?: string
-  amount?: number
-  applicationDate?: Date
-  status?: string
-  invoiceManagedFileId?: string
-  reimbursementDate?: Date
-  notes?: string
-}
-
-export interface DeleteExpenseTrackingInput {
-  id: string
-}
-
-export interface GetProjectExpensesInput {
-  projectId: string
-}
-
 // 共享资源相关输入类型
 export interface CreateSharedResourceInput {
   name: string

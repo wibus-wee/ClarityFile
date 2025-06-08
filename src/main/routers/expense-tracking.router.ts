@@ -4,8 +4,9 @@ import type {
   CreateExpenseTrackingInput,
   UpdateExpenseTrackingInput,
   DeleteExpenseTrackingInput,
-  GetProjectExpensesInput
-} from '../types/inputs'
+  GetProjectExpensesInput,
+  GetExpensesByStatusInput
+} from '../types/expense-schemas'
 
 export function expenseTrackingRouter(t: ITipc) {
   return {
@@ -48,7 +49,7 @@ export function expenseTrackingRouter(t: ITipc) {
     }),
 
     // 根据状态获取经费记录
-    getExpensesByStatus: t.procedure.input<{ status: string }>().action(async ({ input }) => {
+    getExpensesByStatus: t.procedure.input<GetExpensesByStatusInput>().action(async ({ input }) => {
       return await ExpenseTrackingService.getExpensesByStatus(input.status)
     })
   }
