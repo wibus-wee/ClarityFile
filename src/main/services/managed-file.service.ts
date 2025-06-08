@@ -33,6 +33,24 @@ export interface GetManagedFilesInput {
   offset?: number
 }
 
+export interface GetGlobalFilesInput {
+  limit?: number
+  offset?: number
+  search?: string
+  type?: string
+  projectId?: string
+  sortBy?: 'name' | 'date' | 'size' | 'type'
+  sortOrder?: 'asc' | 'desc'
+}
+
+export interface FileSystemStatsOutput {
+  totalFiles: number
+  totalSize: number
+  fileTypeDistribution: { type: string; count: number; size: number }[]
+  projectDistribution: { projectId: string; projectName: string; count: number; size: number }[]
+  recentFiles: any[]
+}
+
 /**
  * 受管文件服务
  * 负责 managed_files 表的 CRUD 操作和文件物理层管理
@@ -233,5 +251,113 @@ export class ManagedFileService {
       .from(managedFiles)
 
     return result[0] || { totalFiles: 0, totalSize: 0 }
+  }
+
+  /**
+   * 获取全局文件列表（支持搜索、筛选、排序）
+   */
+  static async getGlobalFiles(input: GetGlobalFilesInput = {}) {
+    const { limit = 50, offset = 0, search, type, sortBy = 'date', sortOrder = 'desc' } = input
+
+    // 简化查询，先获取所有文件然后在内存中过滤
+    // TODO: 优化为数据库级别的过滤
+    const allFiles = await db.select().from(managedFiles)
+
+    let filteredFiles = allFiles
+
+    // 搜索过滤
+    if (search) {
+      filteredFiles = filteredFiles.filter(
+        (file) =>
+          file.name.toLowerCase().includes(search.toLowerCase()) ||
+          file.originalFileName?.toLowerCase().includes(search.toLowerCase())
+      )
+    }
+
+    // 类型过滤
+    if (type) {
+      filteredFiles = filteredFiles.filter((file) => file.mimeType?.startsWith(type))
+    }
+
+    // 排序
+    filteredFiles.sort((a, b) => {
+      let aValue, bValue
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name
+          bValue = b.name
+          break
+        case 'size':
+          aValue = a.fileSizeBytes || 0
+          bValue = b.fileSizeBytes || 0
+          break
+        case 'type':
+          aValue = a.mimeType || ''
+          bValue = b.mimeType || ''
+          break
+        case 'date':
+        default:
+          aValue = a.createdAt
+          bValue = b.createdAt
+          break
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
+    })
+
+    const total = filteredFiles.length
+    const files = filteredFiles.slice(offset, offset + limit)
+
+    return {
+      files,
+      total,
+      hasMore: offset + files.length < total
+    }
+  }
+
+  /**
+   * 获取文件系统统计信息
+   */
+  static async getFileSystemStats(): Promise<FileSystemStatsOutput> {
+    // 简化实现，先获取所有文件然后在内存中统计
+    const allFiles = await db.select().from(managedFiles)
+
+    const totalFiles = allFiles.length
+    const totalSize = allFiles.reduce((sum, file) => sum + (file.fileSizeBytes || 0), 0)
+
+    // 文件类型分布统计
+    const typeMap = new Map<string, { count: number; size: number }>()
+
+    allFiles.forEach((file) => {
+      const type = file.mimeType?.split('/')[0] || 'unknown'
+      const existing = typeMap.get(type) || { count: 0, size: 0 }
+      typeMap.set(type, {
+        count: existing.count + 1,
+        size: existing.size + (file.fileSizeBytes || 0)
+      })
+    })
+
+    const fileTypeDistribution = Array.from(typeMap.entries()).map(([type, stats]) => ({
+      type,
+      count: stats.count,
+      size: stats.size
+    }))
+
+    // 最近文件（按创建时间排序）
+    const recentFiles = allFiles
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10)
+
+    return {
+      totalFiles,
+      totalSize,
+      fileTypeDistribution,
+      projectDistribution: [], // TODO: 实现项目分布统计
+      recentFiles
+    }
   }
 }

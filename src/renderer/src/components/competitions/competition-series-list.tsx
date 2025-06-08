@@ -16,7 +16,7 @@ import { zhCN } from 'date-fns/locale'
 import { CompetitionSeriesDialog } from './dialogs/competition-series-dialog'
 import { DeleteCompetitionSeriesDialog } from './dialogs/delete-competition-series-dialog'
 import { CompetitionMilestoneList } from './competition-milestone-list'
-import type { CompetitionSeriesWithStatsOutput } from '../../../../main/types/outputs'
+import type { CompetitionSeriesWithStatsOutput } from '../../../../main/types/competition-schemas'
 
 interface CompetitionSeriesListProps {
   searchQuery: string

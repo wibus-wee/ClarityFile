@@ -53,7 +53,10 @@ import type {
   UpdateCompetitionMilestoneInput,
   DeleteCompetitionMilestoneInput
 } from '../../../main/types/competition-schemas'
-import type { CreateManagedFileInput } from '../../../main/services/managed-file.service'
+import type {
+  CreateManagedFileInput,
+  GetGlobalFilesInput
+} from '../../../main/services/managed-file.service'
 import type { FileImportContext } from '../../../main/services/intelligent/intelligent-file-import.service'
 
 // 项目相关的 hooks
@@ -786,4 +789,13 @@ export function useMilestoneParticipatingProjects(milestoneId: string | null) {
   return useSWR(milestoneId ? ['milestone-participating-projects', milestoneId] : null, () =>
     milestoneId ? tipcClient.getMilestoneParticipatingProjects({ milestoneId }) : null
   )
+}
+
+// 文件管理相关的 hooks
+export function useGlobalFiles(filters?: GetGlobalFilesInput) {
+  return useSWR(['global-files', filters], () => tipcClient.getGlobalFiles(filters || {}))
+}
+
+export function useFileSystemStats() {
+  return useSWR('file-system-stats', () => tipcClient.getFileSystemStats())
 }
