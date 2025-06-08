@@ -5,19 +5,21 @@ import type {
   UpdateProjectAssetInput,
   DeleteProjectAssetInput,
   GetProjectAssetsInput,
-  GetProjectCoverAssetInput
-} from '../types/inputs'
+  GetProjectAssetInput,
+  BatchDeleteProjectAssetsInput,
+  SearchProjectAssetsInput
+} from '../types/asset-schemas'
 
 export function projectAssetsRouter(t: ITipc) {
   return {
     // 获取项目的所有资产
     getProjectAssets: t.procedure.input<GetProjectAssetsInput>().action(async ({ input }) => {
-      return await ProjectAssetsService.getProjectAssets(input.projectId)
+      return await ProjectAssetsService.getProjectAssets(input)
     }),
 
     // 获取项目封面资产
     getProjectCoverAsset: t.procedure
-      .input<GetProjectCoverAssetInput>()
+      .input<{ coverAssetId: string }>()
       .action(async ({ input }) => {
         return await ProjectAssetsService.getProjectCoverAsset(input.coverAssetId)
       }),
@@ -34,14 +36,31 @@ export function projectAssetsRouter(t: ITipc) {
 
     // 删除项目资产
     deleteProjectAsset: t.procedure.input<DeleteProjectAssetInput>().action(async ({ input }) => {
-      return await ProjectAssetsService.deleteProjectAsset(input.id)
+      return await ProjectAssetsService.deleteProjectAsset(input)
     }),
 
     // 获取项目资产统计信息
     getProjectAssetsStatistics: t.procedure
-      .input<{ projectId: string }>()
+      .input<GetProjectAssetsInput>()
       .action(async ({ input }) => {
-        return await ProjectAssetsService.getProjectAssetsStatistics(input.projectId)
-      })
+        return await ProjectAssetsService.getProjectAssetsStatistics(input)
+      }),
+
+    // 获取单个项目资产
+    getProjectAsset: t.procedure.input<GetProjectAssetInput>().action(async ({ input }) => {
+      return await ProjectAssetsService.getProjectAsset(input)
+    }),
+
+    // 批量删除项目资产
+    batchDeleteProjectAssets: t.procedure
+      .input<BatchDeleteProjectAssetsInput>()
+      .action(async ({ input }) => {
+        return await ProjectAssetsService.batchDeleteProjectAssets(input)
+      }),
+
+    // 搜索项目资产
+    searchProjectAssets: t.procedure.input<SearchProjectAssetsInput>().action(async ({ input }) => {
+      return await ProjectAssetsService.searchProjectAssets(input)
+    })
   }
 }

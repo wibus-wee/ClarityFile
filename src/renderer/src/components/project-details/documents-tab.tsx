@@ -35,8 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
-import { CreateDocumentDrawer } from './drawers/create-document-drawer'
-import { EditDocumentDrawer } from './drawers/edit-document-drawer'
+import { DocumentDrawer } from './drawers/document-drawer'
 import { AddDocumentVersionDrawer } from './drawers/add-document-version-drawer'
 import { DocumentDetailsDialog } from './dialogs/document-details-dialog'
 import { DeleteDocumentDialog } from './dialogs/delete-document-dialog'
@@ -45,7 +44,7 @@ import type { ProjectDetailsOutput } from '../../../../main/types/project-schema
 import type {
   LogicalDocumentWithVersionsOutput,
   DocumentVersionOutput
-} from '../../../../main/types/outputs'
+} from '../../../../main/types/document-schemas'
 
 interface DocumentsTabProps {
   projectDetails: ProjectDetailsOutput
@@ -418,17 +417,17 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
       </div>
 
       {/* Dialog 和 Drawer 组件 */}
-      <CreateDocumentDrawer
-        projectId={projectDetails.id}
-        open={createDocumentOpen}
-        onOpenChange={setCreateDocumentOpen}
-        onSuccess={handleSuccess}
-      />
-
-      <EditDocumentDrawer
+      <DocumentDrawer
+        projectId={projectDetails.project.id}
+        open={createDocumentOpen || editDocumentOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreateDocumentOpen(false)
+            setEditDocumentOpen(false)
+            setSelectedDocument(null)
+          }
+        }}
         document={selectedDocument}
-        open={editDocumentOpen}
-        onOpenChange={setEditDocumentOpen}
         onSuccess={handleSuccess}
       />
 

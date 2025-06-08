@@ -10,8 +10,10 @@ import { Button } from '@renderer/components/ui/button'
 import { AlertTriangle, Loader2, Trash2 } from 'lucide-react'
 import { useDeleteCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
-import type { DeleteCompetitionSeriesInput } from '../../../../../main/types/inputs'
-import type { CompetitionSeriesWithStatsOutput } from '../../../../../main/types/outputs'
+import {
+  CompetitionSeriesWithStatsOutput,
+  DeleteCompetitionSeriesInput
+} from '../../../../../main/types/competition-schemas'
 
 interface DeleteCompetitionSeriesDialogProps {
   series: CompetitionSeriesWithStatsOutput | null

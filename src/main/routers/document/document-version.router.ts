@@ -6,7 +6,7 @@ import type {
   GetDocumentVersionInput,
   DeleteDocumentVersionInput,
   GetLogicalDocumentVersionsInput
-} from '../../types/inputs'
+} from '../../types/document-schemas'
 import type { FileImportContext } from '../../services/intelligent/intelligent-file-import.service'
 import { ITipc } from '../../types'
 

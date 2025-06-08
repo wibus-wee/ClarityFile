@@ -1,14 +1,21 @@
 import { db } from '../../db'
 import { documentVersions, managedFiles, logicalDocuments } from '../../../db/schema'
 import { eq, desc } from 'drizzle-orm'
-import type { SuccessResponse } from '../../types/outputs'
+import {
+  validateCreateDocumentVersion,
+  validateUpdateDocumentVersion,
+  validateGetDocumentVersion,
+  validateDeleteDocumentVersion,
+  validateGetLogicalDocumentVersions
+} from '../../types/document-schemas'
 import type {
   CreateDocumentVersionInput,
   UpdateDocumentVersionInput,
   GetDocumentVersionInput,
   DeleteDocumentVersionInput,
-  GetLogicalDocumentVersionsInput
-} from '../../types/inputs'
+  GetLogicalDocumentVersionsInput,
+  SuccessResponse
+} from '../../types/document-schemas'
 
 /**
  * 文档版本服务
@@ -19,18 +26,19 @@ export class DocumentVersionService {
    * 创建文档版本
    */
   static async createDocumentVersion(input: CreateDocumentVersionInput) {
-    console.log('创建文档版本 - 输入参数:', input)
+    const validatedInput = validateCreateDocumentVersion(input)
+    console.log('创建文档版本 - 输入参数:', validatedInput)
 
     // 验证逻辑文档是否存在
     const logicalDoc = await db
       .select()
       .from(logicalDocuments)
-      .where(eq(logicalDocuments.id, input.logicalDocumentId))
+      .where(eq(logicalDocuments.id, validatedInput.logicalDocumentId))
       .limit(1)
 
     if (logicalDoc.length === 0) {
-      console.error('逻辑文档不存在:', input.logicalDocumentId)
-      throw new Error(`逻辑文档不存在: ${input.logicalDocumentId}`)
+      console.error('逻辑文档不存在:', validatedInput.logicalDocumentId)
+      throw new Error(`逻辑文档不存在: ${validatedInput.logicalDocumentId}`)
     }
 
     console.log('逻辑文档验证通过:', logicalDoc[0])
@@ -39,30 +47,30 @@ export class DocumentVersionService {
     const managedFile = await db
       .select()
       .from(managedFiles)
-      .where(eq(managedFiles.id, input.managedFileId))
+      .where(eq(managedFiles.id, validatedInput.managedFileId))
       .limit(1)
 
     console.log('查询受管文件结果:', {
-      managedFileId: input.managedFileId,
+      managedFileId: validatedInput.managedFileId,
       found: managedFile.length > 0,
       file: managedFile[0] || null
     })
 
     if (managedFile.length === 0) {
-      console.error('受管文件不存在:', input.managedFileId)
+      console.error('受管文件不存在:', validatedInput.managedFileId)
 
       // 查询所有受管文件以便调试
       const allFiles = await db.select().from(managedFiles).limit(10)
       console.log('当前数据库中的受管文件:', allFiles)
 
-      throw new Error(`受管文件不存在: ${input.managedFileId}`)
+      throw new Error(`受管文件不存在: ${validatedInput.managedFileId}`)
     }
 
     // 检查该文件是否已经被其他版本使用
     const existingVersion = await db
       .select()
       .from(documentVersions)
-      .where(eq(documentVersions.managedFileId, input.managedFileId))
+      .where(eq(documentVersions.managedFileId, validatedInput.managedFileId))
       .limit(1)
 
     if (existingVersion.length > 0) {
@@ -72,17 +80,17 @@ export class DocumentVersionService {
     const result = await db
       .insert(documentVersions)
       .values({
-        logicalDocumentId: input.logicalDocumentId,
-        managedFileId: input.managedFileId,
-        versionTag: input.versionTag,
-        isGenericVersion: input.isGenericVersion || false,
-        competitionMilestoneId: input.competitionMilestoneId,
-        competitionProjectName: input.competitionProjectName,
-        notes: input.notes
+        logicalDocumentId: validatedInput.logicalDocumentId,
+        managedFileId: validatedInput.managedFileId,
+        versionTag: validatedInput.versionTag,
+        isGenericVersion: validatedInput.isGenericVersion || false,
+        competitionMilestoneId: validatedInput.competitionMilestoneId,
+        competitionProjectName: validatedInput.competitionProjectName,
+        notes: validatedInput.notes
       })
       .returning()
 
-    console.log(`文档版本 "${input.versionTag}" 创建成功`)
+    console.log(`文档版本 "${validatedInput.versionTag}" 创建成功`)
     return result[0]
   }
 
@@ -90,6 +98,8 @@ export class DocumentVersionService {
    * 获取单个文档版本
    */
   static async getDocumentVersion(input: GetDocumentVersionInput) {
+    const validatedInput = validateGetDocumentVersion(input)
+
     const result = await db
       .select({
         id: documentVersions.id,
@@ -117,7 +127,7 @@ export class DocumentVersionService {
       .from(documentVersions)
       .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
       .innerJoin(logicalDocuments, eq(documentVersions.logicalDocumentId, logicalDocuments.id))
-      .where(eq(documentVersions.id, input.id))
+      .where(eq(documentVersions.id, validatedInput.id))
       .limit(1)
 
     return result[0] || null
@@ -127,6 +137,8 @@ export class DocumentVersionService {
    * 获取逻辑文档的所有版本
    */
   static async getLogicalDocumentVersions(input: GetLogicalDocumentVersionsInput) {
+    const validatedInput = validateGetLogicalDocumentVersions(input)
+
     const result = await db
       .select({
         id: documentVersions.id,
@@ -148,7 +160,7 @@ export class DocumentVersionService {
       })
       .from(documentVersions)
       .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
-      .where(eq(documentVersions.logicalDocumentId, input.logicalDocumentId))
+      .where(eq(documentVersions.logicalDocumentId, validatedInput.logicalDocumentId))
       .orderBy(desc(documentVersions.createdAt))
 
     return result
@@ -158,7 +170,8 @@ export class DocumentVersionService {
    * 更新文档版本
    */
   static async updateDocumentVersion(input: UpdateDocumentVersionInput) {
-    const { id, ...updateData } = input
+    const validatedInput = validateUpdateDocumentVersion(input)
+    const { id, ...updateData } = validatedInput
 
     const result = await db
       .update(documentVersions)
@@ -181,11 +194,13 @@ export class DocumentVersionService {
    * 删除文档版本
    */
   static async deleteDocumentVersion(input: DeleteDocumentVersionInput): Promise<SuccessResponse> {
+    const validatedInput = validateDeleteDocumentVersion(input)
+
     // 获取版本信息
     const version = await db
       .select()
       .from(documentVersions)
-      .where(eq(documentVersions.id, input.id))
+      .where(eq(documentVersions.id, validatedInput.id))
       .limit(1)
 
     if (version.length === 0) {
@@ -196,7 +211,7 @@ export class DocumentVersionService {
     const logicalDoc = await db
       .select()
       .from(logicalDocuments)
-      .where(eq(logicalDocuments.currentOfficialVersionId, input.id))
+      .where(eq(logicalDocuments.currentOfficialVersionId, validatedInput.id))
       .limit(1)
 
     if (logicalDoc.length > 0) {
@@ -211,7 +226,7 @@ export class DocumentVersionService {
     }
 
     // 删除版本记录
-    await db.delete(documentVersions).where(eq(documentVersions.id, input.id))
+    await db.delete(documentVersions).where(eq(documentVersions.id, validatedInput.id))
 
     console.log(`文档版本 "${version[0].versionTag}" 删除成功`)
     return { success: true }

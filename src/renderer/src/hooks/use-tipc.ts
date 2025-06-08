@@ -5,11 +5,18 @@ import type {
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   DeleteLogicalDocumentInput,
-  CreateDocumentVersionInput,
-  CreateTagInput,
+  CreateDocumentVersionInput
+} from '../../../main/types/document-schemas'
+import type {
   CreateProjectAssetInput,
   UpdateProjectAssetInput,
   DeleteProjectAssetInput,
+  GetProjectAssetsInput,
+  BatchDeleteProjectAssetsInput,
+  SearchProjectAssetsInput
+} from '../../../main/types/asset-schemas'
+import type {
+  CreateTagInput,
   CreateExpenseTrackingInput,
   UpdateExpenseTrackingInput,
   DeleteExpenseTrackingInput,

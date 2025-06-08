@@ -1,11 +1,12 @@
 import { LogicalDocumentService } from '../../services/document/logical-document.service'
 import type {
   CreateLogicalDocumentInput,
-  UpdateLogicalDocumentInput,
   GetLogicalDocumentInput,
+  GetProjectDocumentsInput,
+  UpdateLogicalDocumentInput,
   DeleteLogicalDocumentInput,
-  GetProjectDocumentsInput
-} from '../../types/inputs'
+  SetOfficialVersionInput
+} from '../../types/document-schemas'
 import { ITipc } from '../../types'
 
 export function logicalDocumentRouter(t: ITipc) {
@@ -55,10 +56,10 @@ export function logicalDocumentRouter(t: ITipc) {
 
     // 设置当前官方版本
     setCurrentOfficialVersion: t.procedure
-      .input<{ documentId: string; versionId: string }>()
+      .input<SetOfficialVersionInput>()
       .action(async ({ input }) => {
         return await LogicalDocumentService.setCurrentOfficialVersion(
-          input.documentId,
+          input.logicalDocumentId,
           input.versionId
         )
       }),

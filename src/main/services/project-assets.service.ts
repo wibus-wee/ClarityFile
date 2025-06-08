@@ -1,6 +1,26 @@
 import { db } from '../db'
 import { projectAssets, managedFiles } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
+import {
+  validateCreateProjectAsset,
+  validateUpdateProjectAsset,
+  validateGetProjectAsset,
+  validateDeleteProjectAsset,
+  validateGetProjectAssets,
+  validateBatchDeleteProjectAssets,
+  validateSearchProjectAssets
+} from '../types/asset-schemas'
+import type {
+  CreateProjectAssetInput,
+  UpdateProjectAssetInput,
+  GetProjectAssetInput,
+  DeleteProjectAssetInput,
+  GetProjectAssetsInput,
+  BatchDeleteProjectAssetsInput,
+  SearchProjectAssetsInput,
+  ProjectAssetStatsOutput,
+  SuccessResponse
+} from '../types/asset-schemas'
 
 /**
  * 项目资产服务
@@ -10,7 +30,8 @@ export class ProjectAssetsService {
   /**
    * 获取项目的所有资产
    */
-  static async getProjectAssets(projectId: string) {
+  static async getProjectAssets(input: GetProjectAssetsInput) {
+    const validatedInput = validateGetProjectAssets(input)
     const assets = await db
       .select({
         id: projectAssets.id,
@@ -31,7 +52,7 @@ export class ProjectAssetsService {
       })
       .from(projectAssets)
       .innerJoin(managedFiles, eq(projectAssets.managedFileId, managedFiles.id))
-      .where(eq(projectAssets.projectId, projectId))
+      .where(eq(projectAssets.projectId, validatedInput.projectId))
       .orderBy(desc(projectAssets.createdAt))
 
     return assets.map((asset) => ({
@@ -85,85 +106,161 @@ export class ProjectAssetsService {
   /**
    * 创建项目资产
    */
-  static async createProjectAsset(input: {
-    projectId: string
-    name: string
-    assetType: string
-    managedFileId: string
-    contextDescription?: string
-    versionInfo?: string
-    customFields?: unknown
-  }) {
+  static async createProjectAsset(input: CreateProjectAssetInput) {
+    const validatedInput = validateCreateProjectAsset(input)
     const result = await db
       .insert(projectAssets)
       .values({
-        projectId: input.projectId,
-        name: input.name,
-        assetType: input.assetType,
-        managedFileId: input.managedFileId,
-        contextDescription: input.contextDescription,
-        versionInfo: input.versionInfo,
-        customFields: input.customFields
+        projectId: validatedInput.projectId,
+        name: validatedInput.name,
+        assetType: validatedInput.assetType,
+        managedFileId: validatedInput.managedFileId,
+        contextDescription: validatedInput.contextDescription,
+        versionInfo: validatedInput.versionInfo,
+        customFields: validatedInput.customFields
       })
       .returning()
 
-    console.log(`项目资产 "${input.name}" 创建成功`)
+    console.log(`项目资产 "${validatedInput.name}" 创建成功`)
     return result[0]
   }
 
   /**
    * 更新项目资产
    */
-  static async updateProjectAsset(input: {
-    id: string
-    name?: string
-    assetType?: string
-    contextDescription?: string
-    versionInfo?: string
-    customFields?: unknown
-  }) {
+  static async updateProjectAsset(input: UpdateProjectAssetInput) {
+    const validatedInput = validateUpdateProjectAsset(input)
     const result = await db
       .update(projectAssets)
       .set({
-        name: input.name,
-        assetType: input.assetType,
-        contextDescription: input.contextDescription,
-        versionInfo: input.versionInfo,
-        customFields: input.customFields,
+        name: validatedInput.name,
+        assetType: validatedInput.assetType,
+        contextDescription: validatedInput.contextDescription,
+        versionInfo: validatedInput.versionInfo,
+        customFields: validatedInput.customFields,
         updatedAt: new Date()
       })
-      .where(eq(projectAssets.id, input.id))
+      .where(eq(projectAssets.id, validatedInput.id))
       .returning()
 
-    console.log(`项目资产 "${input.id}" 更新成功`)
+    console.log(`项目资产 "${validatedInput.id}" 更新成功`)
     return result[0]
   }
 
   /**
    * 删除项目资产
    */
-  static async deleteProjectAsset(id: string) {
-    await db.delete(projectAssets).where(eq(projectAssets.id, id)).returning()
+  static async deleteProjectAsset(input: DeleteProjectAssetInput): Promise<SuccessResponse> {
+    const validatedInput = validateDeleteProjectAsset(input)
 
-    console.log(`项目资产 "${id}" 删除成功`)
+    await db.delete(projectAssets).where(eq(projectAssets.id, validatedInput.id)).returning()
+
+    console.log(`项目资产 "${validatedInput.id}" 删除成功`)
     return { success: true }
   }
 
   /**
    * 获取项目资产统计信息
    */
-  static async getProjectAssetsStatistics(projectId: string) {
-    const assets = await this.getProjectAssets(projectId)
+  static async getProjectAssetsStatistics(
+    input: GetProjectAssetsInput
+  ): Promise<ProjectAssetStatsOutput> {
+    const validatedInput = validateGetProjectAssets(input)
+    const assets = await this.getProjectAssets(validatedInput)
+
+    // 计算最近7天创建的资产数量
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const recentAssets = assets.filter((asset) => new Date(asset.createdAt) > sevenDaysAgo).length
+
+    // 计算总文件大小
+    const totalFileSize = assets.reduce((total, asset) => total + (asset.fileSizeBytes || 0), 0)
 
     return {
-      assetCount: assets.length,
+      totalAssets: assets.length,
       assetsByType: assets.reduce(
         (acc, asset) => {
           acc[asset.assetType] = (acc[asset.assetType] || 0) + 1
           return acc
         },
         {} as Record<string, number>
-      )
+      ),
+      totalFileSize,
+      recentAssets
     }
+  }
+
+  /**
+   * 获取单个项目资产
+   */
+  static async getProjectAsset(input: GetProjectAssetInput) {
+    const validatedInput = validateGetProjectAsset(input)
+
+    const result = await db
+      .select({
+        id: projectAssets.id,
+        projectId: projectAssets.projectId,
+        name: projectAssets.name,
+        assetType: projectAssets.assetType,
+        contextDescription: projectAssets.contextDescription,
+        versionInfo: projectAssets.versionInfo,
+        customFields: projectAssets.customFields,
+        createdAt: projectAssets.createdAt,
+        updatedAt: projectAssets.updatedAt,
+        // 文件信息
+        managedFileId: managedFiles.id,
+        fileName: managedFiles.name,
+        originalFileName: managedFiles.originalFileName,
+        physicalPath: managedFiles.physicalPath,
+        mimeType: managedFiles.mimeType,
+        fileSizeBytes: managedFiles.fileSizeBytes,
+        uploadedAt: managedFiles.uploadedAt
+      })
+      .from(projectAssets)
+      .innerJoin(managedFiles, eq(projectAssets.managedFileId, managedFiles.id))
+      .where(eq(projectAssets.id, validatedInput.id))
+      .limit(1)
+
+    return result[0] || null
+  }
+
+  /**
+   * 批量删除项目资产
+   */
+  static async batchDeleteProjectAssets(
+    input: BatchDeleteProjectAssetsInput
+  ): Promise<SuccessResponse> {
+    const validatedInput = validateBatchDeleteProjectAssets(input)
+
+    for (const assetId of validatedInput.assetIds) {
+      await db.delete(projectAssets).where(eq(projectAssets.id, assetId))
+    }
+
+    console.log(`批量删除 ${validatedInput.assetIds.length} 个项目资产成功`)
+    return {
+      success: true,
+      message: `成功删除 ${validatedInput.assetIds.length} 个资产`
+    }
+  }
+
+  /**
+   * 搜索项目资产
+   */
+  static async searchProjectAssets(input: SearchProjectAssetsInput) {
+    const validatedInput = validateSearchProjectAssets(input)
+
+    // 这里可以实现更复杂的搜索逻辑
+    const assets = await this.getProjectAssets({ projectId: validatedInput.projectId })
+
+    return assets.filter((asset) => {
+      const matchesQuery =
+        asset.name.toLowerCase().includes(validatedInput.query.toLowerCase()) ||
+        (asset.contextDescription &&
+          asset.contextDescription.toLowerCase().includes(validatedInput.query.toLowerCase()))
+
+      const matchesType = !validatedInput.assetType || asset.assetType === validatedInput.assetType
+
+      return matchesQuery && matchesType
+    })
   }
 }

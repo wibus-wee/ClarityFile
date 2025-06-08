@@ -148,6 +148,16 @@ export interface ProjectDetailsOutput {
   competitions: any[] // 从 CompetitionService 获取
   tags: any[] // 从 TagService 获取
   coverAsset?: any | null // 从 ProjectAssetsService 获取
+  statistics: {
+    documentCount: number
+    versionCount: number
+    assetCount: number
+    expenseCount: number
+    totalExpenseAmount: number
+    sharedResourceCount: number
+    competitionCount: number
+    tagCount: number
+  }
 }
 
 // 成功响应类型

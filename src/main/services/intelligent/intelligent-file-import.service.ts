@@ -598,7 +598,7 @@ export class IntelligentFileImportService {
         const logicalDocument = await LogicalDocumentService.createLogicalDocument({
           projectId: context.projectId!,
           name: context.logicalDocumentName!,
-          type: context.logicalDocumentType!,
+          type: context.logicalDocumentType! as any,
           description: context.notes,
           defaultStoragePathSegment: context.logicalDocumentName
         })

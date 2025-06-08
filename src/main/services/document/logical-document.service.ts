@@ -1,16 +1,23 @@
 import { db } from '../../db'
 import { logicalDocuments, documentVersions, managedFiles, projects } from '../../../db/schema'
 import { eq, desc, and, count } from 'drizzle-orm'
-import type { SuccessResponse } from '../../types/outputs'
 import { IntelligentPathGeneratorService } from '../intelligent/intelligent-path-generator.service'
 import { FilesystemOperations } from '../../utils/filesystem-operations'
 import {
+  validateCreateLogicalDocument,
+  validateUpdateLogicalDocument,
+  validateGetLogicalDocument,
+  validateDeleteLogicalDocument,
+  validateGetProjectDocuments
+} from '../../types/document-schemas'
+import type {
   CreateLogicalDocumentInput,
-  GetLogicalDocumentInput,
-  GetProjectDocumentsInput,
   UpdateLogicalDocumentInput,
-  DeleteLogicalDocumentInput
-} from '../../types/inputs'
+  GetLogicalDocumentInput,
+  DeleteLogicalDocumentInput,
+  GetProjectDocumentsInput,
+  SuccessResponse
+} from '../../types/document-schemas'
 
 /**
  * 逻辑文档服务
@@ -21,19 +28,21 @@ export class LogicalDocumentService {
    * 创建逻辑文档
    */
   static async createLogicalDocument(input: CreateLogicalDocumentInput) {
+    const validatedInput = validateCreateLogicalDocument(input)
+
     const result = await db
       .insert(logicalDocuments)
       .values({
-        projectId: input.projectId,
-        name: input.name,
-        type: input.type,
-        description: input.description,
-        defaultStoragePathSegment: input.defaultStoragePathSegment,
+        projectId: validatedInput.projectId,
+        name: validatedInput.name,
+        type: validatedInput.type,
+        description: validatedInput.description,
+        defaultStoragePathSegment: validatedInput.defaultStoragePathSegment,
         status: 'active'
       })
       .returning()
 
-    console.log(`逻辑文档 "${input.name}" 创建成功`)
+    console.log(`逻辑文档 "${validatedInput.name}" 创建成功`)
     return result[0]
   }
 
@@ -41,10 +50,12 @@ export class LogicalDocumentService {
    * 获取单个逻辑文档
    */
   static async getLogicalDocument(input: GetLogicalDocumentInput) {
+    const validatedInput = validateGetLogicalDocument(input)
+
     const result = await db
       .select()
       .from(logicalDocuments)
-      .where(eq(logicalDocuments.id, input.id))
+      .where(eq(logicalDocuments.id, validatedInput.id))
       .limit(1)
 
     return result[0] || null
@@ -94,6 +105,8 @@ export class LogicalDocumentService {
    * 获取项目的所有逻辑文档
    */
   static async getProjectDocuments(input: GetProjectDocumentsInput) {
+    const validatedInput = validateGetProjectDocuments(input)
+
     // 先获取基本的逻辑文档信息
     const documents = await db
       .select({
@@ -109,7 +122,10 @@ export class LogicalDocumentService {
       })
       .from(logicalDocuments)
       .where(
-        and(eq(logicalDocuments.projectId, input.projectId), eq(logicalDocuments.status, 'active'))
+        and(
+          eq(logicalDocuments.projectId, validatedInput.projectId),
+          eq(logicalDocuments.status, 'active')
+        )
       )
       .orderBy(desc(logicalDocuments.updatedAt))
 
@@ -135,7 +151,8 @@ export class LogicalDocumentService {
    * 更新逻辑文档
    */
   static async updateLogicalDocument(input: UpdateLogicalDocumentInput) {
-    const { id, ...updateData } = input
+    const validatedInput = validateUpdateLogicalDocument(input)
+    const { id, ...updateData } = validatedInput
 
     // 如果要更新名称，需要先获取旧的文档信息和项目信息
     let oldDocument: typeof logicalDocuments.$inferSelect | null = null
@@ -207,11 +224,13 @@ export class LogicalDocumentService {
    * 删除逻辑文档
    */
   static async deleteLogicalDocument(input: DeleteLogicalDocumentInput): Promise<SuccessResponse> {
+    const validatedInput = validateDeleteLogicalDocument(input)
+
     // 检查是否有关联的文档版本
     const versions = await db
       .select()
       .from(documentVersions)
-      .where(eq(documentVersions.logicalDocumentId, input.id))
+      .where(eq(documentVersions.logicalDocumentId, validatedInput.id))
       .limit(1)
 
     if (versions.length > 0) {
@@ -220,7 +239,7 @@ export class LogicalDocumentService {
 
     const result = await db
       .delete(logicalDocuments)
-      .where(eq(logicalDocuments.id, input.id))
+      .where(eq(logicalDocuments.id, validatedInput.id))
       .returning()
 
     if (result.length === 0) {
@@ -235,8 +254,10 @@ export class LogicalDocumentService {
    * 获取逻辑文档的详细信息（包含版本列表）
    */
   static async getLogicalDocumentWithVersions(input: GetLogicalDocumentInput) {
+    const validatedInput = validateGetLogicalDocument(input)
+
     // 获取逻辑文档基本信息
-    const document = await this.getLogicalDocument(input)
+    const document = await this.getLogicalDocument(validatedInput)
     if (!document) {
       return null
     }
@@ -261,7 +282,7 @@ export class LogicalDocumentService {
       })
       .from(documentVersions)
       .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
-      .where(eq(documentVersions.logicalDocumentId, input.id))
+      .where(eq(documentVersions.logicalDocumentId, validatedInput.id))
       .orderBy(desc(documentVersions.createdAt))
 
     return {

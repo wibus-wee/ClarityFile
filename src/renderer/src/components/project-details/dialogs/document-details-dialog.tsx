@@ -9,7 +9,7 @@ import {
 import { Badge } from '@renderer/components/ui/badge'
 import { Separator } from '@renderer/components/ui/separator'
 import { FileText, Calendar, Hash } from 'lucide-react'
-import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/outputs'
+import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/document-schemas'
 
 interface DocumentDetailsDialogProps {
   document: LogicalDocumentWithVersionsOutput | null
