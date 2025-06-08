@@ -1,5 +1,12 @@
 import { db } from '../../db'
-import { logicalDocuments, documentVersions, managedFiles, projects } from '../../../db/schema'
+import {
+  logicalDocuments,
+  documentVersions,
+  managedFiles,
+  projects,
+  competitionMilestones,
+  competitionSeries
+} from '../../../db/schema'
 import { eq, desc, and, count } from 'drizzle-orm'
 import { IntelligentPathGeneratorService } from '../intelligent/intelligent-path-generator.service'
 import { FilesystemOperations } from '../../utils/filesystem-operations'
@@ -269,7 +276,6 @@ export class LogicalDocumentService {
         versionTag: documentVersions.versionTag,
         isGenericVersion: documentVersions.isGenericVersion,
         competitionMilestoneId: documentVersions.competitionMilestoneId,
-        competitionProjectName: documentVersions.competitionProjectName,
         createdAt: documentVersions.createdAt,
         updatedAt: documentVersions.updatedAt,
         // 文件信息
@@ -457,7 +463,6 @@ export class LogicalDocumentService {
             versionTag: documentVersions.versionTag,
             isGenericVersion: documentVersions.isGenericVersion,
             competitionMilestoneId: documentVersions.competitionMilestoneId,
-            competitionProjectName: documentVersions.competitionProjectName,
             notes: documentVersions.notes,
             createdAt: documentVersions.createdAt,
             updatedAt: documentVersions.updatedAt,
@@ -467,16 +472,59 @@ export class LogicalDocumentService {
             physicalPath: managedFiles.physicalPath,
             mimeType: managedFiles.mimeType,
             fileSizeBytes: managedFiles.fileSizeBytes,
-            uploadedAt: managedFiles.uploadedAt
+            uploadedAt: managedFiles.uploadedAt,
+            // 赛事里程碑信息
+            competitionMilestoneLevelName: competitionMilestones.levelName,
+            competitionMilestoneDueDate: competitionMilestones.dueDateMilestone,
+            competitionSeriesId: competitionSeries.id,
+            competitionSeriesName: competitionSeries.name
           })
           .from(documentVersions)
           .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
+          .leftJoin(
+            competitionMilestones,
+            eq(documentVersions.competitionMilestoneId, competitionMilestones.id)
+          )
+          .leftJoin(
+            competitionSeries,
+            eq(competitionMilestones.competitionSeriesId, competitionSeries.id)
+          )
           .where(eq(documentVersions.logicalDocumentId, doc.id))
           .orderBy(desc(documentVersions.createdAt))
 
+        // 转换版本数据，组装赛事信息
+        const transformedVersions = versions.map((version) => ({
+          id: version.id,
+          versionTag: version.versionTag,
+          isGenericVersion: version.isGenericVersion,
+          competitionMilestoneId: version.competitionMilestoneId,
+          notes: version.notes,
+          createdAt: version.createdAt,
+          updatedAt: version.updatedAt,
+          fileName: version.fileName,
+          originalFileName: version.originalFileName,
+          physicalPath: version.physicalPath,
+          mimeType: version.mimeType,
+          fileSizeBytes: version.fileSizeBytes,
+          uploadedAt: version.uploadedAt,
+          // 组装赛事里程碑信息
+          competitionMilestone:
+            version.competitionMilestoneId && version.competitionMilestoneLevelName
+              ? {
+                  id: version.competitionMilestoneId,
+                  levelName: version.competitionMilestoneLevelName,
+                  dueDate: version.competitionMilestoneDueDate,
+                  series: {
+                    id: version.competitionSeriesId!,
+                    name: version.competitionSeriesName!
+                  }
+                }
+              : null
+        }))
+
         return {
           ...doc,
-          versions
+          versions: transformedVersions
         }
       })
     )

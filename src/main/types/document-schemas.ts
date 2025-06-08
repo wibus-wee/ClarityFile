@@ -81,11 +81,6 @@ export const createDocumentVersionSchema = z.object({
   versionTag: z.string().min(1, '版本标签不能为空').max(50, '版本标签不能超过50个字符'),
   isGenericVersion: z.boolean().default(false),
   competitionMilestoneId: z.string().nullable().optional(),
-  competitionProjectName: z
-    .string()
-    .max(100, '比赛项目名称不能超过100个字符')
-    .nullable()
-    .optional(),
   notes: z.string().max(1000, '备注不能超过1000个字符').optional()
 })
 
@@ -95,11 +90,6 @@ export const updateDocumentVersionSchema = z.object({
   versionTag: z.string().min(1, '版本标签不能为空').max(50, '版本标签不能超过50个字符').optional(),
   isGenericVersion: z.boolean().optional(),
   competitionMilestoneId: z.string().nullable().optional(),
-  competitionProjectName: z
-    .string()
-    .max(100, '比赛项目名称不能超过100个字符')
-    .nullable()
-    .optional(),
   notes: z.string().max(1000, '备注不能超过1000个字符').optional()
 })
 
@@ -219,7 +209,6 @@ export interface DocumentVersionOutput {
   versionTag: string
   isGenericVersion: boolean
   competitionMilestoneId?: string | null
-  competitionProjectName?: string | null
   notes?: string | null
   createdAt: Date
   updatedAt: Date
@@ -230,6 +219,16 @@ export interface DocumentVersionOutput {
   mimeType?: string | null
   fileSizeBytes?: number | null
   uploadedAt: Date
+  // 赛事信息（从 competitionMilestones 表关联）
+  competitionMilestone?: {
+    id: string
+    levelName: string
+    dueDate?: Date | null
+    series: {
+      id: string
+      name: string
+    }
+  } | null
 }
 
 // 带版本信息的逻辑文档输出类型

@@ -55,12 +55,18 @@ export function DocumentVersionDetailsDialog({
               {version.isGenericVersion && <Badge variant="secondary">通用版本</Badge>}
             </div>
 
-            {version.competitionProjectName && (
+            {version.competitionMilestone && (
               <div>
-                <span className="text-sm text-muted-foreground">关联赛事项目：</span>
-                <Badge variant="outline" className="ml-2">
-                  {version.competitionProjectName}
-                </Badge>
+                <span className="text-sm text-muted-foreground">关联赛事：</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline">{version.competitionMilestone.series.name}</Badge>
+                  <Badge variant="secondary">{version.competitionMilestone.levelName}</Badge>
+                  {version.competitionMilestone.dueDate && (
+                    <span className="text-xs text-muted-foreground">
+                      截止：{new Date(version.competitionMilestone.dueDate).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>

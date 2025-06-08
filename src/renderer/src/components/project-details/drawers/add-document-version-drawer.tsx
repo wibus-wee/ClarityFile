@@ -26,8 +26,20 @@ import {
   FormLabel,
   FormMessage
 } from '@renderer/components/ui/form'
-import { FileText, Upload, FolderOpen } from 'lucide-react'
-import { useSelectFile, useUploadDocumentVersion } from '@renderer/hooks/use-tipc'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@renderer/components/ui/select'
+import { FileText, Upload, FolderOpen, Trophy, Target } from 'lucide-react'
+import {
+  useSelectFile,
+  useUploadDocumentVersion,
+  useGetAllCompetitionSeries,
+  useGetCompetitionMilestones
+} from '@renderer/hooks/use-tipc'
 import type { ProjectDetailsOutput } from '../../../../../main/types/project-schemas'
 import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/document-schemas'
 
@@ -35,7 +47,7 @@ const addVersionSchema = z.object({
   versionTag: z.string().min(1, '版本标签不能为空').max(50, '版本标签不能超过50个字符'),
   notes: z.string().optional(),
   isGenericVersion: z.boolean(),
-  competitionProjectName: z.string().optional(),
+  competitionMilestoneId: z.string().optional(),
   filePath: z.string().min(1, '请选择要上传的文件')
 })
 
@@ -58,8 +70,14 @@ export function AddDocumentVersionDrawer({
 }: AddDocumentVersionDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState<string>('')
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string>('')
+
   const selectFile = useSelectFile()
   const uploadDocumentVersion = useUploadDocumentVersion()
+  const { data: competitionSeries } = useGetAllCompetitionSeries()
+  const { data: milestones } = useGetCompetitionMilestones(selectedSeriesId, {
+    enabled: !!selectedSeriesId
+  })
 
   const form = useForm<AddVersionFormData>({
     resolver: zodResolver(addVersionSchema),
@@ -67,7 +85,7 @@ export function AddDocumentVersionDrawer({
       versionTag: '',
       notes: '',
       isGenericVersion: true,
-      competitionProjectName: '',
+      competitionMilestoneId: '',
       filePath: ''
     }
   })
@@ -146,10 +164,7 @@ export function AddDocumentVersionDrawer({
         isGenericVersion: data.isGenericVersion,
 
         // 比赛相关信息（如果不是通用版本）
-        competitionInfo:
-          !data.isGenericVersion && data.competitionProjectName
-            ? { projectName: data.competitionProjectName }
-            : undefined,
+        competitionMilestoneId: !data.isGenericVersion ? data.competitionMilestoneId : undefined,
 
         // 其他选项
         notes: data.notes,
@@ -270,20 +285,71 @@ export function AddDocumentVersionDrawer({
               />
 
               {!form.watch('isGenericVersion') && (
-                <FormField
-                  control={form.control}
-                  name="competitionProjectName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>赛事项目名称</FormLabel>
-                      <FormControl>
-                        <Input placeholder="输入关联的赛事项目名称" {...field} />
-                      </FormControl>
-                      <FormDescription>此版本关联的特定赛事项目</FormDescription>
-                      <FormMessage />
-                    </FormItem>
+                <div className="space-y-4">
+                  {/* 赛事系列选择 */}
+                  <div>
+                    <label className="text-sm font-medium">赛事系列</label>
+                    <Select
+                      value={selectedSeriesId}
+                      onValueChange={(value) => {
+                        setSelectedSeriesId(value)
+                        // 清空里程碑选择
+                        form.setValue('competitionMilestoneId', '')
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="选择赛事系列" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {competitionSeries?.map((series) => (
+                          <SelectItem key={series.id} value={series.id}>
+                            <div className="flex items-center gap-2">
+                              <Trophy className="h-4 w-4 text-primary" />
+                              {series.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* 赛事里程碑选择 */}
+                  {selectedSeriesId && (
+                    <FormField
+                      control={form.control}
+                      name="competitionMilestoneId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>赛事里程碑</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="选择赛事里程碑" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {milestones?.map((milestone) => (
+                                <SelectItem key={milestone.id} value={milestone.id}>
+                                  <div className="flex items-center gap-2">
+                                    <Target className="h-4 w-4 text-primary" />
+                                    {milestone.levelName}
+                                    {milestone.dueDate && (
+                                      <span className="text-xs text-muted-foreground">
+                                        ({new Date(milestone.dueDate).toLocaleDateString()})
+                                      </span>
+                                    )}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>选择此版本关联的赛事里程碑</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
+                </div>
               )}
 
               <FormField

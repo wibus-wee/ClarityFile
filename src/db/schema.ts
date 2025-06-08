@@ -108,7 +108,6 @@ export const documentVersions = sqliteTable(
       () => competitionMilestones.id,
       { onDelete: 'set null' }
     ),
-    competitionProjectName: text('competition_project_name'),
     notes: text('notes'), // 版本说明
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()

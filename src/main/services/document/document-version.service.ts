@@ -85,7 +85,6 @@ export class DocumentVersionService {
         versionTag: validatedInput.versionTag,
         isGenericVersion: validatedInput.isGenericVersion || false,
         competitionMilestoneId: validatedInput.competitionMilestoneId,
-        competitionProjectName: validatedInput.competitionProjectName,
         notes: validatedInput.notes
       })
       .returning()
@@ -107,7 +106,6 @@ export class DocumentVersionService {
         versionTag: documentVersions.versionTag,
         isGenericVersion: documentVersions.isGenericVersion,
         competitionMilestoneId: documentVersions.competitionMilestoneId,
-        competitionProjectName: documentVersions.competitionProjectName,
         notes: documentVersions.notes,
         createdAt: documentVersions.createdAt,
         updatedAt: documentVersions.updatedAt,
@@ -145,7 +143,6 @@ export class DocumentVersionService {
         versionTag: documentVersions.versionTag,
         isGenericVersion: documentVersions.isGenericVersion,
         competitionMilestoneId: documentVersions.competitionMilestoneId,
-        competitionProjectName: documentVersions.competitionProjectName,
         notes: documentVersions.notes,
         createdAt: documentVersions.createdAt,
         updatedAt: documentVersions.updatedAt,
@@ -248,7 +245,6 @@ export class DocumentVersionService {
       versionTag: newVersionTag,
       isGenericVersion: originalVersion.isGenericVersion,
       competitionMilestoneId: originalVersion.competitionMilestoneId || undefined,
-      competitionProjectName: originalVersion.competitionProjectName || undefined,
       notes: `复制自版本: ${originalVersion.versionTag}`
     })
 
