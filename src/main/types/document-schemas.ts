@@ -18,16 +18,13 @@ export const documentTypeSchema = z
 export const COMMON_DOCUMENT_TYPES = [
   { value: 'business_plan', label: '商业计划书', description: '项目商业计划书文档' },
   { value: 'presentation', label: 'PPT演示', description: '项目演示文稿' },
-  { value: 'project_report', label: '项目报告', description: '项目相关报告文档' },
-  { value: 'project_proposal', label: '项目提案', description: '项目提案文档' },
   { value: 'specification', label: '项目说明书', description: '项目技术或功能说明' },
-  { value: 'user_manual', label: '使用手册', description: '产品或系统使用手册' },
+  { value: 'meeting_minutes', label: '会议纪要', description: '项目会议记录文档' },
+  { value: 'project_report', label: '项目报告', description: '项目相关报告文档' },
   { value: 'contract', label: '合同文档', description: '项目相关合同文件' },
   { value: 'requirements', label: '需求文档', description: '项目需求分析文档' },
   { value: 'design_doc', label: '设计文档', description: '项目设计方案文档' },
   { value: 'technical_doc', label: '技术文档', description: '技术实现相关文档' },
-  { value: 'test_doc', label: '测试文档', description: '测试计划和报告文档' },
-  { value: 'meeting_minutes', label: '会议纪要', description: '项目会议记录文档' },
   { value: 'other', label: '其他', description: '其他类型文档' }
 ] as const
 

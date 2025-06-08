@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import {
@@ -20,20 +20,24 @@ import {
   FormMessage
 } from '@renderer/components/ui/form'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@renderer/components/ui/select'
-import { FileText, Edit, Loader2, Plus } from 'lucide-react'
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@renderer/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+import { FileText, Edit, Loader2, Plus, Check, ChevronsUpDown } from 'lucide-react'
 import { useCreateLogicalDocument, useUpdateLogicalDocument } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
+import { cn } from '@renderer/lib/utils'
 import type {
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   DocumentType
 } from '../../../../../main/types/document-schemas'
+import { COMMON_DOCUMENT_TYPES } from '../../../../../main/types/document-schemas'
 
 // 文档输出类型（简化版，用于编辑）
 interface DocumentOutput {
@@ -65,17 +69,135 @@ type DocumentFormData = {
   defaultStoragePathSegment?: string
 }
 
-// 文档类型选项配置
-const documentTypeOptions = [
-  { value: '需求文档', label: '需求文档', description: '项目需求分析和规格说明' },
-  { value: '设计文档', label: '设计文档', description: '系统设计和架构文档' },
-  { value: '技术文档', label: '技术文档', description: '技术实现和开发文档' },
-  { value: '测试文档', label: '测试文档', description: '测试计划和测试报告' },
-  { value: '用户手册', label: '用户手册', description: '用户操作指南和说明' },
-  { value: '项目计划', label: '项目计划', description: '项目规划和进度安排' },
-  { value: '会议纪要', label: '会议纪要', description: '会议记录和决议事项' },
-  { value: '其他', label: '其他', description: '其他类型的文档' }
-]
+// 文档类型 Combobox 组件
+interface DocumentTypeComboboxProps {
+  value?: string
+  onValueChange: (value: string) => void
+  placeholder?: string
+  disabled?: boolean
+}
+
+function DocumentTypeCombobox({
+  value,
+  onValueChange,
+  placeholder = '选择或输入文档类型...',
+  disabled = false
+}: DocumentTypeComboboxProps) {
+  const [open, setOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+
+  // 过滤选项
+  const filteredOptions = COMMON_DOCUMENT_TYPES.filter(
+    (option) =>
+      option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+      option.description.toLowerCase().includes(searchValue.toLowerCase()) ||
+      option.value.toLowerCase().includes(searchValue.toLowerCase())
+  )
+
+  // 检查当前值是否在预定义选项中
+  const selectedOption = COMMON_DOCUMENT_TYPES.find((option) => option.value === value)
+
+  const handleSelect = (selectedValue: string) => {
+    if (selectedValue === value) {
+      onValueChange('')
+    } else {
+      onValueChange(selectedValue)
+    }
+    setOpen(false)
+    setSearchValue('')
+  }
+
+  const handleCustomValue = () => {
+    if (searchValue.trim()) {
+      onValueChange(searchValue.trim())
+      setOpen(false)
+      setSearchValue('')
+    }
+  }
+
+  const displayValue = selectedOption?.label || value || placeholder
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn('w-full justify-between font-normal', !value && 'text-muted-foreground')}
+          disabled={disabled}
+        >
+          <span className="truncate">{displayValue}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <Command>
+          <CommandInput
+            placeholder="搜索文档类型..."
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
+          <CommandList>
+            <CommandEmpty className="py-6 text-center text-sm">
+              <div className="space-y-2">
+                <p className="text-muted-foreground">未找到匹配的文档类型</p>
+                {searchValue.trim() && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCustomValue}
+                    className="h-8 text-xs"
+                  >
+                    <Plus className="mr-1 h-3 w-3" />
+                    使用 &quot;{searchValue.trim()}&quot;
+                  </Button>
+                )}
+              </div>
+            </CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.value}
+                  onSelect={handleSelect}
+                  className="flex flex-col items-start gap-1 py-3"
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <span className="font-medium">{option.label}</span>
+                    <Check
+                      className={cn(
+                        'h-4 w-4',
+                        value === option.value ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground">{option.description}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            {/* 显示自定义值选项 */}
+            {searchValue.trim() &&
+              !filteredOptions.some(
+                (option) => option.value.toLowerCase() === searchValue.toLowerCase()
+              ) && (
+                <CommandGroup>
+                  <CommandItem
+                    value={searchValue.trim()}
+                    onSelect={() => handleCustomValue()}
+                    className="flex items-center gap-2 py-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>使用 &quot;{searchValue.trim()}&quot;</span>
+                  </CommandItem>
+                </CommandGroup>
+              )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 export function DocumentDrawer({
   open,
@@ -94,7 +216,7 @@ export function DocumentDrawer({
     defaultValues: {
       projectId: projectId,
       name: '',
-      type: '需求文档' as DocumentType,
+      type: 'requirements' as DocumentType,
       description: '',
       defaultStoragePathSegment: '',
       ...(isEdit && { id: '' })
@@ -117,7 +239,7 @@ export function DocumentDrawer({
       form.reset({
         projectId: projectId,
         name: '',
-        type: '需求文档' as DocumentType,
+        type: 'requirements' as DocumentType,
         description: '',
         defaultStoragePathSegment: ''
       })
@@ -243,26 +365,15 @@ export function DocumentDrawer({
                     <FormLabel>
                       文档类型 <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="选择文档类型" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {documentTypeOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div className="flex flex-col items-start">
-                              <span className="font-medium">{option.label}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {option.description}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <DocumentTypeCombobox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="选择或输入文档类型"
+                    />
                     <FormMessage />
+                    <p className="text-xs text-muted-foreground">
+                      可以从预定义选项中选择，也可以输入自定义类型
+                    </p>
                   </FormItem>
                 )}
               />
