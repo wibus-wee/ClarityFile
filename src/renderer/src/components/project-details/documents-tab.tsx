@@ -41,8 +41,8 @@ import { AddDocumentVersionDrawer } from './drawers/add-document-version-drawer'
 import { DocumentDetailsDialog } from './dialogs/document-details-dialog'
 import { DeleteDocumentDialog } from './dialogs/delete-document-dialog'
 import { DocumentVersionDetailsDialog } from './dialogs/document-version-details-dialog'
+import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 import type {
-  ProjectDetailsOutput,
   LogicalDocumentWithVersionsOutput,
   DocumentVersionOutput
 } from '../../../../main/types/outputs'

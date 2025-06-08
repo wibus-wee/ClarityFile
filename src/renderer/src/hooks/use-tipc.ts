@@ -2,10 +2,6 @@ import useSWR, { mutate } from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { tipcClient } from '../lib/tipc-client'
 import type {
-  CreateProjectInput,
-  UpdateProjectInput,
-  DeleteProjectInput,
-  SearchProjectsInput,
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   DeleteLogicalDocumentInput,
@@ -29,6 +25,12 @@ import type {
   SelectDirectoryInput,
   SelectFileInput
 } from '../../../main/types/inputs'
+import type {
+  CreateProjectInput,
+  UpdateProjectInput,
+  DeleteProjectInput,
+  SearchProjectsInput
+} from '../../../main/types/project-schemas'
 import type {
   CreateCompetitionSeriesInput,
   CreateCompetitionMilestoneInput,

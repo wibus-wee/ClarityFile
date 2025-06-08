@@ -11,13 +11,15 @@
 **描述**: 获取指定项目的完整详细信息，包括所有关联的文档、资产、经费、共享资源、赛事参与情况和标签。
 
 **输入参数**:
+
 ```typescript
 {
-  id: string  // 项目ID
+  id: string // 项目ID
 }
 ```
 
 **返回数据结构**:
+
 ```typescript
 {
   // 项目基本信息
@@ -31,10 +33,10 @@
     createdAt: Date
     updatedAt: Date
   }
-  
+
   // 项目封面资产（如果设置了封面）
   coverAsset: ProjectAsset | null
-  
+
   // 文档相关 - 逻辑文档及其版本
   documents: Array<{
     // 逻辑文档信息
@@ -45,10 +47,10 @@
     // 该逻辑文档的所有版本
     versions: Array<DocumentVersion>
   }>
-  
+
   // 项目资产（截图、Logo等）
   assets: Array<ProjectAsset>
-  
+
   // 经费记录
   expenses: Array<{
     id: string
@@ -61,7 +63,7 @@
     invoiceFileName: string | null
     // ... 其他发票文件字段
   }>
-  
+
   // 关联的共享资源
   sharedResources: Array<{
     usageDescription: string | null
@@ -72,7 +74,7 @@
     resourceType: string
     // ... 其他共享资源字段
   }>
-  
+
   // 参与的赛事里程碑
   competitions: Array<{
     statusInMilestone: string | null
@@ -88,7 +90,7 @@
     notificationFileName: string | null
     // ... 其他字段
   }>
-  
+
   // 项目标签
   tags: Array<{
     tagId: string
@@ -96,17 +98,17 @@
     tagColor: string | null
     tagCreatedAt: Date
   }>
-  
+
   // 统计信息
   statistics: {
-    documentCount: number        // 逻辑文档数量
-    versionCount: number         // 文档版本总数
-    assetCount: number          // 资产数量
-    expenseCount: number        // 经费记录数量
-    totalExpenseAmount: number  // 经费总金额
+    documentCount: number // 逻辑文档数量
+    versionCount: number // 文档版本总数
+    assetCount: number // 资产数量
+    expenseCount: number // 经费记录数量
+    totalExpenseAmount: number // 经费总金额
     sharedResourceCount: number // 共享资源数量
-    competitionCount: number    // 参与赛事数量
-    tagCount: number           // 标签数量
+    competitionCount: number // 参与赛事数量
+    tagCount: number // 标签数量
   }
 }
 ```
@@ -114,6 +116,7 @@
 ## 使用示例
 
 ### 在主进程中使用
+
 ```typescript
 import { ProjectService } from './services/project.service'
 
@@ -126,28 +129,29 @@ if (projectDetails) {
 ```
 
 ### 在渲染进程中使用（通过TIPC）
+
 ```typescript
 import { useTipc } from '@/hooks/use-tipc'
 
 function ProjectDetailPage({ projectId }: { projectId: string }) {
   const { data: projectDetails, error, isLoading } = useTipc('getProjectDetails', { id: projectId })
-  
+
   if (isLoading) return <div>加载中...</div>
   if (error) return <div>加载失败: {error.message}</div>
   if (!projectDetails) return <div>项目不存在</div>
-  
+
   return (
     <div>
       <h1>{projectDetails.project.name}</h1>
       <p>{projectDetails.project.description}</p>
-      
+
       {/* 统计信息 */}
       <div className="stats">
         <div>文档: {projectDetails.statistics.documentCount}</div>
         <div>资产: {projectDetails.statistics.assetCount}</div>
         <div>经费: ¥{projectDetails.statistics.totalExpenseAmount}</div>
       </div>
-      
+
       {/* 文档列表 */}
       <section>
         <h2>项目文档</h2>
@@ -158,7 +162,7 @@ function ProjectDetailPage({ projectId }: { projectId: string }) {
           </div>
         ))}
       </section>
-      
+
       {/* 其他模块... */}
     </div>
   )
@@ -197,5 +201,5 @@ function ProjectDetailPage({ projectId }: { projectId: string }) {
 
 - 服务实现: `src/main/services/project.service.ts`
 - 路由定义: `src/main/routers/project.router.ts`
-- 类型定义: `src/main/types/outputs.ts`
+- 类型定义: `src/main/types/project-schemas.ts`
 - 数据库模型: `src/db/schema.ts`

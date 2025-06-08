@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { FileText, Image, DollarSign, Trophy, TrendingUp, Share2, Tag } from 'lucide-react'
 import { cn, formatFileSize } from '@renderer/lib/utils'
-import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 
 interface ProjectStatisticsProps {
   projectDetails: ProjectDetailsOutput
@@ -9,7 +9,19 @@ interface ProjectStatisticsProps {
 }
 
 export function ProjectStatistics({ projectDetails, className }: ProjectStatisticsProps) {
-  const { statistics, documents, assets, expenses, competitions } = projectDetails
+  const { documents, assets, expenses, competitions, sharedResources, tags } = projectDetails
+
+  // 计算统计信息
+  const statistics = {
+    documentCount: documents.length,
+    versionCount: documents.reduce((total, doc) => total + (doc.versions?.length || 0), 0),
+    assetCount: assets.length,
+    expenseCount: expenses.length,
+    totalExpenseAmount: expenses.reduce((total, expense) => total + expense.amount, 0),
+    competitionCount: competitions.length,
+    sharedResourceCount: sharedResources.length,
+    tagCount: tags.length
+  }
 
   // 计算一些额外的统计信息
   const recentDocuments = documents.filter(

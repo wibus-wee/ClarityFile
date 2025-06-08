@@ -1,14 +1,26 @@
 import { db } from '../db'
 import { projects } from '../../db/schema'
 import { eq, desc, like, and } from 'drizzle-orm'
+import {
+  validateCreateProject,
+  validateUpdateProject,
+  validateGetProject,
+  validateDeleteProject,
+  validateSearchProjects,
+  validateSyncProjectFolderPath,
+  validateRepairProjectFolder
+} from '../types/project-schemas'
 import type {
   CreateProjectInput,
   UpdateProjectInput,
   GetProjectInput,
   DeleteProjectInput,
-  SearchProjectsInput
-} from '../types/inputs'
-import type { SuccessResponse, ProjectDetailsOutput } from '../types/outputs'
+  SearchProjectsInput,
+  SyncProjectFolderPathInput,
+  RepairProjectFolderInput,
+  ProjectDetailsOutput,
+  SuccessResponse
+} from '../types/project-schemas'
 import { ProjectFolderManager } from '../managers/project-folder.manager'
 import { PathSyncManager } from '../managers/path-sync.manager'
 // 导入专门的服务类
@@ -28,19 +40,26 @@ export class ProjectService {
 
   // 根据 ID 获取项目
   static async getProject(input: GetProjectInput) {
-    const result = await db.select().from(projects).where(eq(projects.id, input.id)).limit(1)
+    const validatedInput = validateGetProject(input)
+    const result = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, validatedInput.id))
+      .limit(1)
     return result[0] || null
   }
 
   // 创建项目
   static async createProject(input: CreateProjectInput) {
+    const validatedInput = validateCreateProject(input)
+
     // 首先在数据库中创建项目记录（不包含文件夹路径）
     const result = await db
       .insert(projects)
       .values({
-        name: input.name,
-        description: input.description,
-        status: input.status || 'active'
+        name: validatedInput.name,
+        description: validatedInput.description,
+        status: validatedInput.status || 'active'
       })
       .returning()
 
@@ -74,7 +93,8 @@ export class ProjectService {
 
   // 更新项目
   static async updateProject(input: UpdateProjectInput) {
-    const { id, ...updateData } = input
+    const validatedInput = validateUpdateProject(input)
+    const { id, ...updateData } = validatedInput
 
     // 如果更新了项目名称，需要处理文件夹重命名
     let oldProject: any = null
@@ -132,12 +152,18 @@ export class ProjectService {
 
   // 删除项目
   static async deleteProject(input: DeleteProjectInput): Promise<SuccessResponse> {
+    const validatedInput = validateDeleteProject(input)
+
     // 获取项目信息用于文件夹删除
-    const projectResult = await db.select().from(projects).where(eq(projects.id, input.id)).limit(1)
+    const projectResult = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, validatedInput.id))
+      .limit(1)
     const project = projectResult[0]
 
     // 删除数据库记录
-    await db.delete(projects).where(eq(projects.id, input.id))
+    await db.delete(projects).where(eq(projects.id, validatedInput.id))
 
     // 删除项目文件夹（如果项目存在）
     if (project) {
@@ -158,17 +184,19 @@ export class ProjectService {
 
   // 搜索项目
   static async searchProjects(input: SearchProjectsInput) {
+    const validatedInput = validateSearchProjects(input)
     const result = await db
       .select()
       .from(projects)
-      .where(and(like(projects.name, `%${input.query}%`), eq(projects.status, 'active')))
+      .where(and(like(projects.name, `%${validatedInput.query}%`), eq(projects.status, 'active')))
       .orderBy(desc(projects.updatedAt))
     return result
   }
 
   // 同步项目文件夹路径
-  static async syncProjectFolderPath(projectId: string): Promise<SuccessResponse> {
-    return await PathSyncManager.syncProjectFolderPath(projectId)
+  static async syncProjectFolderPath(input: SyncProjectFolderPathInput): Promise<SuccessResponse> {
+    const validatedInput = validateSyncProjectFolderPath(input)
+    return await PathSyncManager.syncProjectFolderPath(validatedInput.projectId)
   }
 
   // 批量同步所有项目的文件夹路径
@@ -177,14 +205,17 @@ export class ProjectService {
   }
 
   // 修复项目文件夹（重新创建缺失的文件夹）
-  static async repairProjectFolder(projectId: string): Promise<SuccessResponse> {
-    return await PathSyncManager.repairProjectFolder(projectId)
+  static async repairProjectFolder(input: RepairProjectFolderInput): Promise<SuccessResponse> {
+    const validatedInput = validateRepairProjectFolder(input)
+    return await PathSyncManager.repairProjectFolder(validatedInput.projectId)
   }
 
   // 获取项目详细信息（聚合所有相关数据）
   static async getProjectDetails(input: GetProjectInput): Promise<ProjectDetailsOutput | null> {
+    const validatedInput = validateGetProject(input)
+
     // 1. 获取项目基本信息
-    const project = await this.getProject(input)
+    const project = await this.getProject(validatedInput)
     if (!project) {
       return null
     }
@@ -199,12 +230,12 @@ export class ProjectService {
       projectTagsData,
       coverAsset
     ] = await Promise.all([
-      LogicalDocumentService.getProjectDocumentsWithVersions(input.id),
-      ProjectAssetsService.getProjectAssets(input.id),
-      ExpenseTrackingService.getProjectExpenses(input.id),
-      SharedResourcesService.getProjectSharedResources(input.id),
-      CompetitionService.getProjectCompetitions(input.id),
-      TagService.getProjectTags(input.id),
+      LogicalDocumentService.getProjectDocumentsWithVersions(validatedInput.id),
+      ProjectAssetsService.getProjectAssets(validatedInput.id),
+      ExpenseTrackingService.getProjectExpenses(validatedInput.id),
+      SharedResourcesService.getProjectSharedResources(validatedInput.id),
+      CompetitionService.getProjectCompetitions(validatedInput.id),
+      TagService.getProjectTags(validatedInput.id),
       project.currentCoverAssetId
         ? ProjectAssetsService.getProjectCoverAsset(project.currentCoverAssetId)
         : Promise.resolve(null)

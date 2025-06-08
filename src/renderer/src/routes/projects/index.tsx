@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Input } from '@renderer/components/ui/input'
+import { Button } from '@renderer/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -16,15 +17,13 @@ import {
   useSearchProjects
 } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
-import { Search } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ProjectCard,
   ProjectSkeleton,
   ProjectEmptyState,
-  CreateProjectDialog,
-  EditProjectDialog,
-  type ProjectFormData,
+  ProjectDialog,
   type Project
 } from '@renderer/components/projects'
 
@@ -38,61 +37,17 @@ function ProjectsPage() {
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  // 表单状态
-  const [formData, setFormData] = useState<ProjectFormData>({
-    name: '',
-    description: '',
-    status: 'active'
-  })
-
   // SWR hooks
   const { data: projects, error: projectsError, isLoading: projectsLoading } = useProjects()
-  const { trigger: createProject, isMutating: isCreatingProject } = useCreateProject()
-  const { trigger: updateProject, isMutating: isUpdatingProject } = useUpdateProject()
   const { trigger: deleteProject, isMutating: isDeletingProject } = useDeleteProject()
   const { trigger: searchProjects, data: searchResults } = useSearchProjects()
 
-  const handleCreateProject = async () => {
-    if (!formData.name.trim()) {
-      toast.error('请输入项目名称')
-      return
-    }
-
-    try {
-      await createProject({
-        name: formData.name,
-        description: formData.description || undefined,
-        status: formData.status
-      })
-      toast.success('项目创建成功！')
-      setIsCreateDialogOpen(false)
-      resetForm()
-    } catch (error) {
-      toast.error('创建项目失败')
-      console.error(error)
-    }
-  }
-
-  const handleUpdateProject = async () => {
-    if (!editingProject || !formData.name.trim()) {
-      toast.error('请输入项目名称')
-      return
-    }
-
-    try {
-      await updateProject({
-        id: editingProject.id,
-        name: formData.name,
-        description: formData.description || undefined,
-        status: formData.status
-      })
-      toast.success('项目更新成功！')
-      setEditingProject(null)
-      resetForm()
-    } catch (error) {
-      toast.error('更新项目失败')
-      console.error(error)
-    }
+  // 项目操作成功回调
+  const handleProjectSuccess = () => {
+    // 项目创建/更新成功后的处理已经在 ProjectDialog 组件内部完成
+    // 这里只需要关闭对话框
+    setIsCreateDialogOpen(false)
+    setEditingProject(null)
   }
 
   const handleDeleteProject = async (projectId: string, projectName: string) => {
@@ -122,21 +77,8 @@ function ProjectsPage() {
     }
   }
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      status: 'active'
-    })
-  }
-
   const openEditDialog = (project: any) => {
     setEditingProject(project)
-    setFormData({
-      name: project.name,
-      description: project.description || '',
-      status: project.status
-    })
   }
 
   // 过滤项目
@@ -154,15 +96,12 @@ function ProjectsPage() {
           <p className="text-muted-foreground">管理您的所有项目，创建新项目并跟踪进度</p>
         </div>
 
-        <CreateProjectDialog
-          isOpen={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleCreateProject}
-          isSubmitting={isCreatingProject}
-          onReset={resetForm}
-        />
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            新建项目
+          </Button>
+        </div>
       </div>
 
       {/* 搜索和筛选栏 */}
@@ -257,14 +196,17 @@ function ProjectsPage() {
         )}
       </AnimatePresence>
 
-      {/* 编辑对话框 */}
-      <EditProjectDialog
+      {/* 项目对话框 */}
+      <ProjectDialog
+        open={isCreateDialogOpen || !!editingProject}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsCreateDialogOpen(false)
+            setEditingProject(null)
+          }
+        }}
         project={editingProject}
-        onOpenChange={(open) => !open && setEditingProject(null)}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleUpdateProject}
-        isSubmitting={isUpdatingProject}
+        onSuccess={handleProjectSuccess}
       />
     </div>
   )

@@ -1,9 +1,8 @@
 // 项目相关组件的统一导出
-export { ProjectForm } from './project-form'
 export { ProjectCard } from './project-card'
 export { ProjectSkeleton } from './project-skeleton'
 export { ProjectEmptyState } from './project-empty-state'
-export { CreateProjectDialog, EditProjectDialog } from './project-dialogs'
+export { ProjectDialog } from './project-dialog'
 
 // 类型定义
 export interface ProjectFormData {

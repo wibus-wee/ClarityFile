@@ -11,36 +11,26 @@ import {
   SettingsTextareaField,
   SettingsSelectField
 } from '@renderer/components/settings/components'
-import { 
-  Settings, 
-  Folder, 
-  Tag, 
-  Archive, 
-  Trash2,
-  AlertTriangle
-} from 'lucide-react'
+import { Settings, Folder, Tag, Archive, Trash2, AlertTriangle } from 'lucide-react'
 import { useUpdateProject, useDeleteProject } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+import { projectSettingsSchema } from '../../../../main/types/project-schemas'
+import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 
 interface SettingsTabProps {
   projectDetails: ProjectDetailsOutput
 }
 
-// 项目设置表单验证
-const projectSettingsSchema = z.object({
-  name: z.string().min(1, '项目名称不能为空'),
-  description: z.string().optional(),
-  status: z.enum(['active', 'archived', 'on_hold']),
-  folderPath: z.string().optional(),
+// 扩展项目设置 Schema，添加额外的设置字段
+const extendedProjectSettingsSchema = projectSettingsSchema.extend({
   autoSync: z.boolean(),
   enableNotifications: z.boolean(),
   backupEnabled: z.boolean(),
   compressionLevel: z.number().min(0).max(9)
 })
 
-type ProjectSettingsForm = z.infer<typeof projectSettingsSchema>
+type ProjectSettingsForm = z.infer<typeof extendedProjectSettingsSchema>
 
 const statusOptions = [
   { value: 'active', label: '进行中' },
@@ -58,7 +48,7 @@ const compressionOptions = [
 export function SettingsTab({ projectDetails }: SettingsTabProps) {
   const { project, tags } = projectDetails
   const [showDangerZone, setShowDangerZone] = useState(false)
-  
+
   const { trigger: updateProject } = useUpdateProject()
   const { trigger: deleteProject } = useDeleteProject()
 
@@ -92,7 +82,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
     if (!confirm('确定要删除此项目吗？此操作不可撤销！')) {
       return
     }
-    
+
     try {
       await deleteProject({ id: project.id })
       toast.success('项目已删除')
@@ -126,17 +116,14 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
       >
         <SettingsForm
           category="project"
-          schema={projectSettingsSchema}
+          schema={extendedProjectSettingsSchema}
           defaultValues={defaultValues}
           onSubmit={handleSaveSettings}
           submitButtonText="保存项目设置"
         >
           {(form) => (
             <>
-              <SettingsSection
-                title="基本信息"
-                description="配置项目的基本信息和元数据"
-              >
+              <SettingsSection title="基本信息" description="配置项目的基本信息和元数据">
                 <SettingsInputField
                   control={form.control}
                   name="name"
@@ -172,10 +159,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
                 />
               </SettingsSection>
 
-              <SettingsSection
-                title="同步与备份"
-                description="配置项目文件的同步和备份选项"
-              >
+              <SettingsSection title="同步与备份" description="配置项目文件的同步和备份选项">
                 <SettingsSwitchField
                   control={form.control}
                   name="autoSync"
@@ -264,7 +248,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
           <Settings className="w-5 h-5" />
           项目信息
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="p-4 bg-muted/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
@@ -273,21 +257,21 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
             </div>
             <code className="text-xs bg-muted px-2 py-1 rounded">{project.id}</code>
           </div>
-          
+
           <div className="p-4 bg-muted/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-medium">创建时间</span>
             </div>
             <p>{new Date(project.createdAt).toLocaleString()}</p>
           </div>
-          
+
           <div className="p-4 bg-muted/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-medium">最后更新</span>
             </div>
             <p>{new Date(project.updatedAt).toLocaleString()}</p>
           </div>
-          
+
           {project.currentCoverAssetId && (
             <div className="p-4 bg-muted/20 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
@@ -328,7 +312,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
               <AlertTriangle className="w-5 h-5 text-destructive" />
               <h3 className="text-lg font-semibold text-destructive">危险操作</h3>
             </div>
-            
+
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
                 <div>
@@ -355,11 +339,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
                     永久删除项目及其所有相关数据，此操作不可撤销
                   </p>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteProject}
-                >
+                <Button variant="destructive" size="sm" onClick={handleDeleteProject}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   删除
                 </Button>

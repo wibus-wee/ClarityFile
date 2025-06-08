@@ -28,10 +28,8 @@ import {
 } from '@renderer/components/ui/form'
 import { FileText, Upload, FolderOpen } from 'lucide-react'
 import { useSelectFile, useUploadDocumentVersion } from '@renderer/hooks/use-tipc'
-import type {
-  LogicalDocumentWithVersionsOutput,
-  ProjectDetailsOutput
-} from '../../../../../main/types/outputs'
+import type { ProjectDetailsOutput } from '../../../../../main/types/project-schemas'
+import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/outputs'
 
 const addVersionSchema = z.object({
   versionTag: z.string().min(1, '版本标签不能为空').max(50, '版本标签不能超过50个字符'),
