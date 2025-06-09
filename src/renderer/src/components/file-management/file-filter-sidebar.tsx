@@ -18,9 +18,15 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Badge } from '@renderer/components/ui/badge'
 import { Slider } from '@renderer/components/ui/slider'
 import { cn } from '@renderer/lib/utils'
+import { useProjects } from '@renderer/hooks/use-tipc'
 
 interface FileFilterSidebarProps {
-  onFilterChange: (filters: any) => void
+  onFilterChange: (filters: {
+    type?: string
+    project?: string
+    dateRange?: string
+    sizeRange?: number[]
+  }) => void
 }
 
 export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
@@ -29,12 +35,15 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
   const [sizeRange, setSizeRange] = useState([0, 100])
   const [dateRange, setDateRange] = useState<string>('all')
 
+  // 获取真实的项目数据
+  const { data: projectsData } = useProjects()
+
   const fileTypes = [
     { id: 'image', label: '图片', icon: Image, color: 'text-green-600' },
     { id: 'text', label: '文档', icon: FileText, color: 'text-orange-600' },
     { id: 'video', label: '视频', icon: Video, color: 'text-purple-600' },
     { id: 'audio', label: '音频', icon: Music, color: 'text-blue-600' },
-    { id: 'application', label: '应用', icon: Archive, color: 'text-gray-600' }
+    { id: 'application', label: '应用/压缩包', icon: Archive, color: 'text-gray-600' }
   ]
 
   const dateRanges = [
@@ -45,13 +54,12 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
     { id: 'year', label: '今年' }
   ]
 
-  // 模拟项目数据
-  const projects = [
-    { id: '1', name: '项目 A', fileCount: 45 },
-    { id: '2', name: '项目 B', fileCount: 32 },
-    { id: '3', name: '项目 C', fileCount: 28 },
-    { id: '4', name: '项目 D', fileCount: 15 }
-  ]
+  // 转换项目数据格式
+  const projects = (projectsData || []).map((project) => ({
+    id: project.id,
+    name: project.name,
+    fileCount: 0 // TODO: 从文件统计中获取实际文件数量
+  }))
 
   const toggleType = (typeId: string) => {
     const newTypes = new Set(selectedTypes)
@@ -61,7 +69,11 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
       newTypes.add(typeId)
     }
     setSelectedTypes(newTypes)
-    onFilterChange({ types: Array.from(newTypes) })
+    // 传递所有选中的类型，用逗号分隔
+    const selectedTypesArray = Array.from(newTypes)
+    onFilterChange({
+      type: selectedTypesArray.length > 0 ? selectedTypesArray.join(',') : undefined
+    })
   }
 
   const toggleProject = (projectId: string) => {
@@ -72,7 +84,11 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
       newProjects.add(projectId)
     }
     setSelectedProjects(newProjects)
-    onFilterChange({ projects: Array.from(newProjects) })
+    // 传递所有选中的项目，用逗号分隔
+    const selectedProjectsArray = Array.from(newProjects)
+    onFilterChange({
+      project: selectedProjectsArray.length > 0 ? selectedProjectsArray.join(',') : undefined
+    })
   }
 
   const clearAllFilters = () => {
@@ -80,11 +96,20 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
     setSelectedProjects(new Set())
     setSizeRange([0, 100])
     setDateRange('all')
-    onFilterChange({})
+    onFilterChange({
+      type: undefined,
+      project: undefined,
+      dateRange: undefined,
+      sizeRange: undefined
+    })
   }
 
   const hasActiveFilters =
-    selectedTypes.size > 0 || selectedProjects.size > 0 || dateRange !== 'all'
+    selectedTypes.size > 0 ||
+    selectedProjects.size > 0 ||
+    dateRange !== 'all' ||
+    sizeRange[0] !== 0 ||
+    sizeRange[1] !== 100
 
   return (
     <div className="h-full bg-background flex flex-col">
@@ -138,7 +163,9 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
               return (
                 <motion.button
                   key={type.id}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   onClick={() => toggleType(type.id)}
                   className={cn(
                     'w-full flex items-center gap-3 p-2 rounded-md transition-colors text-left',
@@ -171,7 +198,9 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
               return (
                 <motion.button
                   key={project.id}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   onClick={() => toggleProject(project.id)}
                   className={cn(
                     'w-full flex items-center justify-between p-2 rounded-md transition-colors text-left',
@@ -208,8 +237,13 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
               return (
                 <motion.button
                   key={range.id}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setDateRange(range.id)}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  onClick={() => {
+                    setDateRange(range.id)
+                    onFilterChange({ dateRange: range.id === 'all' ? undefined : range.id })
+                  }}
                   className={cn(
                     'w-full flex items-center justify-between p-2 rounded-md transition-colors text-left',
                     isSelected
@@ -236,7 +270,10 @@ export function FileFilterSidebar({ onFilterChange }: FileFilterSidebarProps) {
           <div className="space-y-3">
             <Slider
               value={sizeRange}
-              onValueChange={setSizeRange}
+              onValueChange={(value) => {
+                setSizeRange(value)
+                onFilterChange({ sizeRange: value })
+              }}
               max={100}
               step={1}
               className="w-full"

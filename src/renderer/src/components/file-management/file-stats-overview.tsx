@@ -1,14 +1,5 @@
 import { motion } from 'framer-motion'
-import { 
-  Files, 
-  HardDrive, 
-  Image, 
-  FileText, 
-  Video, 
-  Music,
-  Archive,
-  TrendingUp
-} from 'lucide-react'
+import { Files, HardDrive, Image, FileText, Video, Music, Archive, TrendingUp } from 'lucide-react'
 import { Badge } from '@renderer/components/ui/badge'
 import { cn } from '@renderer/lib/utils'
 
@@ -64,7 +55,7 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
   }
 
   // 计算最大的文件类型用于进度条
-  const maxTypeCount = Math.max(...stats.fileTypeDistribution.map(item => item.count))
+  const maxTypeCount = Math.max(...stats.fileTypeDistribution.map((item) => item.count))
 
   return (
     <div className="space-y-4">
@@ -127,7 +118,7 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
             {stats.fileTypeDistribution.slice(0, 5).map((item, index) => {
               const TypeIcon = getTypeIcon(item.type)
               const percentage = maxTypeCount > 0 ? (item.count / maxTypeCount) * 100 : 0
-              
+
               return (
                 <motion.div
                   key={item.type}
@@ -138,11 +129,9 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <TypeIcon className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-                    <span className="text-sm font-medium capitalize truncate">
-                      {item.type}
-                    </span>
+                    <span className="text-sm font-medium capitalize truncate">{item.type}</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
@@ -159,11 +148,11 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
                         )}
                       />
                     </div>
-                    
+
                     <Badge variant="secondary" className="text-xs min-w-fit">
                       {item.count}
                     </Badge>
-                    
+
                     <span className="text-xs text-muted-foreground min-w-fit">
                       {formatFileSize(item.size)}
                     </span>
@@ -171,7 +160,7 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
                 </motion.div>
               )
             })}
-            
+
             {stats.fileTypeDistribution.length > 5 && (
               <motion.div
                 initial={{ opacity: 0 }}

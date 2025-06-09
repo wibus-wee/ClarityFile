@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { useSearch } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { useSearch, useNavigate } from '@tanstack/react-router'
 import {
   Search,
   Grid3X3,
@@ -12,25 +11,65 @@ import {
   Image,
   FileText,
   Video,
-  Music
+  Music,
+  ArrowUp,
+  ArrowDown,
+  MousePointer2,
+  CheckSquare
 } from 'lucide-react'
 import { Input } from '@renderer/components/ui/input'
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { Badge } from '@renderer/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@renderer/components/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
 import { useGlobalFiles, useFileSystemStats } from '@renderer/hooks/use-tipc'
+import { useFileActions } from '@renderer/hooks/use-file-actions'
+import { useFileManagementStore } from '@renderer/stores/file-management'
+import { MimeTypeUtils } from '@renderer/utils/mime-type-utils'
 import { FileListView } from './file-list-view'
 import { FileGridView } from './file-grid-view'
 import { FileStatsOverview } from './file-stats-overview'
 import { FileFilterSidebar } from './file-filter-sidebar'
+import { FileRenameDialog } from './file-rename-dialog'
+import { FileDeleteDialog } from './file-delete-dialog'
+import { FileInfoDrawer } from './file-info-drawer'
+import { QuickLookIndicator } from './quicklook-indicator'
 
 type ViewMode = 'grid' | 'list' | 'details'
 
 export function FileManagerPage() {
   const search = useSearch({ from: '/files' })
+  const navigate = useNavigate({ from: '/files' })
   const [searchQuery, setSearchQuery] = useState(search.search || '')
-  const [showFilters, setShowFilters] = useState(false)
+  const [showFilters, setShowFilters] = useState(true)
+
+  const { handleUpload, handleFileAction } = useFileActions()
+  const { selectionMode, setSelectionMode, fileForInfo, isInfoDrawerOpen, closeInfoDrawer } =
+    useFileManagementStore()
+
+  // 同步搜索框和URL参数
+  useEffect(() => {
+    setSearchQuery(search.search || '')
+  }, [search.search])
+
+  // 更新URL参数的函数
+  const updateSearchParams = (updates: Partial<typeof search>) => {
+    navigate({
+      search: (prev) => ({ ...prev, ...updates }),
+      replace: true
+    })
+  }
+
+  // 处理视图模式切换
+  const handleViewModeChange = (mode: ViewMode) => {
+    updateSearchParams({ view: mode })
+  }
 
   // 获取文件数据
   const { data: filesData, isLoading } = useGlobalFiles({
@@ -48,40 +87,24 @@ export function FileManagerPage() {
 
   // 文件类型图标映射
   const getFileTypeIcon = (mimeType: string) => {
-    if (mimeType?.startsWith('image/')) return Image
-    if (mimeType?.startsWith('video/')) return Video
-    if (mimeType?.startsWith('audio/')) return Music
-    if (mimeType?.includes('text') || mimeType?.includes('document')) return FileText
+    if (MimeTypeUtils.isImageFile(mimeType)) return Image
+    if (MimeTypeUtils.isVideoFile(mimeType)) return Video
+    if (MimeTypeUtils.isAudioFile(mimeType)) return Music
+    if (MimeTypeUtils.isDocumentFile(mimeType)) return FileText
     return File
   }
 
   // 文件类型颜色映射
   const getFileTypeColor = (mimeType: string) => {
-    if (mimeType?.startsWith('image/')) return 'text-green-600'
-    if (mimeType?.startsWith('video/')) return 'text-purple-600'
-    if (mimeType?.startsWith('audio/')) return 'text-blue-600'
-    if (mimeType?.includes('text') || mimeType?.includes('document')) return 'text-orange-600'
+    if (MimeTypeUtils.isImageFile(mimeType)) return 'text-green-600'
+    if (MimeTypeUtils.isVideoFile(mimeType)) return 'text-purple-600'
+    if (MimeTypeUtils.isAudioFile(mimeType)) return 'text-blue-600'
+    if (MimeTypeUtils.isDocumentFile(mimeType)) return 'text-orange-600'
     return 'text-gray-600'
   }
 
   return (
     <div className="flex h-[calc(100vh-7rem)] bg-background">
-      {/* 左侧筛选面板 */}
-      <motion.div
-        initial={{ width: showFilters ? 280 : 0 }}
-        animate={{ width: showFilters ? 280 : 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="h-full border-r border-border overflow-hidden flex-shrink-0"
-      >
-        {showFilters && (
-          <FileFilterSidebar
-            onFilterChange={(_filters) => {
-              // TODO: 更新URL参数
-            }}
-          />
-        )}
-      </motion.div>
-
       {/* 主内容区域 */}
       <div className="flex-1 flex flex-col h-full min-w-0">
         {/* 顶部工具栏 */}
@@ -94,7 +117,15 @@ export function FileManagerPage() {
                 <Input
                   placeholder="搜索文件..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setSearchQuery(value)
+                    // 防抖更新URL
+                    const timeoutId = setTimeout(() => {
+                      updateSearchParams({ search: value || undefined })
+                    }, 300)
+                    return () => clearTimeout(timeoutId)
+                  }}
                   className="pl-10"
                 />
               </div>
@@ -115,43 +146,130 @@ export function FileManagerPage() {
             <div className="flex items-center gap-2 flex-shrink-0">
               {/* 视图切换 */}
               <div className="flex items-center bg-muted rounded-md p-1">
-                <motion.div whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      'h-8 px-3 rounded-md transition-all border-0',
-                      viewMode === 'grid'
-                        ? 'bg-background text-foreground shadow-sm border border-border/50'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                    )}
-                  >
-                    <Grid3X3 className="w-4 h-4" />
-                  </Button>
-                </motion.div>
-                <motion.div whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      'h-8 px-3 rounded-md transition-all border-0',
-                      viewMode === 'list'
-                        ? 'bg-background text-foreground shadow-sm border border-border/50'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                    )}
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                </motion.div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleViewModeChange('grid')}
+                  className={cn(
+                    'h-8 px-3 rounded-md transition-all border-0',
+                    viewMode === 'grid'
+                      ? 'bg-background text-foreground shadow-sm border border-border/50'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  )}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleViewModeChange('list')}
+                  className={cn(
+                    'h-8 px-3 rounded-md transition-all border-0',
+                    viewMode === 'list'
+                      ? 'bg-background text-foreground shadow-sm border border-border/50'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  )}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
               </div>
 
               <Separator orientation="vertical" className="h-6" />
 
+              {/* 排序选择 */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    {search.sortOrder === 'asc' ? (
+                      <ArrowUp className="w-4 h-4 mr-2" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 mr-2" />
+                    )}
+                    排序
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() =>
+                      updateSearchParams({
+                        sortBy: 'name',
+                        sortOrder:
+                          search.sortBy === 'name' && search.sortOrder === 'asc' ? 'desc' : 'asc'
+                      })
+                    }
+                  >
+                    按名称排序
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      updateSearchParams({
+                        sortBy: 'date',
+                        sortOrder:
+                          search.sortBy === 'date' && search.sortOrder === 'asc' ? 'desc' : 'asc'
+                      })
+                    }
+                  >
+                    按日期排序
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      updateSearchParams({
+                        sortBy: 'size',
+                        sortOrder:
+                          search.sortBy === 'size' && search.sortOrder === 'asc' ? 'desc' : 'asc'
+                      })
+                    }
+                  >
+                    按大小排序
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      updateSearchParams({
+                        sortBy: 'type',
+                        sortOrder:
+                          search.sortBy === 'type' && search.sortOrder === 'asc' ? 'desc' : 'asc'
+                      })
+                    }
+                  >
+                    按类型排序
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Separator orientation="vertical" className="h-6" />
+
+              {/* 选择模式切换 */}
+              <Button
+                variant={selectionMode === 'multiple' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectionMode(selectionMode === 'single' ? 'multiple' : 'single')}
+                className="transition-colors"
+              >
+                {selectionMode === 'single' ? (
+                  <>
+                    <MousePointer2 className="w-4 h-4 mr-2" />
+                    单选模式
+                  </>
+                ) : (
+                  <>
+                    <CheckSquare className="w-4 h-4 mr-2" />
+                    多选模式
+                  </>
+                )}
+              </Button>
+
+              <Separator orientation="vertical" className="h-6" />
+
               {/* 上传按钮 */}
-              <Button size="sm">
+              <Button size="sm" onClick={handleUpload}>
                 <Upload className="w-4 h-4 mr-2" />
                 上传文件
               </Button>
+
+              <Separator orientation="vertical" className="h-6" />
+
+              {/* QuickLook 状态指示器 */}
+              <QuickLookIndicator />
             </div>
           </div>
 
@@ -180,7 +298,7 @@ export function FileManagerPage() {
                 <p className="text-muted-foreground mb-4">
                   {searchQuery ? '没有找到匹配的文件' : '开始上传文件到ClarityFile'}
                 </p>
-                <Button>
+                <Button onClick={handleUpload}>
                   <Upload className="w-4 h-4 mr-2" />
                   上传文件
                 </Button>
@@ -199,6 +317,7 @@ export function FileManagerPage() {
                   files={filesData?.files || []}
                   getFileTypeIcon={getFileTypeIcon}
                   getFileTypeColor={getFileTypeColor}
+                  onFileAction={handleFileAction}
                 />
               )}
             </div>
@@ -233,6 +352,33 @@ export function FileManagerPage() {
           </div>
         )}
       </div>
+
+      {/* 左侧筛选面板 */}
+      <div
+        className={cn(
+          'h-full border-l border-border overflow-hidden flex-shrink-0 transition-all duration-200',
+          showFilters ? 'w-[280px]' : 'w-0'
+        )}
+      >
+        {showFilters && (
+          <FileFilterSidebar
+            onFilterChange={(filters) => {
+              updateSearchParams(filters)
+            }}
+          />
+        )}
+      </div>
+
+      {/* Dialog和Drawer组件 */}
+      <FileRenameDialog />
+      <FileDeleteDialog />
+      <FileInfoDrawer
+        file={fileForInfo}
+        isOpen={isInfoDrawerOpen}
+        onClose={closeInfoDrawer}
+        getFileTypeIcon={getFileTypeIcon}
+        getFileTypeColor={getFileTypeColor}
+      />
     </div>
   )
 }
