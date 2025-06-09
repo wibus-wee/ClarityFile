@@ -799,3 +799,140 @@ export function useGlobalFiles(filters?: GetGlobalFilesInput) {
 export function useFileSystemStats() {
   return useSWR('file-system-stats', () => tipcClient.getFileSystemStats())
 }
+
+// 文件系统操作相关的 hooks
+export function useRenameFile() {
+  return useSWRMutation(
+    'rename-file',
+    async (_key, { arg }: { arg: { fileId: string; newName: string } }) => {
+      const result = await tipcClient.renameFile(arg)
+      // 重新验证文件列表
+      mutate((key) => Array.isArray(key) && key[0] === 'global-files')
+      mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+      return result
+    }
+  )
+}
+
+export function useCopyFileToDirectory() {
+  return useSWRMutation(
+    'copy-file-to-directory',
+    async (_key, { arg }: { arg: { fileId: string; targetDirectory?: string } }) => {
+      return await tipcClient.copyFileToDirectory(arg)
+    }
+  )
+}
+
+export function useOpenFileWithSystem() {
+  return useSWRMutation(
+    'open-file-with-system',
+    async (_key, { arg }: { arg: { filePath: string } }) => {
+      return await tipcClient.openFileWithSystem(arg)
+    }
+  )
+}
+
+export function useOpenFileByIdWithSystem() {
+  return useSWRMutation(
+    'open-file-by-id-with-system',
+    async (_key, { arg }: { arg: { fileId: string } }) => {
+      return await tipcClient.openFileByIdWithSystem(arg)
+    }
+  )
+}
+
+export function useMoveFileToTrash() {
+  return useSWRMutation(
+    'move-file-to-trash',
+    async (_key, { arg }: { arg: { fileId: string } }) => {
+      const result = await tipcClient.moveFileToTrash(arg)
+      // 重新验证文件列表
+      mutate((key) => Array.isArray(key) && key[0] === 'global-files')
+      mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+      mutate('file-system-stats')
+      return result
+    }
+  )
+}
+
+export function useSaveFileAs() {
+  return useSWRMutation(
+    'save-file-as',
+    async (_key, { arg }: { arg: { fileId: string; targetPath?: string } }) => {
+      return await tipcClient.saveFileAs(arg)
+    }
+  )
+}
+
+export function useBatchMoveFilesToTrash() {
+  return useSWRMutation(
+    'batch-move-files-to-trash',
+    async (_key, { arg }: { arg: { fileIds: string[] } }) => {
+      const result = await tipcClient.batchMoveFilesToTrash(arg)
+      // 重新验证文件列表
+      mutate((key) => Array.isArray(key) && key[0] === 'global-files')
+      mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+      mutate('file-system-stats')
+      return result
+    }
+  )
+}
+
+export function useBatchCopyFilesToDirectory() {
+  return useSWRMutation(
+    'batch-copy-files-to-directory',
+    async (_key, { arg }: { arg: { fileIds: string[]; targetDirectory: string } }) => {
+      return await tipcClient.batchCopyFilesToDirectory(arg)
+    }
+  )
+}
+
+// QuickLook 预览相关的 hooks
+export function useQuickLookPreviewById() {
+  return useSWRMutation(
+    'quicklook-preview-by-id',
+    async (_key, { arg }: { arg: { fileId: string } }) => {
+      return await tipcClient.previewFileById(arg)
+    }
+  )
+}
+
+export function useQuickLookPreviewByPath() {
+  return useSWRMutation(
+    'quicklook-preview-by-path',
+    async (_key, { arg }: { arg: { filePath: string } }) => {
+      return await tipcClient.previewFileByPath(arg)
+    }
+  )
+}
+
+export function useIsQuickLookAvailable() {
+  return useSWR('quicklook-available', () => tipcClient.isQuickLookAvailable())
+}
+
+export function useQuickLookSupportedFileTypes() {
+  return useSWR('quicklook-supported-types', () => tipcClient.getSupportedFileTypes())
+}
+
+export function useIsFileSupported() {
+  return useSWRMutation(
+    'quicklook-file-supported',
+    async (_key, { arg }: { arg: { fileName: string } }) => {
+      return await tipcClient.isFileSupported(arg)
+    }
+  )
+}
+
+export function useDeleteManagedFile() {
+  return useSWRMutation(
+    'delete-managed-file',
+    async (_key, { arg }: { arg: { id: string; deletePhysicalFile?: boolean } }) => {
+      const result = await tipcClient.deleteManagedFile(arg)
+      // 重新验证文件列表
+      mutate((key) => Array.isArray(key) && key[0] === 'global-files')
+      mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+      mutate('file-system-stats')
+      return result
+    }
+  )
+}

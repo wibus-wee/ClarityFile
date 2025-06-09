@@ -1,7 +1,14 @@
 import { db } from '../db'
-import { managedFiles } from '../../db/schema'
-import { eq, like, count, sum } from 'drizzle-orm'
+import {
+  managedFiles,
+  documentVersions,
+  logicalDocuments,
+  projectAssets,
+  expenseTrackings
+} from '../../db/schema'
+import { eq, like, count, sum, inArray } from 'drizzle-orm'
 import { FilesystemOperations } from '../utils/filesystem-operations'
+import { MimeTypeUtils } from '../utils/mime-type-utils'
 import crypto from 'crypto'
 import fs from 'fs'
 import type { SuccessResponse } from '../types/outputs'
@@ -17,6 +24,10 @@ export interface CreateManagedFileInput {
 export interface UpdateManagedFileInput {
   id: string
   name?: string
+  physicalPath?: string
+  originalFileName?: string
+  mimeType?: string
+  fileSizeBytes?: number
 }
 
 export interface GetManagedFileInput {
@@ -257,13 +268,61 @@ export class ManagedFileService {
    * 获取全局文件列表（支持搜索、筛选、排序）
    */
   static async getGlobalFiles(input: GetGlobalFilesInput = {}) {
-    const { limit = 50, offset = 0, search, type, sortBy = 'date', sortOrder = 'desc' } = input
+    const {
+      limit = 50,
+      offset = 0,
+      search,
+      type,
+      projectId,
+      sortBy = 'date',
+      sortOrder = 'desc'
+    } = input
 
     // 简化查询，先获取所有文件然后在内存中过滤
     // TODO: 优化为数据库级别的过滤
     const allFiles = await db.select().from(managedFiles)
 
     let filteredFiles = allFiles
+
+    // 项目过滤（支持多选）
+    if (projectId) {
+      const projectIds = projectId.split(',').map((id) => id.trim())
+      console.log(`筛选项目: ${projectIds.join(', ')}`)
+
+      // 获取与这些项目相关的文件ID
+      const relatedFileIds = new Set<string>()
+
+      for (const pid of projectIds) {
+        // 1. 通过文档版本关联的文件
+        const docVersionFiles = await db
+          .select({ managedFileId: documentVersions.managedFileId })
+          .from(documentVersions)
+          .innerJoin(logicalDocuments, eq(documentVersions.logicalDocumentId, logicalDocuments.id))
+          .where(eq(logicalDocuments.projectId, pid))
+
+        docVersionFiles.forEach((f) => relatedFileIds.add(f.managedFileId))
+
+        // 2. 通过项目资产关联的文件
+        const assetFiles = await db
+          .select({ managedFileId: projectAssets.managedFileId })
+          .from(projectAssets)
+          .where(eq(projectAssets.projectId, pid))
+
+        assetFiles.forEach((f) => relatedFileIds.add(f.managedFileId))
+
+        // 3. 通过经费记录关联的文件
+        const expenseFiles = await db
+          .select({ managedFileId: expenseTrackings.invoiceManagedFileId })
+          .from(expenseTrackings)
+          .where(eq(expenseTrackings.projectId, pid))
+
+        expenseFiles.forEach((f) => f.managedFileId && relatedFileIds.add(f.managedFileId))
+      }
+
+      // 筛选出相关的文件
+      filteredFiles = filteredFiles.filter((file) => relatedFileIds.has(file.id))
+      console.log(`项目筛选后文件数量: ${filteredFiles.length}`)
+    }
 
     // 搜索过滤
     if (search) {
@@ -274,9 +333,47 @@ export class ManagedFileService {
       )
     }
 
-    // 类型过滤
+    // 类型过滤（支持多选）
     if (type) {
-      filteredFiles = filteredFiles.filter((file) => file.mimeType?.startsWith(type))
+      const types = type.split(',').map((t) => t.trim())
+      console.log(`筛选类型: ${types.join(', ')}`)
+      console.log(`筛选前文件数量: ${filteredFiles.length}`)
+
+      filteredFiles = filteredFiles.filter((file) => {
+        if (!file.mimeType) {
+          console.log(`文件 ${file.name} 没有MIME类型`)
+          return false
+        }
+
+        // 检查文件是否匹配任一选中的类型
+        return types.some((selectedType) => {
+          let matches = false
+          switch (selectedType) {
+            case 'image':
+              matches = file.mimeType?.startsWith('image/') || false
+              break
+            case 'video':
+              matches = file.mimeType?.startsWith('video/') || false
+              break
+            case 'audio':
+              matches = file.mimeType?.startsWith('audio/') || false
+              break
+            case 'text':
+              matches = MimeTypeUtils.isDocumentFile(file.physicalPath || file.name)
+              break
+            case 'application':
+              matches =
+                (file.mimeType?.startsWith('application/') || false) &&
+                !MimeTypeUtils.isDocumentFile(file.physicalPath || file.name)
+              break
+            default:
+              matches = file.mimeType?.startsWith(selectedType) || false
+          }
+          return matches
+        })
+      })
+
+      console.log(`筛选后文件数量: ${filteredFiles.length}`)
     }
 
     // 排序

@@ -14,6 +14,8 @@ import { expenseTrackingRouter } from './routers/expense-tracking.router'
 import { sharedResourcesRouter } from './routers/shared-resources.router'
 import { competitionRouter } from './routers/competition.router'
 import { fileAccessRouter } from './routers/file-access.router'
+import { quickLookRouter } from './routers/quicklook.router'
+import { filesystemOperationsRouter } from './routers/filesystem-operations.router'
 
 const t = tipc.create()
 
@@ -61,7 +63,13 @@ export const router = {
   ...competitionRouter(t),
 
   // 文件访问相关路由
-  ...fileAccessRouter(t)
+  ...fileAccessRouter(t),
+
+  // 文件系统操作相关路由
+  ...filesystemOperationsRouter(t),
+
+  // QuickLook 预览相关路由
+  ...quickLookRouter(t)
 }
 
 export type Router = typeof router
