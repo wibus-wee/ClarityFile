@@ -15,7 +15,7 @@ import { AlertTriangle, Trash2, FileText, Calendar, Trophy } from 'lucide-react'
 import { useDeleteDocumentVersion } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { formatFileSize } from '@renderer/lib/utils'
-import type { DocumentVersionOutput } from '../../../../../main/types/document-schemas'
+import type { DocumentVersionOutput } from '@main/types/document-schemas'
 
 interface DeleteDocumentVersionDialogProps {
   version: DocumentVersionOutput | null
@@ -72,9 +72,7 @@ export function DeleteDocumentVersionDialog({
             <Trash2 className="w-5 h-5 text-destructive" />
             删除文档版本
           </DialogTitle>
-          <DialogDescription>
-            此操作不可撤销，请确认是否要删除此文档版本。
-          </DialogDescription>
+          <DialogDescription>此操作不可撤销，请确认是否要删除此文档版本。</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -138,7 +136,8 @@ export function DeleteDocumentVersionDialog({
                   <div className="flex items-center gap-1">
                     <Trophy className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs">
-                      {version.competitionMilestone.series.name} - {version.competitionMilestone.levelName}
+                      {version.competitionMilestone.series.name} -{' '}
+                      {version.competitionMilestone.levelName}
                     </span>
                   </div>
                 </div>
@@ -149,9 +148,7 @@ export function DeleteDocumentVersionDialog({
                   <Separator />
                   <div>
                     <span className="text-muted-foreground">备注:</span>
-                    <div className="mt-1 p-2 bg-muted/50 rounded text-xs">
-                      {version.notes}
-                    </div>
+                    <div className="mt-1 p-2 bg-muted/50 rounded text-xs">{version.notes}</div>
                   </div>
                 </>
               )}
@@ -173,18 +170,10 @@ export function DeleteDocumentVersionDialog({
         </motion.div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isDeleting}>
             取消
           </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
+          <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
             {isDeleting ? (
               '删除中...'
             ) : (

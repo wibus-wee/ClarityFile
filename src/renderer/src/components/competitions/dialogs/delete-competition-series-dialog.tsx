@@ -13,7 +13,7 @@ import { toast } from 'sonner'
 import {
   CompetitionSeriesWithStatsOutput,
   DeleteCompetitionSeriesInput
-} from '../../../../../main/types/competition-schemas'
+} from '@main/types/competition-schemas'
 
 interface DeleteCompetitionSeriesDialogProps {
   series: CompetitionSeriesWithStatsOutput | null

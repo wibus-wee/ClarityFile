@@ -42,7 +42,7 @@ import { cn } from '@renderer/lib/utils'
 import { ExpenseFormDrawer } from './drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from '../expenses/expense-details-dialog'
 import { ExpenseStatusDialog } from '../expenses/expense-status-dialog'
-import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+import type { ProjectDetailsOutput } from '@main/types/project-schemas'
 
 // 统计卡片组件
 interface ExpenseStatCardProps {

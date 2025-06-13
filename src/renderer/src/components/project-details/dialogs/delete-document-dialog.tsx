@@ -11,7 +11,7 @@ import {
 import { Button } from '@renderer/components/ui/button'
 import { AlertTriangle, FileText } from 'lucide-react'
 import { useDeleteLogicalDocument } from '@renderer/hooks/use-tipc'
-import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/outputs'
+import type { LogicalDocumentWithVersionsOutput } from '@main/types/document-schemas'
 
 interface DeleteDocumentDialogProps {
   document: LogicalDocumentWithVersionsOutput | null

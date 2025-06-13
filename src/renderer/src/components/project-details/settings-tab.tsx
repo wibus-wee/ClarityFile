@@ -6,7 +6,6 @@ import { Badge } from '@renderer/components/ui/badge'
 import {
   SettingsForm,
   SettingsSection,
-  SettingsSwitchField,
   SettingsInputField,
   SettingsTextareaField,
   SettingsSelectField
@@ -22,27 +21,12 @@ interface SettingsTabProps {
   projectDetails: ProjectDetailsOutput
 }
 
-// 扩展项目设置 Schema，添加额外的设置字段
-const extendedProjectSettingsSchema = projectSettingsSchema.extend({
-  autoSync: z.boolean(),
-  enableNotifications: z.boolean(),
-  backupEnabled: z.boolean(),
-  compressionLevel: z.number().min(0).max(9)
-})
-
-type ProjectSettingsForm = z.infer<typeof extendedProjectSettingsSchema>
+type ProjectSettingsForm = z.infer<typeof projectSettingsSchema>
 
 const statusOptions = [
   { value: 'active', label: '进行中' },
   { value: 'on_hold', label: '暂停' },
   { value: 'archived', label: '已归档' }
-]
-
-const compressionOptions = [
-  { value: '0', label: '无压缩' },
-  { value: '3', label: '低压缩' },
-  { value: '6', label: '中等压缩' },
-  { value: '9', label: '高压缩' }
 ]
 
 export function SettingsTab({ projectDetails }: SettingsTabProps) {
@@ -55,12 +39,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
   const defaultValues: ProjectSettingsForm = {
     name: project.name,
     description: project.description || '',
-    status: project.status as 'active' | 'archived' | 'on_hold',
-    folderPath: project.folderPath || '',
-    autoSync: true, // 这些设置可能需要从其他地方获取
-    enableNotifications: true,
-    backupEnabled: false,
-    compressionLevel: 6
+    status: project.status as 'active' | 'archived' | 'on_hold'
   }
 
   const handleSaveSettings = async (data: ProjectSettingsForm) => {
@@ -116,7 +95,7 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
       >
         <SettingsForm
           category="project"
-          schema={extendedProjectSettingsSchema}
+          schema={projectSettingsSchema}
           defaultValues={defaultValues}
           onSubmit={handleSaveSettings}
           submitButtonText="保存项目设置"
@@ -147,46 +126,6 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
                   description="当前项目的状态"
                   placeholder="选择项目状态"
                   options={statusOptions}
-                />
-
-                <SettingsInputField
-                  control={form.control}
-                  name="folderPath"
-                  label="项目文件夹路径"
-                  description="项目文件在文件系统中的存储路径"
-                  placeholder="选择或输入文件夹路径"
-                  type="directory"
-                />
-              </SettingsSection>
-
-              <SettingsSection title="同步与备份" description="配置项目文件的同步和备份选项">
-                <SettingsSwitchField
-                  control={form.control}
-                  name="autoSync"
-                  label="自动同步"
-                  description="自动同步项目文件夹中的变更"
-                />
-
-                <SettingsSwitchField
-                  control={form.control}
-                  name="enableNotifications"
-                  label="启用通知"
-                  description="当项目有重要更新时发送通知"
-                />
-
-                <SettingsSwitchField
-                  control={form.control}
-                  name="backupEnabled"
-                  label="启用备份"
-                  description="定期备份项目文件"
-                />
-
-                <SettingsSelectField
-                  control={form.control}
-                  name="compressionLevel"
-                  label="压缩级别"
-                  description="备份文件的压缩级别"
-                  options={compressionOptions}
                 />
               </SettingsSection>
             </>

@@ -13,7 +13,7 @@ import { useDeleteCompetitionMilestone } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import type { CompetitionMilestoneOutput } from '../../../../../main/types/outputs'
+import type { CompetitionMilestoneOutput } from '@main/types/competition-schemas'
 
 interface DeleteCompetitionMilestoneDialogProps {
   milestone: CompetitionMilestoneOutput | null

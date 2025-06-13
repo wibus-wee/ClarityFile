@@ -12,10 +12,7 @@ import type {
 import type {
   CreateProjectAssetInput,
   UpdateProjectAssetInput,
-  DeleteProjectAssetInput,
-  GetProjectAssetsInput,
-  BatchDeleteProjectAssetsInput,
-  SearchProjectAssetsInput
+  DeleteProjectAssetInput
 } from '../../../main/types/asset-schemas'
 import type {
   CreateTagInput,

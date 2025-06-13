@@ -11,7 +11,7 @@ import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { formatFileSize } from '@renderer/lib/utils'
 import { FileText, Calendar, Download, HardDrive, FileType } from 'lucide-react'
-import type { DocumentVersionOutput } from '../../../../../main/types/document-schemas'
+import type { DocumentVersionOutput } from '@main/types/document-schemas'
 
 interface DocumentVersionDetailsDialogProps {
   version: DocumentVersionOutput | null

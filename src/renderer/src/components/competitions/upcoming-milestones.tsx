@@ -26,7 +26,7 @@ import { zhCN } from 'date-fns/locale'
 import { useNavigate } from '@tanstack/react-router'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
 import { MilestoneParticipatingProjectsDialog } from './dialogs/milestone-participating-projects-dialog'
-import type { MilestoneWithProjectsOutput } from '../../../../main/types/outputs'
+import { MilestoneWithProjectsOutput } from '@main/types/competition-schemas'
 
 interface MilestoneCardProps {
   milestone: MilestoneWithProjectsOutput

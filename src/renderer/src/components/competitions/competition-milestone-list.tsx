@@ -28,8 +28,10 @@ import { cn } from '@renderer/lib/utils'
 import { CompetitionMilestoneDrawer } from './drawers/competition-milestone-drawer'
 import { DeleteCompetitionMilestoneDialog } from './dialogs/delete-competition-milestone-dialog'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
-import type { CompetitionMilestoneOutput } from '../../../../main/types/outputs'
-import type { CompetitionSeriesWithStatsOutput } from '../../../../main/types/outputs'
+import {
+  CompetitionSeriesWithStatsOutput,
+  CompetitionMilestoneOutput
+} from '@main/types/competition-schemas'
 
 interface CompetitionMilestoneListProps {
   series: CompetitionSeriesWithStatsOutput

@@ -21,7 +21,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { CompetitionSeriesDialog } from './dialogs/competition-series-dialog'
 import { CompetitionMilestoneDrawer } from './drawers/competition-milestone-drawer'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
-import type { MilestoneWithProjectsOutput } from '../../../../main/types/outputs'
+import { MilestoneWithProjectsOutput } from '@main/types/competition-schemas'
 
 interface StatCardProps {
   title: string

@@ -15,7 +15,7 @@ import { cn } from '@renderer/lib/utils'
 import type {
   MilestoneWithProjectsOutput,
   CompetitionMilestoneOutput
-} from '../../../../../main/types/competition-schemas'
+} from '@main/types/competition-schemas'
 
 interface MilestoneDetailsDialogProps {
   milestone: MilestoneWithProjectsOutput | CompetitionMilestoneOutput | null

@@ -9,13 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import {
-  useProjects,
-  useCreateProject,
-  useUpdateProject,
-  useDeleteProject,
-  useSearchProjects
-} from '@renderer/hooks/use-tipc'
+import { useProjects, useDeleteProject, useSearchProjects } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { Search, Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'

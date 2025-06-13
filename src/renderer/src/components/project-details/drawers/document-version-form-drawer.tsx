@@ -42,11 +42,11 @@ import {
   useGetAllCompetitionSeries,
   useGetCompetitionMilestones
 } from '@renderer/hooks/use-tipc'
-import type { ProjectDetailsOutput } from '../../../../../main/types/project-schemas'
+import type { ProjectDetailsOutput } from '@main/types/project-schemas'
 import type {
   LogicalDocumentWithVersionsOutput,
   DocumentVersionOutput
-} from '../../../../../main/types/document-schemas'
+} from '@main/types/document-schemas'
 
 const versionFormSchema = z.object({
   versionTag: z.string().min(1, '版本标签不能为空').max(50, '版本标签不能超过50个字符'),

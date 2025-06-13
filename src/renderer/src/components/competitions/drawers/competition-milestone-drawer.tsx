@@ -128,7 +128,7 @@ export function CompetitionMilestoneDrawer({
       } else {
         // 创建模式
         const input: CreateCompetitionMilestoneInput = {
-          competitionSeriesId: data.competitionSeriesId!,
+          competitionSeriesId: data.competitionSeriesId,
           levelName: data.levelName!.trim(),
           dueDateMilestone: data.dueDateMilestone,
           notes: data.notes?.trim() || undefined

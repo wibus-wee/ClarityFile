@@ -36,8 +36,8 @@ import type {
   CreateLogicalDocumentInput,
   UpdateLogicalDocumentInput,
   DocumentType
-} from '../../../../../main/types/document-schemas'
-import { COMMON_DOCUMENT_TYPES } from '../../../../../main/types/document-schemas'
+} from '@main/types/document-schemas'
+import { COMMON_DOCUMENT_TYPES } from '@main/types/document-schemas'
 
 // 文档输出类型（简化版，用于编辑）
 interface DocumentOutput {

@@ -144,10 +144,7 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
     setVersionFormOpen(true)
   }
 
-  const handleDeleteVersion = (
-    version: DocumentVersionOutput,
-    isOfficialVersion: boolean = false
-  ) => {
+  const handleDeleteVersion = (version: DocumentVersionOutput) => {
     setSelectedVersion(version)
     setDeleteVersionOpen(true)
   }
@@ -425,9 +422,7 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
                                           <DropdownMenuSeparator />
                                           <DropdownMenuItem
                                             className="text-destructive"
-                                            onClick={() =>
-                                              handleDeleteVersion(version, isOfficialVersion)
-                                            }
+                                            onClick={() => handleDeleteVersion(version)}
                                           >
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             删除版本

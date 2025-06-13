@@ -17,4 +17,5 @@ export interface Project {
   description?: string | null
   status: string
   createdAt: Date
+  updatedAt: Date
 }

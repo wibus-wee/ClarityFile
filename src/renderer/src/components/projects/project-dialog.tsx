@@ -32,30 +32,24 @@ import { FolderOpen, Edit, Loader2, Plus } from 'lucide-react'
 import { useCreateProject, useUpdateProject } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { createProjectSchema, updateProjectSchema } from '../../../../main/types/project-schemas'
-import type { CreateProjectInput, UpdateProjectInput } from '../../../../main/types/project-schemas'
-
-// 项目输出类型（简化版，用于编辑）
-interface ProjectOutput {
-  id: string
-  name: string
-  description?: string | null
-  status: string
-  createdAt: Date
-  updatedAt: Date
-}
+import type {
+  CreateProjectInput,
+  ProjectStatus,
+  UpdateProjectInput
+} from '../../../../main/types/project-schemas'
+import { Project } from '.'
 
 interface ProjectDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  project?: ProjectOutput | null // 编辑时传入，创建时为空
+  project?: Project | null // 编辑时传入，创建时为空
   onSuccess?: () => void
 }
 
 // 根据模式选择合适的 Schema
-const getFormSchema = (isEdit: boolean) => 
-  isEdit ? updateProjectSchema : createProjectSchema
+const getFormSchema = (isEdit: boolean) => (isEdit ? updateProjectSchema : createProjectSchema)
 
-type ProjectFormData = z.infer<typeof createProjectSchema> & 
+type ProjectFormData = z.infer<typeof createProjectSchema> &
   Partial<z.infer<typeof updateProjectSchema>>
 
 // 状态选项配置
@@ -65,20 +59,16 @@ const statusOptions = [
   { value: 'archived', label: '已归档', description: '已完成或不再活跃的项目' }
 ]
 
-export function ProjectDialog({
-  open,
-  onOpenChange,
-  project,
-  onSuccess
-}: ProjectDialogProps) {
+export function ProjectDialog({ open, onOpenChange, project, onSuccess }: ProjectDialogProps) {
   const isEdit = !!project
   const { trigger: createProject, isMutating: isCreating } = useCreateProject()
   const { trigger: updateProject, isMutating: isUpdating } = useUpdateProject()
-  
+
   const isMutating = isCreating || isUpdating
 
   const form = useForm<ProjectFormData>({
-    resolver: zodResolver(getFormSchema(isEdit)),
+    // only edit need id prop
+    resolver: zodResolver(getFormSchema(isEdit) as any),
     defaultValues: {
       name: '',
       description: '',
@@ -95,7 +85,7 @@ export function ProjectDialog({
         id: project.id,
         name: project.name,
         description: project.description || '',
-        status: project.status
+        status: project.status as ProjectStatus
       })
     } else {
       // 创建模式
@@ -118,7 +108,7 @@ export function ProjectDialog({
           status: data.status
         }
         await updateProject(input)
-        
+
         toast.success('项目更新成功', {
           description: `"${data.name}" 已成功更新`
         })
@@ -130,7 +120,7 @@ export function ProjectDialog({
           status: data.status || 'active'
         }
         await createProject(input)
-        
+
         toast.success('项目创建成功', {
           description: `"${data.name}" 已成功创建，文件夹已自动生成`
         })
@@ -138,10 +128,10 @@ export function ProjectDialog({
 
       // 重置表单
       form.reset()
-      
+
       // 关闭对话框
       onOpenChange(false)
-      
+
       // 调用成功回调
       onSuccess?.()
     } catch (error) {
@@ -162,11 +152,11 @@ export function ProjectDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              isEdit 
-                ? 'bg-blue-100 dark:bg-blue-900/20' 
-                : 'bg-primary/10'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                isEdit ? 'bg-blue-100 dark:bg-blue-900/20' : 'bg-primary/10'
+              }`}
+            >
               {isEdit ? (
                 <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               ) : (
@@ -174,14 +164,11 @@ export function ProjectDialog({
               )}
             </div>
             <div>
-              <DialogTitle className="text-xl">
-                {isEdit ? '编辑项目' : '创建新项目'}
-              </DialogTitle>
+              <DialogTitle className="text-xl">{isEdit ? '编辑项目' : '创建新项目'}</DialogTitle>
               <DialogDescription className="text-sm">
-                {isEdit 
+                {isEdit
                   ? `修改 "${project?.name}" 的项目信息`
-                  : '填写项目信息来开始管理您的文档和资源'
-                }
+                  : '填写项目信息来开始管理您的文档和资源'}
               </DialogDescription>
             </div>
           </div>
@@ -249,9 +236,7 @@ export function ProjectDialog({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {isEdit ? '项目状态' : '初始状态'}
-                  </FormLabel>
+                  <FormLabel>{isEdit ? '项目状态' : '初始状态'}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -263,7 +248,9 @@ export function ProjectDialog({
                         <SelectItem key={option.value} value={option.value}>
                           <div className="flex flex-col items-start">
                             <span className="font-medium">{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {option.description}
+                            </span>
                           </div>
                         </SelectItem>
                       ))}
@@ -286,11 +273,7 @@ export function ProjectDialog({
                 取消
               </Button>
 
-              <Button
-                type="submit"
-                disabled={isMutating}
-                className="flex-1 gap-2"
-              >
+              <Button type="submit" disabled={isMutating} className="flex-1 gap-2">
                 {isMutating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />

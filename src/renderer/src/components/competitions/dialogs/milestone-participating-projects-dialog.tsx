@@ -16,7 +16,7 @@ import { useNavigate } from '@tanstack/react-router'
 import type {
   MilestoneWithProjectsOutput,
   CompetitionMilestoneOutput
-} from '../../../../../main/types/outputs'
+} from '@main/types/competition-schemas'
 
 interface MilestoneParticipatingProjectsDialogProps {
   milestone: MilestoneWithProjectsOutput | CompetitionMilestoneOutput | null

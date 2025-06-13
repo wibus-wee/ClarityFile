@@ -49,7 +49,7 @@ import {
   type CreateExpenseTrackingInput,
   type UpdateExpenseTrackingInput,
   type ExpenseStatus
-} from '../../../../../main/types/expense-schemas'
+} from '@main/types/expense-schemas'
 
 // 表单验证Schema - 使用创建schema作为基础表单schema
 const expenseFormSchema = createExpenseTrackingSchema

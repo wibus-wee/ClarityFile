@@ -33,8 +33,7 @@ import {
   DropdownMenuTrigger
 } from '@renderer/components/ui/dropdown-menu'
 import { formatFileSize } from '@renderer/lib/utils'
-
-import type { ProjectDetailsOutput } from '../../../../main/types/outputs'
+import { ProjectDetailsOutput } from '@main/types/project-schemas'
 
 interface SharedResourcesTabProps {
   projectDetails: ProjectDetailsOutput

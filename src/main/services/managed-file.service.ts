@@ -6,7 +6,7 @@ import {
   projectAssets,
   expenseTrackings
 } from '../../db/schema'
-import { eq, like, count, sum, inArray } from 'drizzle-orm'
+import { eq, like, count, sum } from 'drizzle-orm'
 import { FilesystemOperations } from '../utils/filesystem-operations'
 import { MimeTypeUtils } from '../utils/mime-type-utils'
 import crypto from 'crypto'

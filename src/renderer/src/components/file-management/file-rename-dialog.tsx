@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,25 +25,16 @@ const renameSchema = z.object({
     .string()
     .min(1, '文件名不能为空')
     .max(255, '文件名不能超过255个字符')
-    .refine(
-      (name) => !/[<>:"/\\|?*]/.test(name),
-      '文件名不能包含以下字符: < > : " / \\ | ? *'
-    )
+    .refine((name) => !/[<>:"/\\|?*]/.test(name), '文件名不能包含以下字符: < > : " / \\ | ? *')
 })
 
 type RenameFormData = z.infer<typeof renameSchema>
 
 export function FileRenameDialog() {
-  const {
-    isRenameDialogOpen,
-    fileForRename,
-    closeRenameDialog,
-    setProcessing,
-    isProcessing
-  } = useFileManagementStore()
+  const { isRenameDialogOpen, fileForRename, closeRenameDialog, setProcessing, isProcessing } =
+    useFileManagementStore()
 
   const { trigger: renameFile } = useRenameFile()
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
     register,
@@ -62,8 +53,10 @@ export function FileRenameDialog() {
   useEffect(() => {
     if (isRenameDialogOpen && fileForRename) {
       // 移除文件扩展名，只保留文件名部分
-      const nameWithoutExt = fileForRename.originalFileName?.replace(/\.[^/.]+$/, '') || 
-                            fileForRename.name?.replace(/\.[^/.]+$/, '') || ''
+      const nameWithoutExt =
+        fileForRename.originalFileName?.replace(/\.[^/.]+$/, '') ||
+        fileForRename.name?.replace(/\.[^/.]+$/, '') ||
+        ''
       setValue('newName', nameWithoutExt)
     }
   }, [isRenameDialogOpen, fileForRename, setValue])
@@ -79,7 +72,6 @@ export function FileRenameDialog() {
     if (!fileForRename) return
 
     try {
-      setIsSubmitting(true)
       setProcessing(true, 'rename')
 
       // 获取原始文件扩展名
@@ -97,13 +89,12 @@ export function FileRenameDialog() {
       console.error('重命名文件失败:', error)
       toast.error(`重命名文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
     } finally {
-      setIsSubmitting(false)
       setProcessing(false)
     }
   }
 
   const handleCancel = () => {
-    if (!isSubmitting) {
+    if (!isProcessing) {
       closeRenameDialog()
     }
   }
@@ -122,7 +113,7 @@ export function FileRenameDialog() {
             重命名文件
           </DialogTitle>
           <DialogDescription>
-            为文件 "{fileForRename.originalFileName}" 输入新的名称
+            为文件 &quot;{fileForRename.originalFileName}&quot; 输入新的名称
           </DialogDescription>
         </DialogHeader>
 
@@ -138,7 +129,7 @@ export function FileRenameDialog() {
                 id="newName"
                 {...register('newName')}
                 placeholder="输入新的文件名"
-                disabled={isSubmitting}
+                disabled={isProcessing}
                 className="flex-1"
                 autoFocus
                 onKeyDown={(e) => {
@@ -148,9 +139,7 @@ export function FileRenameDialog() {
                 }}
               />
               {fileExtension && (
-                <span className="text-sm text-muted-foreground font-mono">
-                  {fileExtension}
-                </span>
+                <span className="text-sm text-muted-foreground font-mono">{fileExtension}</span>
               )}
             </div>
             {errors.newName && (
@@ -165,19 +154,11 @@ export function FileRenameDialog() {
           </motion.div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={isProcessing}>
               取消
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !newName?.trim()}
-            >
-              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button type="submit" disabled={isProcessing || !newName?.trim()}>
+              {isProcessing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               重命名
             </Button>
           </DialogFooter>

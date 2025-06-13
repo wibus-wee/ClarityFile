@@ -22,20 +22,17 @@ import {
   FormMessage
 } from '@renderer/components/ui/form'
 import { Trophy, Loader2, Plus, Edit } from 'lucide-react'
-import { 
-  useCreateCompetitionSeries,
-  useUpdateCompetitionSeries 
-} from '@renderer/hooks/use-tipc'
+import { useCreateCompetitionSeries, useUpdateCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
-import { 
+import {
   createCompetitionSeriesSchema,
-  updateCompetitionSeriesSchema 
-} from '../../../../../main/types/competition-schemas'
-import type { 
+  updateCompetitionSeriesSchema
+} from '@main/types/competition-schemas'
+import type {
   CreateCompetitionSeriesInput,
   UpdateCompetitionSeriesInput,
-  CompetitionSeriesWithStatsOutput 
-} from '../../../../../main/types/competition-schemas'
+  CompetitionSeriesWithStatsOutput
+} from '@main/types/competition-schemas'
 
 interface CompetitionSeriesDialogProps {
   open: boolean
@@ -45,10 +42,10 @@ interface CompetitionSeriesDialogProps {
 }
 
 // 根据模式选择合适的 Schema
-const getFormSchema = (isEdit: boolean) => 
+const getFormSchema = (isEdit: boolean) =>
   isEdit ? updateCompetitionSeriesSchema : createCompetitionSeriesSchema
 
-type SeriesFormData = z.infer<typeof createCompetitionSeriesSchema> & 
+type SeriesFormData = z.infer<typeof createCompetitionSeriesSchema> &
   Partial<z.infer<typeof updateCompetitionSeriesSchema>>
 
 export function CompetitionSeriesDialog({
@@ -60,11 +57,13 @@ export function CompetitionSeriesDialog({
   const isEdit = !!series
   const { trigger: createSeries, isMutating: isCreating } = useCreateCompetitionSeries()
   const { trigger: updateSeries, isMutating: isUpdating } = useUpdateCompetitionSeries()
-  
+
   const isMutating = isCreating || isUpdating
 
   const form = useForm<SeriesFormData>({
-    resolver: zodResolver(getFormSchema(isEdit)),
+    // 使用 any 是因为这个地方是 multi-schema mode, edit mode need id prop
+    // but create mode not need id prop
+    resolver: zodResolver(getFormSchema(isEdit) as any),
     defaultValues: {
       name: '',
       notes: '',
@@ -100,7 +99,7 @@ export function CompetitionSeriesDialog({
           notes: data.notes?.trim() || undefined
         }
         await updateSeries(input)
-        
+
         toast.success('赛事系列更新成功', {
           description: `"${data.name}" 已成功更新`
         })
@@ -111,7 +110,7 @@ export function CompetitionSeriesDialog({
           notes: data.notes?.trim() || undefined
         }
         await createSeries(input)
-        
+
         toast.success('赛事系列创建成功', {
           description: `"${data.name}" 已成功创建`
         })
@@ -119,10 +118,10 @@ export function CompetitionSeriesDialog({
 
       // 重置表单
       form.reset()
-      
+
       // 关闭对话框
       onOpenChange(false)
-      
+
       // 调用成功回调
       onSuccess?.()
     } catch (error) {
@@ -147,9 +146,7 @@ export function CompetitionSeriesDialog({
               <Trophy className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DialogTitle>
-                {isEdit ? '编辑赛事系列' : '创建赛事系列'}
-              </DialogTitle>
+              <DialogTitle>{isEdit ? '编辑赛事系列' : '创建赛事系列'}</DialogTitle>
               <DialogDescription>
                 {isEdit ? '修改赛事系列的基本信息' : '创建一个新的赛事系列来管理相关比赛'}
               </DialogDescription>
@@ -174,14 +171,12 @@ export function CompetitionSeriesDialog({
                     赛事系列名称 <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="例如：全国大学生创新创业大赛"
-                      maxLength={100}
-                      {...field}
-                    />
+                    <Input placeholder="例如：全国大学生创新创业大赛" maxLength={100} {...field} />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">{field.value?.length || 0}/100 字符</p>
+                  <p className="text-xs text-muted-foreground">
+                    {field.value?.length || 0}/100 字符
+                  </p>
                 </FormItem>
               )}
             />
@@ -202,7 +197,9 @@ export function CompetitionSeriesDialog({
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">{field.value?.length || 0}/500 字符</p>
+                  <p className="text-xs text-muted-foreground">
+                    {field.value?.length || 0}/500 字符
+                  </p>
                 </FormItem>
               )}
             />
@@ -219,11 +216,7 @@ export function CompetitionSeriesDialog({
                 取消
               </Button>
 
-              <Button
-                type="submit"
-                disabled={isMutating}
-                className="flex-1 gap-2"
-              >
+              <Button type="submit" disabled={isMutating} className="flex-1 gap-2">
                 {isMutating ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
