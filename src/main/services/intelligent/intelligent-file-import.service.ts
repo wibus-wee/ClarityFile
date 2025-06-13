@@ -512,7 +512,7 @@ export class IntelligentFileImportService {
    */
   private static async generateTargetPath(context: FileImportContext): Promise<string> {
     switch (context.importType) {
-      case 'document':
+      case 'document': {
         // 通过 projectId 查询项目名称
         const projectForDoc = await this.getProjectById(context.projectId!)
         return await IntelligentPathGeneratorService.generateDocumentPath({
@@ -520,8 +520,9 @@ export class IntelligentFileImportService {
           projectId: context.projectId!,
           logicalDocumentName: context.logicalDocumentName!
         })
+      }
 
-      case 'asset':
+      case 'asset': {
         // 通过 projectId 查询项目名称
         const projectForAsset = await this.getProjectById(context.projectId!)
         return await IntelligentPathGeneratorService.generateProjectAssetPath({
@@ -529,8 +530,9 @@ export class IntelligentFileImportService {
           projectId: context.projectId!,
           assetType: context.assetType!
         })
+      }
 
-      case 'expense':
+      case 'expense': {
         // 通过 projectId 查询项目名称
         const projectForExpense = await this.getProjectById(context.projectId!)
         return await IntelligentPathGeneratorService.generateProjectExpensePath({
@@ -539,6 +541,7 @@ export class IntelligentFileImportService {
           expenseDescription: context.expenseDescription!,
           applicantName: context.applicantName
         })
+      }
 
       case 'shared':
         return await IntelligentPathGeneratorService.generateSharedResourcePath({
@@ -612,7 +615,6 @@ export class IntelligentFileImportService {
         versionTag: context.versionTag!,
         isGenericVersion: context.isGenericVersion || false,
         competitionMilestoneId: context.competitionInfo?.seriesName ? undefined : undefined, // TODO: 实现比赛里程碑关联
-        competitionProjectName: context.competitionInfo?.projectName,
         notes: context.notes
       })
 
