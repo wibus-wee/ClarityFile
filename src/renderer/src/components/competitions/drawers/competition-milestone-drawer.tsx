@@ -32,24 +32,24 @@ import {
 import { Calendar } from '@renderer/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
 import { Target, Calendar as CalendarIcon, Loader2, Trophy, Plus, Edit } from 'lucide-react'
-import { 
-  useCreateCompetitionMilestone, 
+import {
+  useCreateCompetitionMilestone,
   useUpdateCompetitionMilestone,
-  useGetAllCompetitionSeries 
+  useGetAllCompetitionSeries
 } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { cn } from '@renderer/lib/utils'
-import { 
+import {
   createCompetitionMilestoneSchema,
-  updateCompetitionMilestoneSchema 
-} from '../../../../../main/types/competition-schemas'
-import type { 
+  updateCompetitionMilestoneSchema
+} from '@main/types/competition-schemas'
+import type {
   CreateCompetitionMilestoneInput,
   UpdateCompetitionMilestoneInput,
-  CompetitionMilestoneOutput 
-} from '../../../../../main/types/competition-schemas'
+  CompetitionMilestoneOutput
+} from '@main/types/competition-schemas'
 
 interface CompetitionMilestoneDrawerProps {
   open: boolean
@@ -60,10 +60,10 @@ interface CompetitionMilestoneDrawerProps {
 }
 
 // 根据模式选择合适的 Schema
-const getFormSchema = (isEdit: boolean) => 
+const getFormSchema = (isEdit: boolean) =>
   isEdit ? updateCompetitionMilestoneSchema : createCompetitionMilestoneSchema
 
-type MilestoneFormData = z.infer<typeof createCompetitionMilestoneSchema> & 
+type MilestoneFormData = z.infer<typeof createCompetitionMilestoneSchema> &
   Partial<z.infer<typeof updateCompetitionMilestoneSchema>>
 
 export function CompetitionMilestoneDrawer({
@@ -74,16 +74,16 @@ export function CompetitionMilestoneDrawer({
   onSuccess
 }: CompetitionMilestoneDrawerProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
-  
+
   const isEdit = !!milestone
   const { data: competitionSeries } = useGetAllCompetitionSeries()
   const { trigger: createMilestone, isMutating: isCreating } = useCreateCompetitionMilestone()
   const { trigger: updateMilestone, isMutating: isUpdating } = useUpdateCompetitionMilestone()
-  
+
   const isMutating = isCreating || isUpdating
 
   const form = useForm<MilestoneFormData>({
-    resolver: zodResolver(getFormSchema(isEdit)),
+    resolver: zodResolver(getFormSchema(isEdit) as any),
     defaultValues: {
       competitionSeriesId: selectedSeriesId || '',
       levelName: '',
@@ -121,7 +121,7 @@ export function CompetitionMilestoneDrawer({
           notes: data.notes?.trim() || undefined
         }
         await updateMilestone(input)
-        
+
         toast.success('里程碑更新成功', {
           description: `"${data.levelName}" 已成功更新`
         })
@@ -134,7 +134,7 @@ export function CompetitionMilestoneDrawer({
           notes: data.notes?.trim() || undefined
         }
         await createMilestone(input)
-        
+
         const selectedSeries = competitionSeries?.find((s) => s.id === data.competitionSeriesId)
         toast.success('赛事里程碑创建成功', {
           description: `"${data.levelName}" 已添加到 "${selectedSeries?.name}"`
@@ -143,10 +143,10 @@ export function CompetitionMilestoneDrawer({
 
       // 重置表单
       form.reset()
-      
+
       // 关闭抽屉
       onOpenChange(false)
-      
+
       // 调用成功回调
       onSuccess?.()
     } catch (error) {
@@ -171,9 +171,7 @@ export function CompetitionMilestoneDrawer({
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DrawerTitle>
-                {isEdit ? '编辑赛事里程碑' : '创建赛事里程碑'}
-              </DrawerTitle>
+              <DrawerTitle>{isEdit ? '编辑赛事里程碑' : '创建赛事里程碑'}</DrawerTitle>
               <DrawerDescription>
                 {isEdit ? '修改里程碑的详细信息' : '为赛事系列添加新的里程碑节点'}
               </DrawerDescription>
@@ -231,14 +229,12 @@ export function CompetitionMilestoneDrawer({
                     里程碑名称 <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="例如：初赛、复赛、决赛"
-                      maxLength={100}
-                      {...field}
-                    />
+                    <Input placeholder="例如：初赛、复赛、决赛" maxLength={100} {...field} />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">{field.value?.length || 0}/100 字符</p>
+                  <p className="text-xs text-muted-foreground">
+                    {field.value?.length || 0}/100 字符
+                  </p>
                 </FormItem>
               )}
             />
@@ -317,7 +313,9 @@ export function CompetitionMilestoneDrawer({
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">{field.value?.length || 0}/500 字符</p>
+                  <p className="text-xs text-muted-foreground">
+                    {field.value?.length || 0}/500 字符
+                  </p>
                 </FormItem>
               )}
             />

@@ -12,7 +12,8 @@ import {
   validateUpdateCompetitionSeries,
   validateCreateCompetitionMilestone,
   validateUpdateCompetitionMilestone,
-  validateAddProjectToCompetition
+  validateAddProjectToCompetition,
+  CompetitionMilestoneOutput
 } from '../types/competition-schemas'
 
 /**
@@ -93,10 +94,11 @@ export class CompetitionService {
   /**
    * 获取赛事系列的所有里程碑
    */
-  static async getCompetitionMilestones(seriesId: string) {
+  static async getCompetitionMilestones(seriesId: string): Promise<CompetitionMilestoneOutput[]> {
     const milestones = await db
       .select({
         id: competitionMilestones.id,
+        competitionSeriesId: competitionMilestones.competitionSeriesId,
         levelName: competitionMilestones.levelName,
         dueDate: competitionMilestones.dueDateMilestone,
         description: competitionMilestones.notes,

@@ -126,6 +126,7 @@ export const competitionSeriesWithStatsOutputSchema = competitionSeriesOutputSch
 // 赛事里程碑输出
 export const competitionMilestoneOutputSchema = z.object({
   id: z.string(),
+  competitionSeriesId: z.string(),
   levelName: z.string(),
   dueDate: z.date().nullable(),
   description: z.string().nullable(),
