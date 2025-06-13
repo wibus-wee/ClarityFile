@@ -559,6 +559,9 @@ export function useCreateBudgetPool() {
     mutate(['project-details', arg.projectId])
     mutate(['project-budget-pools', arg.projectId])
     mutate(['project-budget-overview', arg.projectId])
+    // 重新验证全局数据
+    mutate('all-budget-pools')
+    mutate('global-budget-overview')
     return result
   })
 }
@@ -570,6 +573,9 @@ export function useUpdateBudgetPool() {
     mutate((key) => Array.isArray(key) && key[0] === 'project-details')
     mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
     mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
+    // 重新验证全局数据
+    mutate('all-budget-pools')
+    mutate('global-budget-overview')
     return result
   })
 }
@@ -581,8 +587,20 @@ export function useDeleteBudgetPool() {
     mutate((key) => Array.isArray(key) && key[0] === 'project-details')
     mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
     mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
+    // 重新验证全局数据
+    mutate('all-budget-pools')
+    mutate('global-budget-overview')
     return result
   })
+}
+
+// 全局经费池相关的 hooks
+export function useAllBudgetPools() {
+  return useSWR('all-budget-pools', () => tipcClient.getAllBudgetPools())
+}
+
+export function useGlobalBudgetOverview() {
+  return useSWR('global-budget-overview', () => tipcClient.getGlobalBudgetOverview())
 }
 
 // 共享资源相关的 hooks

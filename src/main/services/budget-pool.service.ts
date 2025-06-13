@@ -1,5 +1,5 @@
 import { db } from '../db'
-import { budgetPools, expenseTrackings } from '../../db/schema'
+import { budgetPools, expenseTrackings, projects } from '../../db/schema'
 import { eq, desc, sum, and, inArray } from 'drizzle-orm'
 import {
   validateCreateBudgetPool,
@@ -14,7 +14,9 @@ import {
   type GetBudgetPoolInput,
   type BudgetPoolOutput,
   type ProjectBudgetOverview,
-  type BudgetPoolStatistics
+  type BudgetPoolStatistics,
+  type GlobalBudgetPoolOutput,
+  type GlobalBudgetOverview
 } from '../types/budget-pool-schemas'
 
 /**
@@ -237,6 +239,88 @@ export class BudgetPoolService {
       usedBudget,
       budgetPools: budgetPoolsData,
       utilizationRate
+    }
+  }
+
+  /**
+   * 获取所有经费池（跨项目）
+   */
+  static async getAllBudgetPools(): Promise<GlobalBudgetPoolOutput[]> {
+    // 获取所有经费池及其关联的项目信息
+    const poolsWithProjects = await db
+      .select({
+        // 经费池信息
+        id: budgetPools.id,
+        name: budgetPools.name,
+        projectId: budgetPools.projectId,
+        budgetAmount: budgetPools.budgetAmount,
+        description: budgetPools.description,
+        createdAt: budgetPools.createdAt,
+        updatedAt: budgetPools.updatedAt,
+        // 项目信息
+        projectName: projects.name,
+        projectStatus: projects.status
+      })
+      .from(budgetPools)
+      .leftJoin(projects, eq(budgetPools.projectId, projects.id))
+      .orderBy(desc(budgetPools.createdAt))
+
+    // 为每个经费池计算统计信息并格式化输出
+    const poolsWithStats = await Promise.all(
+      poolsWithProjects.map(async (pool) => {
+        const statistics = await this.getBudgetPoolStatistics(pool.id)
+        return {
+          id: pool.id,
+          name: pool.name,
+          projectId: pool.projectId,
+          budgetAmount: pool.budgetAmount,
+          description: pool.description,
+          createdAt: pool.createdAt,
+          updatedAt: pool.updatedAt,
+          statistics,
+          project: {
+            id: pool.projectId,
+            name: pool.projectName || '未知项目',
+            status: pool.projectStatus || 'unknown'
+          }
+        } as GlobalBudgetPoolOutput
+      })
+    )
+
+    return poolsWithStats
+  }
+
+  /**
+   * 获取全局经费概览
+   */
+  static async getGlobalBudgetOverview(): Promise<GlobalBudgetOverview> {
+    // 获取所有经费池
+    const allBudgetPools = await this.getAllBudgetPools()
+
+    // 获取所有项目的经费概览
+    const projectIds = [...new Set(allBudgetPools.map((pool) => pool.projectId))]
+    const projectOverviews = await Promise.all(
+      projectIds.map((projectId) => this.getProjectBudgetOverview(projectId))
+    )
+
+    // 计算全局统计
+    const totalBudget = allBudgetPools.reduce((sum, pool) => sum + pool.budgetAmount, 0)
+    const usedBudget = allBudgetPools.reduce(
+      (sum, pool) => sum + (pool.statistics?.usedAmount || 0),
+      0
+    )
+    const remainingBudget = totalBudget - usedBudget
+    const utilizationRate = totalBudget > 0 ? (usedBudget / totalBudget) * 100 : 0
+
+    return {
+      totalBudget,
+      usedBudget,
+      remainingBudget,
+      utilizationRate,
+      projectCount: projectIds.length,
+      budgetPoolCount: allBudgetPools.length,
+      budgetPools: allBudgetPools,
+      projectOverviews
     }
   }
 }

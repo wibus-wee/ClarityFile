@@ -47,6 +47,16 @@ export function budgetPoolRouter(t: ITipc) {
       .input<{ projectId: string }>()
       .action(async ({ input }) => {
         return await BudgetPoolService.getProjectBudgetOverview(input.projectId)
-      })
+      }),
+
+    // 获取所有经费池（跨项目）
+    getAllBudgetPools: t.procedure.action(async () => {
+      return await BudgetPoolService.getAllBudgetPools()
+    }),
+
+    // 获取全局经费概览
+    getGlobalBudgetOverview: t.procedure.action(async () => {
+      return await BudgetPoolService.getGlobalBudgetOverview()
+    })
   }
 }

@@ -10,14 +10,15 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import { Plus, Search, TrendingUp, Receipt } from 'lucide-react'
+import { Plus, Search, TrendingUp, Receipt, PieChart } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { ExpenseOverview } from '@renderer/components/expenses/expense-overview'
 import { ExpenseList } from '@renderer/components/expenses/expense-list'
+import { BudgetPoolsList } from '@renderer/components/expenses/budget-pools-list'
 import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/expense-form-drawer'
 
 // 视图模式类型
-type ViewMode = 'overview' | 'list'
+type ViewMode = 'overview' | 'list' | 'budget-pools-list'
 
 interface ViewTab {
   id: ViewMode
@@ -29,15 +30,21 @@ interface ViewTab {
 const viewTabs: ViewTab[] = [
   {
     id: 'overview',
-    label: '概览',
+    label: '综合概览',
     icon: TrendingUp,
-    description: '经费中心总览和统计信息'
+    description: '经费中心和经费池的统一概览'
   },
   {
     id: 'list',
     label: '经费列表',
     icon: Receipt,
     description: '查看和管理所有经费记录'
+  },
+  {
+    id: 'budget-pools-list',
+    label: '经费池管理',
+    icon: PieChart,
+    description: '查看和管理所有经费池'
   }
 ]
 
@@ -60,9 +67,7 @@ function ExpensesPage() {
   const { view, projectId, status } = Route.useSearch()
   const [currentView, setCurrentView] = useState<ViewMode>(view || 'overview')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'amount' | 'application' | 'reimbursement' | 'status'>(
-    'application'
-  )
+  const [sortBy, setSortBy] = useState<string>('application')
   const [filterStatus, setFilterStatus] = useState<string>(status || 'all')
 
   // Drawer 状态
@@ -130,7 +135,7 @@ function ExpensesPage() {
       </div>
 
       {/* 搜索和筛选栏 */}
-      {currentView === 'list' && (
+      {(currentView === 'list' || currentView === 'budget-pools-list') && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -139,7 +144,9 @@ function ExpensesPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="搜索经费记录..."
+              placeholder={
+                currentView === 'budget-pools-list' ? '搜索经费池...' : '搜索经费记录...'
+              }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -151,10 +158,22 @@ function ExpensesPage() {
               <SelectValue placeholder="排序方式" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="application">申请时间</SelectItem>
-              <SelectItem value="amount">金额</SelectItem>
-              <SelectItem value="reimbursement">报销时间</SelectItem>
-              <SelectItem value="status">状态</SelectItem>
+              {currentView === 'budget-pools-list' ? (
+                <>
+                  <SelectItem value="name">名称</SelectItem>
+                  <SelectItem value="budget">预算金额</SelectItem>
+                  <SelectItem value="used">已使用</SelectItem>
+                  <SelectItem value="remaining">剩余金额</SelectItem>
+                  <SelectItem value="project">项目</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="application">申请时间</SelectItem>
+                  <SelectItem value="amount">金额</SelectItem>
+                  <SelectItem value="reimbursement">报销时间</SelectItem>
+                  <SelectItem value="status">状态</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
 
@@ -163,11 +182,22 @@ function ExpensesPage() {
               <SelectValue placeholder="状态筛选" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部</SelectItem>
-              <SelectItem value="pending">待审核</SelectItem>
-              <SelectItem value="approved">已批准</SelectItem>
-              <SelectItem value="reimbursed">已报销</SelectItem>
-              <SelectItem value="rejected">已拒绝</SelectItem>
+              {currentView === 'budget-pools-list' ? (
+                <>
+                  <SelectItem value="all">全部状态</SelectItem>
+                  <SelectItem value="high-usage">高使用率 ({'>'}80%)</SelectItem>
+                  <SelectItem value="medium-usage">中使用率 (30-80%)</SelectItem>
+                  <SelectItem value="low-usage">低使用率 ({'<'}30%)</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="all">全部</SelectItem>
+                  <SelectItem value="pending">待审核</SelectItem>
+                  <SelectItem value="approved">已批准</SelectItem>
+                  <SelectItem value="reimbursed">已报销</SelectItem>
+                  <SelectItem value="rejected">已拒绝</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
         </motion.div>
@@ -190,7 +220,15 @@ function ExpensesPage() {
           {currentView === 'list' && (
             <ExpenseList
               searchQuery={searchQuery}
-              sortBy={sortBy}
+              sortBy={sortBy as 'amount' | 'application' | 'reimbursement' | 'status'}
+              filterStatus={filterStatus}
+              projectId={projectId}
+            />
+          )}
+          {currentView === 'budget-pools-list' && (
+            <BudgetPoolsList
+              searchQuery={searchQuery}
+              sortBy={sortBy as 'name' | 'budget' | 'used' | 'remaining' | 'project'}
               filterStatus={filterStatus}
               projectId={projectId}
             />

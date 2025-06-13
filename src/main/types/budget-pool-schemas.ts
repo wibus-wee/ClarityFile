@@ -77,6 +77,28 @@ export interface ProjectBudgetOverview {
   utilizationRate: number // 整体预算使用率
 }
 
+// 全局经费池输出类型（包含项目信息）
+export interface GlobalBudgetPoolOutput extends BudgetPoolOutput {
+  // 项目信息
+  project: {
+    id: string
+    name: string
+    status: string
+  }
+}
+
+// 全局经费概览类型
+export interface GlobalBudgetOverview {
+  totalBudget: number // 所有项目总预算
+  usedBudget: number // 所有项目已使用预算
+  remainingBudget: number // 所有项目剩余预算
+  utilizationRate: number // 全局预算使用率
+  projectCount: number // 项目数量
+  budgetPoolCount: number // 经费池总数
+  budgetPools: GlobalBudgetPoolOutput[] // 所有经费池
+  projectOverviews: ProjectBudgetOverview[] // 各项目概览
+}
+
 // 验证函数
 export function validateCreateBudgetPool(input: unknown): CreateBudgetPoolInput {
   return createBudgetPoolSchema.parse(input)

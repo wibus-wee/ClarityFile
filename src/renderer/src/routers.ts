@@ -41,26 +41,26 @@ export const routes: AppRoute = {
       label: '赛事中心',
       icon: Trophy
     },
-    {
-      path: '/shared-resources',
-      label: '共享资源',
-      icon: Share2
-    },
-    {
-      path: '/project-assets',
-      label: '项目资产',
-      icon: Image
-    },
+    // {
+    //   path: '/shared-resources',
+    //   label: '共享资源',
+    //   icon: Share2
+    // },
+    // {
+    //   path: '/project-assets',
+    //   label: '项目资产',
+    //   icon: Image
+    // },
     {
       path: '/expenses',
       label: '经费报销',
       icon: CreditCard
-    },
-    {
-      path: '/tags',
-      label: '标签管理',
-      icon: Tags
     }
+    // {
+    //   path: '/tags',
+    //   label: '标签管理',
+    //   icon: Tags
+    // }
   ],
   主要功能: [
     {

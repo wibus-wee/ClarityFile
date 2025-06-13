@@ -10,11 +10,15 @@ import {
   Users,
   BarChart3,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Wallet,
+  PieChart,
+  AlertCircle
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import useSWR from 'swr'
 import { tipcClient } from '@renderer/lib/tipc-client'
+import { useGlobalBudgetOverview } from '@renderer/hooks/use-tipc'
 import { cn } from '@renderer/lib/utils'
 
 // 统计卡片组件
@@ -79,7 +83,13 @@ function ExpenseStatCard({
 
 export function ExpenseOverview() {
   // 获取全局经费统计数据
-  const { data: allExpenses, isLoading } = useSWR('all-expenses', () => tipcClient.getAllExpenses())
+  const { data: allExpenses, isLoading: expensesLoading } = useSWR('all-expenses', () =>
+    tipcClient.getAllExpenses()
+  )
+  // 获取全局经费池数据
+  const { data: globalBudgetOverview, isLoading: budgetLoading } = useGlobalBudgetOverview()
+
+  const isLoading = expensesLoading || budgetLoading
 
   if (isLoading) {
     return (
@@ -90,9 +100,17 @@ export function ExpenseOverview() {
   }
 
   const expenses = allExpenses || []
+  const budgetOverview = globalBudgetOverview || {
+    totalBudget: 0,
+    usedBudget: 0,
+    remainingBudget: 0,
+    utilizationRate: 0,
+    projectCount: 0,
+    budgetPoolCount: 0,
+    budgetPools: []
+  }
 
-  // 计算统计数据
-  const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  // 计算经费记录统计数据
   const pendingAmount = expenses
     .filter((e) => e.status.toLowerCase() === 'pending')
     .reduce((sum, e) => sum + e.amount, 0)
@@ -106,8 +124,13 @@ export function ExpenseOverview() {
     .filter((e) => e.status.toLowerCase() === 'approved')
     .reduce((sum, e) => sum + e.amount, 0)
 
-  // 计算实际已使用的经费（只包含已批准和已报销的记录）
-  const usedAmount = approvedAmount + reimbursedAmount
+  // 计算经费池统计
+  const highRiskPools = budgetOverview.budgetPools.filter(
+    (pool) => (pool.statistics?.utilizationRate || 0) > 80
+  ).length
+  const lowUsagePools = budgetOverview.budgetPools.filter(
+    (pool) => (pool.statistics?.utilizationRate || 0) < 30
+  ).length
 
   const statusCounts = expenses.reduce(
     (acc, expense) => {
@@ -182,35 +205,65 @@ export function ExpenseOverview() {
     .sort(([a], [b]) => b.localeCompare(a))
     .slice(0, 6)
 
-  // 统计卡片数据
+  // 格式化金额
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('zh-CN', {
+      style: 'currency',
+      currency: 'CNY',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
+
+  // 统计卡片数据 - 合并经费记录和经费池统计
   const statCards = [
     {
-      title: '已使用经费',
-      value: `¥${usedAmount.toLocaleString()}`,
+      title: '总预算',
+      value: formatCurrency(budgetOverview.totalBudget),
       icon: DollarSign,
-      color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-      trend: { value: 12, isPositive: true }
+      color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
     },
     {
-      title: '已报销',
-      value: `¥${reimbursedAmount.toLocaleString()}`,
+      title: '已使用预算',
+      value: formatCurrency(budgetOverview.usedBudget),
       icon: CheckCircle,
-      color: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400',
-      trend: { value: 8, isPositive: true }
+      color: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400'
     },
     {
-      title: '待处理',
-      value: `¥${pendingAmount.toLocaleString()}`,
+      title: '剩余预算',
+      value: formatCurrency(budgetOverview.remainingBudget),
+      icon: Wallet,
+      color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'
+    },
+    {
+      title: '预算使用率',
+      value: `${Math.round(budgetOverview.utilizationRate)}%`,
+      icon: BarChart3,
+      color: 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'
+    },
+    {
+      title: '待处理经费',
+      value: formatCurrency(pendingAmount),
       icon: Clock,
-      color: 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
-      trend: { value: 5, isPositive: false }
+      color: 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400'
     },
     {
-      title: '本月新增',
-      value: `¥${thisMonthAmount.toLocaleString()}`,
+      title: '经费池数量',
+      value: `${budgetOverview.budgetPoolCount}个`,
+      icon: PieChart,
+      color: 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400'
+    },
+    {
+      title: '高风险经费池',
+      value: `${highRiskPools}个`,
+      icon: AlertCircle,
+      color: 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400'
+    },
+    {
+      title: '本月新增经费',
+      value: formatCurrency(thisMonthAmount),
       icon: TrendingUp,
-      color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
-      trend: { value: 15, isPositive: true }
+      color: 'bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400'
     }
   ]
 
@@ -297,7 +350,6 @@ export function ExpenseOverview() {
             value={card.value}
             icon={card.icon}
             color={card.color}
-            trend={card.trend}
             delay={index * 0.1}
           />
         ))}
@@ -533,6 +585,88 @@ export function ExpenseOverview() {
           <div className="text-center py-6 text-muted-foreground">
             <Receipt className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">暂无经费记录</p>
+          </div>
+        )}
+      </motion.div>
+
+      {/* 经费池快速概览 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.4 }}
+        className="p-4 border border-border rounded-lg bg-card"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium">经费池概览</h3>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/expenses" search={{ view: 'budget-pools-list' }}>
+              查看全部经费池
+            </Link>
+          </Button>
+        </div>
+
+        {budgetOverview.budgetPools.length > 0 ? (
+          <div className="space-y-3">
+            {/* 使用率分布 */}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-lg font-bold text-red-600">{highRiskPools}</div>
+                <div className="text-xs text-muted-foreground">高风险 ({'>'}80%)</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-yellow-600">
+                  {budgetOverview.budgetPoolCount - highRiskPools - lowUsagePools}
+                </div>
+                <div className="text-xs text-muted-foreground">中等使用率</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-green-600">{lowUsagePools}</div>
+                <div className="text-xs text-muted-foreground">低使用率 ({'<'}30%)</div>
+              </div>
+            </div>
+
+            {/* 前几个经费池 */}
+            <div className="space-y-2">
+              {budgetOverview.budgetPools.slice(0, 3).map((pool, index) => (
+                <motion.div
+                  key={pool.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.5 + index * 0.1 }}
+                  className="flex items-center justify-between p-2 rounded border border-border/50"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate">{pool.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pool.project.name} • {formatCurrency(pool.budgetAmount)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div
+                      className={cn(
+                        'text-sm font-medium',
+                        (pool.statistics?.utilizationRate || 0) > 80
+                          ? 'text-red-600'
+                          : (pool.statistics?.utilizationRate || 0) > 50
+                            ? 'text-yellow-600'
+                            : 'text-green-600'
+                      )}
+                    >
+                      {(pool.statistics?.utilizationRate || 0).toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">使用率</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 text-muted-foreground">
+            <PieChart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">暂无经费池数据</p>
+            <Button asChild variant="outline" size="sm" className="mt-2">
+              <Link to="/projects">创建项目和经费池</Link>
+            </Button>
           </div>
         )}
       </motion.div>
