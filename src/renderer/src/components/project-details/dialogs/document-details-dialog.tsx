@@ -9,7 +9,7 @@ import {
 import { Badge } from '@renderer/components/ui/badge'
 import { Separator } from '@renderer/components/ui/separator'
 import { FileText, Calendar, Hash } from 'lucide-react'
-import type { LogicalDocumentWithVersionsOutput } from '../../../../../main/types/document-schemas'
+import type { LogicalDocumentWithVersionsOutput } from '@main/types/document-schemas'
 
 interface DocumentDetailsDialogProps {
   document: LogicalDocumentWithVersionsOutput | null
@@ -117,9 +117,9 @@ export function DocumentDetailsDialog({
                             通用版本
                           </Badge>
                         )}
-                        {version.competitionProjectName && (
+                        {version.competitionMilestone?.series.name && (
                           <Badge variant="outline" className="text-xs">
-                            {version.competitionProjectName}
+                            {version.competitionMilestone.series.name}
                           </Badge>
                         )}
                       </div>
