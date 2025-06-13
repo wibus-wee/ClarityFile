@@ -539,6 +539,52 @@ export function useDeleteExpenseTracking() {
   )
 }
 
+// 经费池相关的 hooks
+export function useProjectBudgetPools(projectId: string | null) {
+  return useSWR(projectId ? ['project-budget-pools', projectId] : null, () =>
+    projectId ? tipcClient.getProjectBudgetPools({ projectId }) : null
+  )
+}
+
+export function useProjectBudgetOverview(projectId: string | null) {
+  return useSWR(projectId ? ['project-budget-overview', projectId] : null, () =>
+    projectId ? tipcClient.getProjectBudgetOverview({ projectId }) : null
+  )
+}
+
+export function useCreateBudgetPool() {
+  return useSWRMutation('budget-pools', async (_key, { arg }: { arg: any }) => {
+    const result = await tipcClient.createBudgetPool(arg)
+    // 重新验证项目详情和经费池列表
+    mutate(['project-details', arg.projectId])
+    mutate(['project-budget-pools', arg.projectId])
+    mutate(['project-budget-overview', arg.projectId])
+    return result
+  })
+}
+
+export function useUpdateBudgetPool() {
+  return useSWRMutation('budget-pools', async (_key, { arg }: { arg: any }) => {
+    const result = await tipcClient.updateBudgetPool(arg)
+    // 重新验证相关数据
+    mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+    mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
+    mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
+    return result
+  })
+}
+
+export function useDeleteBudgetPool() {
+  return useSWRMutation('budget-pools', async (_key, { arg }: { arg: any }) => {
+    const result = await tipcClient.deleteBudgetPool(arg)
+    // 重新验证相关数据
+    mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+    mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
+    mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
+    return result
+  })
+}
+
 // 共享资源相关的 hooks
 export function useCreateSharedResource() {
   return useSWRMutation(

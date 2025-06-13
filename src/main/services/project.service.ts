@@ -28,6 +28,7 @@ import { PathSyncManager } from '../managers/path-sync.manager'
 import { LogicalDocumentService } from './document/logical-document.service'
 import { ProjectAssetsService } from './project-assets.service'
 import { ExpenseTrackingService } from './expense-tracking.service'
+import { BudgetPoolService } from './budget-pool.service'
 import { SharedResourcesService } from './shared-resources.service'
 import { CompetitionService } from './competition.service'
 import { TagService } from './tag.service'
@@ -226,6 +227,7 @@ export class ProjectService {
       documentsWithVersions,
       assets,
       expenses,
+      budgetOverview,
       sharedResourcesData,
       competitions,
       projectTagsData,
@@ -234,6 +236,7 @@ export class ProjectService {
       LogicalDocumentService.getProjectDocumentsWithVersions(validatedInput.id),
       ProjectAssetsService.getProjectAssets({ projectId: validatedInput.id }),
       ExpenseTrackingService.getProjectExpenses(validatedInput.id),
+      BudgetPoolService.getProjectBudgetOverview(validatedInput.id),
       SharedResourcesService.getProjectSharedResources(validatedInput.id),
       CompetitionService.getProjectCompetitions(validatedInput.id),
       TagService.getProjectTags(validatedInput.id),
@@ -260,6 +263,8 @@ export class ProjectService {
       assets,
       // 经费相关
       expenses,
+      // 经费池相关
+      budgetOverview,
       // 共享资源相关
       sharedResources: sharedResourcesData,
       // 赛事相关
@@ -272,11 +277,12 @@ export class ProjectService {
         versionCount: documentsWithVersions.reduce((sum, doc) => sum + doc.versions.length, 0),
         assetCount: assets.length,
         expenseCount: expenses.length,
-        totalExpenseAmount: expenses.reduce((sum, expense) => sum + expense.amount, 0),
-        // 计算实际已使用的经费（只包含已批准和已报销的记录）
-        usedExpenseAmount: expenses
-          .filter((expense) => expense.status === 'approved' || expense.status === 'reimbursed')
-          .reduce((sum, expense) => sum + expense.amount, 0),
+        // 使用经费池概览中的正确数据
+        totalBudget: budgetOverview.totalBudget, // 项目总预算（所有经费池预算之和）
+        usedBudget: budgetOverview.usedBudget, // 实际已使用预算
+        remainingBudget: budgetOverview.remainingBudget, // 剩余预算
+        budgetUtilizationRate: budgetOverview.utilizationRate, // 预算使用率
+        budgetPoolCount: budgetOverview.budgetPools.length, // 经费池数量
         sharedResourceCount: sharedResourcesData.length,
         competitionCount: competitions.length,
         tagCount: projectTagsData.length

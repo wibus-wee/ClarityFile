@@ -17,6 +17,7 @@ import { tipcClient } from '@renderer/lib/tipc-client'
 import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from './expense-details-dialog'
 import { ExpenseStatusDialog } from './expense-status-dialog'
+import type { ExpenseTrackingOutput } from '@main/types/expense-schemas'
 
 interface ExpenseListProps {
   searchQuery: string
@@ -25,27 +26,8 @@ interface ExpenseListProps {
   projectId?: string
 }
 
-// 使用getAllExpenses返回的类型定义（包含发票文件信息）
-type ExpenseItem = {
-  id: string
-  itemName: string
-  projectId: string | null
-  applicant: string
-  amount: number
-  applicationDate: Date
-  status: string
-  reimbursementDate: Date | null
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
-  // 发票文件信息
-  invoiceFileName: string | null
-  invoiceOriginalFileName: string | null
-  invoicePhysicalPath: string | null
-  invoiceMimeType: string | null
-  invoiceFileSizeBytes: number | null
-  invoiceUploadedAt: Date | null
-}
+// 使用统一的经费记录输出类型
+type ExpenseItem = ExpenseTrackingOutput
 
 export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: ExpenseListProps) {
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
@@ -286,14 +268,7 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
         open={editDrawerOpen}
         onOpenChange={setEditDrawerOpen}
         mode="edit"
-        expense={
-          selectedExpense && selectedExpense.projectId
-            ? {
-                ...selectedExpense,
-                projectId: selectedExpense.projectId
-              }
-            : null
-        }
+        expense={selectedExpense}
         onSuccess={handleSuccess}
       />
 

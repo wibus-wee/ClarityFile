@@ -1,5 +1,5 @@
 import { db } from '../db'
-import { expenseTrackings, managedFiles } from '../../db/schema'
+import { expenseTrackings, managedFiles, budgetPools } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
 import type {
   CreateExpenseTrackingInput,
@@ -19,6 +19,8 @@ export class ExpenseTrackingService {
       .select({
         id: expenseTrackings.id,
         itemName: expenseTrackings.itemName,
+        projectId: expenseTrackings.projectId,
+        budgetPoolId: expenseTrackings.budgetPoolId,
         applicant: expenseTrackings.applicant,
         amount: expenseTrackings.amount,
         applicationDate: expenseTrackings.applicationDate,
@@ -47,11 +49,27 @@ export class ExpenseTrackingService {
    * 创建经费记录
    */
   static async createExpenseTracking(input: CreateExpenseTrackingInput) {
+    // 验证经费池是否属于指定项目
+    const budgetPool = await db
+      .select()
+      .from(budgetPools)
+      .where(eq(budgetPools.id, input.budgetPoolId))
+      .limit(1)
+
+    if (!budgetPool[0]) {
+      throw new Error('指定的经费池不存在')
+    }
+
+    if (budgetPool[0].projectId !== input.projectId) {
+      throw new Error('经费池不属于指定的项目')
+    }
+
     const result = await db
       .insert(expenseTrackings)
       .values({
         itemName: input.itemName,
         projectId: input.projectId,
+        budgetPoolId: input.budgetPoolId,
         applicant: input.applicant,
         amount: input.amount,
         applicationDate: input.applicationDate,
@@ -70,19 +88,54 @@ export class ExpenseTrackingService {
    * 更新经费记录
    */
   static async updateExpenseTracking(input: UpdateExpenseTrackingInput) {
+    // 如果要更新经费池，需要验证经费池是否属于该记录的项目
+    if (input.budgetPoolId !== undefined) {
+      // 先获取当前经费记录的项目ID
+      const currentRecord = await db
+        .select({ projectId: expenseTrackings.projectId })
+        .from(expenseTrackings)
+        .where(eq(expenseTrackings.id, input.id))
+        .limit(1)
+
+      if (!currentRecord[0]) {
+        throw new Error('经费记录不存在')
+      }
+
+      // 验证新的经费池是否属于该项目
+      const budgetPool = await db
+        .select()
+        .from(budgetPools)
+        .where(eq(budgetPools.id, input.budgetPoolId))
+        .limit(1)
+
+      if (!budgetPool[0]) {
+        throw new Error('指定的经费池不存在')
+      }
+
+      if (budgetPool[0].projectId !== currentRecord[0].projectId) {
+        throw new Error('经费池不属于该经费记录的项目')
+      }
+    }
+
+    const updateData: any = {
+      updatedAt: new Date()
+    }
+
+    if (input.itemName !== undefined) updateData.itemName = input.itemName
+    if (input.budgetPoolId !== undefined) updateData.budgetPoolId = input.budgetPoolId
+    if (input.applicant !== undefined) updateData.applicant = input.applicant
+    if (input.amount !== undefined) updateData.amount = input.amount
+    if (input.applicationDate !== undefined) updateData.applicationDate = input.applicationDate
+    if (input.status !== undefined) updateData.status = input.status
+    if (input.invoiceManagedFileId !== undefined)
+      updateData.invoiceManagedFileId = input.invoiceManagedFileId
+    if (input.reimbursementDate !== undefined)
+      updateData.reimbursementDate = input.reimbursementDate
+    if (input.notes !== undefined) updateData.notes = input.notes
+
     const result = await db
       .update(expenseTrackings)
-      .set({
-        itemName: input.itemName,
-        applicant: input.applicant,
-        amount: input.amount,
-        applicationDate: input.applicationDate,
-        status: input.status,
-        invoiceManagedFileId: input.invoiceManagedFileId,
-        reimbursementDate: input.reimbursementDate,
-        notes: input.notes,
-        updatedAt: new Date()
-      })
+      .set(updateData)
       .where(eq(expenseTrackings.id, input.id))
       .returning()
 
@@ -150,6 +203,7 @@ export class ExpenseTrackingService {
         id: expenseTrackings.id,
         itemName: expenseTrackings.itemName,
         projectId: expenseTrackings.projectId,
+        budgetPoolId: expenseTrackings.budgetPoolId,
         applicant: expenseTrackings.applicant,
         amount: expenseTrackings.amount,
         applicationDate: expenseTrackings.applicationDate,

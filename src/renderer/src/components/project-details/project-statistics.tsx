@@ -9,7 +9,8 @@ interface ProjectStatisticsProps {
 }
 
 export function ProjectStatistics({ projectDetails, className }: ProjectStatisticsProps) {
-  const { documents, assets, expenses, competitions, sharedResources, tags } = projectDetails
+  const { documents, assets, expenses, budgetOverview, competitions, sharedResources, tags } =
+    projectDetails
 
   // 计算统计信息
   const statistics = {
@@ -17,11 +18,12 @@ export function ProjectStatistics({ projectDetails, className }: ProjectStatisti
     versionCount: documents.reduce((total, doc) => total + (doc.versions?.length || 0), 0),
     assetCount: assets.length,
     expenseCount: expenses.length,
-    totalExpenseAmount: expenses.reduce((total, expense) => total + expense.amount, 0),
-    // 计算实际已使用的经费（只包含已批准和已报销的记录）
-    usedExpenseAmount: expenses
-      .filter((expense) => expense.status === 'approved' || expense.status === 'reimbursed')
-      .reduce((total, expense) => total + expense.amount, 0),
+    // 使用经费池概览中的正确数据
+    totalBudget: budgetOverview?.totalBudget || 0,
+    usedBudget: budgetOverview?.usedBudget || 0,
+    remainingBudget: budgetOverview?.remainingBudget || 0,
+    budgetUtilizationRate: budgetOverview?.utilizationRate || 0,
+    budgetPoolCount: budgetOverview?.budgetPools?.length || 0,
     competitionCount: competitions.length,
     sharedResourceCount: sharedResources.length,
     tagCount: tags.length
@@ -123,7 +125,7 @@ export function ProjectStatistics({ projectDetails, className }: ProjectStatisti
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-bold text-foreground truncate">
-              {formatCurrency(statistics.usedExpenseAmount)}
+              {formatCurrency(statistics.usedBudget)}
             </div>
             <div className="text-xs text-muted-foreground truncate">
               已使用经费 ({statistics.expenseCount} 条

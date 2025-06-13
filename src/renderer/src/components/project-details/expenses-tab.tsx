@@ -43,6 +43,7 @@ import { ExpenseFormDrawer } from './drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from '../expenses/expense-details-dialog'
 import { ExpenseStatusDialog } from '../expenses/expense-status-dialog'
 import type { ProjectDetailsOutput } from '@main/types/project-schemas'
+import type { ExpenseTrackingOutput } from '@main/types/expense-schemas'
 
 // 统计卡片组件
 interface ExpenseStatCardProps {
@@ -121,7 +122,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   const [expenseFormMode, setExpenseFormMode] = useState<'create' | 'edit'>('create')
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
-  const [selectedExpense, setSelectedExpense] = useState<any>(null)
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseTrackingOutput | null>(null)
 
   // 处理创建操作
   const handleCreate = () => {
@@ -131,26 +132,26 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   }
 
   // 处理编辑操作
-  const handleEdit = (expense: any) => {
+  const handleEdit = (expense: ExpenseTrackingOutput) => {
     setExpenseFormMode('edit')
     setSelectedExpense(expense)
     setExpenseFormOpen(true)
   }
 
   // 处理查看详情
-  const handleViewDetails = (expense: any) => {
+  const handleViewDetails = (expense: ExpenseTrackingOutput) => {
     setSelectedExpense(expense)
     setDetailsDialogOpen(true)
   }
 
   // 处理状态更新
-  const handleUpdateStatus = (expense: any) => {
+  const handleUpdateStatus = (expense: ExpenseTrackingOutput) => {
     setSelectedExpense(expense)
     setStatusDialogOpen(true)
   }
 
   // 从详情页面跳转到编辑
-  const handleEditFromDetails = (expense: any) => {
+  const handleEditFromDetails = (expense: ExpenseTrackingOutput) => {
     setDetailsDialogOpen(false)
     setSelectedExpense(expense)
     setExpenseFormMode('edit')

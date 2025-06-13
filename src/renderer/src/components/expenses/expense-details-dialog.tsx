@@ -18,7 +18,8 @@ import {
   Download,
   Edit,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  PieChart
 } from 'lucide-react'
 import { cn, formatFileSize } from '@renderer/lib/utils'
 import { Link } from '@tanstack/react-router'
@@ -30,6 +31,7 @@ type ExpenseDetails = {
   id: string
   itemName: string
   projectId: string | null
+  budgetPoolId: string | null
   applicant: string
   amount: number
   applicationDate: Date
@@ -45,6 +47,8 @@ type ExpenseDetails = {
   invoiceMimeType: string | null
   invoiceFileSizeBytes: number | null
   invoiceUploadedAt: Date | null
+  // 经费池信息
+  budgetPoolName?: string | null
 }
 
 interface ExpenseDetailsDialogProps {
@@ -154,6 +158,14 @@ export function ExpenseDetailsDialog({
                   <span className="text-sm">
                     {format(new Date(expense.reimbursementDate), 'PPP', { locale: zhCN })}
                   </span>
+                </div>
+              )}
+
+              {expense.budgetPoolName && (
+                <div className="flex items-center gap-2">
+                  <PieChart className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">经费池：</span>
+                  <span className="text-sm font-medium">{expense.budgetPoolName}</span>
                 </div>
               )}
 

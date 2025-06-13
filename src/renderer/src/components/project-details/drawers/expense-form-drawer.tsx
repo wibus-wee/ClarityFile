@@ -40,6 +40,7 @@ import {
   useCreateExpenseTracking,
   useUpdateExpenseTracking,
   useProjects,
+  useProjectBudgetPools,
   useSelectFile
 } from '@renderer/hooks/use-tipc'
 import { tipcClient } from '@renderer/lib/tipc-client'
@@ -68,9 +69,10 @@ interface ExpenseFormDrawerProps {
     amount: number
     applicationDate: Date
     status: string
+    budgetPoolId?: string | null
     reimbursementDate?: Date | null
     notes?: string | null
-    projectId: string
+    projectId: string | null
     // 发票文件信息
     invoiceFileName?: string | null
     invoiceOriginalFileName?: string | null
@@ -100,6 +102,7 @@ export function ExpenseFormDrawer({
   const { trigger: createExpense, isMutating: isCreating } = useCreateExpenseTracking()
   const { trigger: updateExpense, isMutating: isUpdating } = useUpdateExpenseTracking()
   const { data: projects } = useProjects()
+  const { data: budgetPools } = useProjectBudgetPools(projectId || expense?.projectId || null)
   const { trigger: selectFile } = useSelectFile()
 
   const isMutating = isCreating || isUpdating
@@ -109,6 +112,7 @@ export function ExpenseFormDrawer({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
       projectId: projectId || '',
+      budgetPoolId: '',
       itemName: '',
       applicant: '',
       amount: 0,
@@ -123,7 +127,8 @@ export function ExpenseFormDrawer({
   useEffect(() => {
     if (mode === 'edit' && expense) {
       form.reset({
-        projectId: expense.projectId,
+        projectId: expense.projectId || '',
+        budgetPoolId: expense.budgetPoolId || '',
         itemName: expense.itemName,
         applicant: expense.applicant,
         amount: expense.amount,
@@ -151,6 +156,7 @@ export function ExpenseFormDrawer({
     } else if (mode === 'create') {
       form.reset({
         projectId: projectId || '',
+        budgetPoolId: '',
         itemName: '',
         applicant: '',
         amount: 0,
@@ -226,6 +232,7 @@ export function ExpenseFormDrawer({
       if (mode === 'create') {
         await createExpense({
           projectId: data.projectId,
+          budgetPoolId: data.budgetPoolId,
           itemName: data.itemName,
           applicant: data.applicant,
           amount: data.amount,
@@ -240,6 +247,7 @@ export function ExpenseFormDrawer({
       } else if (expense) {
         await updateExpense({
           id: expense.id,
+          budgetPoolId: data.budgetPoolId,
           itemName: data.itemName,
           applicant: data.applicant,
           amount: data.amount,
@@ -318,6 +326,37 @@ export function ExpenseFormDrawer({
                   )}
                 />
               )}
+
+              {/* 经费池选择 */}
+              <FormField
+                control={form.control}
+                name="budgetPoolId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>经费池 *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择经费池" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {budgetPools?.map((pool) => (
+                          <SelectItem key={pool.id} value={pool.id}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>{pool.name}</span>
+                              <span className="text-xs text-muted-foreground ml-2">
+                                剩余: ¥{(pool.statistics?.remainingAmount || 0).toLocaleString()}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField

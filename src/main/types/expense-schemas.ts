@@ -15,6 +15,7 @@ export const createExpenseTrackingSchema = z.object({
     .max(100, '报销项目名称不能超过100个字符')
     .refine((name) => name.trim().length > 0, '报销项目不能只包含空格'),
   projectId: z.string().min(1, '请选择项目'),
+  budgetPoolId: z.string().min(1, '请选择经费池'),
   applicant: z
     .string()
     .min(1, '请填写申请人')
@@ -40,6 +41,7 @@ export const updateExpenseTrackingSchema = z.object({
     .max(100, '报销项目名称不能超过100个字符')
     .refine((name) => name.trim().length > 0, '报销项目不能只包含空格')
     .optional(),
+  budgetPoolId: z.string().min(1, '请选择经费池').optional(),
   applicant: z
     .string()
     .min(1, '请填写申请人')
@@ -72,6 +74,31 @@ export const getProjectExpensesSchema = z.object({
 export const getExpensesByStatusSchema = z.object({
   status: expenseStatusSchema
 })
+
+// ===== 输出类型 =====
+
+// 经费记录输出类型
+export interface ExpenseTrackingOutput {
+  id: string
+  itemName: string
+  projectId: string | null
+  budgetPoolId: string | null
+  applicant: string
+  amount: number
+  applicationDate: Date
+  status: string
+  reimbursementDate: Date | null
+  notes: string | null
+  createdAt: Date
+  updatedAt: Date
+  // 发票文件信息（可能为空）
+  invoiceFileName: string | null
+  invoiceOriginalFileName: string | null
+  invoicePhysicalPath: string | null
+  invoiceMimeType: string | null
+  invoiceFileSizeBytes: number | null
+  invoiceUploadedAt: Date | null
+}
 
 // ===== 导出类型 =====
 export type CreateExpenseTrackingInput = z.infer<typeof createExpenseTrackingSchema>

@@ -143,7 +143,8 @@ export interface ProjectDetailsOutput {
   project: ProjectOutput
   documents: any[] // 从 LogicalDocumentService 获取
   assets: any[] // 从 ProjectAssetsService 获取
-  expenses: any[] // 从 ExpenseTrackingService 获取
+  expenses: import('../types/expense-schemas').ExpenseTrackingOutput[] // 从 ExpenseTrackingService 获取
+  budgetOverview: any // 从 BudgetPoolService 获取的项目经费概览
   sharedResources: any[] // 从 SharedResourcesService 获取
   competitions: any[] // 从 CompetitionService 获取
   tags: any[] // 从 TagService 获取
@@ -153,8 +154,12 @@ export interface ProjectDetailsOutput {
     versionCount: number
     assetCount: number
     expenseCount: number
-    totalExpenseAmount: number
-    usedExpenseAmount: number // 实际已使用的经费（已批准+已报销）
+    // 经费相关统计（使用经费池数据）
+    totalBudget: number // 项目总预算（所有经费池预算之和）
+    usedBudget: number // 实际已使用预算
+    remainingBudget: number // 剩余预算
+    budgetUtilizationRate: number // 预算使用率
+    budgetPoolCount: number // 经费池数量
     sharedResourceCount: number
     competitionCount: number
     tagCount: number

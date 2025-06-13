@@ -11,6 +11,7 @@ import { intelligentFileImportRouter } from './routers/intelligent-file-import.r
 import { documentVersionRouter } from './routers/document/document-version.router'
 import { projectAssetsRouter } from './routers/project-assets.router'
 import { expenseTrackingRouter } from './routers/expense-tracking.router'
+import { budgetPoolRouter } from './routers/budget-pool.router'
 import { sharedResourcesRouter } from './routers/shared-resources.router'
 import { competitionRouter } from './routers/competition.router'
 import { fileAccessRouter } from './routers/file-access.router'
@@ -55,6 +56,9 @@ export const router = {
 
   // 经费追踪相关路由
   ...expenseTrackingRouter(t),
+
+  // 经费池相关路由
+  ...budgetPoolRouter(t),
 
   // 共享资源相关路由
   ...sharedResourcesRouter(t),

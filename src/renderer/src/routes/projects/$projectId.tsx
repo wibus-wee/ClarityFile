@@ -12,7 +12,8 @@ import {
   Image,
   Trophy,
   Share2,
-  DollarSign
+  DollarSign,
+  PieChart
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@renderer/lib/utils'
@@ -22,11 +23,19 @@ import { AssetsTab } from '@renderer/components/project-details/assets-tab'
 import { CompetitionsTab } from '@renderer/components/project-details/competitions-tab'
 import { SharedResourcesTab } from '@renderer/components/project-details/shared-resources-tab'
 import { ExpensesTab } from '@renderer/components/project-details/expenses-tab'
+import { BudgetPoolsTab } from '@renderer/components/project-details/budget-pools-tab'
 import { SettingsTab } from '@renderer/components/project-details/settings-tab'
 import { InlineNotFound } from '@renderer/components/not-found'
 
 // Tab类型定义
-type TabId = 'documents' | 'assets' | 'competitions' | 'shared-resources' | 'expenses' | 'settings'
+type TabId =
+  | 'documents'
+  | 'assets'
+  | 'competitions'
+  | 'shared-resources'
+  | 'expenses'
+  | 'budget-pools'
+  | 'settings'
 
 interface Tab {
   id: TabId
@@ -40,7 +49,8 @@ const tabs: Tab[] = [
   { id: 'assets', label: '资产', icon: Image },
   { id: 'competitions', label: '参与赛事', icon: Trophy },
   { id: 'shared-resources', label: '关联资源', icon: Share2 },
-  { id: 'expenses', label: '经费', icon: DollarSign },
+  { id: 'expenses', label: '经费记录', icon: DollarSign },
+  { id: 'budget-pools', label: '经费池', icon: PieChart },
   { id: 'settings', label: '设置', icon: Settings }
 ]
 
@@ -211,6 +221,8 @@ function renderTabContent(tabId: TabId, projectDetails: any) {
       return <SharedResourcesTab projectDetails={projectDetails} />
     case 'expenses':
       return <ExpensesTab projectDetails={projectDetails} />
+    case 'budget-pools':
+      return <BudgetPoolsTab projectDetails={projectDetails} />
     case 'settings':
       return <SettingsTab projectDetails={projectDetails} />
     default:

@@ -221,6 +221,28 @@ export const projectAssets = sqliteTable(
   ]
 )
 
+export const budgetPools = sqliteTable(
+  'budget_pools',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    name: text('name').notNull(),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    budgetAmount: real('budget_amount').notNull(),
+    description: text('description'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(strftime('%s', 'now') * 1000)`),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(strftime('%s', 'now') * 1000)`)
+  },
+  (table) => [index('bp_project_id_idx').on(table.projectId)]
+)
+
 export const expenseTrackings = sqliteTable(
   'expense_trackings',
   {
@@ -229,6 +251,7 @@ export const expenseTrackings = sqliteTable(
       .$defaultFn(() => randomUUID()),
     itemName: text('item_name').notNull(),
     projectId: text('project_id').references(() => projects.id, { onDelete: 'set null' }),
+    budgetPoolId: text('budget_pool_id').references(() => budgetPools.id, { onDelete: 'set null' }),
     applicant: text('applicant').notNull(),
     amount: real('amount').notNull(),
     applicationDate: integer('application_date', { mode: 'timestamp_ms' }).notNull(),
@@ -247,6 +270,7 @@ export const expenseTrackings = sqliteTable(
   },
   (table) => [
     index('et_project_id_idx').on(table.projectId),
+    index('et_budget_pool_id_idx').on(table.budgetPoolId),
     index('et_invoice_managed_file_id_idx').on(table.invoiceManagedFileId)
   ]
 )
@@ -412,6 +436,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   logicalDocuments: many(logicalDocuments),
   projectAssets: many(projectAssets),
+  budgetPools: many(budgetPools),
   expenseTrackings: many(expenseTrackings),
   projectTags: many(projectTags),
   projectSharedResources: many(projectSharedResources),
@@ -487,10 +512,22 @@ export const projectAssetsRelations = relations(projectAssets, ({ one, many }) =
   // coveredProjects: many(projects, { relationName: 'coveredProjects' }),
 }))
 
+export const budgetPoolsRelations = relations(budgetPools, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [budgetPools.projectId],
+    references: [projects.id]
+  }),
+  expenseTrackings: many(expenseTrackings)
+}))
+
 export const expenseTrackingsRelations = relations(expenseTrackings, ({ one }) => ({
   project: one(projects, {
     fields: [expenseTrackings.projectId],
     references: [projects.id]
+  }),
+  budgetPool: one(budgetPools, {
+    fields: [expenseTrackings.budgetPoolId],
+    references: [budgetPools.id]
   }),
   invoiceFile: one(managedFiles, {
     fields: [expenseTrackings.invoiceManagedFileId],
