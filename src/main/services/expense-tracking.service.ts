@@ -106,7 +106,23 @@ export class ExpenseTrackingService {
   static async getProjectExpensesStatistics(projectId: string) {
     const expenses = await this.getProjectExpenses(projectId)
 
+    // 计算所有报销记录的总金额（用于统计目的）
     const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+
+    // 计算实际已使用的经费（只包含已批准和已报销的记录）
+    const usedAmount = expenses
+      .filter((expense) => expense.status === 'approved' || expense.status === 'reimbursed')
+      .reduce((sum, expense) => sum + expense.amount, 0)
+
+    // 按状态分别计算金额
+    const statusAmounts = expenses.reduce(
+      (acc, expense) => {
+        acc[expense.status] = (acc[expense.status] || 0) + expense.amount
+        return acc
+      },
+      {} as Record<string, number>
+    )
+
     const statusCounts = expenses.reduce(
       (acc, expense) => {
         acc[expense.status] = (acc[expense.status] || 0) + 1
@@ -117,8 +133,10 @@ export class ExpenseTrackingService {
 
     return {
       expenseCount: expenses.length,
-      totalExpenseAmount: totalAmount,
+      totalExpenseAmount: totalAmount, // 所有报销记录的总金额
+      usedExpenseAmount: usedAmount, // 实际已使用的经费（已批准+已报销）
       statusBreakdown: statusCounts,
+      statusAmounts: statusAmounts, // 按状态分组的金额
       averageAmount: expenses.length > 0 ? totalAmount / expenses.length : 0
     }
   }

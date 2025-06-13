@@ -219,8 +219,10 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
                       <div className="text-lg font-bold text-primary">
                         ¥{expense.amount.toLocaleString()}
                       </div>
-                      {expense.reimbursementDate && (
-                        <div className="text-xs text-muted-foreground">已报销</div>
+                      {expense.status === 'reimbursed' && expense.reimbursementDate && (
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(expense.reimbursementDate).toLocaleDateString()}
+                        </div>
                       )}
                     </div>
 

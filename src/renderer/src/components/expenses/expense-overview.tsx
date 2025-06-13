@@ -106,6 +106,9 @@ export function ExpenseOverview() {
     .filter((e) => e.status.toLowerCase() === 'approved')
     .reduce((sum, e) => sum + e.amount, 0)
 
+  // 计算实际已使用的经费（只包含已批准和已报销的记录）
+  const usedAmount = approvedAmount + reimbursedAmount
+
   const statusCounts = expenses.reduce(
     (acc, expense) => {
       acc[expense.status] = (acc[expense.status] || 0) + 1
@@ -141,9 +144,11 @@ export function ExpenseOverview() {
     processedExpenses.length > 0
       ? processedExpenses.reduce((sum, expense) => {
           const applicationDate = new Date(expense.applicationDate)
-          const processedDate = expense.reimbursementDate
-            ? new Date(expense.reimbursementDate)
-            : new Date(expense.updatedAt)
+          // 对于已报销的使用报销日期，对于被拒绝的使用更新日期
+          const processedDate =
+            expense.status.toLowerCase() === 'reimbursed' && expense.reimbursementDate
+              ? new Date(expense.reimbursementDate)
+              : new Date(expense.updatedAt)
           return sum + (processedDate.getTime() - applicationDate.getTime())
         }, 0) /
         processedExpenses.length /
@@ -180,8 +185,8 @@ export function ExpenseOverview() {
   // 统计卡片数据
   const statCards = [
     {
-      title: '总经费',
-      value: `¥${totalAmount.toLocaleString()}`,
+      title: '已使用经费',
+      value: `¥${usedAmount.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
       trend: { value: 12, isPositive: true }

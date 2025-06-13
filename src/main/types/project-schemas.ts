@@ -154,6 +154,7 @@ export interface ProjectDetailsOutput {
     assetCount: number
     expenseCount: number
     totalExpenseAmount: number
+    usedExpenseAmount: number // 实际已使用的经费（已批准+已报销）
     sharedResourceCount: number
     competitionCount: number
     tagCount: number

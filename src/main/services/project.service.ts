@@ -273,6 +273,10 @@ export class ProjectService {
         assetCount: assets.length,
         expenseCount: expenses.length,
         totalExpenseAmount: expenses.reduce((sum, expense) => sum + expense.amount, 0),
+        // 计算实际已使用的经费（只包含已批准和已报销的记录）
+        usedExpenseAmount: expenses
+          .filter((expense) => expense.status === 'approved' || expense.status === 'reimbursed')
+          .reduce((sum, expense) => sum + expense.amount, 0),
         sharedResourceCount: sharedResourcesData.length,
         competitionCount: competitions.length,
         tagCount: projectTagsData.length

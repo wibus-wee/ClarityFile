@@ -240,6 +240,13 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
     .filter((e) => e.status.toLowerCase() === 'approved')
     .reduce((sum, e) => sum + e.amount, 0)
 
+  const rejectedAmount = expenses
+    .filter((e) => e.status.toLowerCase() === 'rejected')
+    .reduce((sum, e) => sum + e.amount, 0)
+
+  // 计算实际已使用的经费（只包含已批准和已报销的记录）
+  const usedAmount = approvedAmount + reimbursedAmount
+
   // 计算报销率
   const reimbursementRate =
     expenses.length > 0
@@ -250,8 +257,8 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   // 统计卡片数据
   const statCards = [
     {
-      title: '总经费',
-      value: `¥${statistics.totalExpenseAmount.toLocaleString()}`,
+      title: '已使用经费',
+      value: `¥${usedAmount.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
       trend: { value: 12, isPositive: true }
@@ -265,7 +272,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
     },
     {
       title: '待处理',
-      value: `¥${(pendingAmount + approvedAmount).toLocaleString()}`,
+      value: `¥${pendingAmount.toLocaleString()}`,
       icon: Clock,
       color: 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
       trend: { value: 5, isPositive: false }
