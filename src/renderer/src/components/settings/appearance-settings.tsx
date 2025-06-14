@@ -5,33 +5,20 @@ import { z } from 'zod'
 import {
   SettingsForm,
   SettingsSection,
-  SettingsSwitchField,
   SettingsSelectField,
-  SettingsSliderField,
   SettingsRadioField
 } from './components'
-import { useTheme } from '@renderer/hooks/use-theme'
 
 const appearanceSettingsSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']),
-  fontSize: z.number().min(12).max(20),
-  fontFamily: z.string(),
-  sidebarCollapsed: z.boolean(),
-  compactMode: z.boolean(),
-  showAnimations: z.boolean(),
-  accentColor: z.string()
+  fontFamily: z.string()
 })
 
 type AppearanceSettingsForm = z.infer<typeof appearanceSettingsSchema>
 
 const defaultValues: AppearanceSettingsForm = {
   theme: 'system',
-  fontSize: 14,
-  fontFamily: 'system',
-  sidebarCollapsed: false,
-  compactMode: false,
-  showAnimations: true,
-  accentColor: 'blue'
+  fontFamily: 'system'
 }
 
 const fontOptions = [
@@ -48,22 +35,8 @@ const themeOptions = [
   { value: 'system', label: '跟随系统', description: '根据系统设置自动切换' }
 ]
 
-const accentColorOptions = [
-  { value: 'blue', label: '蓝色' },
-  { value: 'green', label: '绿色' },
-  { value: 'purple', label: '紫色' },
-  { value: 'orange', label: '橙色' },
-  { value: 'red', label: '红色' },
-  { value: 'pink', label: '粉色' }
-]
-
 export function AppearanceSettings() {
-  const { setTheme } = useTheme()
-
   const mapFormDataToSettings = (data: AppearanceSettingsForm) => {
-    // 应用主题更改
-    setTheme(data.theme)
-
     return [
       {
         key: 'appearance.theme',
@@ -72,40 +45,10 @@ export function AppearanceSettings() {
         description: '应用主题'
       },
       {
-        key: 'appearance.fontSize',
-        value: data.fontSize,
-        category: 'appearance',
-        description: '字体大小'
-      },
-      {
         key: 'appearance.fontFamily',
         value: data.fontFamily,
         category: 'appearance',
         description: '字体系列'
-      },
-      {
-        key: 'appearance.sidebarCollapsed',
-        value: data.sidebarCollapsed,
-        category: 'appearance',
-        description: '侧边栏默认折叠'
-      },
-      {
-        key: 'appearance.compactMode',
-        value: data.compactMode,
-        category: 'appearance',
-        description: '紧凑模式'
-      },
-      {
-        key: 'appearance.showAnimations',
-        value: data.showAnimations,
-        category: 'appearance',
-        description: '显示动画'
-      },
-      {
-        key: 'appearance.accentColor',
-        value: data.accentColor,
-        category: 'appearance',
-        description: '强调色'
       }
     ]
   }
@@ -121,26 +64,14 @@ export function AppearanceSettings() {
       {(form) => (
         <>
           <SettingsSection title="主题设置" description="选择应用程序的外观主题">
-            <SettingsRadioField
-              control={form.control}
-              name="theme"
-              label="主题模式"
-              options={themeOptions}
-              orientation="horizontal"
-            />
-
             <div className="grid grid-cols-2 gap-4">
-              <SettingsSliderField
+              <SettingsRadioField
                 control={form.control}
-                name="fontSize"
-                label="字体大小"
-                description="调整界面字体大小"
-                min={12}
-                max={20}
-                step={1}
-                formatValue={(value) => `${value}px`}
+                name="theme"
+                label="主题模式"
+                options={themeOptions}
+                orientation="horizontal"
               />
-
               <SettingsSelectField
                 control={form.control}
                 name="fontFamily"
@@ -150,45 +81,6 @@ export function AppearanceSettings() {
                 options={fontOptions}
               />
             </div>
-          </SettingsSection>
-
-          <SettingsSection title="颜色设置" description="自定义应用程序的视觉样式">
-            <SettingsSelectField
-              control={form.control}
-              name="accentColor"
-              label="强调色"
-              description="选择应用程序的强调色"
-              placeholder="选择颜色"
-              options={accentColorOptions}
-            />
-          </SettingsSection>
-
-          <SettingsSection
-            title="界面选项"
-            description="配置界面行为和显示选项"
-            showSeparator={false}
-          >
-            <SettingsSwitchField
-              control={form.control}
-              name="sidebarCollapsed"
-              label="默认折叠侧边栏"
-              description="启动时侧边栏是否默认折叠"
-            />
-
-            <SettingsSwitchField
-              control={form.control}
-              name="compactMode"
-              label="紧凑模式"
-              description="减少界面元素间距，显示更多内容"
-            />
-
-            <SettingsSwitchField
-              control={form.control}
-              name="showAnimations"
-              label="显示动画"
-              description="启用界面过渡动画效果"
-              showSeparator={false}
-            />
           </SettingsSection>
         </>
       )}
