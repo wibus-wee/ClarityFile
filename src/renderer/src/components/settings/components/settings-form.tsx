@@ -91,8 +91,6 @@ export function SettingsForm<T extends FieldValues>({
         for (const setting of settingsToSave) {
           await setSetting(setting)
         }
-
-        toast.success(`${category}设置已保存`)
       }
     } catch (error) {
       console.error('保存设置失败:', error)
