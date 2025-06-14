@@ -50,10 +50,10 @@ export function SettingsForm<T extends FieldValues>({
   useEffect(() => {
     if (settings) {
       const settingsMap = new Map(settings.map((s) => [s.key, JSON.parse(s.value as string)]))
-      
+
       // 创建新的值对象，只包含 schema 中定义的字段
       const newValues: Partial<T> = {}
-      
+
       // 遍历 defaultValues 的键来确定需要设置的字段
       Object.keys(defaultValues as object).forEach((key) => {
         const settingKey = `${category}.${key}`
@@ -62,7 +62,7 @@ export function SettingsForm<T extends FieldValues>({
           ;(newValues as any)[key] = value
         }
       })
-      
+
       form.reset({ ...defaultValues, ...newValues } as DefaultValues<T>)
     }
   }, [settings, form, category, defaultValues])
@@ -73,11 +73,11 @@ export function SettingsForm<T extends FieldValues>({
         await onSubmit(data)
       } else if (mapFormDataToSettings) {
         const settingsToSave = mapFormDataToSettings(data)
-        
+
         for (const setting of settingsToSave) {
           await setSetting(setting)
         }
-        
+
         toast.success(`${category}设置已保存`)
       } else {
         // 默认行为：将所有表单字段保存为设置
@@ -87,11 +87,11 @@ export function SettingsForm<T extends FieldValues>({
           category,
           description: key
         }))
-        
+
         for (const setting of settingsToSave) {
           await setSetting(setting)
         }
-        
+
         toast.success(`${category}设置已保存`)
       }
     } catch (error) {
@@ -109,7 +109,7 @@ export function SettingsForm<T extends FieldValues>({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           {children(form)}
-          
+
           <div className="flex justify-end">
             <Button type="submit" className="px-8">
               {submitButtonText}

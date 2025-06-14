@@ -2,16 +2,16 @@ import { HeroUIProvider } from '@heroui/react'
 import { ClarityLayout } from '@renderer/components/layouts/ClarityLayout'
 import { DataProvider } from '@renderer/providers/data-provider'
 import { SWRProvider } from '@renderer/providers/swr-provider'
+import { CustomThemeProvider } from '@renderer/providers/custom-theme-provider'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
-// import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { ThemeProvider } from 'next-themes'
+// import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { Toaster } from 'sonner'
 import { DefaultNotFound } from '@renderer/components/not-found'
 
 export const Route = createRootRoute({
   component: () => (
     <>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <CustomThemeProvider>
         <HeroUIProvider>
           <SWRProvider>
             <DataProvider>
@@ -21,7 +21,7 @@ export const Route = createRootRoute({
             </DataProvider>
           </SWRProvider>
         </HeroUIProvider>
-      </ThemeProvider>
+      </CustomThemeProvider>
       <Toaster richColors />
       {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </>
