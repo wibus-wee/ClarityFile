@@ -7,7 +7,7 @@ export function SWRProvider({ children }: PropsWithChildren) {
     <SWRConfig
       value={{
         // 全局配置
-        revalidateOnFocus: false, // 窗口获得焦点时不重新验证
+        revalidateOnFocus: true, // 窗口获得焦点时不重新验证
         revalidateOnReconnect: true, // 网络重连时重新验证
         dedupingInterval: 2000, // 2秒内的重复请求会被去重
         errorRetryCount: 3, // 错误重试次数
