@@ -60,6 +60,18 @@
 
 总结来说，ClarityFile / 明档 是一个目标明确、设计精良、致力于通过智能化和规范化手段解决特定领域信息管理难题的桌面应用程序项目。它以解决你和你团队的实际痛点为出发点，通过精心设计的数据库和文件系统映射策略，有望成为一个高效、直观、可靠的“第二大脑”和工作枢纽。
 
+## Monorepo 架构设计
+
+项目使用了 monorepo 的架构设计，我们将代码都拆分并分别放到了 `packages/` 目录下。
+
+- `desktop`: ClarityFile 的核心桌面应用代码。
+- `www`: ClarityFile 的官方网站，用于展示项目、提供下载等。
+- `shadcn`: shadcn/ui 的本地化版本，用于统一 UI 组件库。同时为各类子项目提供统一的 UI 组件。
+
+> 值得一提的是，在从 single repo 迁移到 monorepo 的过程中，碰到了很多坑
+
+具体体现在 TailwindCSS 的配置上，由于 monorepo 的存在，导致了 TailwindCSS 的配置需要进行一定的修改，才能保证各个子项目都能正确地应用 TailwindCSS。具体配置可以去查看 `shadcn/global.css`，我使用 `@source` 进行了特别的配置。(Learn from using heroui in Tailwind v4)
+
 ## 渐进式开发
 
 ### Phase 0: 最小可行骨架 (Schema 核心中的核心)

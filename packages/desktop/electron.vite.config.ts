@@ -28,7 +28,12 @@ export default defineConfig({
       }
     },
     plugins: [
-      tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+      tanstackRouter({
+        target: 'react',
+        autoCodeSplitting: true,
+        routesDirectory: resolve('src/renderer/src/routes'),
+        generatedRouteTree: resolve('src/renderer/src/routeTree.gen.ts')
+      }),
       react({
         babel: {
           plugins: [['babel-plugin-react-compiler', ReactCompilerConfig]]
