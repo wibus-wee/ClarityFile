@@ -8,7 +8,7 @@ import { QuickSearchSection } from './quick-search-section'
 
 export function Dashboard() {
   return (
-    <div className="container">
+    <div className="container mx-auto">
       {/* 页面标题 */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
