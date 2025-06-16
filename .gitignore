@@ -100,7 +100,6 @@ Temporary Items
 artifacts
 artifacts/
 bower_components
-build/
 build/Release
 coverage
 default.profraw

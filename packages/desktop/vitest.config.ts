@@ -5,28 +5,19 @@ export default defineConfig({
   test: {
     // 测试环境
     environment: 'node',
-    
+
     // 全局设置
     globals: true,
-    
+
     // 测试文件匹配模式
     include: [
       'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       'tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'
     ],
-    
+
     // 排除文件
-    exclude: [
-      'node_modules',
-      'dist',
-      'out',
-      'build',
-      '.next',
-      '.nuxt',
-      '.vercel',
-      '.changeset'
-    ],
-    
+    exclude: ['node_modules', 'dist', 'out', 'build', '.next', '.nuxt', '.vercel', '.changeset'],
+
     // 覆盖率配置
     coverage: {
       provider: 'c8',
@@ -40,7 +31,7 @@ export default defineConfig({
         '**/*.config.*',
         '**/node_modules/**',
         'src/renderer/**', // 排除前端代码
-        'src/preload/**',  // 排除预加载脚本
+        'src/preload/**', // 排除预加载脚本
         'src/db/schema.ts', // 排除数据库 schema
         'src/main/index.ts' // 排除主入口文件
       ],
@@ -53,13 +44,13 @@ export default defineConfig({
         }
       }
     },
-    
+
     // 测试超时
     testTimeout: 10000,
-    
+
     // 钩子超时
     hookTimeout: 10000,
-    
+
     // 并发设置
     pool: 'threads',
     poolOptions: {
@@ -69,19 +60,19 @@ export default defineConfig({
         minThreads: 1
       }
     },
-    
+
     // 监听模式配置
     watch: true,
-    
+
     // 报告器
     reporter: ['verbose', 'html'],
-    
+
     // 输出目录
     outputFile: {
       html: './coverage/test-report.html'
     }
   },
-  
+
   // 路径解析
   resolve: {
     alias: {
@@ -91,7 +82,7 @@ export default defineConfig({
       '@db': path.resolve(__dirname, './src/db')
     }
   },
-  
+
   // 定义全局变量
   define: {
     __TEST__: true

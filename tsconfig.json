@@ -1,12 +1,9 @@
 {
-  "files": [],
-  "references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.web.json" }],
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@renderer/*": [
-        "src/renderer/src/*"
-      ]
-    }
-  }
+    "target": "ES2022",
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true
+  },
+  "exclude": ["apps", "packages"]
 }
