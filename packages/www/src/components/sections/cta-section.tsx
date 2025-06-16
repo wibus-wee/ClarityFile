@@ -1,6 +1,13 @@
 import { Button } from '@clarity/shadcn'
 import { motion } from 'framer-motion'
-import { Sparkles, FolderPlus, Download, CheckCircle } from 'lucide-react'
+import {
+  Sparkles,
+  FolderPlus,
+  Download,
+  CheckCircle,
+  DownloadCloud,
+  ExternalLink
+} from 'lucide-react'
 
 // CTA Section Component
 export function CTASection() {
@@ -57,14 +64,14 @@ export function CTASection() {
               viewport={{ once: true }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              <Button size="lg" className="px-8 py-6 text-lg font-medium">
-                <FolderPlus className="w-5 h-5 mr-2" />
-                创建第一个项目
+              <Button size="lg" className="px-8 py-6 text-lg font-medium" disabled>
+                <DownloadCloud className="w-5 h-5 mr-2" />
+                下载应用 (开发中)
               </Button>
 
               <Button variant="outline" size="lg" className="px-8 py-6 text-lg font-medium">
-                <Download className="w-5 h-5 mr-2" />
-                下载应用
+                <ExternalLink className="w-5 h-5 mr-2" />
+                查看源码
               </Button>
             </motion.div>
 

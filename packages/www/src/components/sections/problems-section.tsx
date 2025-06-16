@@ -34,14 +34,15 @@ export function ProblemsSection() {
       ],
       impact: 85,
       timeWasted: '每周 12 小时',
-      gradient: 'from-red-50/80 via-white/50 to-red-50/30',
-      accentGradient: 'from-red-500 to-pink-500',
-      numberGradient: 'from-red-500 to-red-600',
-      iconBg: 'bg-red-100/80 border border-red-200/50',
-      iconColor: 'text-red-600',
-      badgeColor: 'bg-red-100/80 text-red-700',
-      statsDot: 'bg-red-500',
-      statsColor: 'text-red-600'
+      gradient:
+        'from-red-50/80 via-white/50 to-red-50/30 dark:from-red-950/40 dark:via-slate-900/30 dark:to-red-950/20',
+      accentGradient: 'from-red-500 to-pink-500 dark:from-red-400 dark:to-pink-400',
+      numberGradient: 'from-red-500 to-red-600 dark:from-red-400 dark:to-red-500',
+      iconBg: 'bg-red-100/80 border border-red-200/50 dark:bg-red-900/30 dark:border-red-800/30',
+      iconColor: 'text-red-600 dark:text-red-400',
+      badgeColor: 'bg-red-100/80 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+      statsDot: 'bg-red-500 dark:bg-red-400',
+      statsColor: 'text-red-600 dark:text-red-400'
     },
     {
       icon: Search,
@@ -62,14 +63,16 @@ export function ProblemsSection() {
       ],
       impact: 78,
       timeWasted: '每周 8 小时',
-      gradient: 'from-orange-50/80 via-white/50 to-orange-50/30',
-      accentGradient: 'from-orange-500 to-yellow-500',
-      numberGradient: 'from-orange-500 to-orange-600',
-      iconBg: 'bg-orange-100/80 border border-orange-200/50',
-      iconColor: 'text-orange-600',
-      badgeColor: 'bg-orange-100/80 text-orange-700',
-      statsDot: 'bg-orange-500',
-      statsColor: 'text-orange-600'
+      gradient:
+        'from-orange-50/80 via-white/50 to-orange-50/30 dark:from-orange-950/40 dark:via-slate-900/30 dark:to-orange-950/20',
+      accentGradient: 'from-orange-500 to-yellow-500 dark:from-orange-400 dark:to-yellow-400',
+      numberGradient: 'from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-500',
+      iconBg:
+        'bg-orange-100/80 border border-orange-200/50 dark:bg-orange-900/30 dark:border-orange-800/30',
+      iconColor: 'text-orange-600 dark:text-orange-400',
+      badgeColor: 'bg-orange-100/80 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+      statsDot: 'bg-orange-500 dark:bg-orange-400',
+      statsColor: 'text-orange-600 dark:text-orange-400'
     },
     {
       icon: Database,
@@ -90,14 +93,16 @@ export function ProblemsSection() {
       ],
       impact: 92,
       timeWasted: '每周 15 小时',
-      gradient: 'from-blue-50/80 via-white/50 to-blue-50/30',
-      accentGradient: 'from-blue-500 to-cyan-500',
-      numberGradient: 'from-blue-500 to-blue-600',
-      iconBg: 'bg-blue-100/80 border border-blue-200/50',
-      iconColor: 'text-blue-600',
-      badgeColor: 'bg-blue-100/80 text-blue-700',
-      statsDot: 'bg-blue-500',
-      statsColor: 'text-blue-600'
+      gradient:
+        'from-blue-50/80 via-white/50 to-blue-50/30 dark:from-blue-950/40 dark:via-slate-900/30 dark:to-blue-950/20',
+      accentGradient: 'from-blue-500 to-cyan-500 dark:from-blue-400 dark:to-cyan-400',
+      numberGradient: 'from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500',
+      iconBg:
+        'bg-blue-100/80 border border-blue-200/50 dark:bg-blue-900/30 dark:border-blue-800/30',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      badgeColor: 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+      statsDot: 'bg-blue-500 dark:bg-blue-400',
+      statsColor: 'text-blue-600 dark:text-blue-400'
     },
     {
       icon: Workflow,
@@ -118,14 +123,16 @@ export function ProblemsSection() {
       ],
       impact: 73,
       timeWasted: '每周 10 小时',
-      gradient: 'from-purple-50/80 via-white/50 to-purple-50/30',
-      accentGradient: 'from-purple-500 to-indigo-500',
-      numberGradient: 'from-purple-500 to-purple-600',
-      iconBg: 'bg-purple-100/80 border border-purple-200/50',
-      iconColor: 'text-purple-600',
-      badgeColor: 'bg-purple-100/80 text-purple-700',
-      statsDot: 'bg-purple-500',
-      statsColor: 'text-purple-600'
+      gradient:
+        'from-purple-50/80 via-white/50 to-purple-50/30 dark:from-purple-950/40 dark:via-slate-900/30 dark:to-purple-950/20',
+      accentGradient: 'from-purple-500 to-indigo-500 dark:from-purple-400 dark:to-indigo-400',
+      numberGradient: 'from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500',
+      iconBg:
+        'bg-purple-100/80 border border-purple-200/50 dark:bg-purple-900/30 dark:border-purple-800/30',
+      iconColor: 'text-purple-600 dark:text-purple-400',
+      badgeColor: 'bg-purple-100/80 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+      statsDot: 'bg-purple-500 dark:bg-purple-400',
+      statsColor: 'text-purple-600 dark:text-purple-400'
     }
   ]
 
@@ -134,12 +141,12 @@ export function ProblemsSection() {
       {/* Animated Background */}
       <motion.div
         style={{ y: backgroundY, opacity: backgroundOpacity }}
-        className="absolute inset-0 bg-gradient-to-br from-muted/30 via-transparent to-accent/20"
+        className="absolute inset-0 bg-gradient-to-br from-muted/30 via-transparent to-accent/20 dark:from-muted/20 dark:via-transparent dark:to-accent/10"
       />
 
       {/* Background Decorations */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-l from-secondary/10 to-primary/5 rounded-full blur-3xl" />
+      <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-primary/5 to-accent/5 dark:from-primary/3 dark:to-accent/3 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-l from-secondary/10 to-primary/5 dark:from-secondary/6 dark:to-primary/3 rounded-full blur-3xl" />
 
       <div className="relative max-w-7xl mx-auto">
         {/* Header Section */}
@@ -154,7 +161,7 @@ export function ProblemsSection() {
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 text-destructive border border-destructive/20 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 text-destructive border border-destructive/20 dark:bg-destructive/20 dark:text-destructive dark:border-destructive/30 mb-6"
           >
             <AlertTriangle className="w-4 h-4" />
             <span className="text-sm font-medium">核心痛点分析</span>
@@ -183,20 +190,20 @@ export function ProblemsSection() {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/10">
-                <div className="text-2xl font-bold text-destructive">45h</div>
+              <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/10 dark:bg-destructive/10 dark:border-destructive/20">
+                <div className="text-2xl font-bold text-destructive dark:text-destructive">45h</div>
                 <div className="text-xs text-muted-foreground">月均时间浪费</div>
               </div>
-              <div className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/10">
-                <div className="text-2xl font-bold text-orange-600">73%</div>
+              <div className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/10 dark:bg-orange-500/10 dark:border-orange-500/20">
+                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">73%</div>
                 <div className="text-xs text-muted-foreground">重复工作比例</div>
               </div>
-              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10">
-                <div className="text-2xl font-bold text-blue-600">156</div>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 dark:bg-blue-500/10 dark:border-blue-500/20">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">156</div>
                 <div className="text-xs text-muted-foreground">平均文件数量</div>
               </div>
-              <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/10">
-                <div className="text-2xl font-bold text-purple-600">2.3</div>
+              <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/10 dark:bg-purple-500/10 dark:border-purple-500/20">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">2.3</div>
                 <div className="text-xs text-muted-foreground">平均项目数量</div>
               </div>
             </div>
@@ -218,7 +225,7 @@ export function ProblemsSection() {
           viewport={{ once: true }}
           className="text-center mt-20"
         >
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 text-primary border border-primary/20">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-primary dark:border-primary/30">
             <Sparkles className="w-5 h-5" />
             <span className="font-medium">ClarityFile 专为解决这些问题而生</span>
           </div>

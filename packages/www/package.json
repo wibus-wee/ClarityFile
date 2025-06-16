@@ -10,7 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clarity/shadcn": "workspace:*"
+    "@clarity/shadcn": "workspace:*",
+    "next-themes": "^0.4.6"
   },
   "devDependencies": {
     "globals": "^16.0.0"
