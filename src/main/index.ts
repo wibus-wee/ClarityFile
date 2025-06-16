@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/icon@2x.png?asset'
 import { runMigrate } from './db'
 import { registerIpcMain } from '@egoist/tipc/main'
 import { router } from './tipc'

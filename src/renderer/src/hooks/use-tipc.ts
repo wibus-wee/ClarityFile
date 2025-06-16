@@ -510,6 +510,12 @@ export function useCreateExpenseTracking() {
       const result = await tipcClient.createExpenseTracking(arg)
       // 重新验证项目详情
       mutate(['project-details', arg.projectId])
+      // 重新验证全局经费数据
+      mutate('all-expenses')
+      mutate('global-budget-overview')
+      // 重新验证项目经费池数据
+      mutate(['project-budget-pools', arg.projectId])
+      mutate(['project-budget-overview', arg.projectId])
       return result
     }
   )
@@ -522,6 +528,11 @@ export function useUpdateExpenseTracking() {
       const result = await tipcClient.updateExpenseTracking(arg)
       // 重新验证相关数据
       mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      // 重新验证全局经费数据
+      mutate('all-expenses')
+      // 重新验证项目经费池数据（需要从结果中获取projectId）
+      mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
       return result
     }
   )
@@ -534,6 +545,12 @@ export function useDeleteExpenseTracking() {
       const result = await tipcClient.deleteExpenseTracking(arg)
       // 重新验证相关数据
       mutate((key) => Array.isArray(key) && key[0] === 'project-details')
+      // 重新验证全局经费数据
+      mutate('all-expenses')
+      mutate('global-budget-overview')
+      // 重新验证项目经费池数据
+      mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
+      mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
       return result
     }
   )
