@@ -73,16 +73,6 @@ export const routes: AppRoute = {
   ],
   Others: [
     {
-      path: '/',
-      label: '仪表板',
-      icon: Gauge
-    },
-    {
-      path: '/files',
-      label: '文件管理',
-      icon: Files
-    },
-    {
       path: '/settings',
       label: '设置',
       icon: Settings2,
