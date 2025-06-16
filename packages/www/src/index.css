@@ -1,1 +1,5 @@
 @import "../../shadcn/global.css";
+
+* {
+  user-select: none;
+}
