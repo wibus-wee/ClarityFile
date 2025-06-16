@@ -8,14 +8,19 @@ const ReactCompilerConfig = {
   target: '19' // '17' | '18' | '19'
 }
 
+const sharedConfig = {}
+
 export default defineConfig({
   main: {
+    ...sharedConfig,
     plugins: [externalizeDepsPlugin()]
   },
   preload: {
+    ...sharedConfig,
     plugins: [externalizeDepsPlugin()]
   },
   renderer: {
+    ...sharedConfig,
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
