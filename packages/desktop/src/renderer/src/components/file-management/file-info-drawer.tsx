@@ -8,9 +8,9 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
-import { Badge } from '@renderer/components/ui/badge'
-import { Separator } from '@renderer/components/ui/separator'
+} from '@clarity/shadcn/ui/drawer'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Separator } from '@clarity/shadcn/ui/separator'
 import { File, Calendar, HardDrive, Tag, FolderOpen } from 'lucide-react'
 
 interface FileInfoDrawerProps {

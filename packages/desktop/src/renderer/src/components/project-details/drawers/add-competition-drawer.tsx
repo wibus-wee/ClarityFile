@@ -11,8 +11,8 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/drawer'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   Form,
   FormControl,
@@ -21,14 +21,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 import { Trophy, Plus, Loader2 } from 'lucide-react'
 import {
   useGetAllCompetitionSeries,

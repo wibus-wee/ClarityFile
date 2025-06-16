@@ -1,13 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Button } from '@renderer/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@renderer/components/ui/card'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@clarity/shadcn/ui/card'
 import { ReactErrorBoundary, InlineErrorBoundary } from '@renderer/components/error-boundary'
 import { NotFound, InlineNotFound } from '@renderer/components/not-found'
 

@@ -1,5 +1,5 @@
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { FileText, ArrowRight, Calendar, MoreHorizontal, ExternalLink, File } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'

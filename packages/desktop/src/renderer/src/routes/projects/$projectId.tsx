@@ -2,8 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProjectDetails } from '@renderer/hooks/use-tipc'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import {
   Edit,
   Settings,

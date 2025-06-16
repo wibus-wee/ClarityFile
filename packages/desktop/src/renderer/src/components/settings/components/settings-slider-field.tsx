@@ -7,8 +7,8 @@ import {
   FormField,
   FormItem,
   FormLabel
-} from '@renderer/components/ui/form'
-import { Slider } from '@renderer/components/ui/slider'
+} from '@clarity/shadcn/ui/form'
+import { Slider } from '@clarity/shadcn/ui/slider'
 
 interface SettingsSliderFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -44,9 +44,7 @@ export function SettingsSliderField<T extends FieldValues>({
           <div className="flex items-center justify-between">
             <FormLabel>{label}</FormLabel>
             {showValue && (
-              <span className="text-sm text-muted-foreground">
-                {formatValue(field.value)}
-              </span>
+              <span className="text-sm text-muted-foreground">{formatValue(field.value)}</span>
             )}
           </div>
           <FormControl>
@@ -59,9 +57,7 @@ export function SettingsSliderField<T extends FieldValues>({
               className="w-full"
             />
           </FormControl>
-          {description && (
-            <FormDescription>{description}</FormDescription>
-          )}
+          {description && <FormDescription>{description}</FormDescription>}
         </FormItem>
       )}
     />

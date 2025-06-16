@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Eye, Monitor } from 'lucide-react'
-import { Badge } from '@renderer/components/ui/badge'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { useIsQuickLookAvailable } from '@renderer/hooks/use-tipc'
 
 interface QuickLookIndicatorProps {

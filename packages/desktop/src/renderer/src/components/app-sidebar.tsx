@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem
-} from '@renderer/components/ui/sidebar'
+} from '@clarity/shadcn/ui/sidebar'
 import { Avatar } from '@heroui/react'
 import { CONSTANTS } from '@renderer/constants'
 import { useAppStore } from '@renderer/stores/app'

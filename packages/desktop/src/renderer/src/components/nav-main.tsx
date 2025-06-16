@@ -2,11 +2,7 @@
 
 import { ChevronRight, type LucideIcon } from 'lucide-react'
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from '@renderer/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@clarity/shadcn/ui/collapsible'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,7 +13,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem
-} from '@renderer/components/ui/sidebar'
+} from '@clarity/shadcn/ui/sidebar'
 
 import { AnimatePresence } from 'framer-motion'
 import { Link, useLocation } from '@tanstack/react-router'

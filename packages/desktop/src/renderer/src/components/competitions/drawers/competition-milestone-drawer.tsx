@@ -10,10 +10,10 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Textarea } from '@renderer/components/ui/textarea'
+} from '@clarity/shadcn/ui/drawer'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 import {
   Form,
   FormControl,
@@ -21,16 +21,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
-import { Calendar } from '@renderer/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+} from '@clarity/shadcn/ui/select'
+import { Calendar } from '@clarity/shadcn/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@clarity/shadcn/ui/popover'
 import { Target, Calendar as CalendarIcon, Loader2, Trophy, Plus, Edit } from 'lucide-react'
 import {
   useCreateCompetitionMilestone,

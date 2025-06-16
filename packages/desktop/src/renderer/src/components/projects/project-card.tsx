@@ -1,11 +1,11 @@
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@renderer/components/ui/dropdown-menu'
+} from '@clarity/shadcn/ui/dropdown-menu'
 import { Calendar, Edit, FolderOpen, MoreHorizontal, Trash2 } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import type { Project } from './index'

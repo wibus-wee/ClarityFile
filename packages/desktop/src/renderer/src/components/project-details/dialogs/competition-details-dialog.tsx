@@ -5,9 +5,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Badge } from '@renderer/components/ui/badge'
-import { Separator } from '@renderer/components/ui/separator'
+} from '@clarity/shadcn/ui/dialog'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Separator } from '@clarity/shadcn/ui/separator'
 import { formatFileSize } from '@renderer/lib/utils'
 import { Trophy, Clock, FileText, Target, Info } from 'lucide-react'
 

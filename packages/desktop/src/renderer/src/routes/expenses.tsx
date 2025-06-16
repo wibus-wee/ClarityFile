@@ -1,15 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 import { Plus, Search, TrendingUp, Receipt, PieChart } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { ExpenseOverview } from '@renderer/components/expenses/expense-overview'

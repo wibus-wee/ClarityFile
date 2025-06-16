@@ -5,8 +5,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
 import { AlertTriangle, Loader2, Trash2 } from 'lucide-react'
 import { useDeleteCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'

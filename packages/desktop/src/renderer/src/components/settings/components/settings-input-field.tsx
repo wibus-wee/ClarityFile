@@ -7,9 +7,9 @@ import {
   FormField,
   FormItem,
   FormLabel
-} from '@renderer/components/ui/form'
-import { Input } from '@renderer/components/ui/input'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/form'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Button } from '@clarity/shadcn/ui/button'
 import { FolderOpen } from 'lucide-react'
 import { useSelectDirectory } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'

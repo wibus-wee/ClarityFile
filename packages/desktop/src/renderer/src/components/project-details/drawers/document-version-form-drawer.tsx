@@ -12,11 +12,11 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Textarea } from '@renderer/components/ui/textarea'
-import { Switch } from '@renderer/components/ui/switch'
+} from '@clarity/shadcn/ui/drawer'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
+import { Switch } from '@clarity/shadcn/ui/switch'
 import {
   Form,
   FormControl,
@@ -25,15 +25,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
-import { Badge } from '@renderer/components/ui/badge'
+} from '@clarity/shadcn/ui/select'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { FileText, Upload, FolderOpen, Trophy, Target, Edit } from 'lucide-react'
 import {
   useSelectFile,

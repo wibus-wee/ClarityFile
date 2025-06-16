@@ -8,10 +8,10 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
-} from '@renderer/components/ui/breadcrumb'
-import { Separator } from '@renderer/components/ui/separator'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@renderer/components/ui/sidebar'
-import useBreadcrumb from '@renderer/hooks/use-breadcrumb'
+} from '@clarity/shadcn/ui/breadcrumb'
+import { Separator } from '@clarity/shadcn/ui/separator'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@clarity/shadcn/ui/sidebar'
+import useBreadcrumb from '@clarity/shadcn/hooks/use-breadcrumb'
 import { useScrollTop } from '@renderer/hooks/use-scroll-top'
 
 import { NavActions } from '../nav-actions'

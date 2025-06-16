@@ -7,10 +7,10 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Textarea } from '@renderer/components/ui/textarea'
+} from '@clarity/shadcn/ui/drawer'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 import {
   Form,
   FormControl,
@@ -18,7 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import {
   Command,
   CommandEmpty,
@@ -26,8 +26,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from '@renderer/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+} from '@clarity/shadcn/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@clarity/shadcn/ui/popover'
 import { FileText, Edit, Loader2, Plus, Check, ChevronsUpDown } from 'lucide-react'
 import { useCreateLogicalDocument, useUpdateLogicalDocument } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'

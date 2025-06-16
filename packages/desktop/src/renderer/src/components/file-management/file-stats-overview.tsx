@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Files, HardDrive, Image, FileText, Video, Music, Archive, TrendingUp } from 'lucide-react'
-import { Badge } from '@renderer/components/ui/badge'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { cn } from '@renderer/lib/utils'
 
 interface FileStatsOverviewProps {

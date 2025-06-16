@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Input } from '@renderer/components/ui/input'
-import { Button } from '@renderer/components/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 import { useProjects, useDeleteProject, useSearchProjects } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { Search, Plus } from 'lucide-react'

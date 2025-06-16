@@ -12,10 +12,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Label } from '@renderer/components/ui/label'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Label } from '@clarity/shadcn/ui/label'
 import { useFileManagementStore } from '@renderer/stores/file-management'
 import { useRenameFile } from '@renderer/hooks/use-tipc'
 import { Edit, Loader2 } from 'lucide-react'

@@ -12,8 +12,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   Form,
   FormControl,
@@ -22,14 +22,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 import { Edit, Loader2 } from 'lucide-react'
 import { useUpdateProjectCompetitionStatus } from '@renderer/hooks/use-tipc'
 

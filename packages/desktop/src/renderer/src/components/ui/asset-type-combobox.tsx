@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ChevronsUpDown, Plus } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   Command,
   CommandEmpty,
@@ -10,8 +10,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from '@renderer/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+} from '@clarity/shadcn/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@clarity/shadcn/ui/popover'
 import { COMMON_ASSET_TYPES } from '../../../../main/types/asset-schemas'
 
 interface AssetTypeComboboxProps {

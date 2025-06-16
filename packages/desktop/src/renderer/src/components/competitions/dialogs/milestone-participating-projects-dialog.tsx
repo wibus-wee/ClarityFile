@@ -5,9 +5,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { Users, Calendar, ExternalLink, Loader2, FolderOpen, Clock } from 'lucide-react'
 import { useMilestoneParticipatingProjects } from '@renderer/hooks/use-tipc'
 import { format } from 'date-fns'

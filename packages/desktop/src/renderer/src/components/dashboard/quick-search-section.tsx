@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Input } from '@renderer/components/ui/input'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { Search, Clock, TrendingUp, Hash } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 

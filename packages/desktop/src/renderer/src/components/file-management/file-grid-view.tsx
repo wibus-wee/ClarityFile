@@ -14,21 +14,21 @@ import {
   Info,
   CheckCircle2
 } from 'lucide-react'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger
-} from '@renderer/components/ui/context-menu'
+} from '@clarity/shadcn/ui/context-menu'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@renderer/components/ui/dropdown-menu'
+} from '@clarity/shadcn/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
 
 interface FileGridViewProps {

@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@renderer/components/ui/dropdown-menu'
+} from '@clarity/shadcn/ui/dropdown-menu'
 import { DollarSign, Calendar, Edit, Eye, MoreHorizontal, User, Receipt, Plus } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { Link } from '@tanstack/react-router'

@@ -7,14 +7,14 @@ import {
   FormField,
   FormItem,
   FormLabel
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 
 interface SelectOption {
   value: string
@@ -61,9 +61,7 @@ export function SettingsSelectField<T extends FieldValues>({
               ))}
             </SelectContent>
           </Select>
-          {description && (
-            <FormDescription>{description}</FormDescription>
-          )}
+          {description && <FormDescription>{description}</FormDescription>}
         </FormItem>
       )}
     />

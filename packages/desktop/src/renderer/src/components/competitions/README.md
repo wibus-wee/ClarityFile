@@ -155,7 +155,7 @@ import { CompetitionSeriesList } from '@renderer/components/competitions/competi
 
 ### UI组件
 
-- `@renderer/components/ui/*` - shadcn/ui组件库
+- `@clarity/shadcn/ui/*` - shadcn/ui组件库
 - 自定义组件遵循相同的设计规范
 
 ## 注意事项

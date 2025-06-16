@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Button } from '@renderer/components/ui/button'
-import { Separator } from '@renderer/components/ui/separator'
-import { Badge } from '@renderer/components/ui/badge'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Separator } from '@clarity/shadcn/ui/separator'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import {
   SettingsForm,
   SettingsSection,

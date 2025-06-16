@@ -7,7 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem
-} from '@renderer/components/ui/sidebar'
+} from '@clarity/shadcn/ui/sidebar'
 
 export function NavSecondary({
   items,

@@ -9,8 +9,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
 import { useFileManagementStore } from '@renderer/stores/file-management'
 import { useMoveFileToTrash, useBatchMoveFilesToTrash } from '@renderer/hooks/use-tipc'
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react'
@@ -43,9 +43,9 @@ export function FileDeleteDialog() {
 
       if (isBatch) {
         // 批量删除
-        const fileIds = filesForDelete.map(file => file.id)
+        const fileIds = filesForDelete.map((file) => file.id)
         await batchMoveFilesToTrash({ fileIds })
-        
+
         toast.success(`已将 ${fileCount} 个文件移动到回收站`)
         clearSelection()
         closeBatchDeleteDialog()
@@ -53,7 +53,7 @@ export function FileDeleteDialog() {
         // 单个删除
         const file = filesForDelete[0]
         await moveFileToTrash({ fileId: file.id })
-        
+
         toast.success(`文件 "${file.originalFileName || file.name}" 已移动到回收站`)
         closeDeleteDialog()
       }
@@ -83,7 +83,7 @@ export function FileDeleteDialog() {
       return {
         title: `删除 ${fileCount} 个文件`,
         description: `确定要将这 ${fileCount} 个文件移动到回收站吗？此操作可以撤销。`,
-        fileNames: filesForDelete.slice(0, 3).map(f => f.originalFileName || f.name)
+        fileNames: filesForDelete.slice(0, 3).map((f) => f.originalFileName || f.name)
       }
     } else {
       const file = filesForDelete[0]
@@ -107,9 +107,7 @@ export function FileDeleteDialog() {
             </div>
             {title}
           </DialogTitle>
-          <DialogDescription className="text-left">
-            {description}
-          </DialogDescription>
+          <DialogDescription className="text-left">{description}</DialogDescription>
         </DialogHeader>
 
         {/* 文件列表预览 */}
@@ -142,20 +140,10 @@ export function FileDeleteDialog() {
         </motion.div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isDeleting}
-          >
+          <Button type="button" variant="outline" onClick={handleCancel} disabled={isDeleting}>
             取消
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
             {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             移动到回收站
           </Button>

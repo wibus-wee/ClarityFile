@@ -7,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
 import { AlertTriangle, FileText } from 'lucide-react'
 import { useDeleteLogicalDocument } from '@renderer/hooks/use-tipc'
 import type { LogicalDocumentWithVersionsOutput } from '@main/types/document-schemas'

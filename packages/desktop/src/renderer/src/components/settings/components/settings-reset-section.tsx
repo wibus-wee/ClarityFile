@@ -1,8 +1,8 @@
 'use client'
 
 import { toast } from 'sonner'
-import { Button } from '@renderer/components/ui/button'
-import { Separator } from '@renderer/components/ui/separator'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Separator } from '@clarity/shadcn/ui/separator'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger
-} from '@renderer/components/ui/alert-dialog'
+} from '@clarity/shadcn/ui/alert-dialog'
 import { useResetSettings } from '@renderer/hooks/use-tipc'
 
 interface SettingsResetSectionProps {
@@ -52,7 +52,7 @@ export function SettingsResetSection({
   return (
     <>
       {showSeparator && <Separator />}
-      
+
       <div className={className}>
         <div>
           <h3 className="text-lg font-medium">{title}</h3>
@@ -77,15 +77,11 @@ export function SettingsResetSection({
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {confirmDescription}
-                    </AlertDialogDescription>
+                    <AlertDialogDescription>{confirmDescription}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>取消</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetAllSettings}>
-                      确认重置
-                    </AlertDialogAction>
+                    <AlertDialogAction onClick={handleResetAllSettings}>确认重置</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

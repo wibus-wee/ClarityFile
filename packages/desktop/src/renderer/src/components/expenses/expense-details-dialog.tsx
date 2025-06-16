@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
-import { Separator } from '@renderer/components/ui/separator'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Separator } from '@clarity/shadcn/ui/separator'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
+} from '@clarity/shadcn/ui/dialog'
 import {
   DollarSign,
   Calendar,

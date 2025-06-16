@@ -4,20 +4,10 @@ import { Component, ReactNode, ErrorInfo, useState } from 'react'
 import { AlertTriangle, RefreshCw, Home, Bug, ChevronDown, ChevronUp } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 
-import { Button } from '@renderer/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@renderer/components/ui/card'
-import { Alert, AlertDescription } from '@renderer/components/ui/alert'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from '@renderer/components/ui/collapsible'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@clarity/shadcn/ui/card'
+import { Alert, AlertDescription } from '@clarity/shadcn/ui/alert'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@clarity/shadcn/ui/collapsible'
 
 interface ErrorBoundaryProps {
   error: Error

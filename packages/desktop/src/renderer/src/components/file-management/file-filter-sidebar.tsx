@@ -13,10 +13,10 @@ import {
   Archive,
   CheckCircle2
 } from 'lucide-react'
-import { Button } from '@renderer/components/ui/button'
-import { Separator } from '@renderer/components/ui/separator'
-import { Badge } from '@renderer/components/ui/badge'
-import { Slider } from '@renderer/components/ui/slider'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Separator } from '@clarity/shadcn/ui/separator'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Slider } from '@clarity/shadcn/ui/slider'
 import { cn } from '@renderer/lib/utils'
 import { useProjects } from '@renderer/hooks/use-tipc'
 

@@ -3,22 +3,22 @@ import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 
 import { MoreHorizontal, Eye, Edit, Info, Trash2 } from 'lucide-react'
-import { Button } from '@renderer/components/ui/button'
-import { Checkbox } from '@renderer/components/ui/checkbox'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Checkbox } from '@clarity/shadcn/ui/checkbox'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger
-} from '@renderer/components/ui/context-menu'
+} from '@clarity/shadcn/ui/context-menu'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@renderer/components/ui/dropdown-menu'
+} from '@clarity/shadcn/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
 import { useFileManagementStore } from '@renderer/stores/file-management'
 

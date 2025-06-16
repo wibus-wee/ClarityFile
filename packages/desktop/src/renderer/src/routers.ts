@@ -4,7 +4,6 @@ import {
   Gauge,
   LucideIcon,
   SquareChartGantt,
-  FileText,
   Trophy,
   Settings2
 } from 'lucide-react'

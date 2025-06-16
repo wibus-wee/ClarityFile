@@ -1,4 +1,4 @@
-import { Skeleton } from '@renderer/components/ui/skeleton'
+import { Skeleton } from '@clarity/shadcn/ui/skeleton'
 
 interface ProjectSkeletonProps {
   viewMode: 'list'

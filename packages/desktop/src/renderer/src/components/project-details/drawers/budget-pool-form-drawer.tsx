@@ -3,9 +3,9 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Textarea } from '@renderer/components/ui/textarea'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 import {
   Drawer,
   DrawerContent,
@@ -13,7 +13,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
+} from '@clarity/shadcn/ui/drawer'
 import {
   Form,
   FormControl,
@@ -21,7 +21,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import { DollarSign, PieChart } from 'lucide-react'
 import { useCreateBudgetPool, useUpdateBudgetPool } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'

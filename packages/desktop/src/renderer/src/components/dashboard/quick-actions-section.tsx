@@ -1,4 +1,4 @@
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@clarity/shadcn/ui/button'
 import {
   FolderPlus,
   FileText,

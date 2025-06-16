@@ -7,9 +7,9 @@ import {
   FormField,
   FormItem,
   FormLabel
-} from '@renderer/components/ui/form'
-import { RadioGroup, RadioGroupItem } from '@renderer/components/ui/radio-group'
-import { Label } from '@renderer/components/ui/label'
+} from '@clarity/shadcn/ui/form'
+import { RadioGroup, RadioGroupItem } from '@clarity/shadcn/ui/radio-group'
+import { Label } from '@clarity/shadcn/ui/label'
 
 interface RadioOption {
   value: string
@@ -47,7 +47,9 @@ export function SettingsRadioField<T extends FieldValues>({
             <RadioGroup
               onValueChange={field.onChange}
               defaultValue={field.value}
-              className={orientation === 'horizontal' ? 'flex flex-row space-x-4' : 'flex flex-col space-y-2'}
+              className={
+                orientation === 'horizontal' ? 'flex flex-row space-x-4' : 'flex flex-col space-y-2'
+              }
             >
               {options.map((option) => (
                 <div key={option.value} className="flex items-center space-x-2">
@@ -60,18 +62,14 @@ export function SettingsRadioField<T extends FieldValues>({
                       {option.label}
                     </Label>
                     {option.description && (
-                      <p className="text-xs text-muted-foreground">
-                        {option.description}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{option.description}</p>
                     )}
                   </div>
                 </div>
               ))}
             </RadioGroup>
           </FormControl>
-          {description && (
-            <FormDescription>{description}</FormDescription>
-          )}
+          {description && <FormDescription>{description}</FormDescription>}
         </FormItem>
       )}
     />

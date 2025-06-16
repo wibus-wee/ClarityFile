@@ -20,7 +20,7 @@ import {
   Button,
   User
 } from '@heroui/react'
-import { useSidebar } from '@renderer/components/ui/sidebar'
+import { useSidebar } from '@clarity/shadcn/ui/sidebar'
 import { useTheme } from '@renderer/hooks/use-theme'
 import { useAppStore } from '@renderer/stores/app'
 import { User as UserType } from '@renderer/types/user'

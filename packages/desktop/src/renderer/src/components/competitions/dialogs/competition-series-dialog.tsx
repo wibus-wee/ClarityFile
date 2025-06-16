@@ -9,10 +9,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Textarea } from '@renderer/components/ui/textarea'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 import {
   Form,
   FormControl,
@@ -20,7 +20,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
+} from '@clarity/shadcn/ui/form'
 import { Trophy, Loader2, Plus, Edit } from 'lucide-react'
 import { useCreateCompetitionSeries, useUpdateCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'

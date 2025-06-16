@@ -7,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
 import { SafeImage } from '@renderer/components/ui/safe-image'
 import { AlertTriangle, Image, Star } from 'lucide-react'
 import { useDeleteProjectAsset } from '@renderer/hooks/use-tipc'

@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Badge } from '@renderer/components/ui/badge'
-import { Separator } from '@renderer/components/ui/separator'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Separator } from '@clarity/shadcn/ui/separator'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 import {
   Image,
   Plus,
@@ -31,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@renderer/components/ui/dropdown-menu'
+} from '@clarity/shadcn/ui/dropdown-menu'
 import { cn, formatFileSize } from '@renderer/lib/utils'
 import { SafeImage } from '@renderer/components/ui/safe-image'
 import { AssetFormDrawer } from './drawers/asset-form-drawer'

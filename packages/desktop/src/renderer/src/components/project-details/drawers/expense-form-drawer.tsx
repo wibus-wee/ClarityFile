@@ -3,17 +3,17 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
-import { Label } from '@renderer/components/ui/label'
-import { Textarea } from '@renderer/components/ui/textarea'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Label } from '@clarity/shadcn/ui/label'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
+} from '@clarity/shadcn/ui/select'
 import {
   Drawer,
   DrawerContent,
@@ -21,7 +21,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle
-} from '@renderer/components/ui/drawer'
+} from '@clarity/shadcn/ui/drawer'
 import {
   Form,
   FormControl,
@@ -29,9 +29,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
-import { Calendar } from '@renderer/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+} from '@clarity/shadcn/ui/form'
+import { Calendar } from '@clarity/shadcn/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@clarity/shadcn/ui/popover'
 import { CalendarIcon, Upload, FileText, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'

@@ -8,8 +8,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@renderer/components/ui/form'
-import { Textarea } from '@renderer/components/ui/textarea'
+} from '@clarity/shadcn/ui/form'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 
 interface SettingsTextareaFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -47,9 +47,7 @@ export function SettingsTextareaField<T extends FieldValues>({
               {...field}
             />
           </FormControl>
-          {description && (
-            <FormDescription>{description}</FormDescription>
-          )}
+          {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
         </FormItem>
       )}

@@ -17,16 +17,16 @@ import {
   MousePointer2,
   CheckSquare
 } from 'lucide-react'
-import { Input } from '@renderer/components/ui/input'
-import { Button } from '@renderer/components/ui/button'
-import { Separator } from '@renderer/components/ui/separator'
-import { Badge } from '@renderer/components/ui/badge'
+import { Input } from '@clarity/shadcn/ui/input'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Separator } from '@clarity/shadcn/ui/separator'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@renderer/components/ui/dropdown-menu'
+} from '@clarity/shadcn/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
 import { useGlobalFiles, useFileSystemStats } from '@renderer/hooks/use-tipc'
 import { useFileActions } from '@renderer/hooks/use-file-actions'

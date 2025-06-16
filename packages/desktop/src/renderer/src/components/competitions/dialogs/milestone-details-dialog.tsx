@@ -5,9 +5,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
+} from '@clarity/shadcn/ui/dialog'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
 import { Target, Calendar, Trophy, Users, Clock, FileText, Edit } from 'lucide-react'
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns'
 import { zhCN } from 'date-fns/locale'

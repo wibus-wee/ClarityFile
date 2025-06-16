@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
-import { Label } from '@renderer/components/ui/label'
-import { Textarea } from '@renderer/components/ui/textarea'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Label } from '@clarity/shadcn/ui/label'
+import { Textarea } from '@clarity/shadcn/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -11,16 +11,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
+} from '@clarity/shadcn/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@renderer/components/ui/select'
-import { Calendar } from '@renderer/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
+} from '@clarity/shadcn/ui/select'
+import { Calendar } from '@clarity/shadcn/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@clarity/shadcn/ui/popover'
 import { CalendarIcon, Receipt, AlertCircle } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { format } from 'date-fns'

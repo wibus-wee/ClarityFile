@@ -5,10 +5,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@renderer/components/ui/dialog'
-import { Badge } from '@renderer/components/ui/badge'
-import { Button } from '@renderer/components/ui/button'
-import { Separator } from '@renderer/components/ui/separator'
+} from '@clarity/shadcn/ui/dialog'
+import { Badge } from '@clarity/shadcn/ui/badge'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Separator } from '@clarity/shadcn/ui/separator'
 import { SafeImage } from '@renderer/components/ui/safe-image'
 import { formatFileSize } from '@renderer/lib/utils'
 import { Image, Calendar, Download, HardDrive, FileType, Star } from 'lucide-react'

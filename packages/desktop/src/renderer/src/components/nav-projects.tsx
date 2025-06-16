@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
-} from '@renderer/components/ui/sidebar'
+} from '@clarity/shadcn/ui/sidebar'
 
 export function NavProjects({
   projects

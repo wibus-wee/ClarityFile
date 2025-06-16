@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 
-import { Button } from '@renderer/components/ui/button'
-import { Form } from '@renderer/components/ui/form'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Form } from '@clarity/shadcn/ui/form'
 import { useSettingsByCategory, useSetSetting } from '@renderer/hooks/use-tipc'
 
 interface SettingItem {

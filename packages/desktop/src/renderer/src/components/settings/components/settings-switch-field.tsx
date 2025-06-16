@@ -7,9 +7,9 @@ import {
   FormField,
   FormItem,
   FormLabel
-} from '@renderer/components/ui/form'
-import { Switch } from '@renderer/components/ui/switch'
-import { Separator } from '@renderer/components/ui/separator'
+} from '@clarity/shadcn/ui/form'
+import { Switch } from '@clarity/shadcn/ui/switch'
+import { Separator } from '@clarity/shadcn/ui/separator'
 
 interface SettingsSwitchFieldProps<T extends FieldValues> {
   control: Control<T>

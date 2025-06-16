@@ -4,15 +4,9 @@ import { Search, Home, ArrowLeft, FileQuestion } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useRouter } from '@tanstack/react-router'
 
-import { Button } from '@renderer/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@renderer/components/ui/card'
-import { Input } from '@renderer/components/ui/input'
+import { Button } from '@clarity/shadcn/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@clarity/shadcn/ui/card'
+import { Input } from '@clarity/shadcn/ui/input'
 
 interface NotFoundProps {
   title?: string
