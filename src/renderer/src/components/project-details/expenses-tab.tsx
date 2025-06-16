@@ -110,7 +110,7 @@ interface ExpensesTabProps {
 }
 
 export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
-  const { expenses, statistics, project } = projectDetails
+  const { expenses, project } = projectDetails
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'amount' | 'application' | 'reimbursement' | 'status'>(
     'application'
@@ -241,9 +241,9 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
     .filter((e) => e.status.toLowerCase() === 'approved')
     .reduce((sum, e) => sum + e.amount, 0)
 
-  const rejectedAmount = expenses
-    .filter((e) => e.status.toLowerCase() === 'rejected')
-    .reduce((sum, e) => sum + e.amount, 0)
+  // const rejectedAmount = expenses
+  //   .filter((e) => e.status.toLowerCase() === 'rejected')
+  //   .reduce((sum, e) => sum + e.amount, 0)
 
   // 计算实际已使用的经费（只包含已批准和已报销的记录）
   const usedAmount = approvedAmount + reimbursedAmount

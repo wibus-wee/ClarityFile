@@ -6,9 +6,6 @@ import {
   SquareChartGantt,
   FileText,
   Trophy,
-  Share2,
-  Image,
-  Tags,
   Settings2
 } from 'lucide-react'
 
@@ -25,17 +22,29 @@ export interface AppRouteItem {
 }
 
 export const routes: AppRoute = {
-  工作区: [
+  Features: [
+    {
+      path: '/',
+      label: '仪表板',
+      icon: Gauge
+    },
+    {
+      path: '/files',
+      label: '文件管理',
+      icon: Files
+    }
+  ],
+  Workspace: [
     {
       path: '/projects',
       label: '项目',
       icon: SquareChartGantt
     },
-    {
-      path: '/documents',
-      label: '文档库',
-      icon: FileText
-    },
+    // {
+    //   path: '/documents',
+    //   label: '文档库',
+    //   icon: FileText
+    // },
     {
       path: '/competitions',
       label: '赛事中心',
@@ -62,7 +71,7 @@ export const routes: AppRoute = {
     //   icon: Tags
     // }
   ],
-  主要功能: [
+  Others: [
     {
       path: '/',
       label: '仪表板',
