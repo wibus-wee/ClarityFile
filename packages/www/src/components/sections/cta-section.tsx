@@ -1,13 +1,6 @@
 import { Button } from '@clarity/shadcn'
 import { motion } from 'framer-motion'
-import {
-  Sparkles,
-  FolderPlus,
-  Download,
-  CheckCircle,
-  DownloadCloud,
-  ExternalLink
-} from 'lucide-react'
+import { Sparkles, CheckCircle, DownloadCloud, ExternalLink } from 'lucide-react'
 
 // CTA Section Component
 export function CTASection() {

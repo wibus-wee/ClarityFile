@@ -11,12 +11,12 @@ import {
 } from '@clarity/shadcn/ui/breadcrumb'
 import { Separator } from '@clarity/shadcn/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@clarity/shadcn/ui/sidebar'
-import useBreadcrumb from '@clarity/shadcn/hooks/use-breadcrumb'
 import { useScrollTop } from '@renderer/hooks/use-scroll-top'
 
 import { NavActions } from '../nav-actions'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@renderer/lib/utils'
+import useBreadcrumb from '@renderer/hooks/use-breadcrumb'
 
 export function ClarityLayout({ children }: PropsWithChildren) {
   const breadcrumbs = useBreadcrumb()
