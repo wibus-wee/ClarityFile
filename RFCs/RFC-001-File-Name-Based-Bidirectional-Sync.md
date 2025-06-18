@@ -181,6 +181,51 @@ const COMPETITION_PATTERN = /^通知_(.+?)_(\d{4}版)\.([\w]+)$/
 
 ### 路径解析设计
 
+**路径解析是文件分类的主要依据**。根据 DIRECTORY_DESIGN.md 的规范，文件的存放路径本身就包含了完整的分类信息，这比文件名解析更加可靠和准确。
+
+#### 路径优先的解析策略
+
+```typescript
+// 解析优先级：路径解析 > 文件名解析 > 容错解析
+class HybridParsingStrategy {
+  static parseFile(filePath: string): ParsedFileInfo {
+    // 1. 首先进行路径解析（主要分类依据）
+    const pathInfo = PathParserService.parsePath(filePath)
+
+    // 2. 然后进行文件名解析（补充详细信息）
+    const fileName = path.basename(filePath)
+    const fileNameInfo = FileNameParserService.parseFileName(fileName, filePath)
+
+    // 3. 合并解析结果，路径信息优先
+    return this.mergeParsingResults(pathInfo, fileNameInfo, filePath)
+  }
+
+  private static mergeParsingResults(
+    pathInfo: PathInfo | null,
+    fileNameInfo: ParsedFileInfo | null,
+    filePath: string
+  ): ParsedFileInfo {
+    // 路径解析成功时，以路径信息为准
+    if (pathInfo) {
+      return {
+        ...fileNameInfo,
+        // 路径信息覆盖文件名解析结果
+        importType: pathInfo.type,
+        projectId: pathInfo.projectId,
+        projectName: pathInfo.projectName,
+        // 根据路径类型设置特定字段
+        ...(pathInfo.type === 'asset' && { assetType: pathInfo.assetType }),
+        ...(pathInfo.type === 'shared' && { resourceType: pathInfo.resourceType }),
+        confidence: Math.max(0.8, fileNameInfo?.confidence || 0.5)
+      }
+    }
+
+    // 路径解析失败时，依赖文件名解析
+    return fileNameInfo || this.createFallbackInfo(filePath)
+  }
+}
+```
+
 基于 DIRECTORY_DESIGN.md 中的路径规范建立解析规则：
 
 **1. 项目文档路径解析**
@@ -194,6 +239,7 @@ const PROJECT_DOC_PATH = /\/Projects\/(.+?)\/Documents\/(.+?)\//
 // - projectFolderName格式：{projectName}_{shortProjectId}
 // - 从项目文件夹名提取项目ID后缀
 // - logicalDocumentName即为逻辑文档名称
+// - 路径确定：importType = 'document'
 ```
 
 **2. 项目资产路径解析**
@@ -205,10 +251,24 @@ const PROJECT_ASSET_PATH = /\/Projects\/(.+?)\/_Assets\/(.+?)\//
 
 // 解析规则：
 // - 同样从projectFolderName提取项目信息
-// - assetType为资产类型目录名
+// - assetType为资产类型目录名（直接从文件夹名获取）
+// - 路径确定：importType = 'asset'
 ```
 
-**3. 共享资源路径解析**
+**3. 项目经费路径解析**
+
+```typescript
+// 路径模式：CLARITY_FILE_ROOT/Projects/{projectFolderName}/_Expenses/{expenseDescription}/
+// 示例：/Projects/核心项目A_a1b2/_Expenses/购买打印机_张三_20240115/
+const PROJECT_EXPENSE_PATH = /\/Projects\/(.+?)\/_Expenses\/(.+?)\//
+
+// 解析规则：
+// - 从projectFolderName提取项目信息
+// - expenseDescription包含事项和申请人信息
+// - 路径确定：importType = 'expense'
+```
+
+**4. 共享资源路径解析**
 
 ```typescript
 // 路径模式：CLARITY_FILE_ROOT/SharedResources/{resourceType}/
@@ -216,10 +276,11 @@ const PROJECT_ASSET_PATH = /\/Projects\/(.+?)\/_Assets\/(.+?)\//
 const SHARED_RESOURCE_PATH = /\/SharedResources\/(.+?)\//
 
 // 解析规则：
-// - resourceType为资源类型目录名
+// - resourceType为资源类型目录名（直接确定资源类型）
+// - 路径确定：importType = 'shared'
 ```
 
-**4. 比赛资料路径解析**
+**5. 比赛资料路径解析**
 
 ```typescript
 // 路径模式：CLARITY_FILE_ROOT/Competitions/{seriesName}/{levelName}/
@@ -227,9 +288,18 @@ const SHARED_RESOURCE_PATH = /\/SharedResources\/(.+?)\//
 const COMPETITION_PATH = /\/Competitions\/(.+?)\/(.+?)\//
 
 // 解析规则：
-// - seriesName为赛事系列名
-// - levelName为赛段名称
+// - seriesName为赛事系列名（直接从文件夹名获取）
+// - levelName为赛段名称（直接从文件夹名获取）
+// - 路径确定：importType = 'competition'
 ```
+
+#### 路径解析的优势
+
+1. **分类准确性高**：文件夹结构是强制性的，比文件名更可靠
+2. **信息完整性好**：路径包含了层级关系和分类信息
+3. **容错性强**：即使文件名不规范，路径仍能提供基本分类
+4. **扩展性好**：新增文件类型只需要添加路径规则
+5. **用户友好**：用户可以通过文件夹位置直观理解文件分类
 
 ### 核心服务架构
 
@@ -287,6 +357,71 @@ class BidirectionalSyncService {
 ```
 
 #### 核心流程架构图
+
+```mermaid
+graph TB
+    %% 文件系统层
+    FS[文件系统<br/>File System]
+
+    %% 监控层
+    FW[文件监控器<br/>FileWatcher<br/>chokidar]
+
+    %% 解析层
+    FNP[文件名解析器<br/>FileNameParser]
+    PP[路径解析器<br/>PathParser]
+    FTP[容错解析器<br/>FaultTolerantParser]
+
+    %% 发现和匹配层
+    FDS[文件发现服务<br/>FileDiscoveryService]
+
+    %% 数据库层
+    DB[(数据库<br/>Database)]
+
+    %% 同步协调层
+    BSS[双向同步服务<br/>BidirectionalSyncService]
+
+    %% 用户界面层
+    UI[用户界面<br/>User Interface]
+
+    %% 主要流程
+    FS -->|文件变更事件| FW
+    FW -->|文件路径| FNP
+    FW -->|文件路径| PP
+
+    FNP -->|解析失败| FTP
+    PP -->|解析失败| FTP
+
+    FNP -->|解析结果| FDS
+    PP -->|解析结果| FDS
+    FTP -->|降级解析| FDS
+
+    FDS -->|匹配查询| DB
+    DB -->|现有记录| FDS
+
+    FDS -->|同步请求| BSS
+    BSS -->|数据更新| DB
+
+    BSS -->|状态通知| UI
+    UI -->|手动同步| BSS
+
+    %% 反向流程（数据库变更）
+    DB -->|变更通知| BSS
+    BSS -->|文件操作| FS
+
+    %% 样式定义
+    classDef fileSystem fill:#e1f5fe
+    classDef parser fill:#f3e5f5
+    classDef service fill:#e8f5e8
+    classDef database fill:#fff3e0
+    classDef ui fill:#fce4ec
+
+    class FS fileSystem
+    class FW fileSystem
+    class FNP,PP,FTP parser
+    class FDS,BSS service
+    class DB database
+    class UI ui
+```
 
 上面的 Mermaid 图展示了整个双向同步系统的架构和数据流。
 
