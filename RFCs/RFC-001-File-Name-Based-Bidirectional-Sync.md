@@ -307,28 +307,80 @@ const COMPETITION_PATH = /\/Competitions\/(.+?)\/(.+?)\//
 
 ```typescript
 /**
- * 文件名解析服务
+ * 统一文件解析服务
+ * 整合路径解析和文件名解析，提供一站式文件信息提取
  */
-class FileNameParserService {
-  static parseDocumentFileName(fileName: string): DocumentFileInfo | null
-  static parseAssetFileName(fileName: string): AssetFileInfo | null
-  static parseSharedResourceFileName(fileName: string): SharedResourceFileInfo | null
-  static parseCompetitionFileName(fileName: string): CompetitionFileInfo | null
+class UnifiedFileParserService {
+  /**
+   * 主要解析入口 - 路径优先策略
+   * @param filePath 完整文件路径
+   * @returns 解析结果，包含完整的文件信息
+   */
+  static parseFile(filePath: string): ParsedFileInfo | null {
+    // 1. 路径解析（主要分类依据）
+    const pathInfo = this.parseFilePath(filePath)
 
-  // 通用解析入口
-  static parseFileName(fileName: string, filePath: string): ParsedFileInfo | null
-}
+    // 2. 文件名解析（补充详细信息）
+    const fileName = path.basename(filePath)
+    const fileNameInfo = this.parseFileName(fileName, pathInfo?.type)
 
-/**
- * 路径解析服务
- */
-class PathParserService {
-  static parseProjectPath(filePath: string): ProjectPathInfo | null
-  static parseSharedResourcePath(filePath: string): SharedResourcePathInfo | null
-  static parseCompetitionPath(filePath: string): CompetitionPathInfo | null
+    // 3. 合并解析结果
+    return this.mergeParsingResults(pathInfo, fileNameInfo, filePath)
+  }
 
-  // 通用路径解析入口
-  static parsePath(filePath: string): PathInfo | null
+  /**
+   * 路径解析 - 确定文件类型和基本分类信息
+   */
+  private static parseFilePath(filePath: string): PathInfo | null {
+    // 项目文档路径
+    if (filePath.includes('/Projects/') && filePath.includes('/Documents/')) {
+      return this.parseProjectDocumentPath(filePath)
+    }
+
+    // 项目资产路径
+    if (filePath.includes('/Projects/') && filePath.includes('/_Assets/')) {
+      return this.parseProjectAssetPath(filePath)
+    }
+
+    // 项目经费路径
+    if (filePath.includes('/Projects/') && filePath.includes('/_Expenses/')) {
+      return this.parseProjectExpensePath(filePath)
+    }
+
+    // 共享资源路径
+    if (filePath.includes('/SharedResources/')) {
+      return this.parseSharedResourcePath(filePath)
+    }
+
+    // 比赛资料路径
+    if (filePath.includes('/Competitions/')) {
+      return this.parseCompetitionPath(filePath)
+    }
+
+    return null
+  }
+
+  /**
+   * 文件名解析 - 提取详细信息
+   */
+  private static parseFileName(
+    fileName: string,
+    fileType?: string
+  ): Partial<ParsedFileInfo> | null {
+    switch (fileType) {
+      case 'document':
+        return this.parseDocumentFileName(fileName)
+      case 'asset':
+        return this.parseAssetFileName(fileName)
+      case 'shared':
+        return this.parseSharedResourceFileName(fileName)
+      case 'competition':
+        return this.parseCompetitionFileName(fileName)
+      default:
+        // 尝试通用解析
+        return this.parseGenericFileName(fileName)
+    }
+  }
 }
 
 /**
@@ -366,9 +418,8 @@ graph TB
     %% 监控层
     FW[文件监控器<br/>FileWatcher<br/>chokidar]
 
-    %% 解析层
-    FNP[文件名解析器<br/>FileNameParser]
-    PP[路径解析器<br/>PathParser]
+    %% 统一解析层
+    UFP[统一文件解析器<br/>UnifiedFileParser<br/>路径优先策略]
     FTP[容错解析器<br/>FaultTolerantParser]
 
     %% 发现和匹配层
@@ -385,14 +436,10 @@ graph TB
 
     %% 主要流程
     FS -->|文件变更事件| FW
-    FW -->|文件路径| FNP
-    FW -->|文件路径| PP
+    FW -->|完整文件路径| UFP
 
-    FNP -->|解析失败| FTP
-    PP -->|解析失败| FTP
-
-    FNP -->|解析结果| FDS
-    PP -->|解析结果| FDS
+    UFP -->|解析失败| FTP
+    UFP -->|解析结果| FDS
     FTP -->|降级解析| FDS
 
     FDS -->|匹配查询| DB
@@ -408,6 +455,11 @@ graph TB
     DB -->|变更通知| BSS
     BSS -->|文件操作| FS
 
+    %% 内部解析流程
+    UFP -.->|1. 路径解析| UFP
+    UFP -.->|2. 文件名解析| UFP
+    UFP -.->|3. 结果合并| UFP
+
     %% 样式定义
     classDef fileSystem fill:#e1f5fe
     classDef parser fill:#f3e5f5
@@ -417,13 +469,26 @@ graph TB
 
     class FS fileSystem
     class FW fileSystem
-    class FNP,PP,FTP parser
+    class UFP,FTP parser
     class FDS,BSS service
     class DB database
     class UI ui
 ```
 
-上面的 Mermaid 图展示了整个双向同步系统的架构和数据流。
+上面的 Mermaid 图展示了简化后的双向同步系统架构。
+
+**架构简化的核心改进**：
+
+1. **统一解析服务**：将原来的 `FileNameParserService` 和 `PathParserService` 合并为 `UnifiedFileParserService`
+2. **路径优先策略**：在统一服务内部实现路径优先的解析逻辑
+3. **减少组件数量**：从7个核心组件减少到5个，降低系统复杂度
+4. **简化数据流**：减少组件间的数据传递和协调开销
+
+**统一解析服务的内部流程**：
+
+```
+文件路径输入 → 路径解析（确定类型） → 文件名解析（补充信息） → 结果合并 → 输出完整信息
+```
 
 #### 详细流程说明
 
@@ -624,14 +689,16 @@ class FaultTolerantParser {
 
 ## 实现计划 (Implementation Plan)
 
-### Phase 1: 解析引擎开发 (2周)
+### Phase 1: 统一解析引擎开发 (2周)
 
-**目标**: 建立文件名和路径解析能力
+**目标**: 建立统一的文件解析能力
 
 **任务**:
 
-- [ ] 实现 `FileNameParserService` 核心解析逻辑
-- [ ] 实现 `PathParserService` 路径解析功能
+- [ ] 实现 `UnifiedFileParserService` 统一解析服务
+- [ ] 实现路径优先的解析策略
+- [ ] 建立各种文件类型的路径模式匹配
+- [ ] 实现文件名解析作为补充信息提取
 - [ ] 建立缩写映射的反向查找表
 - [ ] 实现正则表达式解析规则
 - [ ] 单元测试覆盖所有解析场景
@@ -639,9 +706,16 @@ class FaultTolerantParser {
 
 **交付物**:
 
-- 完整的文件名解析服务
-- 路径解析服务
+- 统一的文件解析服务
+- 路径优先解析策略实现
 - 解析规则文档和测试报告
+
+**架构优势**:
+
+- **简化架构**: 一个服务处理所有解析需求
+- **逻辑集中**: 路径和文件名解析逻辑在同一个地方
+- **易于维护**: 减少服务间的依赖和协调
+- **性能更好**: 避免多次解析和数据传递
 
 ### Phase 2: 文件发现服务 (2周)
 
