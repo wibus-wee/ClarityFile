@@ -69,41 +69,55 @@ Frontend ↔ Backend ↔ Database ↔ File Discovery Service ↔ File System (st
 #### 解析目标数据结构
 
 ```typescript
-interface ParsedFileInfo {
-  // 核心标识
-  type: 'document' | 'asset' | 'shared' | 'competition' | 'expense'
+// 基础解析结果，继承现有的 FileImportContext 结构
+interface ParsedFileInfo extends Partial<FileImportContext> {
+  // 解析元信息
+  confidence: number // 解析置信度 0-1
+  extractedDate?: Date // 从文件名提取的日期
+  errors: string[] // 解析错误
+  warnings: string[] // 解析警告
 
-  // 项目关联
-  projectId?: string // 从路径中提取的项目ID
-  projectName?: string // 从路径中提取的项目名称
+  // 覆盖必需字段
+  sourcePath: string // 等同于 filePath
+  originalFileName: string // 原始文件名
+  importType: 'document' | 'asset' | 'shared' | 'competition' | 'expense' | 'inbox'
+}
 
-  // 文档相关
-  documentType?: string // 文档类型（从缩写反向查找）
-  versionTag?: string // 版本标签
-  isGenericVersion?: boolean // 是否为通用版本
+// 特定类型的解析结果
+interface DocumentFileInfo extends ParsedFileInfo {
+  importType: 'document'
+  // 文档特有字段（继承自 FileImportContext）
+  logicalDocumentType: string
+  versionTag: string
+  isGenericVersion?: boolean
   competitionInfo?: {
-    // 比赛信息
     seriesName?: string
     levelName?: string
     projectName?: string
   }
+}
 
-  // 资产相关
-  assetType?: string // 资产类型
-  assetName?: string // 资产名称
+interface AssetFileInfo extends ParsedFileInfo {
+  importType: 'asset'
+  // 资产特有字段
+  assetType: string
+  assetName: string
+}
 
-  // 共享资源相关
-  resourceType?: string // 资源类型
-  resourceName?: string // 资源名称
-  customFields?: Record<string, any> // 自定义字段
+interface SharedResourceFileInfo extends ParsedFileInfo {
+  importType: 'shared'
+  // 共享资源特有字段
+  resourceType: string
+  resourceName: string
+  customFields?: Record<string, any>
+}
 
-  // 解析元信息
-  confidence: number // 解析置信度 0-1
-  extractedDate?: Date // 从文件名提取的日期
-  originalFileName: string // 原始文件名
-  filePath: string // 完整文件路径
-  errors: string[] // 解析错误
-  warnings: string[] // 解析警告
+interface CompetitionFileInfo extends ParsedFileInfo {
+  importType: 'competition'
+  // 比赛特有字段
+  seriesName: string
+  levelName: string
+  year?: number
 }
 ```
 
@@ -219,6 +233,8 @@ const COMPETITION_PATH = /\/Competitions\/(.+?)\/(.+?)\//
 
 ### 核心服务架构
 
+#### 服务组件设计
+
 ```typescript
 /**
  * 文件名解析服务
@@ -270,6 +286,145 @@ class BidirectionalSyncService {
 }
 ```
 
+#### 核心流程架构图
+
+上面的 Mermaid 图展示了整个双向同步系统的架构和数据流。
+
+#### 详细流程说明
+
+**1. 文件系统变更检测流程**
+
+```mermaid
+sequenceDiagram
+    participant FS as 文件系统
+    participant FW as 文件监控器
+    participant FNP as 文件名解析器
+    participant PP as 路径解析器
+    participant FDS as 文件发现服务
+    participant DB as 数据库
+    participant BSS as 双向同步服务
+
+    FS->>FW: 文件变更事件
+    FW->>FNP: 解析文件名
+    FW->>PP: 解析文件路径
+
+    alt 解析成功
+        FNP->>FDS: 文件名解析结果
+        PP->>FDS: 路径解析结果
+    else 解析失败
+        FNP->>FTP: 启动容错解析
+        FTP->>FDS: 降级解析结果
+    end
+
+    FDS->>DB: 查询匹配记录
+    DB->>FDS: 返回现有记录
+    FDS->>BSS: 提交同步请求
+    BSS->>DB: 更新数据库
+    BSS->>UI: 通知状态变更
+```
+
+**2. 文件解析详细流程**
+
+```mermaid
+flowchart TD
+    A[检测到文件] --> B{解析文件路径}
+    B -->|成功| C[提取项目信息]
+    B -->|失败| D[标记为未知文件]
+
+    C --> E{解析文件名}
+    E -->|文档类型| F[解析文档信息]
+    E -->|资产类型| G[解析资产信息]
+    E -->|共享资源| H[解析资源信息]
+    E -->|比赛通知| I[解析比赛信息]
+    E -->|解析失败| J[容错解析]
+
+    F --> K[生成DocumentFileInfo]
+    G --> L[生成AssetFileInfo]
+    H --> M[生成SharedResourceFileInfo]
+    I --> N[生成CompetitionFileInfo]
+    J --> O[生成部分解析结果]
+
+    K --> P[数据库匹配]
+    L --> P
+    M --> P
+    N --> P
+    O --> P
+    D --> Q[孤儿文件队列]
+
+    P --> R{匹配结果}
+    R -->|精确匹配| S[直接同步]
+    R -->|部分匹配| T[用户确认]
+    R -->|无匹配| U[创建新记录]
+    R -->|冲突| V[冲突解决]
+```
+
+**3. 双向同步核心逻辑**
+
+```mermaid
+stateDiagram-v2
+    [*] --> Monitoring: 启动监控
+
+    Monitoring --> FileChanged: 检测文件变更
+    Monitoring --> DatabaseChanged: 检测数据库变更
+
+    FileChanged --> Parsing: 解析文件信息
+    Parsing --> Matching: 匹配数据库记录
+    Matching --> Syncing: 同步到数据库
+    Syncing --> Monitoring: 完成同步
+
+    DatabaseChanged --> FileOperation: 执行文件操作
+    FileOperation --> Monitoring: 完成操作
+
+    Parsing --> ErrorHandling: 解析失败
+    Matching --> ConflictResolution: 发现冲突
+
+    ErrorHandling --> UserIntervention: 需要用户干预
+    ConflictResolution --> UserIntervention
+    UserIntervention --> Monitoring: 用户处理完成
+```
+
+#### 关键流程实现细节
+
+**A. 文件名解析流程**
+
+1. **模式识别**：根据文件名前缀和格式识别文件类型
+2. **正则匹配**：使用预定义的正则表达式提取关键信息
+3. **缩写反查**：通过缩写映射表还原完整的类型名称
+4. **置信度评分**：根据匹配程度计算解析置信度
+5. **容错处理**：解析失败时启动降级策略
+
+**B. 数据库匹配流程**
+
+1. **主键匹配**：优先通过文件路径匹配现有的 `managed_files` 记录
+2. **元数据匹配**：通过解析出的项目ID、文档类型等信息匹配
+3. **模糊匹配**：使用文件名相似度算法进行模糊匹配
+4. **冲突检测**：识别一对多或多对一的匹配冲突
+5. **置信度排序**：按匹配置信度对结果进行排序
+
+**C. 同步执行流程**
+
+1. **事务开始**：开启数据库事务确保数据一致性
+2. **记录创建/更新**：根据匹配结果创建或更新数据库记录
+3. **关联建立**：建立文件与业务实体的关联关系
+4. **索引更新**：更新内存索引以提高后续查询性能
+5. **事务提交**：提交事务并通知相关服务
+
+**D. 错误处理流程**
+
+1. **解析错误**：记录错误信息，尝试部分解析
+2. **匹配冲突**：标记冲突文件，等待用户处理
+3. **同步失败**：回滚事务，记录失败原因
+4. **用户通知**：通过UI显示错误状态和处理建议
+5. **重试机制**：对临时性错误实施自动重试
+
+**E. 性能优化策略**
+
+1. **增量扫描**：只处理变更的文件，避免全量扫描
+2. **批量处理**：将多个文件变更合并为批量操作
+3. **异步执行**：解析和同步操作在后台异步执行
+4. **缓存机制**：缓存解析结果和数据库查询结果
+5. **索引优化**：维护内存索引加速文件查找
+
 ### 错误处理和容错机制
 
 #### 解析失败处理策略
@@ -283,13 +438,38 @@ class BidirectionalSyncService {
 #### 容错机制
 
 ```typescript
+// 解析结果，与现有的 FileImportResult 保持一致的结构
 interface ParseResult {
   success: boolean
   confidence: number // 0-1，解析置信度
-  parsedInfo?: ParsedFileInfo
+  parsedInfo?: ParsedFileInfo // 主要解析结果
   fallbackInfo?: Partial<ParsedFileInfo> // 降级解析结果
-  errors: string[]
-  suggestions: string[] // 修复建议
+  errors?: string[] // 解析错误
+  warnings?: string[] // 解析警告
+  suggestions?: string[] // 修复建议
+}
+
+// 文件匹配结果，用于与数据库记录关联
+interface MatchResult {
+  discoveredFile: ParsedFileInfo
+  databaseRecord?: ManagedFileOutput // 使用现有的输出类型
+  matchType: 'exact' | 'partial' | 'none' | 'conflict'
+  confidence: number
+  conflictReason?: string
+}
+
+// 同步结果，与现有的 FileImportResult 结构类似
+interface SyncResult {
+  success: boolean
+  managedFileId?: string
+  finalPath?: string
+  relativePath?: string
+  logicalDocumentId?: string
+  documentVersionId?: string
+  assetId?: string
+  sharedResourceId?: string
+  errors?: string[]
+  warnings?: string[]
 }
 
 class FaultTolerantParser {
