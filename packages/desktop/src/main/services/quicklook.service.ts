@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron'
 import path from 'path'
 import { FilesystemOperations } from '../utils/filesystem-operations'
+import { ManagedFileService } from './managed-file.service'
 import type { SuccessResponse } from '../types/outputs'
 
 export interface QuickLookPreviewInput {
@@ -53,9 +54,6 @@ export class QuickLookService {
       const { fileId } = input
 
       // 这里需要从数据库获取文件路径
-      // 由于我们需要访问 ManagedFileService，我们需要导入它
-      const { ManagedFileService } = await import('./managed-file.service')
-
       const file = await ManagedFileService.getManagedFile({ id: fileId })
       if (!file) {
         throw new Error('文件不存在')

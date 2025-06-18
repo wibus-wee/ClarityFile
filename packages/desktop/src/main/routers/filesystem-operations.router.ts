@@ -1,4 +1,5 @@
 import { FileSystemOperationsService } from '../services/filesystem-operations.service'
+import { ManagedFileService } from '../services/managed-file.service'
 import type {
   RenameFileInput,
   CopyFileToDirectoryInput,
@@ -38,11 +39,9 @@ export function filesystemOperationsRouter(t: ITipc) {
     }),
 
     // 批量移动文件到回收站
-    batchMoveFilesToTrash: t.procedure
-      .input<{ fileIds: string[] }>()
-      .action(async ({ input }) => {
-        return await FileSystemOperationsService.batchMoveFilesToTrash(input.fileIds)
-      }),
+    batchMoveFilesToTrash: t.procedure.input<{ fileIds: string[] }>().action(async ({ input }) => {
+      return await FileSystemOperationsService.batchMoveFilesToTrash(input.fileIds)
+    }),
 
     // 批量复制文件到目录
     batchCopyFilesToDirectory: t.procedure
@@ -55,16 +54,13 @@ export function filesystemOperationsRouter(t: ITipc) {
       }),
 
     // 通过文件ID打开文件
-    openFileByIdWithSystem: t.procedure
-      .input<{ fileId: string }>()
-      .action(async ({ input }) => {
-        // 先获取文件信息，然后打开
-        const { ManagedFileService } = await import('../services/managed-file.service')
-        const file = await ManagedFileService.getManagedFile({ id: input.fileId })
-        if (!file) {
-          throw new Error('文件不存在')
-        }
-        return await FileSystemOperationsService.openFileWithSystem({ filePath: file.physicalPath })
-      })
+    openFileByIdWithSystem: t.procedure.input<{ fileId: string }>().action(async ({ input }) => {
+      // 先获取文件信息，然后打开
+      const file = await ManagedFileService.getManagedFile({ id: input.fileId })
+      if (!file) {
+        throw new Error('文件不存在')
+      }
+      return await FileSystemOperationsService.openFileWithSystem({ filePath: file.physicalPath })
+    })
   }
 }
