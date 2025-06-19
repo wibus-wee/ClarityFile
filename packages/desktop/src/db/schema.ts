@@ -418,6 +418,67 @@ export const projectCompetitionMilestones = sqliteTable(
   ]
 )
 
+// MARK: File Sync Tables
+
+export const syncStates = sqliteTable(
+  'sync_states',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    filePath: text('file_path').notNull(), // 相对于项目根目录的文件路径
+    lastSyncHash: text('last_sync_hash'), // 最后同步时的文件哈希值
+    lastSyncTimestamp: integer('last_sync_timestamp', { mode: 'timestamp_ms' }), // 最后同步时间
+    syncStatus: text('sync_status').notNull().default('synced'), // 'synced', 'pending', 'conflict', 'ignored'
+    fileSize: integer('file_size'), // 文件大小（字节）
+    lastModified: integer('last_modified', { mode: 'timestamp_ms' }), // 文件最后修改时间
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(strftime('%s', 'now') * 1000)`),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(strftime('%s', 'now') * 1000)`)
+  },
+  (table) => [
+    uniqueIndex('ss_project_file_unique_idx').on(table.projectId, table.filePath),
+    index('ss_project_id_idx').on(table.projectId),
+    index('ss_sync_status_idx').on(table.syncStatus)
+  ]
+)
+
+export const changeLogs = sqliteTable(
+  'change_logs',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    changeType: text('change_type').notNull(), // 'file_added', 'file_removed', 'file_modified', 'file_renamed'
+    filePath: text('file_path').notNull(), // 变化的文件路径
+    oldValue: text('old_value'), // 旧值（如重命名时的旧文件名）
+    newValue: text('new_value'), // 新值（如重命名时的新文件名）
+    fileHash: text('file_hash'), // 文件哈希值
+    fileSize: integer('file_size'), // 文件大小
+    userConfirmed: integer('user_confirmed', { mode: 'boolean' }).default(false), // 用户是否已确认
+    appliedAt: integer('applied_at', { mode: 'timestamp_ms' }), // 变化应用时间
+    metadata: text('metadata', { mode: 'json' }), // 额外的元数据信息
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(strftime('%s', 'now') * 1000)`)
+  },
+  (table) => [
+    index('cl_project_id_idx').on(table.projectId),
+    index('cl_change_type_idx').on(table.changeType),
+    index('cl_user_confirmed_idx').on(table.userConfirmed),
+    index('cl_created_at_idx').on(table.createdAt)
+  ]
+)
+
 // MARK: Drizzle Relations (for query building)
 
 export const managedFilesRelations = relations(managedFiles, ({ many }) => ({
@@ -440,7 +501,9 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   expenseTrackings: many(expenseTrackings),
   projectTags: many(projectTags),
   projectSharedResources: many(projectSharedResources),
-  projectCompetitionMilestones: many(projectCompetitionMilestones)
+  projectCompetitionMilestones: many(projectCompetitionMilestones),
+  syncStates: many(syncStates),
+  changeLogs: many(changeLogs)
 }))
 
 export const logicalDocumentsRelations = relations(logicalDocuments, ({ one, many }) => ({
@@ -616,3 +679,19 @@ export const projectCompetitionMilestonesRelations = relations(
     })
   })
 )
+
+// MARK: File Sync Relations
+
+export const syncStatesRelations = relations(syncStates, ({ one }) => ({
+  project: one(projects, {
+    fields: [syncStates.projectId],
+    references: [projects.id]
+  })
+}))
+
+export const changeLogsRelations = relations(changeLogs, ({ one }) => ({
+  project: one(projects, {
+    fields: [changeLogs.projectId],
+    references: [projects.id]
+  })
+}))
