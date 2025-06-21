@@ -13,9 +13,9 @@ import type {
   UpdateDocumentVersionInput,
   GetDocumentVersionInput,
   DeleteDocumentVersionInput,
-  GetLogicalDocumentVersionsInput,
-  SuccessResponse
+  GetLogicalDocumentVersionsInput
 } from '../../types/document-schemas'
+import { SuccessResponse } from '../../types/outputs'
 
 /**
  * 文档版本服务
