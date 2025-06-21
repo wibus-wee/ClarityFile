@@ -430,11 +430,10 @@ export const syncStates = sqliteTable(
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
     filePath: text('file_path').notNull(), // 相对于项目根目录的文件路径
-    lastSyncHash: text('last_sync_hash'), // 最后同步时的文件哈希值
     lastSyncTimestamp: integer('last_sync_timestamp', { mode: 'timestamp_ms' }), // 最后同步时间
-    syncStatus: text('sync_status').notNull().default('synced'), // 'synced', 'pending', 'conflict', 'ignored'
-    fileSize: integer('file_size'), // 文件大小（字节）
-    lastModified: integer('last_modified', { mode: 'timestamp_ms' }), // 文件最后修改时间
+    syncStatus: text('sync_status').notNull().default('synced'), // 'synced', 'pending', 'ignored' (移除conflict)
+    fileSize: integer('file_size'), // 文件大小（字节）- chokidar stats提供
+    lastModified: integer('last_modified', { mode: 'timestamp_ms' }), // 文件最后修改时间 - chokidar stats提供
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
       .default(sql`(strftime('%s', 'now') * 1000)`),
@@ -458,15 +457,13 @@ export const changeLogs = sqliteTable(
     projectId: text('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
-    changeType: text('change_type').notNull(), // 'file_added', 'file_removed', 'file_modified', 'file_renamed'
-    filePath: text('file_path').notNull(), // 变化的文件路径
-    oldValue: text('old_value'), // 旧值（如重命名时的旧文件名）
-    newValue: text('new_value'), // 新值（如重命名时的新文件名）
-    fileHash: text('file_hash'), // 文件哈希值
-    fileSize: integer('file_size'), // 文件大小
+    changeType: text('change_type').notNull(), // chokidar事件: 'add', 'change', 'unlink', 'addDir', 'unlinkDir'
+    filePath: text('file_path').notNull(), // 当前文件路径
+    fileSize: integer('file_size'), // 文件大小 - 直接来自chokidar stats
     userConfirmed: integer('user_confirmed', { mode: 'boolean' }).default(false), // 用户是否已确认
     appliedAt: integer('applied_at', { mode: 'timestamp_ms' }), // 变化应用时间
-    metadata: text('metadata', { mode: 'json' }), // 额外的元数据信息
+    chokidarEvent: text('chokidar_event').notNull(), // 原始chokidar事件类型
+    metadata: text('metadata', { mode: 'json' }), // chokidar提供的额外信息(stats等)
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
       .default(sql`(strftime('%s', 'now') * 1000)`)
@@ -474,6 +471,7 @@ export const changeLogs = sqliteTable(
   (table) => [
     index('cl_project_id_idx').on(table.projectId),
     index('cl_change_type_idx').on(table.changeType),
+    index('cl_chokidar_event_idx').on(table.chokidarEvent),
     index('cl_user_confirmed_idx').on(table.userConfirmed),
     index('cl_created_at_idx').on(table.createdAt)
   ]

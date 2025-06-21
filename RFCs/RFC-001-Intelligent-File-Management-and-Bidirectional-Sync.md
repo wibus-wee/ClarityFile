@@ -1,14 +1,14 @@
 # RFC-001: 智能文件管理与双向同步系统
 
-- **状态**: 修订版 v2 (Revised v2) - 采用TIPC事件驱动架构
+- **状态**: 修订版 v3 (Revised v3) - 基于Chokidar的简化架构
 - **作者**: ClarityFile 开发团队
 - **创建日期**: 2025-06-18
-- **最后更新**: 2025-06-19
-- **修订原因**: 采用TIPC事件系统替代轮询机制，实现真正的实时同步
+- **最后更新**: 2025-06-21
+- **修订原因**: 采用Chokidar文件监控库，简化架构并移除冲突处理复杂性
 
 ## 概述
 
-本RFC提出了一个智能文件管理与双向同步系统，旨在实现ClarityFile应用与项目文件夹之间的无缝同步，自动检测文件变化，并提供智能的项目结构解析和导入功能。
+本RFC提出了一个基于Chokidar的智能文件管理与双向同步系统，旨在实现ClarityFile应用与项目文件夹之间的无缝同步。通过充分利用Chokidar的文件监控能力，系统将提供简洁高效的文件变化检测、用户确认机制和智能的项目结构解析功能。
 
 ## 背景与动机
 
@@ -21,40 +21,39 @@
 
 ### 目标
 
-1. **事件驱动的双向同步**：基于TIPC事件系统实现文件夹与应用数据库的实时双向同步
-2. **实时智能检测**：自动检测文件夹变化并通过事件立即推送到前端
+1. **基于Chokidar的双向同步**：利用Chokidar强大的文件监控能力实现文件夹与应用数据库的实时双向同步
+2. **简化的变化检测**：直接使用Chokidar事件(add/change/unlink等)，无需复杂的哈希计算
 3. **自动导入**：选择工作目录后自动解析项目结构
 4. **用户确认机制**：重要操作需要用户确认，保证数据安全
-5. **SWR集成**：事件触发自动重新验证，避免手动状态管理
+5. **TIPC+SWR集成**：Chokidar事件通过TIPC推送到前端，触发SWR自动重新验证
 
 ## 核心功能
 
-### 1. 双向同步机制
+### 1. 基于Chokidar的双向同步机制
 
-系统通过事件驱动模型，实现了应用与文件系统之间无缝、实时的双向数据同步。其核心是两条清晰的数据流：从应用到文件系统，以及从文件系统到应用。
+系统通过Chokidar文件监控库，实现了应用与文件系统之间无缝、实时的双向数据同步。Chokidar提供了强大的跨平台文件监控能力，大大简化了我们的实现复杂度。
 
 #### 1.1 数据流：从应用到文件系统 (App → FS)
 
 ```mermaid
 graph LR
     A[应用内操作 重命名A为B] --> B[同步管理器接收请求]
-    B --> C[标记为内部操作]
-    C --> D[执行文件系统操作 rename]
-    D --> E{操作成功?}
-    E -- Yes --> F[更新数据库]
-    F --> G[UI状态更新]
-    E -- No --> H[回滚并通知用户]
-    D --> M[FSWatcher检测到B创建]
-    M --> N[内部操作标记?]
-    N -- Yes --> O[忽略事件]
+    B --> C[执行文件系统操作 rename]
+    C --> D{操作成功?}
+    D -- Yes --> E[更新数据库]
+    E --> F[UI状态更新]
+    D -- No --> G[回滚并通知用户]
+    C --> H[Chokidar检测到文件变化]
+    H --> I[内部操作标记?]
+    I -- Yes --> J[忽略事件]
 ```
 
 #### 1.2 数据流：从文件系统到应用 (FS → App)
 
 ```mermaid
 graph LR
-    A[外部编辑器修改文件A] --> B[FSWatcher检测变化]
-    B --> C[变化检测引擎分析]
+    A[外部编辑器修改文件A] --> B[Chokidar检测变化事件]
+    B --> C[获取文件stats信息]
     C --> D[通过TIPC事件发送file-changed]
     D --> E[前端事件监听器接收]
     E --> F[触发SWR重新验证]
@@ -92,79 +91,73 @@ graph LR
 
 #### 3.1 实时变化通知
 
-- 通过TIPC事件实时推送文件变化到前端
+- Chokidar事件通过TIPC实时推送文件变化到前端
 - 前端监听事件，自动触发SWR重新验证
-- 提供变化详情和预览
+- 利用Chokidar提供的文件stats信息展示变化详情
 - 支持批量确认和单个确认
 - 无需轮询，真正的实时响应
 
-#### 3.2 冲突解决机制
+#### 3.2 简化的变化处理
 
-当文件在应用内外同时被修改，系统将不再简单地让用户"二选一"，而是启动智能合并流程以保全所有工作。
+为了专注于核心功能，暂时不实现复杂的冲突解决机制。系统采用简单的"用户确认"模式：
 
 ```mermaid
 graph LR
-    subgraph 检测阶段
-        A[外部文件被修改] --> C[计算H_fs]
-        B[应用内数据被修改] --> D[读取H_db]
-        C --> E{H_fs != H_db?}
-        D --> E
-    end
-    subgraph 判定阶段
-        E -- Yes --> F[比较H_base]
-        F --> G{H_fs != H_base 且 H_db != H_base?}
-    end
-    subgraph 处理阶段
-        G -- Yes --> H[判定为内容冲突]
-        H --> I[暂存冲突版本:conflict.md]
-        I --> J[UI通知]
-        J --> K{用户点击解决}
-        K --> L[三方合并视图]
-        L --> M[用户手动合并]
-        M --> N[保存最终版本]
-    end
-    E -- No --> Z[正常同步]
-    G -- No --> Z
+    A[Chokidar检测到文件变化] --> B[记录到change_logs]
+    B --> C[通过TIPC推送到前端]
+    C --> D[显示变化通知]
+    D --> E{用户确认?}
+    E -- Yes --> F[更新sync_states]
+    F --> G[应用变化到数据库]
+    E -- No --> H[标记为忽略]
 ```
 
 #### 3.3 自动重命名
 
 - 确认后自动按照命名规范重命名文件
 - 保持文件系统与数据库的一致性
+- 利用Chokidar的add/unlink事件检测重命名操作
 
 ### 4. 性能与可扩展性考量
 
-#### 4.1 忽略机制 (`.clarityignore`)
+#### 4.1 Chokidar内置忽略机制
 
-- **必要性**: 为了避免索引不必要的文件（如 `node_modules`, `.git`, 临时文件），系统将支持 `.clarityignore` 文件。
-- **语法**: 语法与 `.gitignore` 保持一致，允许用户自定义忽略规则，从而显著提升大规模项目的扫描和监控性能。
+利用Chokidar的内置`ignored`选项，无需自己实现复杂的忽略逻辑：
 
-#### 4.2 事件节流与防抖 (Throttling & Debouncing)
-
-为应对 `git checkout` 等操作引发的事件风暴，系统采用防抖机制，将短时间内的大量文件变化合并为单次更新。
-
-```mermaid
-sequenceDiagram
-    participant FS as 文件系统
-    participant Watcher as 文件监控
-    participant Debouncer as 事件防抖器
-    participant Sync as 同步管理器
-
-    FS->>Watcher: 文件A修改 (t=0ms)
-    Watcher->>Debouncer: 收到事件A, 启动500ms计时器
-    FS->>Watcher: 文件B修改 (t=150ms)
-    Watcher->>Debouncer: 收到事件B, 重置计时器
-    FS->>Watcher: 文件C修改 (t=400ms)
-    Watcher->>Debouncer: 收到事件C, 重置计时器
-    Note over Debouncer: 500ms过去，无新事件
-    Debouncer->>Sync: 触发一次总体验证
-    Sync->>FS: 请求最新状态
+```typescript
+const watcher = chokidar.watch(projectPath, {
+  ignored: (path, stats) => {
+    // 忽略node_modules, .git等
+    if (path.includes('node_modules') || path.includes('.git')) return true
+    // 忽略临时文件
+    if (stats?.isFile() && path.endsWith('.tmp')) return true
+    // 支持.clarityignore文件的自定义规则
+    return isIgnoredByRules(path)
+  },
+  persistent: true,
+  awaitWriteFinish: true // 等待写入完成，避免部分写入的事件
+})
 ```
 
-#### 4.3 增量与智能检测
+#### 4.2 Chokidar内置防抖机制
 
-- **大文件处理**: 对于大型文件（如视频、PSD），避免每次都计算完整哈希。优先通过检查文件大小和修改日期进行快速判断。
-- **首次索引优化**: 首次导入大规模项目时，提供进度反馈，并允许用户优先使用部分已索引的内容。
+Chokidar提供了`awaitWriteFinish`选项来处理分块写入，无需自己实现复杂的防抖逻辑：
+
+```typescript
+const watcher = chokidar.watch(projectPath, {
+  awaitWriteFinish: {
+    stabilityThreshold: 2000, // 文件稳定2秒后触发事件
+    pollInterval: 100 // 每100ms检查一次
+  },
+  atomic: true // 处理原子写入操作
+})
+```
+
+#### 4.3 简化的文件检测
+
+- **利用Chokidar Stats**: 直接使用Chokidar提供的文件统计信息，无需手动计算哈希
+- **事件驱动**: 完全基于Chokidar事件，无需轮询或手动扫描
+- **首次索引**: 利用Chokidar的`ready`事件确定初始扫描完成
 
 ### 5. 健壮性与错误处理
 
@@ -191,11 +184,6 @@ graph LR
 - **原子性**: 复杂操作（如重命名文件夹）将被视为一个事务。如果操作中途失败（如磁盘空间不足、权限问题），系统将自动回滚到操作前的状态，避免数据不一致。
 - **操作队列**: 所有文件操作将进入一个持久化队列，支持失败重试机制，以应对文件被临时占用等情况。
 
-#### 5.3 外部驱动器与网络共享
-
-- **状态管理**: 系统能检测到项目文件夹所在的驱动器是否已断开连接。
-- **优雅处理**: 在驱动器断开时，系统会暂停同步并通知用户。一旦驱动器重新连接，将自动恢复同步状态。
-
 ### 6. 安全与边界情况
 
 #### 6.1 符号链接 (Symbolic Links) 处理
@@ -212,7 +200,7 @@ graph LR
 
 ## 技术架构
 
-### 事件驱动系统架构图
+### 基于Chokidar的简化架构图
 
 ```mermaid
 graph TB
@@ -225,15 +213,12 @@ graph TB
 
     subgraph "通信层"
         TIPC[TIPC事件系统]
-        IPC[Electron IPC]
     end
 
     subgraph "主进程层 (Main Process)"
         SyncManager[文件同步管理器]
-        FSWatcher[文件系统监控服务]
-        ChangeDetector[变化检测引擎]
+        Chokidar[Chokidar文件监控]
         ProjectParser[项目解析器]
-        ConflictResolver[冲突解决器]
     end
 
     subgraph "数据层"
@@ -249,14 +234,13 @@ graph TB
         Resources[Resources/]
     end
 
-    %% 事件驱动数据流
-    ProjectFolder --> FSWatcher
-    Documents --> FSWatcher
-    Assets --> FSWatcher
-    Resources --> FSWatcher
+    %% Chokidar事件驱动数据流
+    ProjectFolder --> Chokidar
+    Documents --> Chokidar
+    Assets --> Chokidar
+    Resources --> Chokidar
 
-    FSWatcher --> ChangeDetector
-    ChangeDetector --> SyncManager
+    Chokidar --> SyncManager
     SyncManager --> Database
     SyncManager --> TIPC
 
@@ -270,7 +254,6 @@ graph TB
     UI --> TIPC
     TIPC --> SyncManager
     SyncManager --> ProjectFolder
-    SyncManager --> ConflictResolver
 
     %% 样式
     classDef frontendLayer fill:#e3f2fd
@@ -278,20 +261,22 @@ graph TB
     classDef mainLayer fill:#e8f5e8
     classDef dataLayer fill:#fff3e0
     classDef fileSystem fill:#fce4ec
+    classDef chokidarLayer fill:#fff9c4
 
     class UI,SWR,EventListener,Notification frontendLayer
-    class TIPC,IPC commLayer
-    class SyncManager,FSWatcher,ChangeDetector,ProjectParser,ConflictResolver mainLayer
+    class TIPC commLayer
+    class SyncManager,ProjectParser mainLayer
+    class Chokidar chokidarLayer
     class Database,SyncStates,ChangeLogs dataLayer
     class ProjectFolder,Documents,Assets,Resources fileSystem
 ```
 
-### 事件驱动的双向同步流程图
+### 基于Chokidar的双向同步流程图
 
 ```mermaid
 sequenceDiagram
     participant FS as 文件系统
-    participant Watcher as 文件监控服务
+    participant Chokidar as Chokidar监控
     participant SyncMgr as 同步管理器
     participant TIPC as TIPC事件系统
     participant Frontend as 前端应用
@@ -299,10 +284,11 @@ sequenceDiagram
     participant DB as 数据库
 
     %% 文件系统到应用的同步
-    Note over FS,DB: 文件变化检测与事件推送
-    FS->>Watcher: 文件系统变化事件
-    Watcher->>SyncMgr: 处理文件变化
-    SyncMgr->>DB: 记录变化日志
+    Note over FS,DB: Chokidar事件检测与推送
+    FS->>Chokidar: 文件系统变化
+    Chokidar->>Chokidar: 获取文件stats信息
+    Chokidar->>SyncMgr: 触发事件(add/change/unlink)
+    SyncMgr->>DB: 记录到change_logs
     SyncMgr->>TIPC: 发送文件变化事件
     TIPC->>Frontend: 推送实时事件
     Frontend->>SWR: 触发数据重新验证
@@ -313,7 +299,8 @@ sequenceDiagram
     Note over Frontend,DB: 用户交互确认
     Frontend->>TIPC: 用户确认变化
     TIPC->>SyncMgr: 处理确认请求
-    SyncMgr->>DB: 更新确认状态
+    SyncMgr->>DB: 更新user_confirmed状态
+    SyncMgr->>DB: 更新sync_states表
     SyncMgr->>FS: 执行文件重命名(如需要)
     SyncMgr->>TIPC: 发送确认完成事件
     TIPC->>Frontend: 推送确认结果
@@ -325,35 +312,34 @@ sequenceDiagram
     TIPC->>SyncMgr: 处理应用内操作
     SyncMgr->>DB: 更新数据库
     SyncMgr->>FS: 同步到文件系统
-    SyncMgr->>SyncMgr: 标记为内部操作
-    FS->>Watcher: 文件变化事件
-    Watcher->>SyncMgr: 检测到变化
+    FS->>Chokidar: 文件变化
+    Chokidar->>SyncMgr: 检测到变化
     SyncMgr->>SyncMgr: 识别为内部操作，跳过通知
 ```
 
-### 1. TIPC事件系统接口
+### 1. 基于Chokidar的TIPC事件系统接口
 
 ```typescript
 // 主进程向渲染进程发送的事件类型
 export type RendererHandlers = {
   fileChanged: (data: {
     projectId: string
-    changeEvent: FileChangeEvent
-    fileInfo?: FileInfo
+    chokidarEvent: 'add' | 'change' | 'unlink' | 'addDir' | 'unlinkDir'
+    filePath: string
+    stats?: fs.Stats // Chokidar提供的文件统计信息
   }) => void
   syncStateUpdated: (data: { projectId: string; syncStates: SyncState[] }) => void
-  conflictDetected: (data: { projectId: string; conflicts: FileConflict[] }) => void
 }
 
-// 文件系统监控服务
-interface FileSystemWatcherService extends EventEmitter {
+// Chokidar文件监控服务
+interface ChokidarWatcherService {
   startWatching(projectId: string, folderPath: string): Promise<void>
-  stopWatching(projectId: string, folderPath: string): Promise<void>
-  // 事件: 'fileChange', 'initialScan', 'error'
+  stopWatching(projectId: string): Promise<void>
+  // 直接使用Chokidar事件: 'add', 'change', 'unlink', 'addDir', 'unlinkDir', 'ready', 'error'
 }
 ```
 
-### 2. 事件驱动同步管理器
+### 2. 简化的同步管理器
 
 ```typescript
 interface FileSyncManager {
@@ -361,8 +347,13 @@ interface FileSyncManager {
   stopProjectWatching(projectId: string): Promise<void>
   startAllProjectWatching(): Promise<void>
 
-  // 内部事件处理
-  private handleFileChange(projectId: string, changeEvent: FileChangeEvent): Promise<void>
+  // Chokidar事件处理
+  private handleChokidarEvent(
+    projectId: string,
+    event: string,
+    path: string,
+    stats?: fs.Stats
+  ): Promise<void>
   private sendEventToRenderer(eventName: string, data: any): void
 }
 ```
@@ -385,8 +376,13 @@ function useFileSyncEvents(projectId: string) {
         mutate(['project-sync-states', projectId])
         mutate(['project-change-logs', projectId])
 
-        // 显示通知
-        showFileChangeNotification(data)
+        // 显示通知，包含Chokidar提供的详细信息
+        showFileChangeNotification({
+          event: data.chokidarEvent,
+          path: data.filePath,
+          size: data.stats?.size,
+          modified: data.stats?.mtime
+        })
       }
     })
     return unlisten
@@ -419,56 +415,58 @@ export function useProjectSyncStates(projectId: string) {
 
 ## 数据模型扩展
 
-### 1. 同步状态跟踪
+### 1. 简化的同步状态跟踪
 
 ```sql
 CREATE TABLE sync_states (
   id TEXT PRIMARY KEY,
   project_id TEXT NOT NULL REFERENCES projects(id),
   file_path TEXT NOT NULL,
-  last_sync_hash TEXT,
   last_sync_timestamp INTEGER,
-  sync_status TEXT NOT NULL, -- 'synced', 'pending', 'conflict'
+  sync_status TEXT NOT NULL, -- 'synced', 'pending', 'ignored' (移除conflict)
+  file_size INTEGER, -- 来自Chokidar stats
+  last_modified INTEGER, -- 来自Chokidar stats
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
 ```
 
-### 2. 变化日志
+### 2. 基于Chokidar的变化日志
 
 ```sql
 CREATE TABLE change_logs (
   id TEXT PRIMARY KEY,
   project_id TEXT NOT NULL REFERENCES projects(id),
-  change_type TEXT NOT NULL, -- 'file_added', 'file_removed', 'file_modified'
+  change_type TEXT NOT NULL, -- 映射的变化类型
   file_path TEXT NOT NULL,
-  old_value TEXT,
-  new_value TEXT,
+  file_size INTEGER, -- 直接来自Chokidar stats
   user_confirmed BOOLEAN DEFAULT FALSE,
   applied_at INTEGER,
+  chokidar_event TEXT NOT NULL, -- 原始Chokidar事件: 'add', 'change', 'unlink'等
+  metadata TEXT, -- JSON格式，存储Chokidar提供的额外信息
   created_at INTEGER NOT NULL
 );
 ```
 
 ## 实现阶段
 
-### Phase 1: 基础监控与事件系统 (2周)
+### Phase 1: Chokidar集成与基础监控 (1.5周)
 
-- ✅ 实现文件系统监控服务 (FileSystemWatcherService)
-- ✅ 基础变化检测引擎 (ChangeDetector)
-- ✅ 数据模型扩展 (sync_states, change_logs表)
+- ✅ 数据模型扩展 (简化的sync_states, change_logs表)
+- 🔄 Chokidar文件监控服务集成
 - 🔄 TIPC事件系统集成
 - 🔄 前端事件监听器实现
+- 🔄 基础的用户确认流程
 
-### Phase 2: 双向同步与SWR集成 (3周)
+### Phase 2: 双向同步与SWR集成 (2周)
 
-- 完整的事件驱动同步引擎
+- 完整的Chokidar事件处理
 - 前端SWR自动重新验证机制
-- 冲突解决机制
-- 用户确认流程
+- 用户确认流程完善
 - 实时通知系统
+- 内部操作标记机制
 
-### Phase 3: 智能解析与用户体验 (4周)
+### Phase 3: 智能解析与用户体验 (3周)
 
 - 项目结构解析
 - 自动分类算法
@@ -476,10 +474,10 @@ CREATE TABLE change_logs (
 - 用户界面优化
 - 通知系统完善
 
-### Phase 4: 高级功能与性能优化 (3周)
+### Phase 4: 高级功能与性能优化 (2周)
 
 - 批量操作支持
-- 性能优化 (事件防抖、智能缓存)
+- Chokidar高级选项配置 (awaitWriteFinish, atomic等)
 - 错误恢复机制
 - 跨平台兼容性测试
 
@@ -514,15 +512,6 @@ CREATE TABLE change_logs (
 5. **回滚功能**：支持操作回滚
 6. **性能监控**：实时监控事件处理性能
 
-## 成功指标
-
-1. **同步准确性**：99%以上的文件变化正确同步
-2. **实时响应**：文件变化事件推送延迟小于1秒
-3. **事件处理性能**：单个事件处理时间小于100ms
-4. **用户满意度**：用户反馈评分4.5+/5.0
-5. **错误率**：同步错误率低于1%
-6. **事件可靠性**：事件传递成功率99.9%以上
-
 ## 未来扩展
 
 1. **云同步集成**：与云存储服务集成
@@ -532,14 +521,24 @@ CREATE TABLE change_logs (
 
 ## 结论
 
-基于TIPC事件系统的智能文件管理与双向同步系统将显著提升ClarityFile的用户体验，实现真正的实时同步。通过事件驱动架构，避免了轮询的性能开销，提供了更好的响应性和用户体验。
+基于Chokidar的智能文件管理与双向同步系统将显著提升ClarityFile的用户体验，实现真正的实时同步。通过充分利用Chokidar的强大文件监控能力，系统架构得到了大幅简化，同时保持了高性能和可靠性。
 
 ### 关键优势
 
-1. **真正的实时同步**：基于事件推送，无延迟响应
-2. **高性能**：避免轮询开销，事件驱动更高效
-3. **类型安全**：TIPC提供端到端类型安全
-4. **SWR集成**：自动缓存管理和数据重新验证
-5. **可扩展性**：事件系统易于扩展新功能
+1. **简化的架构**：利用Chokidar成熟的文件监控能力，减少自研复杂度
+2. **真正的实时同步**：基于Chokidar事件推送，无延迟响应
+3. **高性能**：Chokidar内置防抖、忽略机制，避免性能问题
+4. **跨平台兼容**：Chokidar处理了不同操作系统的文件系统差异
+5. **类型安全**：TIPC提供端到端类型安全
+6. **SWR集成**：自动缓存管理和数据重新验证
+7. **开发效率**：减少开发时间，专注于业务逻辑
 
-通过分阶段实现和充分的用户测试，可以确保系统的稳定性和可用性。当前Phase 1的基础架构已经完成，为后续功能奠定了坚实基础。
+### Chokidar带来的具体好处
+
+1. **内置忽略机制**：无需自己实现.clarityignore解析
+2. **原子写入检测**：自动处理分块写入和原子操作
+3. **文件统计信息**：直接获取文件大小、修改时间等
+4. **错误处理**：成熟的错误处理和恢复机制
+5. **性能优化**：经过大量项目验证的性能优化
+
+通过分阶段实现和充分的用户测试，可以确保系统的稳定性和可用性。基于Chokidar的简化架构使得Phase 1的实现时间可以缩短到1.5周，为后续功能奠定了更坚实的基础。
