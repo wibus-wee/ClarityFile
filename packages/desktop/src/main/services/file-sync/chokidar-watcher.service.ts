@@ -131,7 +131,7 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
       const fs = await import('fs/promises')
       try {
         await fs.access(projectPath)
-      } catch (error) {
+      } catch {
         throw new Error(`项目路径不存在或无法访问: ${projectPath}`)
       }
 
@@ -172,8 +172,34 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
    * 停止项目文件监控
    */
   async stopWatching(projectId: string): Promise<void> {
-    // 实现将在第二步添加
-    throw new Error('Method not implemented yet')
+    try {
+      console.log(`开始停止项目文件监控: ${projectId}`)
+
+      // 获取监控状态
+      const watchState = this.watchStates.get(projectId)
+      if (!watchState) {
+        console.log(`项目 ${projectId} 没有在监控中，跳过停止`)
+        return
+      }
+
+      // 关闭Chokidar监控器
+      if (watchState.watcher) {
+        await watchState.watcher.close()
+        console.log(`Chokidar监控器已关闭: ${projectId}`)
+      }
+
+      // 移除监控状态
+      this.watchStates.delete(projectId)
+
+      console.log(`项目文件监控停止成功: ${projectId}`)
+    } catch (error) {
+      console.error(`停止项目文件监控失败: ${projectId}`, error)
+
+      // 即使出错也要清理状态
+      this.watchStates.delete(projectId)
+
+      throw error
+    }
   }
 
   /**
@@ -256,6 +282,57 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
       projectPath
       // 可以在这里添加项目特定的配置覆盖
     }
+  }
+
+  /**
+   * 设置Chokidar事件监听器
+   */
+  private setupChokidarEventListeners(watcher: FSWatcher, projectId: string): void {
+    // 文件添加事件
+    watcher.on('add', (path: string, stats?: Stats) => {
+      this.handleChokidarEvent(projectId, 'add', path, stats)
+    })
+
+    // 文件修改事件
+    watcher.on('change', (path: string, stats?: Stats) => {
+      this.handleChokidarEvent(projectId, 'change', path, stats)
+    })
+
+    // 文件删除事件
+    watcher.on('unlink', (path: string) => {
+      this.handleChokidarEvent(projectId, 'unlink', path)
+    })
+
+    // 目录添加事件
+    watcher.on('addDir', (path: string, stats?: Stats) => {
+      this.handleChokidarEvent(projectId, 'addDir', path, stats)
+    })
+
+    // 目录删除事件
+    watcher.on('unlinkDir', (path: string) => {
+      this.handleChokidarEvent(projectId, 'unlinkDir', path)
+    })
+
+    // 初始扫描完成事件
+    watcher.on('ready', () => {
+      this.handleChokidarEvent(projectId, 'ready', '')
+
+      // 标记为正在监控
+      const watchState = this.watchStates.get(projectId)
+      if (watchState) {
+        watchState.isWatching = true
+        console.log(`项目 ${projectId} 初始扫描完成，开始监控文件变化`)
+      }
+    })
+
+    // 错误事件
+    watcher.on('error', (err: unknown) => {
+      const error = err instanceof Error ? err : new Error(String(err))
+      this.handleChokidarEvent(projectId, 'error', '', undefined, error)
+      console.error(`项目 ${projectId} 文件监控出错:`, error)
+    })
+
+    console.log(`已设置项目 ${projectId} 的Chokidar事件监听器`)
   }
 
   /**

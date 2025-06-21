@@ -1,6 +1,7 @@
 // 基础响应类型
 export interface SuccessResponse {
   success: boolean
+  message?: string
 }
 
 // 系统信息输出类型
