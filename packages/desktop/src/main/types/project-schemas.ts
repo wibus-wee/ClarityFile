@@ -165,9 +165,3 @@ export interface ProjectDetailsOutput {
     tagCount: number
   }
 }
-
-// 成功响应类型
-export interface SuccessResponse {
-  success: boolean
-  message?: string
-}

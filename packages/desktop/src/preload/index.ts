@@ -4,7 +4,19 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   // 暴露 ipcRenderer.invoke 给 TIPC 使用
-  ipcInvoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args)
+  ipcInvoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
+
+  // 暴露事件相关的 API 给 TIPC 事件系统使用
+  ipcOn: (channel: string, callback: (...args: any[]) => void) => {
+    const subscription = (_event: any, ...args: any[]) => callback(...args)
+    ipcRenderer.on(channel, subscription)
+    return () => {
+      ipcRenderer.off(channel, subscription)
+    }
+  },
+
+  // 暴露 ipcRenderer.send 给 TIPC 事件系统使用
+  ipcSend: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

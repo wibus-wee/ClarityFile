@@ -18,9 +18,9 @@ import type {
   GetProjectAssetsInput,
   BatchDeleteProjectAssetsInput,
   SearchProjectAssetsInput,
-  ProjectAssetStatsOutput,
-  SuccessResponse
+  ProjectAssetStatsOutput
 } from '../types/asset-schemas'
+import { SuccessResponse } from '../types/outputs'
 
 /**
  * 项目资产服务

@@ -19,9 +19,9 @@ import type {
   SyncProjectFolderPathInput,
   RepairProjectFolderInput,
   ProjectDetailsOutput,
-  ProjectStatus,
-  SuccessResponse
+  ProjectStatus
 } from '../types/project-schemas'
+import { SuccessResponse } from '../types/outputs'
 import { ProjectFolderManager } from '../managers/project-folder.manager'
 import { PathSyncManager } from '../managers/path-sync.manager'
 // 导入专门的服务类

@@ -22,9 +22,9 @@ import type {
   UpdateLogicalDocumentInput,
   GetLogicalDocumentInput,
   DeleteLogicalDocumentInput,
-  GetProjectDocumentsInput,
-  SuccessResponse
+  GetProjectDocumentsInput
 } from '../../types/document-schemas'
+import { SuccessResponse } from '../../types/outputs'
 
 /**
  * 逻辑文档服务

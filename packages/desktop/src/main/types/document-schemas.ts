@@ -245,9 +245,3 @@ export interface LogicalDocumentWithVersionsOutput {
   updatedAt: Date
   versions: DocumentVersionOutput[]
 }
-
-// 成功响应类型
-export interface SuccessResponse {
-  success: boolean
-  message?: string
-}

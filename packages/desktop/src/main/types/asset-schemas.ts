@@ -179,9 +179,3 @@ export interface ProjectAssetStatsOutput {
   totalFileSize: number
   recentAssets: number // 最近7天创建的资产数量
 }
-
-// 成功响应类型
-export interface SuccessResponse {
-  success: boolean
-  message?: string
-}
