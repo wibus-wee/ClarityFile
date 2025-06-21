@@ -18,6 +18,32 @@ import { fileAccessRouter } from './routers/file-access.router'
 import { quickLookRouter } from './routers/quicklook.router'
 import { filesystemOperationsRouter } from './routers/filesystem-operations.router'
 
+// 导出事件系统相关工具
+export { TipcEventSender, createEventSender, EventSenderManager } from './lib/tipc-event-sender'
+
+// 导出通用事件类型定义
+export type CommonRendererHandlers = {
+  // 通知事件
+  showNotification: (data: {
+    title: string
+    message: string
+    type?: 'info' | 'success' | 'warning' | 'error'
+  }) => void
+
+  // 进度更新事件
+  updateProgress: (data: { id: string; progress: number; message?: string }) => void
+
+  // 状态同步事件
+  syncStatus: (data: {
+    service: string
+    status: 'connected' | 'disconnected' | 'syncing' | 'error'
+    message?: string
+  }) => void
+
+  // 数据刷新事件
+  refreshData: (data: { type: string; id?: string }) => void
+}
+
 const t = tipc.create()
 
 export const router = {
