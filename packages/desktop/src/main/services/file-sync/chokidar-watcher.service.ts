@@ -1,43 +1,14 @@
 import chokidar from 'chokidar'
 import { EventEmitter } from 'events'
-import type { FSWatcher } from 'chokidar'
+import type { ChokidarOptions, FSWatcher } from 'chokidar'
 import type { Stats } from 'fs'
-
-// Chokidar的WatchOptions类型定义
-interface WatchOptions {
-  persistent?: boolean
-  ignored?: string | RegExp | ((path: string, stats?: Stats) => boolean)
-  ignoreInitial?: boolean
-  followSymlinks?: boolean
-  cwd?: string
-  disableGlobbing?: boolean
-  usePolling?: boolean
-  interval?: number
-  binaryInterval?: number
-  alwaysStat?: boolean
-  depth?: number
-  awaitWriteFinish?:
-    | boolean
-    | {
-        stabilityThreshold?: number
-        pollInterval?: number
-      }
-  ignorePermissionErrors?: boolean
-  atomic?: boolean | number
-}
+import { EventName } from 'chokidar/handler.js'
 
 /**
  * Chokidar事件类型定义
  * 直接映射Chokidar的原生事件
  */
-export type ChokidarEventType =
-  | 'add'
-  | 'change'
-  | 'unlink'
-  | 'addDir'
-  | 'unlinkDir'
-  | 'ready'
-  | 'error'
+export type ChokidarEventType = EventName
 
 /**
  * 文件变化事件数据
@@ -66,7 +37,7 @@ export interface ProjectWatchState {
 /**
  * Chokidar监控配置选项
  */
-export interface ChokidarWatchOptions extends WatchOptions {
+export interface ChokidarWatchOptions extends ChokidarOptions {
   // 继承Chokidar的所有选项，并添加我们的自定义选项
   projectId: string
   projectPath: string
@@ -114,9 +85,6 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
     console.log('ChokidarWatcherService 初始化完成')
   }
 
-  /**
-   * 启动项目文件监控
-   */
   async startWatching(projectId: string, projectPath: string): Promise<void> {
     try {
       // 检查是否已经在监控
@@ -168,9 +136,6 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
     }
   }
 
-  /**
-   * 停止项目文件监控
-   */
   async stopWatching(projectId: string): Promise<void> {
     try {
       console.log(`开始停止项目文件监控: ${projectId}`)
@@ -202,32 +167,20 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
     }
   }
 
-  /**
-   * 获取项目监控状态
-   */
   getWatchState(projectId: string): ProjectWatchState | null {
     return this.watchStates.get(projectId) || null
   }
 
-  /**
-   * 获取所有监控状态
-   */
   getAllWatchStates(): ProjectWatchState[] {
     return Array.from(this.watchStates.values())
   }
 
-  /**
-   * 检查项目是否正在监控
-   */
   isWatching(projectId: string): boolean {
     const state = this.watchStates.get(projectId)
     return state?.isWatching || false
   }
 
-  /**
-   * 生成默认的Chokidar配置选项
-   */
-  private getDefaultChokidarOptions(): Partial<WatchOptions> {
+  private getDefaultChokidarOptions(): Partial<ChokidarOptions> {
     return {
       // 基础配置
       persistent: true,
@@ -270,9 +223,6 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
     }
   }
 
-  /**
-   * 创建项目特定的监控配置
-   */
   private createProjectWatchOptions(projectId: string, projectPath: string): ChokidarWatchOptions {
     const defaultOptions = this.getDefaultChokidarOptions()
 
@@ -284,9 +234,6 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
     }
   }
 
-  /**
-   * 设置Chokidar事件监听器
-   */
   private setupChokidarEventListeners(watcher: FSWatcher, projectId: string): void {
     // 文件添加事件
     watcher.on('add', (path: string, stats?: Stats) => {
@@ -335,9 +282,6 @@ export class ChokidarWatcherService extends EventEmitter implements IChokidarWat
     console.log(`已设置项目 ${projectId} 的Chokidar事件监听器`)
   }
 
-  /**
-   * 处理Chokidar事件的通用方法
-   */
   private handleChokidarEvent(
     projectId: string,
     event: ChokidarEventType,
