@@ -99,14 +99,6 @@ export function ExpenseFormDrawer({
     filePath: string
   } | null>(null)
 
-  const { trigger: createExpense, isMutating: isCreating } = useCreateExpenseTracking()
-  const { trigger: updateExpense, isMutating: isUpdating } = useUpdateExpenseTracking()
-  const { data: projects } = useProjects()
-  const { data: budgetPools } = useProjectBudgetPools(projectId || expense?.projectId || null)
-  const { trigger: selectFile } = useSelectFile()
-
-  const isMutating = isCreating || isUpdating
-
   // 表单初始化
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseFormSchema),
@@ -122,6 +114,19 @@ export function ExpenseFormDrawer({
       notes: ''
     }
   })
+
+  const { trigger: createExpense, isMutating: isCreating } = useCreateExpenseTracking()
+  const { trigger: updateExpense, isMutating: isUpdating } = useUpdateExpenseTracking()
+  const { data: projects } = useProjects()
+  const { trigger: selectFile } = useSelectFile()
+
+  // 监听表单中的 projectId 变化，以便动态获取对应的经费池数据
+  const watchedProjectId = form.watch('projectId')
+  const { data: budgetPools } = useProjectBudgetPools(
+    watchedProjectId || expense?.projectId || null
+  )
+
+  const isMutating = isCreating || isUpdating
 
   // 当expense变化时更新表单数据（编辑模式）
   useEffect(() => {
@@ -170,16 +175,20 @@ export function ExpenseFormDrawer({
     }
   }, [mode, expense, projectId, form])
 
+  // 当用户在创建模式下选择项目时，重置经费池选择
+  // 因为不同项目的经费池不同，之前选择的经费池可能不适用于新项目
+  useEffect(() => {
+    if (mode === 'create' && watchedProjectId) {
+      form.setValue('budgetPoolId', '')
+    }
+  }, [watchedProjectId, mode, form])
+
   // 处理文件选择
   const handleSelectFile = async () => {
     try {
       const result = await selectFile({
         title: '选择发票文件',
-        filters: [
-          { name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp'] },
-          { name: 'PDF文件', extensions: ['pdf'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
+        filters: [{ name: '所有文件', extensions: ['*'] }]
       })
 
       if (result && !result.canceled && result.path) {
