@@ -238,8 +238,7 @@ export class ProjectAssetsService {
 
     console.log(`批量删除 ${validatedInput.assetIds.length} 个项目资产成功`)
     return {
-      success: true,
-      message: `成功删除 ${validatedInput.assetIds.length} 个资产`
+      success: true
     }
   }
 

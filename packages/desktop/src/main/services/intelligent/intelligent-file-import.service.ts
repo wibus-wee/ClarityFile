@@ -227,7 +227,7 @@ export class IntelligentFileImportService {
       if (!(await FilesystemOperations.fileExists(context.sourcePath))) {
         return {
           success: false,
-          errors: ['源文件不存在']
+          errors: [`源文件不存在. Source Path: ${context.sourcePath}`]
         }
       }
 

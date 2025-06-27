@@ -17,6 +17,10 @@ import { NavActions } from '../nav-actions'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@renderer/lib/utils'
 import useBreadcrumb from '@renderer/hooks/use-breadcrumb'
+import { GlobalFileDropListener } from '@renderer/components/import-assistant/global-file-drop-listener'
+import { GlobalFileDropOverlay } from '@renderer/components/import-assistant/global-file-drop-overlay'
+import { NestedImportAssistant } from '@renderer/components/import-assistant/nested-import-assistant'
+import '@renderer/components/import-assistant/global-file-drop.css'
 
 export function ClarityLayout({ children }: PropsWithChildren) {
   const breadcrumbs = useBreadcrumb()
@@ -72,6 +76,15 @@ export function ClarityLayout({ children }: PropsWithChildren) {
           <div className="p-4 px-9">{children}</div>
         </SidebarInset>
       </SidebarProvider>
+
+      {/* 全局文件拖拽监听器 */}
+      <GlobalFileDropListener />
+
+      {/* 全局文件拖拽覆盖层 */}
+      <GlobalFileDropOverlay />
+
+      {/* 智能文件导入助手（使用 True Nested Drawer） */}
+      <NestedImportAssistant />
     </div>
   )
 }

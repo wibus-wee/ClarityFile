@@ -65,6 +65,20 @@ interface DocumentVersionFormDrawerProps {
   projectDetails: ProjectDetailsOutput | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  // 新增：预填充数据支持
+  prefilledData?: {
+    versionTag?: string
+    notes?: string
+    isGenericVersion?: boolean
+  }
+  // 新增：预选择文件支持
+  preselectedFile?: {
+    path: string
+    name: string
+    size: number
+    type: string
+    extension: string
+  }
   onSuccess?: () => void
 }
 
@@ -75,6 +89,8 @@ export function DocumentVersionFormDrawer({
   projectDetails,
   open,
   onOpenChange,
+  prefilledData,
+  preselectedFile,
   onSuccess
 }: DocumentVersionFormDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -96,11 +112,11 @@ export function DocumentVersionFormDrawer({
   const form = useForm<VersionFormData>({
     resolver: zodResolver(versionFormSchema),
     defaultValues: {
-      versionTag: '',
-      notes: '',
-      isGenericVersion: true,
+      versionTag: prefilledData?.versionTag || '',
+      notes: prefilledData?.notes || '',
+      isGenericVersion: prefilledData?.isGenericVersion ?? true,
       competitionMilestoneId: '',
-      filePath: ''
+      filePath: preselectedFile?.path || ''
     }
   })
 
@@ -120,18 +136,25 @@ export function DocumentVersionFormDrawer({
         setSelectedSeriesId(version.competitionMilestone.series.id)
       }
     } else if (!isEdit && open) {
-      // 创建模式下重置表单
+      // 创建模式下重置表单，支持预填充数据
       form.reset({
-        versionTag: '',
-        notes: '',
-        isGenericVersion: true,
+        versionTag: prefilledData?.versionTag || '',
+        notes: prefilledData?.notes || '',
+        isGenericVersion: prefilledData?.isGenericVersion ?? true,
         competitionMilestoneId: '',
-        filePath: ''
+        filePath: preselectedFile?.path || ''
       })
-      setSelectedFile('')
+
+      // 如果有预选择的文件，设置为选中状态
+      if (preselectedFile) {
+        setSelectedFile(preselectedFile.path)
+      } else {
+        setSelectedFile('')
+      }
+
       setSelectedSeriesId('')
     }
-  }, [isEdit, version, open, form])
+  }, [isEdit, version, open, prefilledData, preselectedFile, form])
 
   const handleSelectFile = async () => {
     if (isEdit) return // 编辑模式下不允许选择文件

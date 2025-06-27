@@ -81,6 +81,21 @@ interface ExpenseFormDrawerProps {
     invoiceFileSizeBytes?: number | null
     invoiceUploadedAt?: Date | null
   } | null
+  // 新增：预填充数据支持
+  prefilledData?: {
+    itemName?: string
+    applicant?: string
+    amount?: number
+    notes?: string
+  }
+  // 新增：预选择文件支持
+  preselectedFile?: {
+    path: string
+    name: string
+    size: number
+    type: string
+    extension: string
+  }
   onSuccess?: () => void
 }
 
@@ -90,6 +105,8 @@ export function ExpenseFormDrawer({
   mode,
   projectId,
   expense,
+  prefilledData,
+  preselectedFile,
   onSuccess
 }: ExpenseFormDrawerProps) {
   const [selectedFile, setSelectedFile] = useState<string>('')
@@ -162,18 +179,29 @@ export function ExpenseFormDrawer({
       form.reset({
         projectId: projectId || '',
         budgetPoolId: '',
-        itemName: '',
-        applicant: '',
-        amount: 0,
+        itemName: prefilledData?.itemName || '',
+        applicant: prefilledData?.applicant || '',
+        amount: prefilledData?.amount || 0,
         status: 'pending',
         applicationDate: new Date(),
         reimbursementDate: undefined,
-        notes: ''
+        notes: prefilledData?.notes || ''
       })
       setExistingInvoiceFile(null)
-      setSelectedFile('')
+
+      // 如果有预选择的文件，设置为选中状态
+      if (preselectedFile) {
+        setSelectedFile(preselectedFile.path)
+        setExistingInvoiceFile({
+          fileName: preselectedFile.name,
+          originalFileName: preselectedFile.name,
+          filePath: preselectedFile.path
+        })
+      } else {
+        setSelectedFile('')
+      }
     }
-  }, [mode, expense, projectId, form])
+  }, [mode, expense, projectId, prefilledData, preselectedFile, form])
 
   // 当用户在创建模式下选择项目时，重置经费池选择
   // 因为不同项目的经费池不同，之前选择的经费池可能不适用于新项目

@@ -7,12 +7,12 @@ import './index.css'
 import { routeTree } from './routeTree.gen'
 import { DefaultErrorComponent } from './components/error-boundary'
 
-import { scan } from 'react-scan'
+// import { scan } from 'react-scan'
 
 // Use React Scan to optimize app
-scan({
-  enabled: import.meta.env.DEV
-})
+// scan({
+//   enabled: import.meta.env.DEV
+// })
 
 // Create a new router instance
 const router = createRouter({

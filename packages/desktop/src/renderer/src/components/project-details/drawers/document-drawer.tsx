@@ -56,7 +56,13 @@ interface DocumentDrawerProps {
   onOpenChange: (open: boolean) => void
   projectId: string
   document?: DocumentOutput | null // 编辑时传入，创建时为空
-  onSuccess?: () => void
+  // 新增：预填充数据支持
+  prefilledData?: {
+    name?: string
+    type?: string
+    description?: string
+  }
+  onSuccess?: (createdDocument?: any) => void
 }
 
 // 统一的表单数据类型
@@ -204,6 +210,7 @@ export function DocumentDrawer({
   onOpenChange,
   projectId,
   document,
+  prefilledData,
   onSuccess
 }: DocumentDrawerProps) {
   const isEdit = !!document
@@ -215,9 +222,9 @@ export function DocumentDrawer({
   const form = useForm<DocumentFormData>({
     defaultValues: {
       projectId: projectId,
-      name: '',
-      type: 'requirements' as DocumentType,
-      description: '',
+      name: prefilledData?.name || '',
+      type: (prefilledData?.type as DocumentType) || 'requirements',
+      description: prefilledData?.description || '',
       defaultStoragePathSegment: '',
       ...(isEdit && { id: '' })
     }
@@ -235,16 +242,16 @@ export function DocumentDrawer({
         defaultStoragePathSegment: document.defaultStoragePathSegment || ''
       })
     } else {
-      // 创建模式
+      // 创建模式，支持预填充数据
       form.reset({
         projectId: projectId,
-        name: '',
-        type: 'requirements' as DocumentType,
-        description: '',
+        name: prefilledData?.name || '',
+        type: (prefilledData?.type as DocumentType) || 'requirements',
+        description: prefilledData?.description || '',
         defaultStoragePathSegment: ''
       })
     }
-  }, [document, projectId, form])
+  }, [document, projectId, prefilledData, form])
 
   const onSubmit = async (data: DocumentFormData) => {
     try {
@@ -271,13 +278,24 @@ export function DocumentDrawer({
           description: data.description?.trim() || undefined,
           defaultStoragePathSegment: data.defaultStoragePathSegment?.trim() || undefined
         }
-        await createDocument(input)
+        const createdDocument = await createDocument(input)
 
         toast.success('文档创建成功', {
           description: `"${data.name}" 已成功创建`
         })
+
+        // 重置表单
+        form.reset()
+
+        // 关闭对话框
+        onOpenChange(false)
+
+        // 调用成功回调，传递创建的文档
+        onSuccess?.(createdDocument)
+        return
       }
 
+      // 编辑模式的处理
       // 重置表单
       form.reset()
 

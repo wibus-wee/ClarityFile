@@ -42,7 +42,7 @@ export function SettingsForm<T extends FieldValues>({
   const { trigger: setSetting } = useSetSetting()
 
   const form = useForm<T>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema as any),
     defaultValues
   })
 
