@@ -7,6 +7,7 @@ declare global {
       ipcInvoke: (channel: string, ...args: any[]) => Promise<any>
       ipcOn: (channel: string, callback: (...args: any[]) => void) => () => void
       ipcSend: (channel: string, ...args: any[]) => void
+      getPathForFile: (file: File) => string
     }
   }
 }

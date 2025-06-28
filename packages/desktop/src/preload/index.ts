@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
@@ -16,7 +16,10 @@ const api = {
   },
 
   // 暴露 ipcRenderer.send 给 TIPC 事件系统使用
-  ipcSend: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args)
+  ipcSend: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args),
+
+  // 暴露 webUtils.getPathForFile 用于获取拖拽文件的绝对路径
+  getPathForFile: (file: File) => webUtils.getPathForFile(file)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

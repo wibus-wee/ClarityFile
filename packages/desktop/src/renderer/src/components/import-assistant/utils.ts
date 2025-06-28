@@ -21,12 +21,19 @@ export function extractFileInfoFromFile(file: File): Partial<DroppedFileInfo> {
   const fileName = file.name
   const extension = fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : ''
 
-  // 在 Electron 环境中，File 对象有 path 属性包含完整的文件系统路径
-  // 在普通浏览器环境中，只能使用文件名
-  const filePath = (file as any).path || file.name
-  console.log(file)
+  // 在 Electron 环境中，使用 webUtils.getPathForFile 获取完整的文件系统路径
+  // 这是官方推荐的方法，替代了已被移除的 File.path 属性
+  let filePath: string
+  try {
+    filePath = window.api.getPathForFile(file)
+  } catch (error) {
+    // 如果获取路径失败，回退到使用文件名
+    console.warn('无法获取文件路径，使用文件名作为回退:', error)
+    filePath = file.name
+  }
+
   return {
-    path: filePath, // 使用真实的文件路径（Electron）或文件名（浏览器）
+    path: filePath, // 使用真实的文件路径（Electron）或文件名（回退）
     name: fileName,
     extension
   }
