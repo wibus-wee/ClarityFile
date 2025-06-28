@@ -85,8 +85,8 @@ export class ExpenseImportHandler {
     config: ExpenseImportConfig
   ): Promise<void> {
     // 推断表单数据
-    const inferredItemName = this.inferItemNameFromFile(file)
-    const inferredApplicant = this.inferApplicantFromFile(file)
+    const inferredItemName = this.inferExpenseItemFromFile(file)
+    const inferredAmount = this.inferAmountFromFile(file)
 
     // 使用全局状态管理打开 expense-form-drawer
     const { openExpenseForm } = useGlobalDrawersStore.getState()
@@ -97,7 +97,7 @@ export class ExpenseImportHandler {
       preselectedFile: file,
       prefilledData: {
         itemName: config.itemName || inferredItemName,
-        applicant: config.applicant || inferredApplicant,
+        amount: config.amount || inferredAmount || undefined,
         notes: `导入文件：${file.name}`
       }
     })
@@ -108,50 +108,48 @@ export class ExpenseImportHandler {
   }
 
   /**
-   * 从文件名推断报销项目名称
+   * 从文件名推断报销物品名称
+   * 解析格式：物品名称_金额.pdf（如 "无尘布_24.pdf" → "无尘布"）
    */
-  static inferItemNameFromFile(file: DroppedFileInfo): string {
-    const fileName = file.name.toLowerCase()
+  static inferExpenseItemFromFile(file: DroppedFileInfo): string {
+    const fileName = file.name
 
-    // 常见的报销项目关键词映射
-    const itemKeywords = {
-      办公: ['办公', 'office', '文具', '纸张', '笔'],
-      差旅: ['差旅', '机票', '火车', '酒店', '住宿', 'hotel', 'flight'],
-      餐饮: ['餐饮', '用餐', '食堂', '外卖', 'meal', 'food'],
-      交通: ['交通', '打车', '地铁', '公交', 'taxi', 'uber'],
-      会议: ['会议', '培训', 'meeting', 'conference'],
-      设备: ['设备', '电脑', '硬件', 'equipment', 'computer'],
-      软件: ['软件', 'software', '订阅', 'subscription'],
-      材料: ['材料', '实验', 'material', 'lab']
+    // 移除文件扩展名
+    const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '')
+
+    // 尝试解析 "物品名称_金额" 格式
+    const match = nameWithoutExt.match(/^(.+?)_\d+(\.\d+)?$/)
+    if (match && match[1]) {
+      // 返回物品名称部分，清理多余的空格和特殊字符
+      return match[1].trim().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ')
     }
 
-    for (const [category, keywords] of Object.entries(itemKeywords)) {
-      if (keywords.some((keyword) => fileName.includes(keyword))) {
-        return `${category}费用`
-      }
-    }
-
-    // 如果没有匹配到关键词，返回通用名称
-    return '报销费用'
+    // 如果解析失败，返回空字符串
+    return ''
   }
 
   /**
-   * 从文件名推断申请人
+   * 从文件名推断报销金额
+   * 解析格式：物品名称_金额.pdf（如 "无尘布_24.pdf" → 24）
    */
-  static inferApplicantFromFile(file: DroppedFileInfo): string {
+  static inferAmountFromFile(file: DroppedFileInfo): number | null {
     const fileName = file.name
 
-    // 尝试从文件名中提取可能的姓名
-    // 这里可以根据实际需求添加更复杂的逻辑
-    const namePattern = /[\u4e00-\u9fa5]{2,4}/g
-    const matches = fileName.match(namePattern)
+    // 移除文件扩展名
+    const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '')
 
-    if (matches && matches.length > 0) {
-      // 返回第一个匹配的中文姓名
-      return matches[0]
+    // 尝试解析 "物品名称_金额" 格式
+    const match = nameWithoutExt.match(/^.+?_(\d+(?:\.\d+)?)$/)
+    if (match && match[1]) {
+      const amount = parseFloat(match[1])
+      // 验证金额是否为有效数字且大于0
+      if (!isNaN(amount) && amount > 0) {
+        return amount
+      }
     }
 
-    return ''
+    // 如果解析失败，返回 null
+    return null
   }
 
   /**

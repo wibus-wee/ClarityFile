@@ -16,7 +16,6 @@ export interface ImportContextData {
     // 发票报销预填充
     expense?: {
       itemName?: string
-      applicant?: string
       amount?: number
       notes?: string
     }

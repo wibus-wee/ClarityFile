@@ -61,8 +61,8 @@ export interface ExpenseImportConfig {
   projectId?: string
   /** 预填充的报销项目名称 */
   itemName?: string
-  /** 预填充的申请人 */
-  applicant?: string
+  /** 预填充的报销金额 */
+  amount?: number
 }
 
 /**

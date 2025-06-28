@@ -69,8 +69,8 @@ export function NestedImportAssistant() {
         expense:
           importType === 'expense'
             ? {
-                itemName: ExpenseImportHandler.inferItemNameFromFile(file),
-                applicant: ExpenseImportHandler.inferApplicantFromFile(file),
+                itemName: ExpenseImportHandler.inferExpenseItemFromFile(file),
+                amount: ExpenseImportHandler.inferAmountFromFile(file) || undefined,
                 notes: `导入文件：${file.name}`
               }
             : undefined,
