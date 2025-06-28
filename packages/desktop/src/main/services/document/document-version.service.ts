@@ -16,6 +16,7 @@ import type {
   GetLogicalDocumentVersionsInput
 } from '../../types/document-schemas'
 import { SuccessResponse } from '../../types/outputs'
+import { ManagedFileService } from '../managed-file.service'
 
 /**
  * 文档版本服务
@@ -193,9 +194,14 @@ export class DocumentVersionService {
   static async deleteDocumentVersion(input: DeleteDocumentVersionInput): Promise<SuccessResponse> {
     const validatedInput = validateDeleteDocumentVersion(input)
 
-    // 获取版本信息
+    // 获取版本信息（包含关联的managed_file信息）
     const version = await db
-      .select()
+      .select({
+        id: documentVersions.id,
+        versionTag: documentVersions.versionTag,
+        managedFileId: documentVersions.managedFileId,
+        logicalDocumentId: documentVersions.logicalDocumentId
+      })
       .from(documentVersions)
       .where(eq(documentVersions.id, validatedInput.id))
       .limit(1)
@@ -203,6 +209,8 @@ export class DocumentVersionService {
     if (version.length === 0) {
       throw new Error('文档版本不存在')
     }
+
+    const versionData = version[0]
 
     // 检查是否为当前官方版本
     const logicalDoc = await db
@@ -225,7 +233,21 @@ export class DocumentVersionService {
     // 删除版本记录
     await db.delete(documentVersions).where(eq(documentVersions.id, validatedInput.id))
 
-    console.log(`文档版本 "${version[0].versionTag}" 删除成功`)
+    // 删除关联的managed_file记录和物理文件
+    if (versionData.managedFileId) {
+      try {
+        await ManagedFileService.deleteManagedFile({
+          id: versionData.managedFileId,
+          deletePhysicalFile: true
+        })
+        console.log(`关联的受管文件已删除: ${versionData.managedFileId}`)
+      } catch (error) {
+        console.warn(`删除关联的受管文件失败: ${versionData.managedFileId}`, error)
+        // 不抛出错误，因为版本记录已经删除，这只是清理工作
+      }
+    }
+
+    console.log(`文档版本 "${versionData.versionTag}" 删除成功`)
     return { success: true }
   }
 

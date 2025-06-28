@@ -21,6 +21,7 @@ import type {
   ProjectAssetStatsOutput
 } from '../types/asset-schemas'
 import { SuccessResponse } from '../types/outputs'
+import { ManagedFileService } from './managed-file.service'
 
 /**
  * 项目资产服务
@@ -153,9 +154,41 @@ export class ProjectAssetsService {
   static async deleteProjectAsset(input: DeleteProjectAssetInput): Promise<SuccessResponse> {
     const validatedInput = validateDeleteProjectAsset(input)
 
-    await db.delete(projectAssets).where(eq(projectAssets.id, validatedInput.id)).returning()
+    // 获取项目资产信息（包含关联的managed_file信息）
+    const asset = await db
+      .select({
+        id: projectAssets.id,
+        name: projectAssets.name,
+        managedFileId: projectAssets.managedFileId
+      })
+      .from(projectAssets)
+      .where(eq(projectAssets.id, validatedInput.id))
+      .limit(1)
 
-    console.log(`项目资产 "${validatedInput.id}" 删除成功`)
+    if (asset.length === 0) {
+      throw new Error('项目资产不存在')
+    }
+
+    const assetData = asset[0]
+
+    // 删除项目资产记录
+    await db.delete(projectAssets).where(eq(projectAssets.id, validatedInput.id))
+
+    // 删除关联的managed_file记录和物理文件
+    if (assetData.managedFileId) {
+      try {
+        await ManagedFileService.deleteManagedFile({
+          id: assetData.managedFileId,
+          deletePhysicalFile: true
+        })
+        console.log(`关联的受管文件已删除: ${assetData.managedFileId}`)
+      } catch (error) {
+        console.warn(`删除关联的受管文件失败: ${assetData.managedFileId}`, error)
+        // 不抛出错误，因为资产记录已经删除，这只是清理工作
+      }
+    }
+
+    console.log(`项目资产 "${assetData.name}" 删除成功`)
     return { success: true }
   }
 
@@ -232,8 +265,49 @@ export class ProjectAssetsService {
   ): Promise<SuccessResponse> {
     const validatedInput = validateBatchDeleteProjectAssets(input)
 
+    // 获取所有要删除的资产信息
+    const assets = await db
+      .select({
+        id: projectAssets.id,
+        name: projectAssets.name,
+        managedFileId: projectAssets.managedFileId
+      })
+      .from(projectAssets)
+      .where(eq(projectAssets.id, validatedInput.assetIds[0])) // 先查询一个，然后循环处理
+
+    // 逐个删除资产
     for (const assetId of validatedInput.assetIds) {
-      await db.delete(projectAssets).where(eq(projectAssets.id, assetId))
+      // 获取单个资产信息
+      const asset = await db
+        .select({
+          id: projectAssets.id,
+          name: projectAssets.name,
+          managedFileId: projectAssets.managedFileId
+        })
+        .from(projectAssets)
+        .where(eq(projectAssets.id, assetId))
+        .limit(1)
+
+      if (asset.length > 0) {
+        const assetData = asset[0]
+
+        // 删除项目资产记录
+        await db.delete(projectAssets).where(eq(projectAssets.id, assetId))
+
+        // 删除关联的managed_file记录和物理文件
+        if (assetData.managedFileId) {
+          try {
+            await ManagedFileService.deleteManagedFile({
+              id: assetData.managedFileId,
+              deletePhysicalFile: true
+            })
+            console.log(`关联的受管文件已删除: ${assetData.managedFileId}`)
+          } catch (error) {
+            console.warn(`删除关联的受管文件失败: ${assetData.managedFileId}`, error)
+            // 不抛出错误，继续删除其他资产
+          }
+        }
+      }
     }
 
     console.log(`批量删除 ${validatedInput.assetIds.length} 个项目资产成功`)

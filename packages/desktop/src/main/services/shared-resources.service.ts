@@ -1,6 +1,7 @@
 import { db } from '../db'
 import { sharedResources, projectSharedResources, managedFiles } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
+import { ManagedFileService } from './managed-file.service'
 
 /**
  * 共享资源服务
