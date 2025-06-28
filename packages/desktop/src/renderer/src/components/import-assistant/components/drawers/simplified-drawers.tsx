@@ -2,6 +2,7 @@ import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/
 import { DocumentDrawer } from '@renderer/components/project-details/drawers/document-drawer'
 import { DocumentVersionFormDrawer } from '@renderer/components/project-details/drawers/document-version-form-drawer'
 import { useGlobalDrawersStore } from '@renderer/stores/global-drawers'
+import { useImportAssistantStore } from '@renderer/stores/import-assistant'
 import { useProjects } from '@renderer/hooks/use-tipc'
 import {
   useImportContext,
@@ -18,12 +19,14 @@ import { toast } from 'sonner'
  */
 export function SimpleExpenseFormDrawer() {
   const { expenseForm, closeExpenseForm } = useGlobalDrawersStore()
+  const { closeImportAssistant } = useImportAssistantStore()
   const { projectId } = useImportContext()
   const preselectedFile = usePreselectedFile()
   const prefilledData = useExpensePrefilledData()
 
   const handleSuccess = () => {
     closeExpenseForm()
+    closeImportAssistant() // 成功完成报销记录创建后关闭主导入助手
     toast.success('报销记录创建成功')
   }
 
@@ -57,6 +60,7 @@ export function SimpleExpenseFormDrawer() {
  */
 export function SimpleDocumentDrawer() {
   const { documentForm, closeDocumentForm, openDocumentVersionForm } = useGlobalDrawersStore()
+  const { closeImportAssistant } = useImportAssistantStore()
   const { projectId } = useImportContext()
   const preselectedFile = usePreselectedFile()
   const prefilledData = useDocumentPrefilledData()
@@ -78,11 +82,14 @@ export function SimpleDocumentDrawer() {
           notes: `导入文件：${preselectedFile.name}`,
           isGenericVersion: true
         }
+        // 注意：不传递onClose回调，版本创建成功后的关闭逻辑在SimpleDocumentVersionFormDrawer中处理
       })
 
       toast.success('文档创建成功，正在添加文件版本...')
     } else {
+      // 如果没有预选文件，直接完成文档创建流程
       closeDocumentForm()
+      closeImportAssistant() // 成功完成文档创建后关闭主导入助手
       toast.success('文档创建成功')
     }
   }
@@ -115,6 +122,7 @@ export function SimpleDocumentDrawer() {
  */
 export function SimpleDocumentVersionFormDrawer() {
   const { documentVersionForm, closeDocumentVersionForm } = useGlobalDrawersStore()
+  const { closeImportAssistant } = useImportAssistantStore()
   const { data: projects } = useProjects()
   const preselectedFile = usePreselectedFile()
   const prefilledData = useDocumentVersionPrefilledData()
@@ -168,6 +176,7 @@ export function SimpleDocumentVersionFormDrawer() {
 
   const handleVersionSuccess = () => {
     closeDocumentVersionForm()
+    closeImportAssistant() // 成功完成文档版本添加后关闭主导入助手
     toast.success('文档版本添加成功')
   }
 

@@ -25,6 +25,8 @@ export function ExpenseDrawerWrapper({ contextData, disabled }: ExpenseDrawerWra
       projectId: contextData.projectId,
       prefilledData: contextData.prefilledData?.expense,
       preselectedFile: contextData.files[0]
+      // 注意：不在这里添加onClose回调，因为这会在任何关闭情况下触发
+      // 只在成功完成时关闭主导入助手，逻辑在SimpleExpenseFormDrawer中处理
     })
   }
 

@@ -6,6 +6,11 @@ import { useGlobalDrawersStore } from '@renderer/stores/global-drawers'
 import { ImportContextProvider } from '../../core/import-context'
 import type { ImportContextData } from '../../core/types'
 import type { LogicalDocumentOutput } from '@main/types/document-schemas'
+
+// 扩展类型，包含版本数量信息
+interface LogicalDocumentWithVersionCount extends LogicalDocumentOutput {
+  versionCount: number
+}
 import { SimpleDocumentDrawer, SimpleDocumentVersionFormDrawer } from './simplified-drawers'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { toast } from 'sonner'
@@ -26,7 +31,9 @@ export interface DocumentDrawerWrapperProps {
 export function DocumentDrawerWrapper({ contextData, disabled }: DocumentDrawerWrapperProps) {
   const [isMainDrawerOpen, setIsMainDrawerOpen] = useState(false)
   const [showDocumentSelection, setShowDocumentSelection] = useState(false)
-  const [availableDocuments, setAvailableDocuments] = useState<LogicalDocumentOutput[]>([])
+  const [availableDocuments, setAvailableDocuments] = useState<LogicalDocumentWithVersionCount[]>(
+    []
+  )
   const [searchQuery, setSearchQuery] = useState('')
 
   const {
@@ -71,6 +78,8 @@ export function DocumentDrawerWrapper({ contextData, disabled }: DocumentDrawerW
       projectId: contextData.projectId,
       prefilledData: contextData.prefilledData?.document,
       preselectedFile: contextData.files[0]
+      // 注意：不在这里添加onClose回调，因为这会在任何关闭情况下触发
+      // 只在成功完成时关闭主导入助手，逻辑在SimpleDocumentDrawer中处理
     })
   }
 
@@ -84,7 +93,13 @@ export function DocumentDrawerWrapper({ contextData, disabled }: DocumentDrawerW
       }
 
       // 显示文档选择界面
-      setAvailableDocuments(documents)
+      // 添加projectId字段并转换为正确的类型
+      const documentsWithProjectId = documents.map((doc) => ({
+        ...doc,
+        projectId: contextData.projectId
+      })) as LogicalDocumentWithVersionCount[]
+
+      setAvailableDocuments(documentsWithProjectId)
       setShowDocumentSelection(true)
     } catch (error) {
       console.error('获取文档列表失败:', error)
@@ -103,6 +118,8 @@ export function DocumentDrawerWrapper({ contextData, disabled }: DocumentDrawerW
         mode: 'create',
         document: documentWithVersions,
         preselectedFile: contextData.files[0]
+        // 注意：不在这里添加onClose回调，因为这会在任何关闭情况下触发
+        // 只在成功完成时关闭主导入助手，逻辑在SimpleDocumentVersionFormDrawer中处理
       })
     } catch (error) {
       console.error('获取文档版本信息失败:', error)
@@ -251,10 +268,10 @@ function DocumentImportOptions({ onCreateNew, onAddVersion }: DocumentImportOpti
  * 显示项目中的文档列表供用户选择
  */
 interface DocumentSelectionStepProps {
-  documents: LogicalDocumentOutput[]
+  documents: LogicalDocumentWithVersionCount[]
   searchQuery: string
   onSearchChange: (query: string) => void
-  onDocumentSelect: (document: LogicalDocumentOutput) => void
+  onDocumentSelect: (document: LogicalDocumentWithVersionCount) => void
   onBack: () => void
   fileName?: string
 }
