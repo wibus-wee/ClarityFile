@@ -1,7 +1,8 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useImportAssistantStore } from '@renderer/stores/import-assistant'
-import { extractFileInfoFromFile, validateFileSize } from './utils'
-import type { DroppedFileInfo } from './types'
+import { extractFileInfoFromFile, validateFileSize } from '../../core/utils'
+import type { DroppedFileInfo } from '../../core/types'
+import { useDragDrop } from '../../context/drag-drop-context'
 import { toast } from 'sonner'
 
 /**
@@ -10,35 +11,32 @@ import { toast } from 'sonner'
  */
 export function GlobalFileDropListener() {
   const { openImportAssistant } = useImportAssistantStore()
-  const dragCounterRef = useRef(0)
-  const isDraggingRef = useRef(false)
+  const { incrementDragCounter, decrementDragCounter, resetDragState } = useDragDrop()
 
   // 处理文件拖拽进入
-  const handleDragEnter = useCallback((e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleDragEnter = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-    dragCounterRef.current++
-
-    // 检查是否包含文件
-    if (e.dataTransfer?.types.includes('Files')) {
-      isDraggingRef.current = true
-      document.body.classList.add('file-dragging')
-    }
-  }, [])
+      // 检查是否包含文件
+      if (e.dataTransfer?.types.includes('Files')) {
+        incrementDragCounter()
+      }
+    },
+    [incrementDragCounter]
+  )
 
   // 处理文件拖拽离开
-  const handleDragLeave = useCallback((e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleDragLeave = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-    dragCounterRef.current--
-
-    if (dragCounterRef.current === 0) {
-      isDraggingRef.current = false
-      document.body.classList.remove('file-dragging')
-    }
-  }, [])
+      decrementDragCounter()
+    },
+    [decrementDragCounter]
+  )
 
   // 处理文件拖拽悬停
   const handleDragOver = useCallback((e: DragEvent) => {
@@ -58,9 +56,7 @@ export function GlobalFileDropListener() {
       e.stopPropagation()
 
       // 重置拖拽状态
-      dragCounterRef.current = 0
-      isDraggingRef.current = false
-      document.body.classList.remove('file-dragging')
+      resetDragState()
 
       const files = e.dataTransfer?.files
       if (!files || files.length === 0) {
@@ -114,7 +110,7 @@ export function GlobalFileDropListener() {
         toast.error('处理文件时发生错误')
       }
     },
-    [openImportAssistant]
+    [openImportAssistant, resetDragState]
   )
 
   // 阻止默认的拖拽行为
@@ -143,10 +139,17 @@ export function GlobalFileDropListener() {
       document.removeEventListener('dragover', preventDefaults)
       document.removeEventListener('drop', preventDefaults)
 
-      // 清理样式
-      document.body.classList.remove('file-dragging')
+      // 重置拖拽状态
+      resetDragState()
     }
-  }, [handleDragEnter, handleDragLeave, handleDragOver, handleDrop, preventDefaults])
+  }, [
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    preventDefaults,
+    resetDragState
+  ])
 
   // 这个组件不渲染任何内容，只是添加事件监听器
   return null

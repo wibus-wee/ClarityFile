@@ -4,7 +4,7 @@ import type {
   ImportAssistantActions,
   ImportAssistantType,
   DroppedFileInfo
-} from '@renderer/components/import-assistant/types'
+} from '@renderer/components/import-assistant/core/types'
 
 type ImportAssistantStore = ImportAssistantState & ImportAssistantActions
 

@@ -9,7 +9,7 @@ import {
   useExpensePrefilledData,
   useDocumentPrefilledData,
   useDocumentVersionPrefilledData
-} from './import-context'
+} from '../../core/import-context'
 import { toast } from 'sonner'
 
 /**

@@ -1,39 +1,12 @@
-import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useDragDropState } from '../../context/drag-drop-context'
 
 /**
  * 全局文件拖拽覆盖层组件
  * 显示拖拽时的视觉反馈
  */
 export function GlobalFileDropOverlay() {
-  const [isDragging, setIsDragging] = useState(false)
-
-  useEffect(() => {
-    const checkDraggingState = () => {
-      setIsDragging(document.body.classList.contains('file-dragging'))
-    }
-
-    // 监听 body 类变化
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          checkDraggingState()
-        }
-      })
-    })
-
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class']
-    })
-
-    // 初始检查
-    checkDraggingState()
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
+  const { isDragging } = useDragDropState()
 
   return (
     <>

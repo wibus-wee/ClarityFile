@@ -1,38 +1,5 @@
 import { createContext, useContext, ReactNode } from 'react'
-import type { DroppedFileInfo } from './types'
-
-/**
- * 导入上下文数据
- */
-export interface ImportContextData {
-  /** 拖拽的文件列表 */
-  files: DroppedFileInfo[]
-  /** 选择的项目ID */
-  projectId: string
-  /** 导入类型 */
-  importType: 'expense' | 'document'
-  /** 预填充数据 */
-  prefilledData?: {
-    // 发票报销预填充
-    expense?: {
-      itemName?: string
-      amount?: number
-      notes?: string
-    }
-    // 文档预填充
-    document?: {
-      name?: string
-      type?: string
-      description?: string
-    }
-    // 文档版本预填充
-    documentVersion?: {
-      versionTag?: string
-      notes?: string
-      isGenericVersion?: boolean
-    }
-  }
-}
+import type { ImportContextData, DroppedFileInfo } from './types'
 
 /**
  * 导入上下文

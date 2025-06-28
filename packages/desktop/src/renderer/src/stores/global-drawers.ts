@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { DroppedFileInfo } from '@renderer/components/import-assistant/types'
+import type { DroppedFileInfo } from '@renderer/components/import-assistant/core/types'
 
 /**
  * 全局 Drawer 状态管理

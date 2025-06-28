@@ -24,7 +24,7 @@ import {
 } from '@clarity/shadcn/ui/form'
 import { Image, Upload, FolderOpen, Edit, Save } from 'lucide-react'
 import { useCreateProjectAsset, useUpdateProjectAsset } from '@renderer/hooks/use-tipc'
-import { useFilePicker, FILE_FILTERS } from '@renderer/hooks/use-file-picker'
+import { useFilePicker } from '@renderer/hooks/use-file-picker'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { AssetTypeCombobox } from '@renderer/components/ui/asset-type-combobox'
 import { toast } from 'sonner'
