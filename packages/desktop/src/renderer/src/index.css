@@ -4,9 +4,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-* {
+/* * {
   user-select: none;
-}
+} */
 
 body {
   -webkit-font-smoothing: antialiased !important;

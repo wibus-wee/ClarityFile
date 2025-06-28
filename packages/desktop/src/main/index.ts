@@ -3,9 +3,20 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon@2x.png?asset'
 import { runMigrate } from './db'
-import { registerIpcMain } from '@egoist/tipc/main'
+import { RouterType } from '@egoist/tipc/main'
 import { router } from './tipc'
 import { WindowManager } from './managers/window.manager'
+import consola from 'consola'
+
+export const registerIpcMainWithLogger = (router: RouterType) => {
+  for (const [name, route] of Object.entries(router)) {
+    ipcMain.handle(name, (e, payload) => {
+      consola.withTag(name).info(`Renderer Invoke -> Main Handle ${name}`)
+      return route.action({ context: { sender: e.sender }, input: payload })
+    })
+    consola.withTag('TIPC').success(`Registered IPC Main Handler: ${name}`)
+  }
+}
 
 async function createWindow(): Promise<void> {
   // 创建窗口管理器实例
@@ -68,7 +79,7 @@ app.whenReady().then(async () => {
   ipcMain.on('ping', () => console.log('pong'))
 
   // 注册 TIPC 路由器
-  registerIpcMain(router)
+  registerIpcMainWithLogger(router)
 
   await runMigrate()
   await createWindow()
