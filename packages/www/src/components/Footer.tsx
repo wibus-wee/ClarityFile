@@ -204,7 +204,7 @@ export function Footer() {
               </div>
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>基于 MIT 许可证开源</span>
+                <span>基于 AGPLv3 许可证开源</span>
                 <div className="w-1 h-1 rounded-full bg-muted-foreground/50" />
                 <span>Version 0.0.0 (WIP)</span>
               </div>
