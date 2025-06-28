@@ -112,7 +112,7 @@ function ProjectDetailsPage() {
   return (
     <div className="flex flex-col h-full">
       {/* 顶部导航栏 */}
-      <div className="flex items-center gap-4 py-6 border-b border-border/50">
+      {/* <div className="flex items-center gap-4 py-6 border-b border-border/50">
         <Link
           to="/projects"
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -120,10 +120,10 @@ function ProjectDetailsPage() {
           <ArrowLeft className="w-4 h-4" />
           返回项目列表
         </Link>
-      </div>
+      </div> */}
 
       {/* 项目头部信息 */}
-      <div className="py-6 border-b border-border/50">
+      <div className="py-6 pt-0 border-b border-border/50">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -197,7 +197,7 @@ function ProjectDetailsPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="h-full pt-6"
+            className="min-h-[55vh] pt-6"
           >
             {renderTabContent(activeTab, projectDetails)}
           </motion.div>
