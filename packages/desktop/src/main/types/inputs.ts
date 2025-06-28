@@ -4,42 +4,6 @@ export interface CreateTagInput {
   color?: string
 }
 
-// 共享资源相关输入类型
-export interface CreateSharedResourceInput {
-  name: string
-  type: string
-  managedFileId: string
-  description?: string
-  customFields?: unknown
-}
-
-export interface UpdateSharedResourceInput {
-  id: string
-  name?: string
-  type?: string
-  description?: string
-  customFields?: unknown
-}
-
-export interface DeleteSharedResourceInput {
-  id: string
-}
-
-export interface AssociateResourceToProjectInput {
-  projectId: string
-  sharedResourceId: string
-  usageDescription?: string
-}
-
-export interface DisassociateResourceFromProjectInput {
-  projectId: string
-  sharedResourceId: string
-}
-
-export interface GetProjectSharedResourcesInput {
-  projectId: string
-}
-
 // 设置相关输入类型
 export interface GetSettingsByCategoryInput {
   category: string

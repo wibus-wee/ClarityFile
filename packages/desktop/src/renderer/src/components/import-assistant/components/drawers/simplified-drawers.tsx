@@ -153,7 +153,7 @@ export function SimpleDocumentVersionFormDrawer() {
         utilizationRate: 0,
         budgetPools: []
       },
-      sharedResources: [],
+
       competitions: [],
       tags: [],
       coverAsset: null,
@@ -167,7 +167,7 @@ export function SimpleDocumentVersionFormDrawer() {
         remainingBudget: 0,
         budgetUtilizationRate: 0,
         budgetPoolCount: 0,
-        sharedResourceCount: 0,
+
         competitionCount: 0,
         tagCount: 0
       }

@@ -145,7 +145,7 @@ export interface ProjectDetailsOutput {
   assets: any[] // 从 ProjectAssetsService 获取
   expenses: import('./expense-schemas').ExpenseTrackingOutput[] // 从 ExpenseTrackingService 获取
   budgetOverview: import('./budget-pool-schemas').ProjectBudgetOverview // 从 BudgetPoolService 获取的项目经费概览
-  sharedResources: any[] // 从 SharedResourcesService 获取
+
   competitions: any[] // 从 CompetitionService 获取
   tags: any[] // 从 TagService 获取
   coverAsset?: any | null // 从 ProjectAssetsService 获取
@@ -160,7 +160,7 @@ export interface ProjectDetailsOutput {
     remainingBudget: number // 剩余预算
     budgetUtilizationRate: number // 预算使用率
     budgetPoolCount: number // 经费池数量
-    sharedResourceCount: number
+
     competitionCount: number
     tagCount: number
   }

@@ -90,7 +90,7 @@ export function useFileActions() {
       const result = await intelligentFileImport({
         originalFileName: fileName,
         sourcePath: fileResult.path,
-        importType: 'shared', // 默认导入到共享资源
+        importType: 'inbox', // 默认导入到收件箱
         projectId: undefined // 全局文件，不关联特定项目
       })
 

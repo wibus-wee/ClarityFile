@@ -29,7 +29,7 @@ import { LogicalDocumentService } from './document/logical-document.service'
 import { ProjectAssetsService } from './project-assets.service'
 import { ExpenseTrackingService } from './expense-tracking.service'
 import { BudgetPoolService } from './budget-pool.service'
-import { SharedResourcesService } from './shared-resources.service'
+
 import { CompetitionService } from './competition.service'
 import { TagService } from './tag.service'
 
@@ -228,7 +228,6 @@ export class ProjectService {
       assets,
       expenses,
       budgetOverview,
-      sharedResourcesData,
       competitions,
       projectTagsData,
       coverAsset
@@ -237,7 +236,6 @@ export class ProjectService {
       ProjectAssetsService.getProjectAssets({ projectId: validatedInput.id }),
       ExpenseTrackingService.getProjectExpenses(validatedInput.id),
       BudgetPoolService.getProjectBudgetOverview(validatedInput.id),
-      SharedResourcesService.getProjectSharedResources(validatedInput.id),
       CompetitionService.getProjectCompetitions(validatedInput.id),
       TagService.getProjectTags(validatedInput.id),
       project.currentCoverAssetId
@@ -265,8 +263,6 @@ export class ProjectService {
       expenses,
       // 经费池相关
       budgetOverview,
-      // 共享资源相关
-      sharedResources: sharedResourcesData,
       // 赛事相关
       competitions,
       // 标签相关
@@ -283,7 +279,7 @@ export class ProjectService {
         remainingBudget: budgetOverview.remainingBudget, // 剩余预算
         budgetUtilizationRate: budgetOverview.utilizationRate, // 预算使用率
         budgetPoolCount: budgetOverview.budgetPools.length, // 经费池数量
-        sharedResourceCount: sharedResourcesData.length,
+
         competitionCount: competitions.length,
         tagCount: projectTagsData.length
       }

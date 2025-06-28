@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FileText, Image, DollarSign, Trophy, TrendingUp, Share2, Tag } from 'lucide-react'
+import { FileText, Image, DollarSign, Trophy, TrendingUp, Tag } from 'lucide-react'
 import { cn, formatFileSize } from '@renderer/lib/utils'
 import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 
@@ -9,8 +9,7 @@ interface ProjectStatisticsProps {
 }
 
 export function ProjectStatistics({ projectDetails, className }: ProjectStatisticsProps) {
-  const { documents, assets, expenses, budgetOverview, competitions, sharedResources, tags } =
-    projectDetails
+  const { documents, assets, expenses, budgetOverview, competitions, tags } = projectDetails
 
   // 计算统计信息
   const statistics = {
@@ -25,7 +24,7 @@ export function ProjectStatistics({ projectDetails, className }: ProjectStatisti
     budgetUtilizationRate: budgetOverview?.utilizationRate || 0,
     budgetPoolCount: budgetOverview?.budgetPools?.length || 0,
     competitionCount: competitions.length,
-    sharedResourceCount: sharedResources.length,
+
     tagCount: tags.length
   }
 
@@ -149,24 +148,6 @@ export function ProjectStatistics({ projectDetails, className }: ProjectStatisti
             <div className="text-xs text-muted-foreground truncate">
               赛事{activeCompetitions > 0 ? ` (${activeCompetitions} 进行中)` : ''}
             </div>
-          </div>
-        </motion.div>
-
-        {/* 共享资源 */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-border hover:bg-muted/30 transition-colors"
-        >
-          <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-            <Share2 className="w-4 h-4 text-foreground" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-lg font-bold text-foreground">
-              {statistics.sharedResourceCount}
-            </div>
-            <div className="text-xs text-muted-foreground truncate">共享资源</div>
           </div>
         </motion.div>
 

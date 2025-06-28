@@ -127,48 +127,6 @@ export class IntelligentNamingService {
   }
 
   /**
-   * 为共享资源生成智能文件名
-   * 规则：[资源名称核心部分]_[自定义字段关键信息]_[日期或其他标识].[后缀]
-   */
-  static generateSharedResourceFileName(params: {
-    resourceName: string
-    resourceType: string
-    customFields?: Record<string, any>
-    originalFileName: string
-    createdAt?: Date
-  }): string {
-    const { resourceName, resourceType, customFields, originalFileName, createdAt } = params
-
-    // 获取文件扩展名
-    const ext = path.extname(originalFileName)
-
-    // 1. 资源名称核心部分
-    const cleanResourceName = PathUtils.sanitizeFileName(resourceName).substring(0, 15)
-
-    // 2. 资源类型前缀
-    const typePrefix = PathUtils.sanitizeFileName(resourceType).substring(0, 8)
-
-    // 3. 自定义字段关键信息（如果有）
-    let customInfo = ''
-    if (customFields) {
-      const keyInfo = Object.values(customFields)
-        .filter((value) => value && typeof value === 'string')
-        .map((value) => PathUtils.sanitizeFileName(String(value)).substring(0, 10))
-        .join('_')
-      customInfo = keyInfo ? `_${keyInfo}` : ''
-    }
-
-    // 4. 日期标识
-    const date = createdAt || new Date()
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '')
-
-    // 组合文件名
-    const fileName = `${typePrefix}_${cleanResourceName}${customInfo}_${dateStr}${ext}`
-
-    return this.truncateFileName(fileName, 100)
-  }
-
-  /**
    * 为比赛通知生成智能文件名
    * 规则：通知_[赛段关键信息]_[年份或其他标识].[后缀]
    */

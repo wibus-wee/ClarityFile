@@ -37,15 +37,6 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
         return await IntelligentPathGeneratorService.generateProjectExpensePath(input)
       }),
 
-    // 生成共享资源路径
-    generateSharedResourcePath: t.procedure
-      .input<{
-        resourceType: string
-      }>()
-      .action(async ({ input }) => {
-        return await IntelligentPathGeneratorService.generateSharedResourcePath(input)
-      }),
-
     // 生成比赛资料路径
     generateCompetitionPath: t.procedure
       .input<{
@@ -80,7 +71,7 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
     // 生成完整文件路径
     generateCompleteFilePath: t.procedure
       .input<{
-        type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+        type: 'document' | 'asset' | 'expense' | 'competition' | 'inbox'
         pathParams: any
         fileName: string
       }>()
@@ -118,7 +109,7 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
     // 预览完整的文件存储方案
     previewFileStorageScheme: t.procedure
       .input<{
-        type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+        type: 'document' | 'asset' | 'expense' | 'competition' | 'inbox'
         pathParams: any
         fileName: string
       }>()
@@ -140,10 +131,7 @@ export function intelligentPathGeneratorRouter(t: ITipc) {
               directoryPath =
                 await IntelligentPathGeneratorService.generateProjectExpensePath(pathParams)
               break
-            case 'shared':
-              directoryPath =
-                await IntelligentPathGeneratorService.generateSharedResourcePath(pathParams)
-              break
+
             case 'competition':
               directoryPath =
                 await IntelligentPathGeneratorService.generateCompetitionPath(pathParams)

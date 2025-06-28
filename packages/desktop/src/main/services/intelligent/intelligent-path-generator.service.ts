@@ -106,25 +106,6 @@ export class IntelligentPathGeneratorService {
   }
 
   /**
-   * 生成共享资源的完整存储路径
-   * 路径格式: CLARITY_FILE_ROOT/SharedResources/[资源类型]/
-   */
-  static async generateSharedResourcePath(params: { resourceType: string }): Promise<string> {
-    const { resourceType } = params
-
-    // 获取根目录
-    const rootPath = await PathUtils.getDefaultProjectPath()
-
-    // 清理资源类型名称
-    const cleanResourceType = PathUtils.sanitizeFileName(resourceType)
-
-    // 组合完整路径
-    const fullPath = path.join(rootPath, 'SharedResources', cleanResourceType)
-
-    return fullPath
-  }
-
-  /**
    * 生成比赛资料的完整存储路径
    * 路径格式: CLARITY_FILE_ROOT/Competitions/[赛事系列]/[赛段]/
    */
@@ -215,7 +196,7 @@ export class IntelligentPathGeneratorService {
    * 生成完整的文件物理路径（路径 + 文件名）
    */
   static async generateCompleteFilePath(params: {
-    type: 'document' | 'asset' | 'expense' | 'shared' | 'competition' | 'inbox'
+    type: 'document' | 'asset' | 'expense' | 'competition' | 'inbox'
     pathParams: any
     fileName: string
   }): Promise<string> {
@@ -233,9 +214,7 @@ export class IntelligentPathGeneratorService {
       case 'expense':
         directoryPath = await this.generateProjectExpensePath(pathParams)
         break
-      case 'shared':
-        directoryPath = await this.generateSharedResourcePath(pathParams)
-        break
+
       case 'competition':
         directoryPath = await this.generateCompetitionPath(pathParams)
         break

@@ -166,30 +166,6 @@ export const competitionMilestones = sqliteTable(
   ]
 )
 
-export const sharedResources = sqliteTable(
-  'shared_resources',
-  {
-    id: text('id')
-      .primaryKey()
-      .$defaultFn(() => randomUUID()),
-    name: text('name').notNull(),
-    type: text('type').notNull(),
-    managedFileId: text('managed_file_id')
-      .notNull()
-      .unique()
-      .references(() => managedFiles.id, { onDelete: 'restrict' }),
-    description: text('description'),
-    customFields: text('custom_fields', { mode: 'json' }),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .default(sql`(strftime('%s', 'now') * 1000)`),
-    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .default(sql`(strftime('%s', 'now') * 1000)`)
-  },
-  (table) => [index('sr_managed_file_id_idx').on(table.managedFileId)]
-)
-
 export const projectAssets = sqliteTable(
   'project_assets',
   {
@@ -321,23 +297,6 @@ export const documentVersionTags = sqliteTable(
   ]
 )
 
-export const sharedResourceTags = sqliteTable(
-  'shared_resource_tags',
-  {
-    sharedResourceId: text('shared_resource_id')
-      .notNull()
-      .references(() => sharedResources.id, { onDelete: 'cascade' }),
-    tagId: text('tag_id')
-      .notNull()
-      .references(() => tags.id, { onDelete: 'cascade' })
-  },
-  (table) => [
-    primaryKey({ columns: [table.sharedResourceId, table.tagId] }),
-    index('srt_shared_resource_id_idx').on(table.sharedResourceId),
-    index('srt_tag_id_idx').on(table.tagId)
-  ]
-)
-
 export const projectTags = sqliteTable(
   'project_tags',
   {
@@ -375,27 +334,6 @@ export const projectAssetTags = sqliteTable(
   ]
 )
 
-export const projectSharedResources = sqliteTable(
-  'project_shared_resources',
-  {
-    projectId: text('project_id')
-      .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
-    sharedResourceId: text('shared_resource_id')
-      .notNull()
-      .references(() => sharedResources.id, { onDelete: 'cascade' }),
-    usageDescription: text('usage_description'),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .default(sql`(strftime('%s', 'now') * 1000)`)
-  },
-  (table) => [
-    primaryKey({ columns: [table.projectId, table.sharedResourceId] }),
-    index('psr_project_id_idx').on(table.projectId),
-    index('psr_shared_resource_id_idx').on(table.sharedResourceId)
-  ]
-)
-
 export const projectCompetitionMilestones = sqliteTable(
   'project_competition_milestones',
   {
@@ -422,7 +360,6 @@ export const projectCompetitionMilestones = sqliteTable(
 
 export const managedFilesRelations = relations(managedFiles, ({ many }) => ({
   documentVersions: many(documentVersions),
-  sharedResources: many(sharedResources),
   projectAssets: many(projectAssets),
   expenseTrackingsInvoices: many(expenseTrackings), // For invoiceManagedFileId
   competitionMilestoneNotifications: many(competitionMilestones), // For notificationManagedFileId
@@ -439,7 +376,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   budgetPools: many(budgetPools),
   expenseTrackings: many(expenseTrackings),
   projectTags: many(projectTags),
-  projectSharedResources: many(projectSharedResources),
+
   projectCompetitionMilestones: many(projectCompetitionMilestones)
 }))
 
@@ -489,15 +426,6 @@ export const competitionMilestonesRelations = relations(competitionMilestones, (
   projectCompetitionMilestones: many(projectCompetitionMilestones)
 }))
 
-export const sharedResourcesRelations = relations(sharedResources, ({ one, many }) => ({
-  managedFile: one(managedFiles, {
-    fields: [sharedResources.managedFileId],
-    references: [managedFiles.id]
-  }),
-  sharedResourceTags: many(sharedResourceTags),
-  projectSharedResources: many(projectSharedResources)
-}))
-
 export const projectAssetsRelations = relations(projectAssets, ({ one, many }) => ({
   project: one(projects, {
     fields: [projectAssets.projectId],
@@ -537,7 +465,7 @@ export const expenseTrackingsRelations = relations(expenseTrackings, ({ one }) =
 
 export const tagsRelations = relations(tags, ({ many }) => ({
   documentVersionTags: many(documentVersionTags),
-  sharedResourceTags: many(sharedResourceTags),
+
   projectTags: many(projectTags),
   projectAssetTags: many(projectAssetTags)
 }))
@@ -555,17 +483,6 @@ export const documentVersionTagsRelations = relations(documentVersionTags, ({ on
   }),
   tag: one(tags, {
     fields: [documentVersionTags.tagId],
-    references: [tags.id]
-  })
-}))
-
-export const sharedResourceTagsRelations = relations(sharedResourceTags, ({ one }) => ({
-  sharedResource: one(sharedResources, {
-    fields: [sharedResourceTags.sharedResourceId],
-    references: [sharedResources.id]
-  }),
-  tag: one(tags, {
-    fields: [sharedResourceTags.tagId],
     references: [tags.id]
   })
 }))
@@ -589,17 +506,6 @@ export const projectAssetTagsRelations = relations(projectAssetTags, ({ one }) =
   tag: one(tags, {
     fields: [projectAssetTags.tagId],
     references: [tags.id]
-  })
-}))
-
-export const projectSharedResourcesRelations = relations(projectSharedResources, ({ one }) => ({
-  project: one(projects, {
-    fields: [projectSharedResources.projectId],
-    references: [projects.id]
-  }),
-  sharedResource: one(sharedResources, {
-    fields: [projectSharedResources.sharedResourceId],
-    references: [sharedResources.id]
   })
 }))
 

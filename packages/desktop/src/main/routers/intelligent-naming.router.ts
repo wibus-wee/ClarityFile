@@ -41,23 +41,6 @@ export function intelligentNamingRouter(t: ITipc) {
         return IntelligentNamingService.generateProjectAssetFileName(params)
       }),
 
-    // 为共享资源生成智能文件名
-    generateSharedResourceFileName: t.procedure
-      .input<{
-        resourceName: string
-        resourceType: string
-        customFields?: Record<string, any>
-        originalFileName: string
-        createdAt?: string
-      }>()
-      .action(async ({ input }) => {
-        const params = {
-          ...input,
-          createdAt: input.createdAt ? new Date(input.createdAt) : undefined
-        }
-        return IntelligentNamingService.generateSharedResourceFileName(params)
-      }),
-
     // 为比赛通知生成智能文件名
     generateCompetitionNotificationFileName: t.procedure
       .input<{
@@ -123,7 +106,7 @@ export function intelligentNamingRouter(t: ITipc) {
     // 预览文件名生成结果
     previewFileName: t.procedure
       .input<{
-        type: 'document' | 'asset' | 'shared' | 'competition'
+        type: 'document' | 'asset' | 'competition'
         params: any
       }>()
       .action(async ({ input }) => {
@@ -142,13 +125,6 @@ export function intelligentNamingRouter(t: ITipc) {
 
             case 'asset':
               fileName = IntelligentNamingService.generateProjectAssetFileName({
-                ...params,
-                createdAt: params.createdAt ? new Date(params.createdAt) : undefined
-              })
-              break
-
-            case 'shared':
-              fileName = IntelligentNamingService.generateSharedResourceFileName({
                 ...params,
                 createdAt: params.createdAt ? new Date(params.createdAt) : undefined
               })

@@ -16,11 +16,6 @@ import type {
 } from '../../../main/types/asset-schemas'
 import type {
   CreateTagInput,
-  CreateSharedResourceInput,
-  UpdateSharedResourceInput,
-  DeleteSharedResourceInput,
-  AssociateResourceToProjectInput,
-  DisassociateResourceFromProjectInput,
   SetSettingInput,
   SetSettingsInput,
   DeleteSettingInput,
@@ -611,69 +606,6 @@ export function useAllBudgetPools() {
 
 export function useGlobalBudgetOverview() {
   return useSWR('global-budget-overview', () => tipcClient.getGlobalBudgetOverview())
-}
-
-// 共享资源相关的 hooks
-export function useCreateSharedResource() {
-  return useSWRMutation(
-    'shared-resources',
-    async (_key, { arg }: { arg: CreateSharedResourceInput }) => {
-      const result = await tipcClient.createSharedResource(arg)
-      // 重新验证所有共享资源
-      mutate('all-shared-resources')
-      return result
-    }
-  )
-}
-
-export function useUpdateSharedResource() {
-  return useSWRMutation(
-    'shared-resources',
-    async (_key, { arg }: { arg: UpdateSharedResourceInput }) => {
-      const result = await tipcClient.updateSharedResource(arg)
-      // 重新验证相关数据
-      mutate('all-shared-resources')
-      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
-      return result
-    }
-  )
-}
-
-export function useDeleteSharedResource() {
-  return useSWRMutation(
-    'shared-resources',
-    async (_key, { arg }: { arg: DeleteSharedResourceInput }) => {
-      const result = await tipcClient.deleteSharedResource(arg)
-      // 重新验证相关数据
-      mutate('all-shared-resources')
-      mutate((key) => Array.isArray(key) && key[0] === 'project-details')
-      return result
-    }
-  )
-}
-
-export function useAssociateResourceToProject() {
-  return useSWRMutation(
-    'shared-resources',
-    async (_key, { arg }: { arg: AssociateResourceToProjectInput }) => {
-      const result = await tipcClient.associateResourceToProject(arg)
-      // 重新验证项目详情
-      mutate(['project-details', arg.projectId])
-      return result
-    }
-  )
-}
-
-export function useDisassociateResourceFromProject() {
-  return useSWRMutation(
-    'shared-resources',
-    async (_key, { arg }: { arg: DisassociateResourceFromProjectInput }) => {
-      const result = await tipcClient.disassociateResourceFromProject(arg)
-      // 重新验证项目详情
-      mutate(['project-details', arg.projectId])
-      return result
-    }
-  )
 }
 
 // 赛事管理相关的 hooks

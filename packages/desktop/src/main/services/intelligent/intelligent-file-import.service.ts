@@ -20,7 +20,7 @@ const fileImportContextSchema = z
     displayName: z.string().optional(),
 
     // 导入类型
-    importType: z.enum(['document', 'asset', 'expense', 'shared', 'competition', 'inbox'], {
+    importType: z.enum(['document', 'asset', 'expense', 'competition', 'inbox'], {
       errorMap: () => ({ message: '不支持的导入类型' })
     }),
 
@@ -49,11 +49,6 @@ const fileImportContextSchema = z
     // 经费相关信息（当 importType 为 expense 时必需）
     expenseDescription: z.string().optional(),
     applicantName: z.string().optional(),
-
-    // 共享资源相关信息（当 importType 为 shared 时必需）
-    resourceType: z.string().optional(),
-    resourceName: z.string().optional(),
-    customFields: z.record(z.any()).optional(),
 
     // 比赛相关信息（当 importType 为 competition 时必需）
     seriesName: z.string().optional(),
@@ -135,23 +130,6 @@ const fileImportContextSchema = z
             code: z.ZodIssueCode.custom,
             message: '报销事项描述不能为空',
             path: ['expenseDescription']
-          })
-        }
-        break
-
-      case 'shared':
-        if (!data.resourceType) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '资源类型不能为空',
-            path: ['resourceType']
-          })
-        }
-        if (!data.resourceName) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '资源名称不能为空',
-            path: ['resourceName']
           })
         }
         break
@@ -483,14 +461,6 @@ export class IntelligentFileImportService {
           originalFileName: context.originalFileName
         })
 
-      case 'shared':
-        return IntelligentNamingService.generateSharedResourceFileName({
-          resourceName: context.resourceName!,
-          resourceType: context.resourceType!,
-          customFields: context.customFields,
-          originalFileName: context.originalFileName
-        })
-
       case 'competition':
         return IntelligentNamingService.generateCompetitionNotificationFileName({
           seriesName: context.seriesName!,
@@ -542,11 +512,6 @@ export class IntelligentFileImportService {
           applicantName: context.applicantName
         })
       }
-
-      case 'shared':
-        return await IntelligentPathGeneratorService.generateSharedResourcePath({
-          resourceType: context.resourceType!
-        })
 
       case 'competition':
         return await IntelligentPathGeneratorService.generateCompetitionPath({
@@ -664,7 +629,7 @@ export class IntelligentFileImportService {
       document: ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.txt'],
       asset: ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.mp4', '.mov', '.mp3', '.wav'],
       expense: ['.pdf', '.jpg', '.jpeg', '.png'],
-      shared: ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.txt', '.zip', '.rar'],
+
       competition: ['.pdf', '.doc', '.docx', '.txt'],
       inbox: ['.*'] // 支持所有文件类型
     }

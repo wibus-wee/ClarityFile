@@ -266,7 +266,7 @@ export class ProjectAssetsService {
     const validatedInput = validateBatchDeleteProjectAssets(input)
 
     // 获取所有要删除的资产信息
-    const assets = await db
+    await db
       .select({
         id: projectAssets.id,
         name: projectAssets.name,

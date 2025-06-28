@@ -65,23 +65,6 @@ CLARITY_FILE_ROOT/
     - 例如：`Logo_项目主视觉_最终版.svg`
     - **完整路径示例：** `CLARITY_FILE_ROOT/Projects/核心项目A_a1b2/_Assets/软件截图/Screenshot_用户登录界面_20231001.png`
 
-**二、共享资源 (`SharedResources/`)**
-
-这些资源不直接隶属于单一项目，或者是团队级别的共享。
-
-- **一级子目录：资源类型 (`shared_resources.type`)**
-
-  - 例如：`CLARITY_FILE_ROOT/SharedResources/专利成果/`
-  - 例如：`CLARITY_FILE_ROOT/SharedResources/红头文件/`
-  - 例如：`CLARITY_FILE_ROOT/SharedResources/团队资质/`
-  - 例如：`CLARITY_FILE_ROOT/SharedResources/通用PPT模板/`
-
-- **文件名规范：**
-  - 核心要素：`[资源名称核心部分]_[自定义字段关键信息]_[日期或其他标识].[后缀]`
-  - 例如：`专利_一种新型AI算法_ZL2023X001_受理通知书.pdf` (假设“ZL2023X001”来自自定义字段)
-  - 例如：`红头文件_关于XX的决定_2023年第5号.pdf`
-  - **完整路径示例：** `CLARITY_FILE_ROOT/SharedResources/专利成果/专利_一种新型AI算法_ZL2023X001_受理通知书.pdf`
-
 **三、全局赛事资料 (`Competitions/` - 替代原项目下的比赛资料思路)**
 
 存放官方下发的、与具体项目提交物无关的比赛通知、章程等。
