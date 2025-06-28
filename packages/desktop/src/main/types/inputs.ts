@@ -73,12 +73,6 @@ export interface SelectDirectoryInput {
   defaultPath?: string
 }
 
-export interface SelectFileInput {
-  title?: string
-  defaultPath?: string
-  filters?: Array<{ name: string; extensions: string[] }>
-}
-
 // 窗口相关输入类型
 export interface WindowBounds {
   x: number

@@ -25,8 +25,7 @@ import type {
   SetSettingsInput,
   DeleteSettingInput,
   ResetSettingsInput,
-  SelectDirectoryInput,
-  SelectFileInput
+  SelectDirectoryInput
 } from '../../../main/types/inputs'
 import type {
   CreateExpenseTrackingInput,
@@ -428,12 +427,6 @@ export function useSelectDirectory() {
       return await tipcClient.selectDirectory(arg)
     }
   )
-}
-
-export function useSelectFile() {
-  return useSWRMutation('select-file', async (_mutationKey, { arg }: { arg: SelectFileInput }) => {
-    return await tipcClient.selectFile(arg)
-  })
 }
 
 // 逻辑文档更新和删除相关的 hooks

@@ -23,11 +23,8 @@ import {
   FormMessage
 } from '@clarity/shadcn/ui/form'
 import { Image, Upload, FolderOpen, Edit, Save } from 'lucide-react'
-import {
-  useSelectFile,
-  useCreateProjectAsset,
-  useUpdateProjectAsset
-} from '@renderer/hooks/use-tipc'
+import { useCreateProjectAsset, useUpdateProjectAsset } from '@renderer/hooks/use-tipc'
+import { useFilePicker, FILE_FILTERS } from '@renderer/hooks/use-file-picker'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { AssetTypeCombobox } from '@renderer/components/ui/asset-type-combobox'
 import { toast } from 'sonner'
@@ -78,7 +75,7 @@ export function AssetFormDrawer({
   const [selectedFile, setSelectedFile] = useState<string>('')
 
   const isEdit = !!asset
-  const selectFile = useSelectFile()
+  const { pickFile } = useFilePicker()
   const createAsset = useCreateProjectAsset()
   const updateAsset = useUpdateProjectAsset()
 
@@ -119,18 +116,12 @@ export function AssetFormDrawer({
     if (isEdit) return // 编辑模式下不允许更换文件
 
     try {
-      const result = await selectFile.trigger({
-        title: '选择资产文件',
-        filters: [
-          { name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] },
-          { name: '文档文件', extensions: ['pdf', 'doc', 'docx', 'txt', 'md'] },
-          { name: '视频文件', extensions: ['mp4', 'avi', 'mov', 'wmv', 'flv'] },
-          { name: '音频文件', extensions: ['mp3', 'wav', 'flac', 'aac'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
-      })
+      // 使用前端原生文件选择器
+      const result = await pickFile(
+        '.jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.txt,.md,.mp4,.avi,.mov,.wmv,.flv,.mp3,.wav,.flac,.aac'
+      )
 
-      if (result && !result.canceled && result.path) {
+      if (!result.canceled && result.path) {
         const filePath = result.path
         setSelectedFile(filePath)
         form.setValue('filePath', filePath)

@@ -5,7 +5,7 @@ import {
 } from '../services/managed-file.service'
 import { FilesystemService } from '../services/filesystem.service'
 import { TagService } from '../services/tag.service'
-import type { CreateTagInput, SelectDirectoryInput, SelectFileInput } from '../types/inputs'
+import type { CreateTagInput, SelectDirectoryInput } from '../types/inputs'
 import { ITipc } from '../types'
 
 export function fileRouter(t: ITipc) {
@@ -31,11 +31,6 @@ export function fileRouter(t: ITipc) {
       .action(async ({ input, context }) => {
         return await FilesystemService.selectDirectory(input, context)
       }),
-
-    // 选择文件
-    selectFile: t.procedure.input<SelectFileInput>().action(async ({ input, context }) => {
-      return await FilesystemService.selectFile(input, context)
-    }),
 
     // 获取全局文件列表
     getGlobalFiles: t.procedure.input<GetGlobalFilesInput>().action(async ({ input }) => {

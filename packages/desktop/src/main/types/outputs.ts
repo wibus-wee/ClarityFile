@@ -17,11 +17,5 @@ export interface SelectDirectoryOutput {
   path: string | null
 }
 
-export interface SelectFileOutput {
-  canceled: boolean
-  path: string | null
-  filePaths?: string[]
-}
-
 // 设置分类输出类型
 export type SettingsCategoriesOutput = string[]

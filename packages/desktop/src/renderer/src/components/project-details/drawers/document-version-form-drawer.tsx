@@ -36,12 +36,12 @@ import {
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { FileText, Upload, FolderOpen, Trophy, Target, Edit } from 'lucide-react'
 import {
-  useSelectFile,
   useUploadDocumentVersion,
   useUpdateDocumentVersion,
   useGetAllCompetitionSeries,
   useGetCompetitionMilestones
 } from '@renderer/hooks/use-tipc'
+import { useFilePicker } from '@renderer/hooks/use-file-picker'
 import type { ProjectDetailsOutput } from '@main/types/project-schemas'
 import type {
   LogicalDocumentWithVersionsOutput,
@@ -97,7 +97,7 @@ export function DocumentVersionFormDrawer({
   const [selectedFile, setSelectedFile] = useState<string>('')
   const [selectedSeriesId, setSelectedSeriesId] = useState<string>('')
 
-  const selectFile = useSelectFile()
+  const { pickFile } = useFilePicker()
   const uploadDocumentVersion = useUploadDocumentVersion()
   const updateDocumentVersion = useUpdateDocumentVersion()
   const { data: competitionSeries } = useGetAllCompetitionSeries()
@@ -160,15 +160,10 @@ export function DocumentVersionFormDrawer({
     if (isEdit) return // 编辑模式下不允许选择文件
 
     try {
-      const result = await selectFile.trigger({
-        title: '选择文档文件',
-        filters: [
-          { name: '文档文件', extensions: ['pdf', 'doc', 'docx', 'txt', 'md'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
-      })
+      // 使用前端原生文件选择器
+      const result = await pickFile('.pdf,.doc,.docx,.txt,.md')
 
-      if (result && !result.canceled && result.path) {
+      if (!result.canceled && result.path) {
         const filePath = result.path
         setSelectedFile(filePath)
         form.setValue('filePath', filePath)

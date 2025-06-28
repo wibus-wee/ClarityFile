@@ -2,11 +2,11 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   useOpenFileByIdWithSystem,
-  useSelectFile,
   useIntelligentFileImport,
   useQuickLookPreviewById,
   useIsQuickLookAvailable
 } from './use-tipc'
+import { useFilePicker } from './use-file-picker'
 import { useFileManagementStore } from '@renderer/stores/file-management'
 
 export function useFileActions() {
@@ -15,7 +15,7 @@ export function useFileActions() {
 
   // 获取所有需要的mutation hooks
   const { trigger: openFileWithSystem } = useOpenFileByIdWithSystem()
-  const { trigger: selectFile } = useSelectFile()
+  const { pickFile } = useFilePicker()
   const { trigger: intelligentFileImport } = useIntelligentFileImport()
   const { trigger: quickLookPreview } = useQuickLookPreviewById()
   const { data: quickLookAvailable } = useIsQuickLookAvailable()
@@ -76,17 +76,10 @@ export function useFileActions() {
     try {
       setProcessing(true, 'upload')
 
-      // 选择文件
-      const fileResult = await selectFile({
-        title: '选择要上传的文件',
-        filters: [
-          { name: '所有文件', extensions: ['*'] },
-          { name: '文档文件', extensions: ['pdf', 'doc', 'docx', 'txt', 'md'] },
-          { name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] },
-          { name: '视频文件', extensions: ['mp4', 'avi', 'mov', 'wmv', 'flv'] },
-          { name: '音频文件', extensions: ['mp3', 'wav', 'flac', 'aac'] }
-        ]
-      })
+      // 使用前端原生文件选择器
+      const fileResult = await pickFile(
+        '.pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.avi,.mov,.wmv,.flv,.mp3,.wav,.flac,.aac'
+      )
 
       if (fileResult.canceled || !fileResult.path) {
         return
@@ -112,7 +105,7 @@ export function useFileActions() {
     } finally {
       setProcessing(false)
     }
-  }, [selectFile, intelligentFileImport, setProcessing])
+  }, [pickFile, intelligentFileImport, setProcessing])
 
   const handleFileAction = useCallback(
     (action: string, file: any) => {

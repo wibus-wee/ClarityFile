@@ -40,9 +40,9 @@ import {
   useCreateExpenseTracking,
   useUpdateExpenseTracking,
   useProjects,
-  useProjectBudgetPools,
-  useSelectFile
+  useProjectBudgetPools
 } from '@renderer/hooks/use-tipc'
+import { useFilePicker } from '@renderer/hooks/use-file-picker'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { toast } from 'sonner'
 import {
@@ -135,7 +135,7 @@ export function ExpenseFormDrawer({
   const { trigger: createExpense, isMutating: isCreating } = useCreateExpenseTracking()
   const { trigger: updateExpense, isMutating: isUpdating } = useUpdateExpenseTracking()
   const { data: projects } = useProjects()
-  const { trigger: selectFile } = useSelectFile()
+  const { pickFile } = useFilePicker()
 
   // 监听表单中的 projectId 变化，以便动态获取对应的经费池数据
   const watchedProjectId = form.watch('projectId')
@@ -214,12 +214,10 @@ export function ExpenseFormDrawer({
   // 处理文件选择
   const handleSelectFile = async () => {
     try {
-      const result = await selectFile({
-        title: '选择发票文件',
-        filters: [{ name: '所有文件', extensions: ['*'] }]
-      })
+      // 使用前端原生文件选择器，支持 PDF 和图片格式
+      const result = await pickFile('.pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp')
 
-      if (result && !result.canceled && result.path) {
+      if (!result.canceled && result.path) {
         setSelectedFile(result.path)
         toast.success('文件选择成功！')
       }
