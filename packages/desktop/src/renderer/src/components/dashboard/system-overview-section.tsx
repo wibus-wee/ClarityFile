@@ -1,6 +1,6 @@
-import { FolderOpen, FileText, Activity, Database } from 'lucide-react'
+import { FolderOpen, FileText, Activity, Database, BookOpen } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useProjects, useFileSystemStats } from '@renderer/hooks/use-tipc'
+import { useProjects, useFileSystemStats, useSystemInfo } from '@renderer/hooks/use-tipc'
 
 interface StatCardProps {
   title: string
@@ -32,11 +32,13 @@ function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
 export function SystemOverviewSection() {
   const { data: projects } = useProjects()
   const { data: fileStats } = useFileSystemStats()
+  const { data: systemInfo } = useSystemInfo()
 
   // 计算统计数据
   const projectCount = projects?.length || 0
   const fileCount = fileStats?.totalFiles || 0
   const activeProjects = projects?.filter((p) => p.status === 'active').length || 0
+  const documentCount = systemInfo?.documentCount || 0
 
   const stats = [
     {
@@ -56,6 +58,12 @@ export function SystemOverviewSection() {
       value: fileCount,
       icon: FileText,
       color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'
+    },
+    {
+      title: '逻辑文档',
+      value: documentCount,
+      icon: BookOpen,
+      color: 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'
     }
   ]
 
@@ -66,7 +74,7 @@ export function SystemOverviewSection() {
         <h2 className="text-xl font-semibold">系统概览</h2>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.title}
