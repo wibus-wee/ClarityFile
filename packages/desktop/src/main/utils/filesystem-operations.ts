@@ -28,7 +28,7 @@ export class FilesystemOperations {
   static async fileExists(filePath: string): Promise<boolean> {
     try {
       const stats = await fs.promises.stat(filePath)
-      return stats.isFile()
+      return stats.isFile() || stats.isDirectory()
     } catch {
       return false
     }

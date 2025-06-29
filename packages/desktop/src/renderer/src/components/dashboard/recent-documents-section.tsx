@@ -1,11 +1,35 @@
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
-import { FileText, ArrowRight, Calendar, MoreHorizontal, ExternalLink, File } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@clarity/shadcn/ui/dropdown-menu'
+import {
+  FileText,
+  ArrowRight,
+  Calendar,
+  MoreHorizontal,
+  ExternalLink,
+  File,
+  Eye,
+  Download,
+  Edit,
+  Trash2
+} from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { useManagedFiles } from '@renderer/hooks/use-tipc'
+import {
+  useManagedFiles,
+  useQuickLookPreviewById,
+  useOpenFileByIdWithSystem,
+  useIsQuickLookAvailable
+} from '@renderer/hooks/use-tipc'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 // 确保文件名包含扩展名的工具函数
 const ensureFileExtension = (fileName: string, originalFileName: string): string => {
@@ -51,6 +75,53 @@ const getFileIcon = (fileName: string) => {
 
 export function RecentDocumentsSection() {
   const { data: files, isLoading, error } = useManagedFiles(5, 0)
+  const { trigger: quickLookPreview } = useQuickLookPreviewById()
+  const { trigger: openFileWithSystem } = useOpenFileByIdWithSystem()
+  const { data: quickLookAvailable } = useIsQuickLookAvailable()
+
+  // 处理文档预览
+  const handlePreviewDocument = async (file: any) => {
+    try {
+      // 检查文件是否存在physicalPath
+      if (!file.physicalPath) {
+        toast.error('文件路径不存在，无法预览')
+        return
+      }
+
+      // 检查是否在 macOS 上且 QuickLook 可用
+      if (quickLookAvailable?.available) {
+        try {
+          await quickLookPreview({ fileId: file.id })
+          return
+        } catch (quickLookError) {
+          console.warn('QuickLook 预览失败，回退到系统默认应用:', quickLookError)
+          // 如果 QuickLook 失败，回退到系统默认应用
+        }
+      }
+
+      // 回退到系统默认应用
+      await openFileWithSystem({ fileId: file.id })
+    } catch (error) {
+      console.error('预览文件失败:', error)
+      toast.error(`预览文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
+  }
+
+  // 处理用系统默认应用打开文档
+  const handleOpenDocument = async (file: any) => {
+    try {
+      // 检查文件是否存在physicalPath
+      if (!file.physicalPath) {
+        toast.error('文件路径不存在，无法打开')
+        return
+      }
+
+      await openFileWithSystem({ fileId: file.id })
+    } catch (error) {
+      console.error('打开文件失败:', error)
+      toast.error(`打开文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -116,7 +187,10 @@ export function RecentDocumentsSection() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="group relative"
               >
-                <div className="flex items-center gap-4 p-4 border border-border rounded-lg hover:border-primary/30 hover:bg-accent/50 transition-all duration-200">
+                <div
+                  className="flex items-center gap-4 p-4 border border-border rounded-lg hover:border-primary/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer"
+                  onClick={() => handlePreviewDocument(file)}
+                >
                   {/* 文件图标 */}
                   <div className="p-2 bg-accent/50 rounded-lg">
                     <FileIcon className={`w-5 h-5 ${fileIcon.color}`} />
@@ -151,12 +225,82 @@ export function RecentDocumentsSection() {
 
                   {/* 操作按钮 */}
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleOpenDocument(file)
+                      }}
+                    >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePreviewDocument(file)
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          预览文档
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleOpenDocument(file)
+                          }}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          用默认应用打开
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // TODO: 实现下载功能
+                            toast.info('下载功能开发中...')
+                          }}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          下载文档
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // TODO: 实现重命名功能
+                            toast.info('重命名功能开发中...')
+                          }}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          重命名
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // TODO: 实现删除功能
+                            toast.info('删除功能开发中...')
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          删除文档
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </motion.div>

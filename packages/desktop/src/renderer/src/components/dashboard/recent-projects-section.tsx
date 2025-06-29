@@ -1,11 +1,28 @@
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
-import { FolderOpen, ArrowRight, Calendar, MoreHorizontal, ExternalLink } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@clarity/shadcn/ui/dropdown-menu'
+import {
+  FolderOpen,
+  ArrowRight,
+  Calendar,
+  MoreHorizontal,
+  ExternalLink,
+  Edit,
+  Trash2,
+  Eye
+} from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { useProjects } from '@renderer/hooks/use-tipc'
+import { useProjects, useOpenFileWithSystem } from '@renderer/hooks/use-tipc'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 const statusConfig = {
   active: {
@@ -26,9 +43,25 @@ const statusConfig = {
 
 export function RecentProjectsSection() {
   const { data: projects, isLoading, error } = useProjects()
+  const { trigger: openFileWithSystem } = useOpenFileWithSystem()
 
   // 获取最近的5个项目
   const recentProjects = projects?.slice(0, 5) || []
+
+  // 处理打开项目文件夹
+  const handleOpenProjectFolder = async (project: any) => {
+    if (!project.folderPath) {
+      toast.error('项目文件夹路径不存在，请先创建项目文件夹')
+      return
+    }
+
+    try {
+      await openFileWithSystem({ filePath: project.folderPath })
+    } catch (error) {
+      console.error('打开项目文件夹失败:', error)
+      toast.error(`打开项目文件夹失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -88,48 +121,114 @@ export function RecentProjectsSection() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="group relative"
               >
-                <div className="flex items-center gap-4 p-4 border border-border rounded-lg hover:border-primary/30 hover:bg-accent/50 transition-all duration-200">
-                  {/* 项目图标 */}
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <FolderOpen className="w-5 h-5 text-primary" />
-                  </div>
-
-                  {/* 项目信息 */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-sm truncate">{project.name}</h3>
-                      <Badge variant="outline" className={`text-xs ${status.color}`}>
-                        {status.label}
-                      </Badge>
+                <Link
+                  to="/projects/$projectId"
+                  params={{ projectId: project.id }}
+                  className="block"
+                >
+                  <div className="flex items-center gap-4 p-4 border border-border rounded-lg hover:border-primary/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer">
+                    {/* 项目图标 */}
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <FolderOpen className="w-5 h-5 text-primary" />
                     </div>
 
-                    {project.description && (
-                      <p className="text-xs text-muted-foreground truncate mb-2">
-                        {project.description}
-                      </p>
-                    )}
+                    {/* 项目信息 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-sm truncate">{project.name}</h3>
+                        <Badge variant="outline" className={`text-xs ${status.color}`}>
+                          {status.label}
+                        </Badge>
+                      </div>
 
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar className="w-3 h-3" />
-                      <span>
-                        {formatDistanceToNow(new Date(project.updatedAt), {
-                          addSuffix: true,
-                          locale: zhCN
-                        })}
-                      </span>
+                      {project.description && (
+                        <p className="text-xs text-muted-foreground truncate mb-2">
+                          {project.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        <span>
+                          {formatDistanceToNow(new Date(project.updatedAt), {
+                            addSuffix: true,
+                            locale: zhCN
+                          })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 操作按钮 */}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleOpenProjectFolder(project)
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                            }}
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                              <Eye className="w-4 h-4 mr-2" />
+                              查看详情
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // TODO: 实现编辑项目功能
+                              toast.info('编辑功能开发中...')
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            编辑项目
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenProjectFolder(project)
+                            }}
+                          >
+                            <FolderOpen className="w-4 h-4 mr-2" />
+                            打开文件夹
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // TODO: 实现删除项目功能
+                              toast.info('删除功能开发中...')
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            删除项目
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
-
-                  {/* 操作按钮 */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                </Link>
               </motion.div>
             )
           })}
