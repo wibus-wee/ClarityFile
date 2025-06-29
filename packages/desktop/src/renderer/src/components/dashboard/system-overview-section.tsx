@@ -1,6 +1,6 @@
-import { FolderOpen, FileText, Activity, Database, BookOpen } from 'lucide-react'
+import { FileText, Activity, Database } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useProjects, useFileSystemStats, useSystemInfo } from '@renderer/hooks/use-tipc'
+import { useProjects, useFileSystemStats } from '@renderer/hooks/use-tipc'
 
 interface StatCardProps {
   title: string
