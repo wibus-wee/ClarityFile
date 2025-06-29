@@ -82,7 +82,7 @@ export function GlobalDocumentVersionFormDrawer() {
     const project = projects.find((p) => p.id === documentVersionForm.document.projectId)
     if (!project) return null
 
-    // 创建符合 ProjectDetailsOutput 类型的对象
+    // 返回基本项目信息，其他数据将在导航后重新获取
     return {
       project: {
         ...project,
@@ -100,7 +100,6 @@ export function GlobalDocumentVersionFormDrawer() {
         utilizationRate: 0,
         budgetPools: []
       },
-
       competitions: [],
       tags: [],
       coverAsset: null,
@@ -114,7 +113,6 @@ export function GlobalDocumentVersionFormDrawer() {
         remainingBudget: 0,
         budgetUtilizationRate: 0,
         budgetPoolCount: 0,
-
         competitionCount: 0,
         tagCount: 0
       }

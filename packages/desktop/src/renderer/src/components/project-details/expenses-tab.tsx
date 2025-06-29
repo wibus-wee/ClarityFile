@@ -24,8 +24,6 @@ import {
   MoreHorizontal,
   User,
   Receipt,
-  TrendingUp,
-  TrendingDown,
   CheckCircle,
   Clock,
   BarChart3
@@ -51,21 +49,10 @@ interface ExpenseStatCardProps {
   value: string | number
   icon: React.ComponentType<{ className?: string }>
   color: string
-  trend?: {
-    value: number
-    isPositive: boolean
-  }
   delay?: number
 }
 
-function ExpenseStatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  trend,
-  delay = 0
-}: ExpenseStatCardProps) {
+function ExpenseStatCard({ title, value, icon: Icon, color, delay = 0 }: ExpenseStatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -78,23 +65,6 @@ function ExpenseStatCard({
         <div className={cn('p-2 rounded-lg', color)}>
           <Icon className="w-4 h-4" />
         </div>
-        {trend && (
-          <div
-            className={cn(
-              'flex items-center gap-1 text-xs',
-              trend.isPositive
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'
-            )}
-          >
-            {trend.isPositive ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
-            <span>{Math.abs(trend.value)}%</span>
-          </div>
-        )}
       </div>
 
       <div className="space-y-1">
@@ -261,22 +231,19 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
       title: '已使用经费',
       value: `¥${usedAmount.toLocaleString()}`,
       icon: DollarSign,
-      color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-      trend: { value: 12, isPositive: true }
+      color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
     },
     {
       title: '已报销',
       value: `¥${reimbursedAmount.toLocaleString()}`,
       icon: CheckCircle,
-      color: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400',
-      trend: { value: 8, isPositive: true }
+      color: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400'
     },
     {
       title: '待处理',
       value: `¥${pendingAmount.toLocaleString()}`,
       icon: Clock,
-      color: 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
-      trend: { value: 5, isPositive: false }
+      color: 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400'
     },
     {
       title: '报销率',
@@ -298,7 +265,6 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
             value={card.value}
             icon={card.icon}
             color={card.color}
-            trend={card.trend}
             delay={index * 0.1}
           />
         ))}

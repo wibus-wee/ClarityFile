@@ -2,17 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
-import {
-  Trophy,
-  Target,
-  Calendar,
-  TrendingUp,
-  Users,
-  Clock,
-  Plus,
-  ArrowRight,
-  Activity
-} from 'lucide-react'
+import { Trophy, Target, Calendar, Users, Clock, Plus, ArrowRight, Activity } from 'lucide-react'
 import { useCompetitionOverview, useUpcomingMilestones } from '@renderer/hooks/use-tipc'
 import { cn } from '@renderer/lib/utils'
 import { format } from 'date-fns'
@@ -28,14 +18,10 @@ interface StatCardProps {
   value: string | number
   description: string
   icon: React.ComponentType<{ className?: string }>
-  trend?: {
-    value: number
-    isPositive: boolean
-  }
   className?: string
 }
 
-function StatCard({ title, value, description, icon: Icon, trend, className }: StatCardProps) {
+function StatCard({ title, value, description, icon: Icon, className }: StatCardProps) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -58,23 +44,6 @@ function StatCard({ title, value, description, icon: Icon, trend, className }: S
           <Icon className="h-6 w-6 text-primary" />
         </div>
       </div>
-
-      {trend && (
-        <div className="mt-4 flex items-center gap-2">
-          <div
-            className={cn(
-              'flex items-center gap-1 text-sm font-medium',
-              trend.isPositive
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'
-            )}
-          >
-            <TrendingUp className={cn('h-4 w-4', !trend.isPositive && 'rotate-180')} />
-            {Math.abs(trend.value)}%
-          </div>
-          <span className="text-sm text-muted-foreground">较上月</span>
-        </div>
-      )}
     </motion.div>
   )
 }
@@ -197,7 +166,6 @@ export function CompetitionOverview() {
           value={stats?.totalSeries || 0}
           description="总共创建的赛事系列数量"
           icon={Trophy}
-          trend={{ value: 12, isPositive: true }}
         />
 
         <StatCard
@@ -205,7 +173,6 @@ export function CompetitionOverview() {
           value={stats?.totalMilestones || 0}
           description="所有赛事系列的里程碑总数"
           icon={Target}
-          trend={{ value: 8, isPositive: true }}
         />
 
         <StatCard
@@ -213,7 +180,6 @@ export function CompetitionOverview() {
           value={stats?.totalParticipations || 0}
           description="项目参与赛事的总次数"
           icon={Users}
-          trend={{ value: 15, isPositive: true }}
         />
 
         <StatCard

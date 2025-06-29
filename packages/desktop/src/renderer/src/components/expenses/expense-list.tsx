@@ -189,7 +189,7 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
                     </div>
 
                     {expense.notes && (
-                      <div className="mt-2 p-2 bg-muted/20 rounded text-xs text-muted-foreground">
+                      <div className="mt-2 p-2 bg-gradient-to-r from-muted to-transparent rounded-sm text-xs text-muted-foreground ">
                         <strong>备注：</strong> {expense.notes}
                       </div>
                     )}
