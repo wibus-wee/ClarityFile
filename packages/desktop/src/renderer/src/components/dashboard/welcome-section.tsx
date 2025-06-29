@@ -1,7 +1,6 @@
 import { useAppStore } from '@renderer/stores/app'
 import { Avatar } from '@heroui/react'
 import { Sparkles, Sun, Moon, Coffee } from 'lucide-react'
-
 export function WelcomeSection() {
   const user = useAppStore((state) => state.user)
 
@@ -141,8 +140,9 @@ export function WelcomeSection() {
         </div>
       </div>
 
-      {/* 今日提示 */}
-      <div className="mt-4 pt-4 border-t border-border/30">
+      {/* 今日提示与动态文案 */}
+      <div className="mt-4 pt-4 border-t border-border/30 space-y-3">
+        {/* 日期信息 */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
           <span>

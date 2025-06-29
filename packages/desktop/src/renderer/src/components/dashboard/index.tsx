@@ -5,6 +5,7 @@ import { RecentProjectsSection } from './recent-projects-section'
 import { RecentDocumentsSection } from './recent-documents-section'
 import { SystemOverviewSection } from './system-overview-section'
 import { QuickSearchSection } from './quick-search-section'
+import { DynamicQuoteSection } from './dynamic-quote-section'
 
 export function Dashboard() {
   return (
@@ -52,17 +53,17 @@ export function Dashboard() {
           </motion.div>
 
           {/* 最近文档 */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <RecentDocumentsSection />
-          </motion.div>
+          </motion.div> */}
         </div>
 
         {/* 右侧边栏 */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-4">
           {/* 快速搜索 */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -79,6 +80,14 @@ export function Dashboard() {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <SystemOverviewSection />
+          </motion.div>
+          {/* 动态文案 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
+            <DynamicQuoteSection />
           </motion.div>
         </div>
       </div>

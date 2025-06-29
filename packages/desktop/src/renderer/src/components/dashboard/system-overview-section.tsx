@@ -32,21 +32,18 @@ function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
 export function SystemOverviewSection() {
   const { data: projects } = useProjects()
   const { data: fileStats } = useFileSystemStats()
-  const { data: systemInfo } = useSystemInfo()
 
   // 计算统计数据
-  const projectCount = projects?.length || 0
   const fileCount = fileStats?.totalFiles || 0
   const activeProjects = projects?.filter((p) => p.status === 'active').length || 0
-  const documentCount = systemInfo?.documentCount || 0
 
   const stats = [
-    {
-      title: '总项目数',
-      value: projectCount,
-      icon: FolderOpen,
-      color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
-    },
+    // {
+    //   title: '总项目数',
+    //   value: projectCount,
+    //   icon: FolderOpen,
+    //   color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
+    // },
     {
       title: '活跃项目',
       value: activeProjects,
@@ -58,13 +55,13 @@ export function SystemOverviewSection() {
       value: fileCount,
       icon: FileText,
       color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'
-    },
-    {
-      title: '逻辑文档',
-      value: documentCount,
-      icon: BookOpen,
-      color: 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'
     }
+    // {
+    //   title: '逻辑文档',
+    //   value: documentCount,
+    //   icon: BookOpen,
+    //   color: 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'
+    // }
   ]
 
   return (
