@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { RouterProvider, createHashHistory, createRouter } from '@tanstack/react-router'
 import './index.css'
 
 // Import the generated route tree
@@ -14,9 +14,12 @@ import { DefaultErrorComponent } from './components/error-boundary'
 //   enabled: import.meta.env.DEV
 // })
 
+const hashHistory = createHashHistory()
+
 // Create a new router instance
 const router = createRouter({
   routeTree,
+  history: hashHistory,
   defaultErrorComponent: DefaultErrorComponent
 })
 
