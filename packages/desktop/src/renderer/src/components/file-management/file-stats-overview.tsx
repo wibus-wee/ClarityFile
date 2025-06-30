@@ -54,9 +54,6 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
     }
   }
 
-  // 计算最大的文件类型用于进度条
-  const maxTypeCount = Math.max(...stats.fileTypeDistribution.map((item) => item.count))
-
   return (
     <div className="space-y-4">
       {/* 总体统计 */}
@@ -101,79 +98,6 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
           </motion.div>
         )}
       </div>
-
-      {/* 文件类型分布 */}
-      {stats.fileTypeDistribution.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-background border border-border rounded-lg p-4"
-        >
-          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-            <Archive className="w-4 h-4" />
-            文件类型分布
-          </h3>
-          <div className="space-y-2">
-            {stats.fileTypeDistribution.slice(0, 5).map((item, index) => {
-              const TypeIcon = getTypeIcon(item.type)
-              const percentage = maxTypeCount > 0 ? (item.count / maxTypeCount) * 100 : 0
-
-              return (
-                <motion.div
-                  key={item.type}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <TypeIcon className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-                    <span className="text-sm font-medium capitalize truncate">{item.type}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
-                        transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                        className={cn(
-                          'h-full rounded-full',
-                          getTypeColor(item.type).includes('green') && 'bg-green-500',
-                          getTypeColor(item.type).includes('orange') && 'bg-orange-500',
-                          getTypeColor(item.type).includes('purple') && 'bg-purple-500',
-                          getTypeColor(item.type).includes('blue') && 'bg-blue-500',
-                          getTypeColor(item.type).includes('gray') && 'bg-gray-500'
-                        )}
-                      />
-                    </div>
-
-                    <Badge variant="secondary" className="text-xs min-w-fit">
-                      {item.count}
-                    </Badge>
-
-                    <span className="text-xs text-muted-foreground min-w-fit">
-                      {formatFileSize(item.size)}
-                    </span>
-                  </div>
-                </motion.div>
-              )
-            })}
-
-            {stats.fileTypeDistribution.length > 5 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9 }}
-                className="text-xs text-muted-foreground text-center pt-2"
-              >
-                还有 {stats.fileTypeDistribution.length - 5} 种文件类型...
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-      )}
     </div>
   )
 }

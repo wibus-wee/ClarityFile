@@ -4,19 +4,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
-import {
-  FolderOpen,
-  ArrowRight,
-  Calendar,
-  MoreHorizontal,
-  ExternalLink,
-  Edit,
-  Trash2,
-  Eye
-} from 'lucide-react'
+import { FolderOpen, ArrowRight, Calendar, MoreHorizontal, ExternalLink, Eye } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { useProjects, useOpenFileWithSystem } from '@renderer/hooks/use-tipc'

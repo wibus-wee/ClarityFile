@@ -57,9 +57,9 @@ type FileManagementStore = FileManagementState & FileManagementActions
 const initialState: FileManagementState = {
   selectedFile: null,
   selectedFiles: new Set(),
-  selectionMode: 'single',
+  selectionMode: 'multiple', // 默认为多选模式
   lastClickedIndex: null,
-  selectMode: false,
+  selectMode: true, // 默认启用选择模式
   isRenameDialogOpen: false,
   isDeleteDialogOpen: false,
   isBatchDeleteDialogOpen: false,
@@ -75,12 +75,12 @@ const initialState: FileManagementState = {
 export const useFileManagementStore = create<FileManagementStore>((set, get) => ({
   ...initialState,
 
-  // 选择操作
+  // 选择操作 - 简化为多选模式
   selectSingleFile: (fileId: string, fileIndex?: number) => {
     set({
       selectedFile: fileId,
-      selectedFiles: new Set(),
-      selectionMode: 'single',
+      selectedFiles: new Set([fileId]), // 单选时也添加到多选集合中
+      selectionMode: 'multiple', // 始终保持多选模式
       lastClickedIndex: fileIndex ?? null
     })
   },
@@ -109,13 +109,13 @@ export const useFileManagementStore = create<FileManagementStore>((set, get) => 
     if (allSelected) {
       set({
         selectedFiles: new Set(),
-        selectionMode: 'single',
+        selectionMode: 'multiple', // 保持多选模式
         selectedFile: null
       })
     } else {
       set({
         selectedFiles: new Set(files.map((f) => f.id)),
-        selectionMode: 'multiple',
+        selectionMode: 'multiple', // 保持多选模式
         selectedFile: null
       })
     }
@@ -142,35 +142,25 @@ export const useFileManagementStore = create<FileManagementStore>((set, get) => 
     set({
       selectedFile: null,
       selectedFiles: new Set(),
-      selectionMode: 'single',
+      selectionMode: 'multiple', // 保持多选模式
       lastClickedIndex: null
     })
   },
 
   setSelectionMode: (mode: 'single' | 'multiple') => {
-    if (mode === 'single') {
-      const { selectedFiles } = get()
-      const lastSelected = Array.from(selectedFiles).pop() || null
-      set({
-        selectionMode: 'single',
-        selectedFile: lastSelected,
-        selectedFiles: new Set()
-      })
-    } else {
-      const { selectedFile } = get()
-      set({
-        selectionMode: 'multiple',
-        selectedFiles: selectedFile ? new Set([selectedFile]) : new Set(),
-        selectedFile: null
-      })
-    }
+    // 简化逻辑：始终保持多选模式
+    const { selectedFile, selectedFiles } = get()
+    set({
+      selectionMode: 'multiple',
+      selectedFiles:
+        selectedFile && selectedFiles.size === 0 ? new Set([selectedFile]) : selectedFiles,
+      selectedFile: selectedFile
+    })
   },
 
   setSelectMode: (enabled: boolean) => {
-    set({ selectMode: enabled })
-    if (!enabled) {
-      get().clearSelection()
-    }
+    // 始终启用选择模式
+    set({ selectMode: true })
   },
 
   // Dialog控制

@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSearch, useNavigate } from '@tanstack/react-router'
 import {
   Search,
-  Grid3X3,
-  List,
   SlidersHorizontal,
   Upload,
   FolderOpen,
@@ -13,9 +11,7 @@ import {
   Video,
   Music,
   ArrowUp,
-  ArrowDown,
-  MousePointer2,
-  CheckSquare
+  ArrowDown
 } from 'lucide-react'
 import { Input } from '@clarity/shadcn/ui/input'
 import { Button } from '@clarity/shadcn/ui/button'
@@ -33,15 +29,12 @@ import { useFileActions } from '@renderer/hooks/use-file-actions'
 import { useFileManagementStore } from '@renderer/stores/file-management'
 import { MimeTypeUtils } from '@renderer/utils/mime-type-utils'
 import { FileListView } from './file-list-view'
-import { FileGridView } from './file-grid-view'
 import { FileStatsOverview } from './file-stats-overview'
 import { FileFilterSidebar } from './file-filter-sidebar'
 import { FileRenameDialog } from './file-rename-dialog'
 import { FileDeleteDialog } from './file-delete-dialog'
 import { FileInfoDrawer } from './file-info-drawer'
 import { QuickLookIndicator } from './quicklook-indicator'
-
-type ViewMode = 'grid' | 'list' | 'details'
 
 export function FileManagerPage() {
   const search = useSearch({ from: '/files' })
@@ -50,8 +43,7 @@ export function FileManagerPage() {
   const [showFilters, setShowFilters] = useState(true)
 
   const { handleUpload, handleFileAction } = useFileActions()
-  const { selectionMode, setSelectionMode, fileForInfo, isInfoDrawerOpen, closeInfoDrawer } =
-    useFileManagementStore()
+  const { fileForInfo, isInfoDrawerOpen, closeInfoDrawer } = useFileManagementStore()
 
   // 同步搜索框和URL参数
   useEffect(() => {
@@ -66,11 +58,6 @@ export function FileManagerPage() {
     })
   }
 
-  // 处理视图模式切换
-  const handleViewModeChange = (mode: ViewMode) => {
-    updateSearchParams({ view: mode })
-  }
-
   // 获取文件数据
   const { data: filesData, isLoading } = useGlobalFiles({
     search: search.search,
@@ -82,8 +69,6 @@ export function FileManagerPage() {
   })
 
   const { data: statsData } = useFileSystemStats()
-
-  const viewMode = search.view as ViewMode
 
   // 文件类型图标映射
   const getFileTypeIcon = (mimeType: string) => {
@@ -142,40 +127,8 @@ export function FileManagerPage() {
               </Button>
             </div>
 
-            {/* 视图切换和操作按钮 */}
+            {/* 操作按钮 */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* 视图切换 */}
-              <div className="flex items-center bg-muted rounded-md p-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleViewModeChange('grid')}
-                  className={cn(
-                    'h-8 px-3 rounded-md transition-all border-0',
-                    viewMode === 'grid'
-                      ? 'bg-background text-foreground shadow-sm border border-border/50'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                  )}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleViewModeChange('list')}
-                  className={cn(
-                    'h-8 px-3 rounded-md transition-all border-0',
-                    viewMode === 'list'
-                      ? 'bg-background text-foreground shadow-sm border border-border/50'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                  )}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <Separator orientation="vertical" className="h-6" />
-
               {/* 排序选择 */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -238,28 +191,6 @@ export function FileManagerPage() {
 
               <Separator orientation="vertical" className="h-6" />
 
-              {/* 选择模式切换 */}
-              <Button
-                variant={selectionMode === 'multiple' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectionMode(selectionMode === 'single' ? 'multiple' : 'single')}
-                className="transition-colors"
-              >
-                {selectionMode === 'single' ? (
-                  <>
-                    <MousePointer2 className="w-4 h-4 mr-2" />
-                    单选模式
-                  </>
-                ) : (
-                  <>
-                    <CheckSquare className="w-4 h-4 mr-2" />
-                    多选模式
-                  </>
-                )}
-              </Button>
-
-              <Separator orientation="vertical" className="h-6" />
-
               {/* 上传按钮 */}
               <Button size="sm" onClick={handleUpload}>
                 <Upload className="w-4 h-4 mr-2" />
@@ -306,20 +237,12 @@ export function FileManagerPage() {
             </div>
           ) : (
             <div className="h-full">
-              {viewMode === 'grid' ? (
-                <FileGridView
-                  files={filesData?.files || []}
-                  getFileTypeIcon={getFileTypeIcon}
-                  getFileTypeColor={getFileTypeColor}
-                />
-              ) : (
-                <FileListView
-                  files={filesData?.files || []}
-                  getFileTypeIcon={getFileTypeIcon}
-                  getFileTypeColor={getFileTypeColor}
-                  onFileAction={handleFileAction}
-                />
-              )}
+              <FileListView
+                files={filesData?.files || []}
+                getFileTypeIcon={getFileTypeIcon}
+                getFileTypeColor={getFileTypeColor}
+                onFileAction={handleFileAction}
+              />
             </div>
           )}
         </div>
