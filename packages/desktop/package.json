@@ -15,7 +15,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "start": "pnpm rebuild:sqlite3:electron electron-vite preview",
+    "start": "pnpm rebuild:sqlite3:electron && electron-vite preview",
     "dev": "pnpm rebuild:sqlite3:electron && electron-vite dev",
     "build": "npm run typecheck && pnpm rebuild:sqlite3:electron && electron-vite build",
     "package": "npm run build && electron-builder --mac --config",

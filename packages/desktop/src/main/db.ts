@@ -5,6 +5,7 @@ import * as schema from '../db/schema'
 import fs from 'fs'
 import { app } from 'electron'
 import path from 'path'
+import { consola } from 'consola'
 
 const dbPath = import.meta.env.DEV ? 'local.db' : path.join(app.getPath('userData'), 'data.db')
 
@@ -19,3 +20,5 @@ export const runMigrate = async () => {
     migrationsFolder: path.join(__dirname, '../../drizzle')
   })
 }
+
+consola.info(`DB Info: ${dbPath}`)
