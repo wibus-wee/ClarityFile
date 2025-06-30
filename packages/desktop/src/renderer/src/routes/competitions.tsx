@@ -16,7 +16,7 @@ import { CompetitionOverview } from '@renderer/components/competitions/competiti
 import { CompetitionSeriesList } from '@renderer/components/competitions/competition-series-list'
 import { CompetitionTimeline } from '@renderer/components/competitions/competition-timeline'
 import { UpcomingMilestones } from '@renderer/components/competitions/upcoming-milestones'
-import { CompetitionSeriesDialog } from '@renderer/components/competitions/dialogs/competition-series-dialog'
+import { CompetitionSeriesDrawer } from '@renderer/components/competitions/drawers/competition-series-drawer'
 import { CompetitionMilestoneDrawer } from '@renderer/components/competitions/drawers/competition-milestone-drawer'
 
 // 视图模式类型
@@ -227,7 +227,7 @@ function CompetitionsPage() {
       </AnimatePresence>
 
       {/* 对话框和抽屉 */}
-      <CompetitionSeriesDialog
+      <CompetitionSeriesDrawer
         open={createSeriesOpen}
         onOpenChange={setCreateSeriesOpen}
         onSuccess={handleSuccess}

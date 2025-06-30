@@ -13,7 +13,7 @@ import { Trophy, Target, MoreHorizontal, Edit, Trash2, Plus, Clock, List } from 
 import { useGetAllCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { CompetitionSeriesDialog } from './dialogs/competition-series-dialog'
+import { CompetitionSeriesDrawer } from './drawers/competition-series-drawer'
 import { DeleteCompetitionSeriesDialog } from './dialogs/delete-competition-series-dialog'
 import { CompetitionMilestoneList } from './competition-milestone-list'
 import type { CompetitionSeriesWithStatsOutput } from '../../../../main/types/competition-schemas'
@@ -339,8 +339,8 @@ export function CompetitionSeriesList({
         </AnimatePresence>
       </motion.div>
 
-      {/* 对话框组件 */}
-      <CompetitionSeriesDialog
+      {/* 抽屉组件 */}
+      <CompetitionSeriesDrawer
         series={editingSeries}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}

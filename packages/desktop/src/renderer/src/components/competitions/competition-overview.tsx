@@ -8,7 +8,7 @@ import { cn } from '@renderer/lib/utils'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useNavigate } from '@tanstack/react-router'
-import { CompetitionSeriesDialog } from './dialogs/competition-series-dialog'
+import { CompetitionSeriesDrawer } from './drawers/competition-series-drawer'
 import { CompetitionMilestoneDrawer } from './drawers/competition-milestone-drawer'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
 import { MilestoneWithProjectsOutput } from '@main/types/competition-schemas'
@@ -292,7 +292,7 @@ export function CompetitionOverview() {
       </div>
 
       {/* 对话框和抽屉组件 */}
-      <CompetitionSeriesDialog
+      <CompetitionSeriesDrawer
         open={createSeriesOpen}
         onOpenChange={setCreateSeriesOpen}
         onSuccess={handleSuccess}

@@ -196,33 +196,11 @@ export function RecentProjectsSection() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation()
-                              // TODO: 实现编辑项目功能
-                              toast.info('编辑功能开发中...')
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            编辑项目
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation()
                               handleOpenProjectFolder(project)
                             }}
                           >
                             <FolderOpen className="w-4 h-4 mr-2" />
                             打开文件夹
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // TODO: 实现删除项目功能
-                              toast.info('删除功能开发中...')
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            删除项目
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

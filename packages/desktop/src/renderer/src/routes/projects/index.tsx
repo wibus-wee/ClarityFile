@@ -17,7 +17,7 @@ import {
   ProjectCard,
   ProjectSkeleton,
   ProjectEmptyState,
-  ProjectDialog,
+  ProjectDrawer,
   type Project
 } from '@renderer/components/projects'
 
@@ -38,8 +38,8 @@ function ProjectsPage() {
 
   // 项目操作成功回调
   const handleProjectSuccess = () => {
-    // 项目创建/更新成功后的处理已经在 ProjectDialog 组件内部完成
-    // 这里只需要关闭对话框
+    // 项目创建/更新成功后的处理已经在 ProjectDrawer 组件内部完成
+    // 这里只需要关闭抽屉
     setIsCreateDialogOpen(false)
     setEditingProject(null)
   }
@@ -190,8 +190,8 @@ function ProjectsPage() {
         )}
       </AnimatePresence>
 
-      {/* 项目对话框 */}
-      <ProjectDialog
+      {/* 项目抽屉 */}
+      <ProjectDrawer
         open={isCreateDialogOpen || !!editingProject}
         onOpenChange={(open) => {
           if (!open) {
