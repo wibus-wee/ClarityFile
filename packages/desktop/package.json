@@ -1,9 +1,13 @@
 {
-  "name": "@clarity/desktop",
+  "name": "ClarityFile",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
-  "main": "./dist/main/index.js",
-  "author": "example.com",
+  "main": "./out/main/index.js",
+  "author": {
+    "email": "wibus@qq.com",
+    "name": "wibus-wee",
+    "url": "https://wibus.ren"
+  },
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
@@ -11,12 +15,11 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "start": "pnpm rebuild:sqlite3:electron electron-vite preview --outDir=dist",
-    "dev": "pnpm rebuild:sqlite3:electron && electron-vite dev --outDir=dist",
-    "build": "npm run typecheck && pnpm rebuild:sqlite3 && electron-vite build --outDir=dist",
+    "start": "pnpm rebuild:sqlite3:electron electron-vite preview",
+    "dev": "pnpm rebuild:sqlite3:electron && electron-vite dev",
+    "build": "npm run typecheck && pnpm rebuild:sqlite3:electron && electron-vite build",
+    "package": "npm run build && electron-builder --mac --config",
     "build:unpack": "npm run build",
-    "package": "electron-vite build --outDir=dist && electron-forge package",
-    "make": "electron-vite build --outDir=dist && electron-forge make",
     "rebuild:sqlite3:electron": "electron-rebuild -f -w better-sqlite3",
     "rebuild:sqlite3": "pnpm rebuild better-sqlite3",
     "drizzle-kit": "pnpm rebuild:sqlite3 && npx drizzle-kit",
@@ -71,6 +74,7 @@
     "c8": "^10.1.3",
     "drizzle-kit": "^0.31.1",
     "electron": "^35.1.5",
+    "electron-builder": "26.0.12",
     "electron-vite": "^3.1.0"
   }
 }
