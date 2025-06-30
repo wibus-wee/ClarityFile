@@ -16,7 +16,7 @@ import { useScrollTop } from '@renderer/hooks/use-scroll-top'
 import { NavActions } from '../nav-actions'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@renderer/lib/utils'
-import useBreadcrumb from '@renderer/hooks/use-breadcrumb'
+import { useBreadcrumb } from '@renderer/hooks/use-breadcrumb'
 import {
   GlobalFileDropListener,
   GlobalFileDropOverlay,

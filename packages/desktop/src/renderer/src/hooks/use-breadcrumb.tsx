@@ -8,7 +8,7 @@ interface BreadcrumbItem {
   isLast: boolean
 }
 
-const useBreadcrumb = () => {
+export const useBreadcrumb = () => {
   const location = useLocation()
   const paths = location.pathname.split('/').filter(Boolean)
 
@@ -86,5 +86,3 @@ const useBreadcrumb = () => {
 
   return breadcrumbs
 }
-
-export default useBreadcrumb
