@@ -147,7 +147,7 @@ export const useFileManagementStore = create<FileManagementStore>((set, get) => 
     })
   },
 
-  setSelectionMode: (mode: 'single' | 'multiple') => {
+  setSelectionMode: () => {
     // 简化逻辑：始终保持多选模式
     const { selectedFile, selectedFiles } = get()
     set({
@@ -158,7 +158,7 @@ export const useFileManagementStore = create<FileManagementStore>((set, get) => 
     })
   },
 
-  setSelectMode: (enabled: boolean) => {
+  setSelectMode: () => {
     // 始终启用选择模式
     set({ selectMode: true })
   },

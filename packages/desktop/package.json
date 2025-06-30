@@ -18,7 +18,7 @@
     "start": "pnpm rebuild:sqlite3:electron && electron-vite preview",
     "dev": "pnpm rebuild:sqlite3:electron && electron-vite dev",
     "build": "npm run typecheck && pnpm rebuild:sqlite3:electron && electron-vite build",
-    "package": "npm run build && electron-builder --mac --config",
+    "electron:mac": "npm run build && electron-builder --mac --config",
     "build:unpack": "npm run build",
     "rebuild:sqlite3:electron": "electron-rebuild -f -w better-sqlite3",
     "rebuild:sqlite3": "pnpm rebuild better-sqlite3",

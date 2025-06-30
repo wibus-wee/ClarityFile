@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion'
-import { Files, HardDrive, Image, FileText, Video, Music, Archive, TrendingUp } from 'lucide-react'
-import { Badge } from '@clarity/shadcn/ui/badge'
-import { cn } from '@renderer/lib/utils'
+import { Files, HardDrive, TrendingUp } from 'lucide-react'
 
 interface FileStatsOverviewProps {
   stats: {
@@ -20,38 +18,6 @@ export function FileStatsOverview({ stats }: FileStatsOverviewProps) {
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-  }
-
-  const getTypeIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'image':
-        return Image
-      case 'text':
-      case 'application':
-        return FileText
-      case 'video':
-        return Video
-      case 'audio':
-        return Music
-      default:
-        return Archive
-    }
-  }
-
-  const getTypeColor = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'image':
-        return 'text-green-600 bg-green-50 border-green-200'
-      case 'text':
-      case 'application':
-        return 'text-orange-600 bg-orange-50 border-orange-200'
-      case 'video':
-        return 'text-purple-600 bg-purple-50 border-purple-200'
-      case 'audio':
-        return 'text-blue-600 bg-blue-50 border-blue-200'
-      default:
-        return 'text-gray-600 bg-gray-50 border-gray-200'
-    }
   }
 
   return (
