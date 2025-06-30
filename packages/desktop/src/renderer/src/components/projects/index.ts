@@ -2,7 +2,7 @@
 export { ProjectCard } from './project-card'
 export { ProjectSkeleton } from './project-skeleton'
 export { ProjectEmptyState } from './project-empty-state'
-export { ProjectDialog } from './project-dialog'
+export { ProjectDrawer } from './project-drawer'
 
 // 类型定义
 export interface ProjectFormData {
