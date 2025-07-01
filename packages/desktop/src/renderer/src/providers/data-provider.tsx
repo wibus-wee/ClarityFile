@@ -6,7 +6,7 @@ export function DataProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     setUser({
-      name: 'Bingsong Wu',
+      name: 'Wibus Wu',
       email: 'i@wibus.ren',
       avatar: 'https://github.com/wibus-wee.png',
       role: 'founder'

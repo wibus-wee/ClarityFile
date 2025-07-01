@@ -5,6 +5,7 @@ import { CTASection } from './components/sections/cta-section'
 import { FeaturesSection } from './components/sections/features-section'
 import { HeroSection } from './components/sections/hero-section'
 import { ProblemsSection } from './components/sections/problems-section'
+import { ScreenshotsSection } from './components/sections/screenshots-section'
 
 // Main Dashboard Component
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Header />
         <main>
           <HeroSection />
+          <ScreenshotsSection />
           <ProblemsSection />
           <FeaturesSection />
           <BenefitsSection />
