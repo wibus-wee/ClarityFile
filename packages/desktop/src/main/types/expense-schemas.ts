@@ -35,6 +35,7 @@ export const createExpenseTrackingSchema = z.object({
 // 更新经费追踪 Schema
 export const updateExpenseTrackingSchema = z.object({
   id: z.string().min(1, '经费记录ID不能为空'),
+  projectId: z.string().min(1, '请选择项目').optional(),
   itemName: z
     .string()
     .min(1, '请填写报销项目')

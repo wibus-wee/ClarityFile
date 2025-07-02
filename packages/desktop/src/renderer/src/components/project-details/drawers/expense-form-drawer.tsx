@@ -203,13 +203,19 @@ export function ExpenseFormDrawer({
     }
   }, [mode, expense, projectId, prefilledData, preselectedFile, form])
 
-  // 当用户在创建模式下选择项目时，重置经费池选择
+  // 当用户选择项目时，重置经费池选择
   // 因为不同项目的经费池不同，之前选择的经费池可能不适用于新项目
   useEffect(() => {
-    if (mode === 'create' && watchedProjectId) {
-      form.setValue('budgetPoolId', '')
+    if (watchedProjectId) {
+      // 在创建模式下，或者在编辑模式下项目发生变化时，重置经费池选择
+      if (
+        mode === 'create' ||
+        (mode === 'edit' && expense && watchedProjectId !== expense.projectId)
+      ) {
+        form.setValue('budgetPoolId', '')
+      }
     }
-  }, [watchedProjectId, mode, form])
+  }, [watchedProjectId, mode, form, expense])
 
   // 处理文件选择
   const handleSelectFile = async () => {
@@ -282,6 +288,7 @@ export function ExpenseFormDrawer({
       } else if (expense) {
         await updateExpense({
           id: expense.id,
+          projectId: data.projectId,
           budgetPoolId: data.budgetPoolId,
           itemName: data.itemName,
           applicant: data.applicant,
@@ -334,8 +341,8 @@ export function ExpenseFormDrawer({
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* 项目选择（仅在创建模式且未指定项目时显示） */}
-              {mode === 'create' && !projectId && (
+              {/* 项目选择（在创建模式且未指定项目时显示，或在编辑模式下显示） */}
+              {(mode === 'create' && !projectId) || mode === 'edit' ? (
                 <FormField
                   control={form.control}
                   name="projectId"
@@ -360,7 +367,7 @@ export function ExpenseFormDrawer({
                     </FormItem>
                   )}
                 />
-              )}
+              ) : null}
 
               {/* 经费池选择 */}
               <FormField

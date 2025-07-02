@@ -16,7 +16,7 @@ export function SWRProvider({ children }: PropsWithChildren) {
         // 错误处理
         onError: (error, key) => {
           console.error('SWR Error:', error, 'Key:', key)
-          toast.error('数据加载失败: ', error.message)
+          toast.error('数据加载失败: ', error)
         },
 
         // // 成功处理

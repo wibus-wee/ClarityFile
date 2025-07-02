@@ -1,5 +1,5 @@
 import { db } from '../db'
-import { expenseTrackings, managedFiles, budgetPools } from '../../db/schema'
+import { expenseTrackings, managedFiles, budgetPools, projects } from '../../db/schema'
 import { eq, desc } from 'drizzle-orm'
 import type {
   CreateExpenseTrackingInput,
@@ -88,20 +88,40 @@ export class ExpenseTrackingService {
    * 更新经费记录
    */
   static async updateExpenseTracking(input: UpdateExpenseTrackingInput) {
-    // 如果要更新经费池，需要验证经费池是否属于该记录的项目
-    if (input.budgetPoolId !== undefined) {
-      // 先获取当前经费记录的项目ID
-      const currentRecord = await db
-        .select({ projectId: expenseTrackings.projectId })
-        .from(expenseTrackings)
-        .where(eq(expenseTrackings.id, input.id))
+    // 先获取当前经费记录的信息
+    const currentRecord = await db
+      .select({
+        projectId: expenseTrackings.projectId,
+        budgetPoolId: expenseTrackings.budgetPoolId
+      })
+      .from(expenseTrackings)
+      .where(eq(expenseTrackings.id, input.id))
+      .limit(1)
+
+    if (!currentRecord[0]) {
+      throw new Error('经费记录不存在')
+    }
+
+    // 确定最终的项目ID（如果更新了项目，使用新项目ID，否则使用当前项目ID）
+    const finalProjectId =
+      input.projectId !== undefined ? input.projectId : currentRecord[0].projectId
+
+    // 如果更新了项目，验证新项目是否存在
+    if (input.projectId !== undefined && input.projectId !== currentRecord[0].projectId) {
+      const project = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, input.projectId))
         .limit(1)
 
-      if (!currentRecord[0]) {
-        throw new Error('经费记录不存在')
+      if (!project[0]) {
+        throw new Error('指定的项目不存在')
       }
+    }
 
-      // 验证新的经费池是否属于该项目
+    // 验证经费池的逻辑
+    if (input.budgetPoolId !== undefined) {
+      // 验证新的经费池是否存在
       const budgetPool = await db
         .select()
         .from(budgetPools)
@@ -112,8 +132,22 @@ export class ExpenseTrackingService {
         throw new Error('指定的经费池不存在')
       }
 
-      if (budgetPool[0].projectId !== currentRecord[0].projectId) {
-        throw new Error('经费池不属于该经费记录的项目')
+      // 验证经费池是否属于最终的项目
+      if (budgetPool[0].projectId !== finalProjectId) {
+        throw new Error('经费池不属于指定的项目')
+      }
+    } else if (input.projectId !== undefined && input.projectId !== currentRecord[0].projectId) {
+      // 如果更新了项目但没有更新经费池，需要验证当前经费池是否属于新项目
+      if (currentRecord[0].budgetPoolId) {
+        const currentBudgetPool = await db
+          .select()
+          .from(budgetPools)
+          .where(eq(budgetPools.id, currentRecord[0].budgetPoolId))
+          .limit(1)
+
+        if (currentBudgetPool[0] && currentBudgetPool[0].projectId !== finalProjectId) {
+          throw new Error('当前经费池不属于新项目，请同时更新经费池')
+        }
       }
     }
 
@@ -121,6 +155,7 @@ export class ExpenseTrackingService {
       updatedAt: new Date()
     }
 
+    if (input.projectId !== undefined) updateData.projectId = input.projectId
     if (input.itemName !== undefined) updateData.itemName = input.itemName
     if (input.budgetPoolId !== undefined) updateData.budgetPoolId = input.budgetPoolId
     if (input.applicant !== undefined) updateData.applicant = input.applicant

@@ -518,9 +518,16 @@ export function useUpdateExpenseTracking() {
       mutate((key) => Array.isArray(key) && key[0] === 'project-details')
       // 重新验证全局经费数据
       mutate('all-expenses')
-      // 重新验证项目经费池数据（需要从结果中获取projectId）
+      mutate('global-budget-overview')
+      // 重新验证项目经费池数据
       mutate((key) => Array.isArray(key) && key[0] === 'project-budget-pools')
       mutate((key) => Array.isArray(key) && key[0] === 'project-budget-overview')
+      // 如果更新了项目ID，需要重新验证新项目的数据
+      if (arg.projectId) {
+        mutate(['project-details', arg.projectId])
+        mutate(['project-budget-pools', arg.projectId])
+        mutate(['project-budget-overview', arg.projectId])
+      }
       return result
     }
   )
