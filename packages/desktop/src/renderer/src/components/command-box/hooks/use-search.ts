@@ -3,7 +3,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import { useRouter } from '@tanstack/react-router'
 import { SearchEngine } from '../utils/search-engine'
 import { useCommandBox } from '../stores/command-box-store'
-import { useProjects, useGlobalFiles } from '@renderer/hooks/use-tipc'
+import { useProjects, useGlobalFiles, useAllDocuments } from '@renderer/hooks/use-tipc'
 import type { SearchableItem, SearchResult, SearchOptions } from '../types/command-box.types'
 
 /**
@@ -19,6 +19,7 @@ export function useSearch(query: string, options?: SearchOptions) {
   // 数据源 hooks
   const { data: projects } = useProjects()
   const { data: files } = useGlobalFiles()
+  const { data: documents } = useAllDocuments()
 
   // 搜索引擎实例
   const searchEngine = useMemo(() => {
@@ -65,6 +66,33 @@ export function useSearch(query: string, options?: SearchOptions) {
       })
     }
 
+    // 文档数据
+    if (documents) {
+      documents.forEach((document) => {
+        items.push({
+          id: `document-${document.id}`,
+          type: 'document',
+          title: document.name,
+          description: document.description || '',
+          content: document.type, // 将文档类型作为可搜索内容
+          tags: [document.name, document.type, document.description].filter((tag): tag is string =>
+            Boolean(tag)
+          ),
+          metadata: {
+            documentType: document.type,
+            status: document.status,
+            projectId: document.projectId,
+            currentOfficialVersionId: document.currentOfficialVersionId,
+            defaultStoragePathSegment: document.defaultStoragePathSegment,
+            createdAt: document.createdAt,
+            updatedAt: document.updatedAt
+          },
+          createdAt: document.createdAt.toISOString(),
+          updatedAt: document.updatedAt.toISOString()
+        })
+      })
+    }
+
     // 文件数据
     if (files) {
       files.files.forEach((file) => {
@@ -88,7 +116,7 @@ export function useSearch(query: string, options?: SearchOptions) {
       })
     }
     return items
-  }, [projects, files])
+  }, [projects, documents, files])
 
   // 防抖搜索函数
   const debouncedSearch = useDebouncedCallback(
@@ -207,6 +235,21 @@ export function useSearchActions() {
           // 跳转到项目详情
           const projectId = result.id.replace('project-', '')
           router.navigate({ to: `/projects/${projectId}` })
+          break
+        }
+
+        case 'document': {
+          // 跳转到项目详情页面的文档Tab
+          const projectId = result.metadata?.projectId
+          if (projectId) {
+            router.navigate({
+              to: `/projects/${projectId}`,
+              hash: `document-${result.id.replace('document-', '')}`
+            })
+          } else {
+            // 如果没有项目ID，跳转到项目列表页面
+            router.navigate({ to: '/projects' })
+          }
           break
         }
 
