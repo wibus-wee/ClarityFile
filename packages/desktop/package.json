@@ -45,6 +45,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.43.1",
     "electron-updater": "^6.3.9",
+    "fuse.js": "7.1.0",
     "mime-types": "^3.0.1",
     "nuqs": "^2.4.3",
     "react-compiler-runtime": "19.1.0-rc.2",
@@ -52,6 +53,7 @@
     "react-scan": "^0.3.4",
     "sonner": "^2.0.3",
     "swr": "^2.3.3",
+    "use-debounce": "10.0.5",
     "vaul": "^1.1.2",
     "zod": "^3.25.20",
     "zustand": "^5.0.5"
