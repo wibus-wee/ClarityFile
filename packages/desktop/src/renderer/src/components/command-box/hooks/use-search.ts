@@ -167,12 +167,29 @@ export function useSearch(query: string, options?: SearchOptions) {
     [searchEngine]
   )
 
+  // 转换搜索结果为 CommandItem 格式
+  const getSearchCommandItems = useCallback(
+    (executeSearchAction: (result: SearchResult) => void) => {
+      return searchResults.map((result) => ({
+        id: result.id,
+        type: 'search-result' as const,
+        title: result.title,
+        description: result.description,
+        icon: undefined,
+        action: () => executeSearchAction(result),
+        metadata: result
+      }))
+    },
+    [searchResults]
+  )
+
   return {
     searchResults,
     isSearching,
     highlightText,
     recordUsage,
-    totalResults: searchResults.length
+    totalResults: searchResults.length,
+    getSearchCommandItems
   }
 }
 

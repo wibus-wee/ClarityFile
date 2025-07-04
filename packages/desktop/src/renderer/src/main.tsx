@@ -8,8 +8,6 @@ import { routeTree } from './routeTree.gen'
 import { DefaultErrorComponent } from './components/error-boundary'
 
 import { scan } from 'react-scan'
-
-// Use React Scan to optimize app
 scan({
   enabled: import.meta.env.DEV
 })

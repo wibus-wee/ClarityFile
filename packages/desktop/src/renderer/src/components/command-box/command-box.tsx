@@ -33,20 +33,13 @@ export function CommandBox() {
   } = useCommandBox()
 
   // 搜索功能
-  const { searchResults, isSearching, highlightText } = useSearch(searchQuery)
+  const { searchResults, isSearching, highlightText, getSearchCommandItems } =
+    useSearch(searchQuery)
   const { executeSearchAction } = useSearchActions()
 
   // 获取显示的项目列表
   const allItems = searchQuery.trim()
-    ? searchResults.map((result) => ({
-        id: result.id,
-        type: 'search-result' as const,
-        title: result.title,
-        description: result.description,
-        icon: undefined,
-        action: () => executeSearchAction(result),
-        metadata: result
-      }))
+    ? getSearchCommandItems(executeSearchAction)
     : getAllVisibleItems()
 
   // 键盘导航
