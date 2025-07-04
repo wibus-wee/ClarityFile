@@ -25,6 +25,7 @@ export function CommandBox() {
     selectedIndex,
     close,
     setSearchQuery,
+    setSelectedIndex,
     selectNext,
     selectPrevious,
     selectItem,
@@ -51,11 +52,7 @@ export function CommandBox() {
   // 键盘导航
   const { handleKeyDown } = useKeyboard({
     selectedIndex,
-    setSelectedIndex: (index) => {
-      // 直接使用 store 中的 setSelectedIndex 方法
-      const store = useCommandBox()
-      store.setSelectedIndex(index)
-    },
+    setSelectedIndex,
     totalItems: allItems.length,
     onSelect: selectItem,
     onClose: close
@@ -120,36 +117,78 @@ export function CommandBox() {
   if (!isOpen) return null
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
+        transition={{
+          duration: 0.2,
+          ease: [0.25, 0.46, 0.45, 0.94] // macOS 风格的缓动函数
+        }}
         className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] bg-black/20 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: -20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -20 }}
-          transition={{
-            duration: 0.2,
-            ease: [0.4, 0.0, 0.2, 1]
+          initial={{
+            opacity: 0,
+            scale: 0.9,
+            y: -30
           }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0
+          }}
+          exit={{
+            opacity: 0,
+            scale: 0.95,
+            y: -20
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 30,
+            mass: 0.8,
+            opacity: { duration: 0.2 }
+          }}
+          style={{ willChange: 'transform, opacity' }} // GPU 加速
           className={cn(
             'w-full max-w-2xl mx-4',
             'bg-card/95 backdrop-blur-xl',
             'border border-border/20',
             'rounded-xl shadow-2xl',
-            'overflow-hidden'
+            'overflow-hidden',
+            // macOS 风格的阴影
+            'shadow-black/10 dark:shadow-black/30'
           )}
           onClick={(e) => e.stopPropagation()}
         >
           <Command className="bg-transparent">
             {/* 搜索输入框 */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-border/10">
-              <Search className="w-5 h-5 text-muted-foreground shrink-0" />
+            <motion.div
+              className="flex items-center gap-3 px-4 py-3 border-b border-border/10"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 500,
+                damping: 35,
+                delay: 0.1
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 600,
+                  damping: 25,
+                  delay: 0.15
+                }}
+              >
+                <Search className="w-5 h-5 text-muted-foreground shrink-0" />
+              </motion.div>
               <input
                 ref={inputRef}
                 value={searchQuery}
@@ -160,19 +199,67 @@ export function CommandBox() {
                   'flex-1 bg-transparent',
                   'text-sm placeholder:text-muted-foreground',
                   'outline-none border-none',
-                  'focus:outline-none focus:ring-0'
+                  'focus:outline-none focus:ring-0',
+                  'transition-all duration-200'
                 )}
               />
-              {isSearching && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
-            </div>
+              <AnimatePresence>
+                {isSearching && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 500,
+                      damping: 30
+                    }}
+                  >
+                    <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
 
             {/* 命令列表 */}
-            <div ref={listRef} className="max-h-[400px] overflow-y-auto">
+            <motion.div
+              ref={listRef}
+              className="max-h-[400px] overflow-y-auto"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 30,
+                delay: 0.2
+              }}
+            >
               <Command.List>
                 {allItems.length === 0 ? (
-                  <CommandEmpty searchQuery={searchQuery} />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 25,
+                      delay: 0.3
+                    }}
+                  >
+                    <CommandEmpty searchQuery={searchQuery} />
+                  </motion.div>
                 ) : (
-                  <div className="py-2">
+                  <motion.div
+                    className="py-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 30,
+                      delay: 0.25
+                    }}
+                  >
                     {searchQuery.trim() ? (
                       // 搜索结果
                       <CommandGroup title={`搜索结果 (${allItems.length})`}>
@@ -241,13 +328,23 @@ export function CommandBox() {
                         </CommandGroup>
                       </>
                     )}
-                  </div>
+                  </motion.div>
                 )}
               </Command.List>
-            </div>
+            </motion.div>
 
             {/* 底部提示 */}
-            <div className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground bg-muted/20 border-t border-border/10">
+            <motion.div
+              className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground bg-muted/20 border-t border-border/10"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 25,
+                delay: 0.35
+              }}
+            >
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
                   <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">↑↓</kbd>
@@ -263,7 +360,7 @@ export function CommandBox() {
                 </span>
               </div>
               <div className="text-xs">{allItems.length} 个结果</div>
-            </div>
+            </motion.div>
           </Command>
         </motion.div>
       </motion.div>

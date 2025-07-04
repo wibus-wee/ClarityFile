@@ -72,8 +72,8 @@ export function useSearch(query: string, options?: SearchOptions) {
           id: `file-${file.id}`,
           type: 'file',
           title: file.originalFileName,
-          description: `${file.mimeType || 'Unknown'} • ${file.name}`,
-          tags: [file.mimeType || '', file.name].filter(Boolean),
+          description: file.name, // 只使用文件名作为描述，不包含 mimeType
+          tags: [file.name].filter(Boolean), // 移除 mimeType，只保留文件名
           path: file.physicalPath,
           metadata: {
             fileType: file.mimeType,

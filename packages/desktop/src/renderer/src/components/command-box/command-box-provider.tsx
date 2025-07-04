@@ -16,7 +16,6 @@ import { useCommandBox } from './stores/command-box-store'
 import { useGlobalKeyboard } from './hooks/use-keyboard'
 import { useSuggestions } from './hooks/use-suggestions'
 import { useGlobalDrawersStore } from '@renderer/stores/global-drawers'
-import { useImportAssistantStore } from '@renderer/stores/import-assistant'
 import type { NavigationItem, ActionItem } from './types/command-box.types'
 
 interface CommandBoxProviderProps {
@@ -33,10 +32,10 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
 
   // 全局状态管理
   const { openExpenseForm, openDocumentForm } = useGlobalDrawersStore()
-  const { openImportAssistant } = useImportAssistantStore()
+  // const { openImportAssistant } = useImportAssistantStore() // 暂时未使用
 
   // 智能建议
-  const { isGenerating } = useSuggestions()
+  useSuggestions() // 自动运行智能建议生成
 
   // 全局快捷键
   useGlobalKeyboard(toggle)
