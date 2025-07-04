@@ -1,13 +1,5 @@
 import { Button } from '@clarity/shadcn/ui/button'
-import {
-  FolderPlus,
-  FileText,
-  Upload,
-  Settings,
-  Trophy,
-  CreditCard,
-  ArrowRight
-} from 'lucide-react'
+import { FolderPlus, FileText, Upload, Settings, Trophy, CreditCard } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 
@@ -72,12 +64,12 @@ export function QuickActionsSection() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">快速操作</h2>
-        <Button variant="ghost" size="sm" asChild>
+        {/* <Button variant="ghost" size="sm" asChild>
           <Link to="/settings">
             查看全部
             <ArrowRight className="w-4 h-4 ml-1" />
           </Link>
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
