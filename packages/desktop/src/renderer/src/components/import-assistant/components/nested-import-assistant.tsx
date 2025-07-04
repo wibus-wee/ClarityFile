@@ -96,8 +96,9 @@ export function NestedImportAssistant() {
                         {formatFileSize(file.size)} • {file.extension.toUpperCase()}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {file.type || '未知类型'}
+                    {/* type 过长的时候，省略号 */}
+                    <Badge variant="outline" className="max-w-[250px]">
+                      <span className="truncate max-w-[200px]">{file.type || '未知类型'}</span>
                     </Badge>
                   </motion.div>
                 )
