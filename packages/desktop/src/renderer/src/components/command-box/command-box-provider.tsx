@@ -13,9 +13,9 @@ import {
   DollarSign
 } from 'lucide-react'
 import { useCommandBox } from './stores/command-box-store'
-import { useGlobalKeyboard } from './hooks/use-keyboard'
 import { useSuggestions } from './hooks/use-suggestions'
 import { useGlobalDrawersStore } from '@renderer/stores/global-drawers'
+import { ShortcutProvider, Shortcut } from '@renderer/components/shortcuts'
 import type { NavigationItem, ActionItem } from './types/command-box.types'
 
 interface CommandBoxProviderProps {
@@ -36,9 +36,6 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
 
   // 智能建议
   useSuggestions() // 自动运行智能建议生成
-
-  // 全局快捷键
-  useGlobalKeyboard(toggle)
 
   // 初始化导航项目
   useEffect(() => {
@@ -287,5 +284,14 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
     }
   }, [router.state.location.pathname, addRecentItem])
 
-  return <>{children}</>
+  return (
+    <ShortcutProvider scope="global">
+      {/* 全局 Command Box 快捷键 */}
+      <Shortcut shortcut={['cmd', 'k']} scope="global" description="打开命令面板" priority={100}>
+        <div style={{ display: 'none' }} onClick={toggle} />
+      </Shortcut>
+
+      {children}
+    </ShortcutProvider>
+  )
 }

@@ -33,7 +33,6 @@ function ErrorTestPage() {
         <h1 className="text-3xl font-bold">错误边界测试页面</h1>
         <p className="text-muted-foreground mt-2">这个页面用于测试不同类型的错误边界组件</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 路由错误测试 */}
         <Card>
@@ -177,7 +176,6 @@ function ErrorTestPage() {
           </CardContent>
         </Card>
       </div>
-
       {/* 使用说明 */}
       <Card>
         <CardHeader>

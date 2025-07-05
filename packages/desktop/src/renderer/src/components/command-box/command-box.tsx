@@ -4,7 +4,7 @@ import { Command } from 'cmdk'
 import { Search, Loader2 } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { useCommandBox } from './stores/command-box-store'
-import { useKeyboard, useSearchKeyboard } from './hooks/use-keyboard'
+import { useCommandBoxKeyboard, useCommandBoxSearchKeyboard } from './hooks/use-keyboard'
 import { useSearch, useSearchActions } from './hooks/use-search'
 import { CommandGroup } from './components/command-group'
 import { CommandItem } from './components/command-item'
@@ -43,7 +43,7 @@ export function CommandBox() {
     : getAllVisibleItems()
 
   // 键盘导航
-  const { handleKeyDown } = useKeyboard({
+  const { handleKeyDown } = useCommandBoxKeyboard({
     selectedIndex,
     setSelectedIndex,
     totalItems: allItems.length,
@@ -52,7 +52,7 @@ export function CommandBox() {
   })
 
   // 搜索输入框键盘处理
-  const { handleKeyDown: handleSearchKeyDown } = useSearchKeyboard({
+  const { handleKeyDown: handleSearchKeyDown } = useCommandBoxSearchKeyboard({
     onArrowDown: selectNext,
     onArrowUp: selectPrevious,
     onEnter: () => selectItem(selectedIndex),

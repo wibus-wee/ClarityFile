@@ -1,4 +1,4 @@
-import { LifeBuoy, Send } from 'lucide-react'
+import { AlertTriangle, LifeBuoy, Send } from 'lucide-react'
 
 import { NavMain } from '@renderer/components/nav-main'
 import { NavSecondary } from '@renderer/components/nav-secondary'
@@ -28,12 +28,12 @@ const data = {
       title: '意见反馈',
       url: '#',
       icon: Send
+    },
+    {
+      title: '错误测试',
+      url: '#/error-test',
+      icon: AlertTriangle
     }
-    // {
-    //   title: '错误测试',
-    //   url: '/error-test',
-    //   icon: AlertTriangle
-    // }
   ],
   projects: [
     // {

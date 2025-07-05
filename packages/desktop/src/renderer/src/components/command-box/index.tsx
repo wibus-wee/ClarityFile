@@ -6,7 +6,12 @@
 export { CommandBox } from './command-box'
 export { CommandBoxProvider } from './command-box-provider'
 export { useCommandBox } from './stores/command-box-store'
-export { useKeyboard, useGlobalKeyboard, useSearchKeyboard } from './hooks/use-keyboard'
+export {
+  useKeyboard,
+  useSearchKeyboard,
+  useCommandBoxKeyboard,
+  useCommandBoxSearchKeyboard
+} from './hooks/use-keyboard'
 
 // 导出类型
 export type {
