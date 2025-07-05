@@ -23,6 +23,11 @@ export function ErrorBoundary({ error, reset, info }: ErrorBoundaryProps) {
 
   return (
     <div className="flex items-center justify-center p-4 bg-background">
+      <style>{`
+        * {
+          user-select: initial;
+        }
+      `}</style>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
