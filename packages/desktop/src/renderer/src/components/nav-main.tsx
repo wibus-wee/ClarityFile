@@ -51,7 +51,7 @@ export function NavMain({
                     asChild
                     tooltip={item.title}
                   >
-                    <Link to={item.url} viewTransition>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -107,7 +107,6 @@ export function NavMain({
                                           )
                                         : undefined
                                     }
-                                    viewTransition
                                   >
                                     <span>{subItem.title}</span>
                                   </Link>

@@ -154,7 +154,7 @@ export function RecentDocumentsSection() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">最近文档</h2>
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/projects" viewTransition>
+          <Link to="/projects">
             查看全部
             <ArrowRight className="w-4 h-4 ml-1" />
           </Link>
@@ -166,9 +166,7 @@ export function RecentDocumentsSection() {
           <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground mb-4">还没有文档</p>
           <Button asChild>
-            <Link to="/projects" viewTransition>
-              添加第一个文档
-            </Link>
+            <Link to="/projects">添加第一个文档</Link>
           </Button>
         </div>
       ) : (

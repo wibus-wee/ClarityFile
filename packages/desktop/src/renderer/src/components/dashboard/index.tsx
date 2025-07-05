@@ -10,15 +10,10 @@ export function Dashboard() {
   return (
     <div className="container mx-auto">
       {/* 页面标题 */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8"
-      >
+      <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">仪表板</h1>
         <p className="text-muted-foreground mt-2">今日事今日毕，重要信息不错过</p>
-      </motion.div>
+      </div>
 
       {/* 主要内容区域 */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -28,7 +23,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
           >
             <WelcomeSection />
           </motion.div>
@@ -37,7 +32,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
           >
             <QuickActionsSection />
           </motion.div>
@@ -46,7 +41,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
           >
             <RecentProjectsSection />
           </motion.div>
@@ -55,7 +50,7 @@ export function Dashboard() {
           {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
           >
             <RecentDocumentsSection />
           </motion.div> */}
@@ -67,7 +62,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
           >
             <QuickSearchSection />
           </motion.div>
@@ -76,7 +71,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
           >
             <SystemOverviewSection />
           </motion.div>
@@ -84,7 +79,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
           >
             <DynamicQuoteSection />
           </motion.div>

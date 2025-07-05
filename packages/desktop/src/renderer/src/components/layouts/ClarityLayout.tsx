@@ -64,9 +64,7 @@ export function ClarityLayout({ children }: PropsWithChildren) {
                             <BreadcrumbPage>{item.label}</BreadcrumbPage>
                           ) : (
                             <BreadcrumbLink asChild>
-                              <Link to={item.path} viewTransition>
-                                {item.label}
-                              </Link>
+                              <Link to={item.path}>{item.label}</Link>
                             </BreadcrumbLink>
                           )}
                         </BreadcrumbItem>

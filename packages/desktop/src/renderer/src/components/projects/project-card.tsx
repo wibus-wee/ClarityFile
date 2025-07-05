@@ -65,7 +65,6 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
         to="/projects/$projectId"
         params={{ projectId: project.id }}
         className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
-        viewTransition
       >
         <motion.div
           layoutId={`project-icon-${project.id}`}
