@@ -1,4 +1,3 @@
-import { toast } from 'sonner'
 import type { ShortcutRegistration, ShortcutConflict, ShortcutScope } from '../types/shortcut.types'
 import { generateShortcutId } from './key-formatter'
 

@@ -10,7 +10,7 @@ import type {
   ParsedShortcut,
   KeyboardEventMatch
 } from '../types/shortcut.types'
-import { detectConflicts } from '../utils/conflict-detector'
+import { detectConflicts, getConflictDescription } from '../utils/conflict-detector'
 import { formatShortcut } from '../utils/key-formatter'
 import { parseShortcut, matchesShortcut } from '../utils/key-parser'
 import { toast } from 'sonner'

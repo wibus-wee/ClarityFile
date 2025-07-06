@@ -182,6 +182,36 @@ export interface KeyboardEventMatch {
   event: KeyboardEvent
 }
 
+// ShortcutDisplay 组件 Props
+export interface ShortcutDisplayProps {
+  /** 快捷键组合 */
+  shortcut: ShortcutKey[]
+  /** 自定义样式类名 */
+  className?: string
+  /** 显示变体 */
+  variant?: 'default' | 'badge' | 'key'
+}
+
+// ShortcutOverlay 组件 Props
+export interface ShortcutOverlayProps {
+  /** 是否显示 overlay */
+  isVisible?: boolean
+  /** 自定义样式类名 */
+  className?: string
+  /** 动画持续时间 */
+  animationDuration?: number
+}
+
+// 快捷键分组
+export interface ShortcutGroup {
+  /** 分组名称 */
+  name: string
+  /** 分组中的快捷键 */
+  shortcuts: ShortcutRegistration[]
+  /** 分组优先级 */
+  priority?: number
+}
+
 // Hook 返回类型
 export interface UseShortcutRegistryReturn extends ShortcutRegistryActions {
   state: ShortcutRegistryState

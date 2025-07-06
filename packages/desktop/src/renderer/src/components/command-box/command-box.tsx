@@ -33,8 +33,7 @@ export function CommandBox() {
   } = useCommandBox()
 
   // 搜索功能
-  const { searchResults, isSearching, highlightText, getSearchCommandItems } =
-    useSearch(searchQuery)
+  const { isSearching, highlightText, getSearchCommandItems } = useSearch(searchQuery)
   const { executeSearchAction } = useSearchActions()
 
   // 获取显示的项目列表

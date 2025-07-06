@@ -46,6 +46,7 @@
     "drizzle-orm": "^0.43.1",
     "electron-updater": "^6.3.9",
     "fuse.js": "7.1.0",
+    "immer": "10.1.1",
     "mime-types": "^3.0.1",
     "nuqs": "^2.4.3",
     "react-compiler-runtime": "19.1.0-rc.2",

@@ -1,20 +1,27 @@
 /**
- * 统一快捷键管理系统
+ * 统一快捷键管理系统 (重构版)
  *
+ * 使用 zustand store 重构，解决 Hook 引用不稳定问题
  * 提供页面级和全局级的快捷键管理功能，支持：
  * - 快捷键包装器组件
  * - 自动 tooltip 提示
  * - 冲突检测和优先级管理
  * - macOS 风格快捷键显示
  * - 平台自适应
+ * - 性能优化和稳定的状态管理
  */
 
 // 主要组件
 export { Shortcut, ShortcutDisplay } from './shortcut'
 export { ShortcutProvider, useShortcuts, ShortcutDebugPanel } from './shortcut-provider'
 
-// Hooks
-export { useShortcutRegistry } from './hooks/use-shortcut-registry'
+// Store 和 Hooks
+export {
+  useShortcutStore,
+  useShortcutPreferences,
+  useShortcutConflicts,
+  useShortcutDebugInfo
+} from './stores/shortcut-store'
 
 // 工具函数
 export {
@@ -52,6 +59,7 @@ export type {
   ShortcutScope,
   Platform,
   ShortcutProps,
+  ShortcutDisplayProps,
   ShortcutProviderProps,
   ShortcutRegistration,
   ShortcutConflict,
@@ -62,3 +70,10 @@ export type {
   ParsedShortcut,
   KeyboardEventMatch
 } from './types/shortcut.types'
+
+// Store 类型
+export type {
+  ShortcutStore,
+  ShortcutStoreState,
+  ShortcutStoreActions
+} from './stores/shortcut-store'

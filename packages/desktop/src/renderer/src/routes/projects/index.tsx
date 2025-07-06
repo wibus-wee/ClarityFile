@@ -20,7 +20,7 @@ import {
   ProjectDrawer,
   type Project
 } from '@renderer/components/projects'
-import { Shortcut, ShortcutDisplay, ShortcutProvider } from '@renderer/components/shortcuts'
+import { Shortcut, ShortcutProvider } from '@renderer/components/shortcuts'
 
 export const Route = createFileRoute('/projects/')({
   component: ProjectsPage
