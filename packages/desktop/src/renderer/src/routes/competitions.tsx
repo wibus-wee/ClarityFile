@@ -18,6 +18,7 @@ import { CompetitionTimeline } from '@renderer/components/competitions/competiti
 import { UpcomingMilestones } from '@renderer/components/competitions/upcoming-milestones'
 import { CompetitionSeriesDrawer } from '@renderer/components/competitions/drawers/competition-series-drawer'
 import { CompetitionMilestoneDrawer } from '@renderer/components/competitions/drawers/competition-milestone-drawer'
+import { Shortcut, ShortcutKey, ShortcutProvider } from '@renderer/components/shortcuts'
 
 // 视图模式类型
 type ViewMode = 'overview' | 'series' | 'timeline' | 'upcoming'
@@ -93,152 +94,167 @@ function CompetitionsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* 页面头部 */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">赛事中心</h1>
-          <p className="text-muted-foreground">管理赛事系列、里程碑和项目参赛情况</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => setCreateMilestoneOpen(true)} className="gap-2">
-            <Target className="h-4 w-4" />
-            添加里程碑
-          </Button>
-
-          <Button onClick={() => setCreateSeriesOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            创建赛事系列
-          </Button>
-        </div>
-      </div>
-
-      {/* 视图切换标签 */}
-      <div className="border-b border-border">
-        <nav className="flex space-x-8" aria-label="Tabs">
-          {viewTabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setCurrentView(tab.id)}
-                className={cn(
-                  'group relative flex items-center gap-2 py-4 px-1 text-sm font-medium transition-colors',
-                  'border-b-2 border-transparent',
-                  'hover:text-foreground hover:border-border',
-                  currentView === tab.id
-                    ? 'text-foreground border-primary'
-                    : 'text-muted-foreground'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-
-                {/* 活动指示器 */}
-                {currentView === tab.id && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"
-                    initial={false}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 500,
-                      damping: 30
-                    }}
-                  />
-                )}
-              </button>
-            )
-          })}
-        </nav>
-      </div>
-
-      {/* 搜索和筛选栏 */}
-      {(currentView === 'series' || currentView === 'timeline') && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4"
-        >
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="搜索赛事系列或里程碑..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+    <ShortcutProvider scope="competitions-page">
+      <div className="space-y-8">
+        {/* 页面头部 */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">赛事中心</h1>
+            <p className="text-muted-foreground">管理赛事系列、里程碑和项目参赛情况</p>
           </div>
 
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="排序方式" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created">创建时间</SelectItem>
-              <SelectItem value="name">名称</SelectItem>
-              <SelectItem value="milestones">里程碑数量</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3">
+            <Shortcut shortcut={['cmd', 'm']} description="添加里程碑">
+              <Button
+                variant="outline"
+                onClick={() => setCreateMilestoneOpen(true)}
+                className="gap-2"
+              >
+                <Target className="h-4 w-4" />
+                添加里程碑
+              </Button>
+            </Shortcut>
 
-          <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="状态筛选" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部</SelectItem>
-              <SelectItem value="active">进行中</SelectItem>
-              <SelectItem value="completed">已完成</SelectItem>
-            </SelectContent>
-          </Select>
-        </motion.div>
-      )}
+            <Shortcut shortcut={['cmd', 'n']} description="创建赛事系列">
+              <Button onClick={() => setCreateSeriesOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                创建赛事系列
+              </Button>
+            </Shortcut>
+          </div>
+        </div>
 
-      {/* 主要内容区域 */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentView}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{
-            type: 'spring',
-            stiffness: 300,
-            damping: 30
-          }}
-        >
-          {currentView === 'overview' && <CompetitionOverview />}
-          {currentView === 'series' && (
-            <CompetitionSeriesList
-              searchQuery={searchQuery}
-              sortBy={sortBy}
-              filterStatus={filterStatus}
-              onCreateMilestone={handleCreateMilestone}
-              initialSeriesId={seriesId}
-              autoShowMilestones={showMilestones === 'true'}
-            />
-          )}
-          {currentView === 'timeline' && (
-            <CompetitionTimeline searchQuery={searchQuery} sortBy={sortBy} />
-          )}
-          {currentView === 'upcoming' && <UpcomingMilestones />}
-        </motion.div>
-      </AnimatePresence>
+        {/* 视图切换标签 */}
+        <div className="border-b border-border">
+          <nav className="flex space-x-8" aria-label="Tabs">
+            {viewTabs.map((tab, index) => {
+              const Icon = tab.icon
+              return (
+                <Shortcut
+                  shortcut={['cmd', (index + 1).toString() as ShortcutKey]}
+                  key={tab.id}
+                  description={tab.label}
+                >
+                  <button
+                    onClick={() => setCurrentView(tab.id)}
+                    className={cn(
+                      'group relative flex items-center gap-2 py-4 px-1 text-sm font-medium transition-colors',
+                      'border-b-2 border-transparent',
+                      'hover:text-foreground hover:border-border',
+                      currentView === tab.id
+                        ? 'text-foreground border-primary'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
 
-      {/* 对话框和抽屉 */}
-      <CompetitionSeriesDrawer
-        open={createSeriesOpen}
-        onOpenChange={setCreateSeriesOpen}
-        onSuccess={handleSuccess}
-      />
+                    {/* 活动指示器 */}
+                    {currentView === tab.id && (
+                      <motion.div
+                        layoutId="activeCompetitionTab"
+                        className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"
+                        initial={false}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 500,
+                          damping: 30
+                        }}
+                      />
+                    )}
+                  </button>
+                </Shortcut>
+              )
+            })}
+          </nav>
+        </div>
 
-      <CompetitionMilestoneDrawer
-        open={createMilestoneOpen}
-        onOpenChange={setCreateMilestoneOpen}
-        selectedSeriesId={selectedSeriesId || undefined}
-        onSuccess={handleSuccess}
-      />
-    </div>
+        {/* 搜索和筛选栏 */}
+        {(currentView === 'series' || currentView === 'timeline') && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4"
+          >
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="搜索赛事系列或里程碑..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="排序方式" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created">创建时间</SelectItem>
+                <SelectItem value="name">名称</SelectItem>
+                <SelectItem value="milestones">里程碑数量</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="状态筛选" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="active">进行中</SelectItem>
+                <SelectItem value="completed">已完成</SelectItem>
+              </SelectContent>
+            </Select>
+          </motion.div>
+        )}
+
+        {/* 主要内容区域 */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{
+              type: 'spring',
+              stiffness: 300,
+              damping: 30
+            }}
+          >
+            {currentView === 'overview' && <CompetitionOverview />}
+            {currentView === 'series' && (
+              <CompetitionSeriesList
+                searchQuery={searchQuery}
+                sortBy={sortBy}
+                filterStatus={filterStatus}
+                onCreateMilestone={handleCreateMilestone}
+                initialSeriesId={seriesId}
+                autoShowMilestones={showMilestones === 'true'}
+              />
+            )}
+            {currentView === 'timeline' && (
+              <CompetitionTimeline searchQuery={searchQuery} sortBy={sortBy} />
+            )}
+            {currentView === 'upcoming' && <UpcomingMilestones />}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* 对话框和抽屉 */}
+        <CompetitionSeriesDrawer
+          open={createSeriesOpen}
+          onOpenChange={setCreateSeriesOpen}
+          onSuccess={handleSuccess}
+        />
+
+        <CompetitionMilestoneDrawer
+          open={createMilestoneOpen}
+          onOpenChange={setCreateMilestoneOpen}
+          selectedSeriesId={selectedSeriesId || undefined}
+          onSuccess={handleSuccess}
+        />
+      </div>
+    </ShortcutProvider>
   )
 }

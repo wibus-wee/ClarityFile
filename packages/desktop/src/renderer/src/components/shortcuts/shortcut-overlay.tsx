@@ -118,7 +118,7 @@ export function ShortcutOverlay({ isVisible, className = '' }: ShortcutOverlayPr
               >
                 {/* 分组标题 - 更紧凑 */}
                 {group.name !== 'default' && (
-                  <div className="text-xs font-semibold text-muted-foreground/90 px-2 py-1 border-b border-border/30 mb-1 bg-muted/10">
+                  <div className="text-xs font-semibold text-muted-foreground/90 px-2 py-1 border-b border-border/30 mb-1">
                     {group.name}
                   </div>
                 )}
