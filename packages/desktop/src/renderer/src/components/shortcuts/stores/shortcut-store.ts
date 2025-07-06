@@ -320,7 +320,7 @@ export const useShortcutStore = create<ShortcutStore>()(
             set((state) => {
               state.overlay.isVisible = true
             })
-          }, 600)
+          }, 250)
         })
       },
 
