@@ -20,7 +20,8 @@ export function Shortcut({
   priority = 50,
   showTooltip = true,
   condition,
-  tooltipContent
+  tooltipContent,
+  action
 }: ShortcutProps) {
   const id = useId()
   const registry = useShortcuts()
@@ -48,11 +49,17 @@ export function Shortcut({
 
   // 提取子组件的 onClick 处理函数 - 使用 useCallback 稳定引用
   const childAction = useCallback(() => {
+    // 如果有自定义 action，优先使用自定义 action，不调用子组件的 onClick
+    if (action) {
+      return action()
+    }
+
+    // 如果没有自定义 action，则调用子组件的 onClick
     if (React.isValidElement(children) && (children.props as any).onClick) {
       return (children.props as any).onClick()
     }
-    console.warn('Shortcut 组件的子组件没有 onClick 处理函数')
-  }, [children])
+    console.warn('Shortcut 组件的子组件没有 onClick 处理函数.')
+  }, [children, action])
 
   // 更新 ref
   useEffect(() => {
@@ -143,14 +150,6 @@ export function Shortcut({
     )
   }, [children])
 
-  // 如果验证失败，只返回原始子组件
-  if (!validation.isValid) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`快捷键 ${formattedShortcut} 验证失败:`, validation.errors)
-    }
-    return children
-  }
-
   // 克隆子组件，添加必要的属性
   const enhancedChild = useMemo(() => {
     if (!React.isValidElement(children)) {
@@ -167,12 +166,25 @@ export function Shortcut({
           }
         : {}
 
+    // 如果有自定义 action，则移除子组件的 onClick 以避免重复执行
+    const childProps = { ...(children.props as any) }
+    if (action && childProps.onClick) {
+      delete childProps.onClick
+    }
+
     return cloneElement(children, {
       ...dataAttributes,
-      // 保持原有的 className 和其他属性
-      ...(children.props as any)
+      ...childProps
     })
-  }, [children, formattedShortcut, scope, enabled])
+  }, [children, formattedShortcut, scope, enabled, action])
+
+  // 如果验证失败，只返回原始子组件
+  if (!validation.isValid) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`快捷键 ${formattedShortcut} 验证失败:`, validation.errors)
+    }
+    return children
+  }
 
   // 如果不需要显示 tooltip 或子组件不支持，直接返回增强的子组件
   if (!shouldShowTooltip || !supportsTooltip) {
@@ -183,7 +195,7 @@ export function Shortcut({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{enhancedChild}</TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side="bottom">
         <p>{tooltipText}</p>
       </TooltipContent>
     </Tooltip>
