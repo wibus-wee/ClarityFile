@@ -13,6 +13,7 @@ import type {
 import { detectConflicts } from '../utils/conflict-detector'
 import { formatShortcut } from '../utils/key-formatter'
 import { parseShortcut, matchesShortcut } from '../utils/key-parser'
+import { toast } from 'sonner'
 
 /**
  * 快捷键注册表管理 Hook
@@ -221,6 +222,9 @@ export function useShortcutRegistry(scope?: string): UseShortcutRegistryReturn {
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && state.conflicts.length > 0) {
       console.warn('快捷键冲突检测到:', state.conflicts)
+      toast.warning(
+        `检测到 ${state.conflicts.length} 个快捷键冲突: ${state.conflicts.map(getConflictDescription).join(', ')}`
+      )
     }
   }, [state.conflicts])
 

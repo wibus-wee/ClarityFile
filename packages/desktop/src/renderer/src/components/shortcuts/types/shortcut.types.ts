@@ -130,6 +130,8 @@ export interface ShortcutProps {
   condition?: () => boolean
   /** 自定义 tooltip 内容 */
   tooltipContent?: string
+  /** 自定义快捷键执行函数 */
+  action?: () => void
 }
 
 // ShortcutProvider Props

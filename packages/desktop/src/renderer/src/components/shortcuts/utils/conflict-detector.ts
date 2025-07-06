@@ -1,3 +1,4 @@
+import { toast } from 'sonner'
 import type { ShortcutRegistration, ShortcutConflict, ShortcutScope } from '../types/shortcut.types'
 import { generateShortcutId } from './key-formatter'
 
@@ -92,6 +93,17 @@ export function resolveConflicts(conflicts: ShortcutConflict[]): {
           enabled: false
         })
       }
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '快捷键冲突解决:',
+        conflict.keys,
+        '保留:',
+        sortedRegistrations[0].id,
+        '禁用:',
+        disabled.map((reg) => reg.id)
+      )
     }
   })
 

@@ -20,6 +20,7 @@ import {
   ProjectDrawer,
   type Project
 } from '@renderer/components/projects'
+import { Shortcut, ShortcutDisplay, ShortcutProvider } from '@renderer/components/shortcuts'
 
 export const Route = createFileRoute('/projects/')({
   component: ProjectsPage
@@ -82,126 +83,130 @@ function ProjectsPage() {
   })
 
   return (
-    <div className="space-y-8">
-      {/* 页面头部 */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">项目</h1>
-          <p className="text-muted-foreground">管理您的所有项目，创建新项目并跟踪进度</p>
+    <ShortcutProvider scope="projects-list">
+      <div className="space-y-8">
+        {/* 页面头部 */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">项目</h1>
+            <p className="text-muted-foreground">管理您的所有项目，创建新项目并跟踪进度</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Shortcut shortcut={['cmd', 'n']}>
+              <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                新建项目
+              </Button>
+            </Shortcut>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            新建项目
-          </Button>
-        </div>
-      </div>
-
-      {/* 搜索和筛选栏 */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="搜索项目..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="pl-10"
-          />
-        </div>
-
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value="active">活跃</SelectItem>
-            <SelectItem value="archived">已归档</SelectItem>
-            <SelectItem value="on_hold">暂停</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* 项目列表 */}
-      <AnimatePresence mode="wait">
-        {projectsLoading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="divide-y divide-border/50"
-          >
-            {[...Array(6)].map((_, i) => (
-              <ProjectSkeleton key={i} viewMode="list" />
-            ))}
-          </motion.div>
-        ) : projectsError ? (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center py-12 text-center"
-          >
-            <div className="text-red-500 mb-2">加载项目失败</div>
-            <p className="text-sm text-muted-foreground">请检查网络连接或稍后重试</p>
-          </motion.div>
-        ) : filteredProjects && filteredProjects.length > 0 ? (
-          <motion.div
-            key="projects-list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="divide-y divide-border/50"
-          >
-            <AnimatePresence>
-              {filteredProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onEdit={openEditDialog}
-                  onDelete={handleDeleteProject}
-                  isDeleting={isDeletingProject}
-                  viewMode="list"
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-          >
-            <ProjectEmptyState
-              searchQuery={searchQuery}
-              statusFilter={statusFilter}
-              onCreateProject={() => setIsCreateDialogOpen(true)}
+        {/* 搜索和筛选栏 */}
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索项目..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="pl-10"
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
 
-      {/* 项目抽屉 */}
-      <ProjectDrawer
-        open={isCreateDialogOpen || !!editingProject}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsCreateDialogOpen(false)
-            setEditingProject(null)
-          }
-        }}
-        project={editingProject}
-        onSuccess={handleProjectSuccess}
-      />
-    </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="active">活跃</SelectItem>
+              <SelectItem value="archived">已归档</SelectItem>
+              <SelectItem value="on_hold">暂停</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 项目列表 */}
+        <AnimatePresence mode="wait">
+          {projectsLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="divide-y divide-border/50"
+            >
+              {[...Array(6)].map((_, i) => (
+                <ProjectSkeleton key={i} viewMode="list" />
+              ))}
+            </motion.div>
+          ) : projectsError ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center justify-center py-12 text-center"
+            >
+              <div className="text-red-500 mb-2">加载项目失败</div>
+              <p className="text-sm text-muted-foreground">请检查网络连接或稍后重试</p>
+            </motion.div>
+          ) : filteredProjects && filteredProjects.length > 0 ? (
+            <motion.div
+              key="projects-list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="divide-y divide-border/50"
+            >
+              <AnimatePresence>
+                {filteredProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onEdit={openEditDialog}
+                    onDelete={handleDeleteProject}
+                    isDeleting={isDeletingProject}
+                    viewMode="list"
+                  />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ProjectEmptyState
+                searchQuery={searchQuery}
+                statusFilter={statusFilter}
+                onCreateProject={() => setIsCreateDialogOpen(true)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 项目抽屉 */}
+        <ProjectDrawer
+          open={isCreateDialogOpen || !!editingProject}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsCreateDialogOpen(false)
+              setEditingProject(null)
+            }
+          }}
+          project={editingProject}
+          onSuccess={handleProjectSuccess}
+        />
+      </div>
+    </ShortcutProvider>
   )
 }
