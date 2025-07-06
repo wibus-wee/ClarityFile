@@ -93,7 +93,7 @@ function ProjectsPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Shortcut shortcut={['cmd', 'n']}>
+            <Shortcut shortcut={['cmd', 'n']} description="新建项目">
               <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
                 <Plus className="w-4 h-4" />
                 新建项目

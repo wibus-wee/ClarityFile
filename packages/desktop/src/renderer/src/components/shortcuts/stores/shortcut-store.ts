@@ -38,6 +38,13 @@ export interface ShortcutStoreState {
     enableConflictWarnings: boolean
     debugMode: boolean
   }
+
+  // Overlay 状态
+  overlay: {
+    isVisible: boolean
+    isLongPressing: boolean
+    longPressTimer: number | null
+  }
 }
 
 /**
@@ -78,6 +85,13 @@ export interface ShortcutStoreActions {
     activeScope: string | null
     registrationsByScope: Record<string, number>
   }
+
+  // Overlay 管理
+  showOverlay: () => void
+  hideOverlay: () => void
+  startLongPress: () => void
+  cancelLongPress: () => void
+  getGroupedShortcuts: () => ShortcutGroup[]
 }
 
 /**
@@ -98,6 +112,11 @@ const initialState: ShortcutStoreState = {
     enableTooltips: true,
     enableConflictWarnings: true,
     debugMode: false
+  },
+  overlay: {
+    isVisible: false,
+    isLongPressing: false,
+    longPressTimer: null
   }
 }
 
@@ -265,6 +284,107 @@ export const useShortcutStore = create<ShortcutStore>()(
           activeScope,
           registrationsByScope
         }
+      },
+
+      // Overlay 管理
+      showOverlay: () => {
+        set((state) => {
+          state.overlay.isVisible = true
+        })
+      },
+
+      hideOverlay: () => {
+        set((state) => {
+          state.overlay.isVisible = false
+          state.overlay.isLongPressing = false
+          if (state.overlay.longPressTimer) {
+            clearTimeout(state.overlay.longPressTimer)
+            state.overlay.longPressTimer = null
+          }
+        })
+      },
+
+      startLongPress: () => {
+        const { overlay } = get()
+
+        // 如果已经在长按中，不重复启动
+        if (overlay.isLongPressing) {
+          return
+        }
+
+        set((state) => {
+          state.overlay.isLongPressing = true
+
+          // 设置长按定时器 (600ms)
+          state.overlay.longPressTimer = window.setTimeout(() => {
+            set((state) => {
+              state.overlay.isVisible = true
+            })
+          }, 600)
+        })
+      },
+
+      cancelLongPress: () => {
+        set((state) => {
+          state.overlay.isLongPressing = false
+          if (state.overlay.longPressTimer) {
+            clearTimeout(state.overlay.longPressTimer)
+            state.overlay.longPressTimer = null
+          }
+        })
+      },
+
+      getGroupedShortcuts: () => {
+        const { registrations, activeScope } = get()
+        const allRegistrations = Array.from(registrations.values())
+
+        // 过滤当前作用域的快捷键
+        const visibleRegistrations = allRegistrations.filter((reg) => {
+          if (!reg.enabled) return false
+          if (reg.condition && !reg.condition()) return false
+
+          // 显示全局快捷键和当前作用域的快捷键
+          return reg.scope === 'global' || (activeScope && reg.scope === 'page')
+        })
+
+        // 按功能分组
+        const groups: Record<string, ShortcutRegistration[]> = {}
+
+        visibleRegistrations.forEach((reg) => {
+          // 根据描述或优先级分组
+          let groupName = '其他'
+
+          if (reg.description) {
+            if (reg.description.includes('创建') || reg.description.includes('新建')) {
+              groupName = '创建操作'
+            } else if (reg.description.includes('导入') || reg.description.includes('上传')) {
+              groupName = '文件操作'
+            } else if (reg.description.includes('搜索') || reg.description.includes('查找')) {
+              groupName = '搜索导航'
+            } else if (reg.description.includes('设置') || reg.description.includes('配置')) {
+              groupName = '设置'
+            } else if (reg.scope === 'global') {
+              groupName = '全局操作'
+            } else {
+              groupName = '页面操作'
+            }
+          }
+
+          if (!groups[groupName]) {
+            groups[groupName] = []
+          }
+          groups[groupName].push(reg)
+        })
+
+        // 转换为 ShortcutGroup 数组并排序
+        const result: ShortcutGroup[] = Object.entries(groups).map(([name, shortcuts]) => ({
+          name,
+          shortcuts: shortcuts.sort((a, b) => b.priority - a.priority),
+          priority: Math.max(...shortcuts.map((s) => s.priority))
+        }))
+
+        // 按组优先级排序
+        return result.sort((a, b) => (b.priority || 0) - (a.priority || 0))
       }
     })),
     {

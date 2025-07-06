@@ -198,8 +198,6 @@ export interface ShortcutOverlayProps {
   isVisible?: boolean
   /** 自定义样式类名 */
   className?: string
-  /** 动画持续时间 */
-  animationDuration?: number
 }
 
 // 快捷键分组

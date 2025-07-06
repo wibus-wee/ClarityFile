@@ -14,6 +14,7 @@
 // 主要组件
 export { Shortcut, ShortcutDisplay } from './shortcut'
 export { ShortcutProvider, useShortcuts, ShortcutDebugPanel } from './shortcut-provider'
+export { ShortcutOverlay, useShortcutOverlay } from './shortcut-overlay'
 
 // Store 和 Hooks
 export {
