@@ -59,24 +59,18 @@ export function useCommandBoxKeyboard({
         case '6':
         case '7':
         case '8':
-        case '9':
+        case '9': {
           event.preventDefault()
           const index = parseInt(event.key) - 1
           if (index < totalItems) {
             onSelect(index)
           }
           break
-
-        // Cmd/Ctrl + K 关闭（如果已经打开）
-        case 'k':
-          if (event.metaKey || event.ctrlKey) {
-            event.preventDefault()
-            onClose()
-          }
-          break
+        }
 
         default:
           // 其他键不处理，让输入框正常工作
+          // 注意：Cmd+K 全局快捷键已通过统一快捷键管理系统处理
           break
       }
     },
