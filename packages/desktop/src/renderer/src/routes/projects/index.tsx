@@ -116,9 +116,11 @@ function ProjectsPage() {
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
+            <Shortcut shortcut={['cmd', 'p']} description="筛选项目" showTooltip={false}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+            </Shortcut>
             <SelectContent>
               <SelectItem value="all">全部状态</SelectItem>
               <SelectItem value="active">活跃</SelectItem>

@@ -24,6 +24,15 @@ export {
   useShortcutDebugInfo
 } from './stores/shortcut-store'
 
+// 优化后的自定义 Hooks (遵循 React.dev 最佳实践)
+export {
+  useShortcutValidation,
+  useChildComponentHandler,
+  useShortcutRegistration,
+  useTooltipContent,
+  useShortcutRegistry
+} from './hooks'
+
 // 工具函数
 export {
   formatShortcut,
@@ -78,3 +87,12 @@ export type {
   ShortcutStoreState,
   ShortcutStoreActions
 } from './stores/shortcut-store'
+
+// 优化后的 Hook 类型
+export type {
+  ValidationResult,
+  ShortcutValidationConfig,
+  ChildComponentHandlerResult,
+  ShortcutRegistrationConfig,
+  TooltipContentConfig
+} from './hooks'
