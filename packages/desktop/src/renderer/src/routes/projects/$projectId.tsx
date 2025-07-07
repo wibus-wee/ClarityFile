@@ -15,6 +15,7 @@ import { ExpensesTab } from '@renderer/components/project-details/expenses-tab'
 import { BudgetPoolsTab } from '@renderer/components/project-details/budget-pools-tab'
 import { SettingsTab } from '@renderer/components/project-details/settings-tab'
 import { InlineNotFound } from '@renderer/components/not-found'
+import { Shortcut, ShortcutKey, ShortcutProvider } from '@renderer/components/shortcuts'
 
 // Tab类型定义
 type TabId = 'documents' | 'assets' | 'competitions' | 'expenses' | 'budget-pools' | 'settings'
@@ -92,100 +93,109 @@ function ProjectDetailsPage() {
   const { project } = projectDetails
 
   return (
-    <div className="flex flex-col h-full">
-      {/* 顶部导航栏 */}
-      {/* <div className="flex items-center gap-4 py-6 border-b border-border/50">
-        <Link
-          to="/projects"
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          返回项目列表
-        </Link>
-      </div> */}
-
-      {/* 项目头部信息 */}
-      <div className="py-6 pt-0 border-b border-border/50">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold">{project.name}</h1>
-              <Badge className={cn('text-xs', getStatusColor(project.status))}>
-                {getStatusText(project.status)}
-              </Badge>
-            </div>
-            {project.description && (
-              <p className="text-muted-foreground mb-4">{project.description}</p>
-            )}
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <span>创建时间：{new Date(project.createdAt).toLocaleDateString()}</span>
-              <span>更新时间：{new Date(project.updatedAt).toLocaleDateString()}</span>
-              {project.folderPath && <span>项目路径：{project.folderPath}</span>}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
-              <Edit className="w-4 h-4 mr-2" />
-              编辑
-            </Button>
-          </div>
-        </div>
-
-        {/* 项目统计信息 */}
-        <div className="mt-6">
-          <ProjectStatistics projectDetails={projectDetails} />
-        </div>
-      </div>
-
-      {/* Tab导航 */}
-      <div className="border-b border-border/50">
-        <div className="flex items-center">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors relative',
-                  isActive
-                    ? 'text-primary border-primary'
-                    : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {tab.label}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-primary/5"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Tab内容区域 */}
-      <div className="flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="min-h-[55vh] pt-6"
+    <ShortcutProvider scope="project-details-page">
+      <div className="flex flex-col h-full">
+        {/* 顶部导航栏 */}
+        {/* <div className="flex items-center gap-4 py-6 border-b border-border/50">
+          <Link
+            to="/projects"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
-            {renderTabContent(activeTab, projectDetails)}
-          </motion.div>
-        </AnimatePresence>
+            <ArrowLeft className="w-4 h-4" />
+            返回项目列表
+          </Link>
+        </div> */}
+
+        {/* 项目头部信息 */}
+        <div className="py-6 pt-0 border-b border-border/50">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl font-bold">{project.name}</h1>
+                <Badge className={cn('text-xs', getStatusColor(project.status))}>
+                  {getStatusText(project.status)}
+                </Badge>
+              </div>
+              {project.description && (
+                <p className="text-muted-foreground mb-4">{project.description}</p>
+              )}
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <span>创建时间：{new Date(project.createdAt).toLocaleDateString()}</span>
+                <span>更新时间：{new Date(project.updatedAt).toLocaleDateString()}</span>
+                {project.folderPath && <span>项目路径：{project.folderPath}</span>}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shortcut shortcut={['cmd', 'e']} description="编辑项目">
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  编辑
+                </Button>
+              </Shortcut>
+            </div>
+          </div>
+
+          {/* 项目统计信息 */}
+          <div className="mt-6">
+            <ProjectStatistics projectDetails={projectDetails} />
+          </div>
+        </div>
+
+        {/* Tab导航 */}
+        <div className="border-b border-border/50">
+          <div className="flex items-center">
+            {tabs.map((tab, index) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+
+              return (
+                <Shortcut
+                  shortcut={['cmd', (index + 1).toString() as ShortcutKey]}
+                  key={tab.id}
+                  description={tab.label}
+                >
+                  <button
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors relative',
+                      isActive
+                        ? 'text-primary border-primary'
+                        : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeProjectTab"
+                        className="absolute inset-0 bg-primary/5"
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                  </button>
+                </Shortcut>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Tab内容区域 */}
+        <div className="flex-1 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="min-h-[55vh] pt-6"
+            >
+              {renderTabContent(activeTab, projectDetails)}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </ShortcutProvider>
   )
 }
 
