@@ -12,6 +12,7 @@ import {
 } from '@renderer/components/settings/components'
 import { Settings, Folder, Tag, Archive, Trash2, AlertTriangle } from 'lucide-react'
 import { useUpdateProject, useDeleteProject } from '@renderer/hooks/use-tipc'
+import { Shortcut } from '@renderer/components/shortcuts'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { projectSettingsSchema } from '../../../../main/types/project-schemas'
@@ -93,44 +94,46 @@ export function SettingsTab({ projectDetails }: SettingsTabProps) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <SettingsForm
-          category="project"
-          schema={projectSettingsSchema}
-          defaultValues={defaultValues}
-          onSubmit={handleSaveSettings}
-          submitButtonText="保存项目设置"
-        >
-          {(form) => (
-            <>
-              <SettingsSection title="基本信息" description="配置项目的基本信息和元数据">
-                <SettingsInputField
-                  control={form.control}
-                  name="name"
-                  label="项目名称"
-                  description="项目的显示名称"
-                  placeholder="输入项目名称"
-                />
+        <Shortcut shortcut={['cmd', 's']} description="保存项目设置">
+          <SettingsForm
+            category="project"
+            schema={projectSettingsSchema}
+            defaultValues={defaultValues}
+            onSubmit={handleSaveSettings}
+            submitButtonText="保存项目设置"
+          >
+            {(form) => (
+              <>
+                <SettingsSection title="基本信息" description="配置项目的基本信息和元数据">
+                  <SettingsInputField
+                    control={form.control}
+                    name="name"
+                    label="项目名称"
+                    description="项目的显示名称"
+                    placeholder="输入项目名称"
+                  />
 
-                <SettingsTextareaField
-                  control={form.control}
-                  name="description"
-                  label="项目描述"
-                  description="项目的详细描述信息"
-                  placeholder="输入项目描述..."
-                />
+                  <SettingsTextareaField
+                    control={form.control}
+                    name="description"
+                    label="项目描述"
+                    description="项目的详细描述信息"
+                    placeholder="输入项目描述..."
+                  />
 
-                <SettingsSelectField
-                  control={form.control}
-                  name="status"
-                  label="项目状态"
-                  description="当前项目的状态"
-                  placeholder="选择项目状态"
-                  options={statusOptions}
-                />
-              </SettingsSection>
-            </>
-          )}
-        </SettingsForm>
+                  <SettingsSelectField
+                    control={form.control}
+                    name="status"
+                    label="项目状态"
+                    description="当前项目的状态"
+                    placeholder="选择项目状态"
+                    options={statusOptions}
+                  />
+                </SettingsSection>
+              </>
+            )}
+          </SettingsForm>
+        </Shortcut>
       </motion.div>
 
       <Separator />

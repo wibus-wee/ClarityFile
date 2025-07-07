@@ -37,6 +37,7 @@ import {
   Activity
 } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
+import { Shortcut } from '@renderer/components/shortcuts'
 
 import type { ProjectDetailsOutput } from '@main/types/project-schemas'
 
@@ -278,10 +279,12 @@ export function BudgetPoolsTab({ projectDetails }: BudgetPoolsTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handleCreate}>
-            <Plus className="w-4 h-4 mr-2" />
-            创建经费池
-          </Button>
+          <Shortcut shortcut={['cmd', 'p']} description="创建经费池">
+            <Button onClick={handleCreate}>
+              <Plus className="w-4 h-4 mr-2" />
+              创建经费池
+            </Button>
+          </Shortcut>
         </div>
       </div>
 
@@ -422,10 +425,12 @@ export function BudgetPoolsTab({ projectDetails }: BudgetPoolsTabProps) {
                 ? '没有找到匹配的经费池'
                 : '创建经费池来管理项目的预算分配'}
             </p>
-            <Button onClick={handleCreate} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              创建第一个经费池
-            </Button>
+            <Shortcut shortcut={['cmd', 'p']} description="创建经费池">
+              <Button onClick={handleCreate} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                创建第一个经费池
+              </Button>
+            </Shortcut>
           </div>
         )}
       </div>

@@ -32,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
+import { Shortcut } from '@renderer/components/shortcuts'
 import { DocumentDrawer } from './drawers/document-drawer'
 import { DocumentVersionFormDrawer } from './drawers/document-version-form-drawer'
 import { DocumentDetailsDialog } from './dialogs/document-details-dialog'
@@ -217,10 +218,12 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={() => setCreateDocumentOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            添加新逻辑文档
-          </Button>
+          <Shortcut shortcut={['cmd', 'd']} description="添加新逻辑文档">
+            <Button onClick={() => setCreateDocumentOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              添加新逻辑文档
+            </Button>
+          </Shortcut>
         </div>
       </div>
 

@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
+import { Shortcut } from '@renderer/components/shortcuts'
 
 import { ExpenseFormDrawer } from './drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from '../expenses/expense-details-dialog'
@@ -312,10 +313,12 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handleCreate}>
-            <Plus className="w-4 h-4 mr-2" />
-            添加新报销
-          </Button>
+          <Shortcut shortcut={['cmd', 'r']} description="添加新报销">
+            <Button onClick={handleCreate}>
+              <Plus className="w-4 h-4 mr-2" />
+              添加新报销
+            </Button>
+          </Shortcut>
         </div>
       </div>
 
@@ -444,10 +447,12 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                 ? '没有找到匹配的经费记录'
                 : '开始添加项目经费记录'}
             </p>
-            <Button onClick={handleCreate} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              添加新报销
-            </Button>
+            <Shortcut shortcut={['cmd', 'r']} description="添加新报销">
+              <Button onClick={handleCreate} size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                添加新报销
+              </Button>
+            </Shortcut>
           </div>
         )}
       </div>

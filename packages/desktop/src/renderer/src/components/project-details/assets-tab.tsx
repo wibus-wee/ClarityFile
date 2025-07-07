@@ -34,6 +34,7 @@ import {
 } from '@clarity/shadcn/ui/dropdown-menu'
 import { cn, formatFileSize } from '@renderer/lib/utils'
 import { SafeImage } from '@renderer/components/ui/safe-image'
+import { Shortcut } from '@renderer/components/shortcuts'
 import { AssetFormDrawer } from './drawers/asset-form-drawer'
 import { AssetDetailsDialog } from './dialogs/asset-details-dialog'
 import { DeleteAssetDialog } from './dialogs/delete-asset-dialog'
@@ -180,10 +181,12 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
           </div>
 
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button onClick={() => setCreateAssetOpen(true)} className="gap-2">
-              <Plus className="w-4 h-4" />
-              添加资产
-            </Button>
+            <Shortcut shortcut={['cmd', 'a']} description="添加资产">
+              <Button onClick={() => setCreateAssetOpen(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                添加资产
+              </Button>
+            </Shortcut>
           </motion.div>
         </div>
 

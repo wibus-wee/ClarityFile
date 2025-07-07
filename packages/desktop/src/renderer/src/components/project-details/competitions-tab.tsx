@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
 import { cn } from '@renderer/lib/utils'
+import { Shortcut } from '@renderer/components/shortcuts'
 import { AddCompetitionDrawer } from './drawers/add-competition-drawer'
 import { EditCompetitionStatusDialog } from './dialogs/edit-competition-status-dialog'
 import { CompetitionDetailsDialog } from './dialogs/competition-details-dialog'
@@ -199,10 +200,12 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={() => setAddCompetitionOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            关联到新赛事
-          </Button>
+          <Shortcut shortcut={['cmd', 'c']} description="关联到新赛事">
+            <Button onClick={() => setAddCompetitionOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              关联到新赛事
+            </Button>
+          </Shortcut>
         </div>
       </div>
 
@@ -372,10 +375,12 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
             <p className="text-muted-foreground mb-4">
               {searchQuery || filterStatus !== 'all' ? '没有找到匹配的赛事' : '开始关联项目到赛事'}
             </p>
-            <Button onClick={() => setAddCompetitionOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              关联到新赛事
-            </Button>
+            <Shortcut shortcut={['cmd', 'c']} description="关联到新赛事">
+              <Button onClick={() => setAddCompetitionOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                关联到新赛事
+              </Button>
+            </Shortcut>
           </div>
         )}
       </div>
