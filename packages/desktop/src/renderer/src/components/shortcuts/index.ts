@@ -29,8 +29,7 @@ export {
   useShortcutValidation,
   useChildComponentHandler,
   useShortcutRegistration,
-  useTooltipContent,
-  useShortcutRegistry
+  useTooltipContent
 } from './hooks'
 
 // 工具函数

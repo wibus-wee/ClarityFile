@@ -14,12 +14,12 @@ export interface ChildComponentHandlerResult {
 
 /**
  * 子组件处理 Hook
- * 
+ *
  * 职责：
  * - 提取子组件的 onClick 处理器
  * - 合并 ref 引用，支持模拟点击
  * - 处理子组件的克隆和属性注入
- * 
+ *
  * 这个 Hook 遵循 React.dev 最佳实践：
  * - 使用 useCallback 优化函数引用
  * - 使用 useRef 避免闭包问题
@@ -31,7 +31,7 @@ export function useChildComponentHandler(
 ): ChildComponentHandlerResult {
   // 存储子组件的 action 函数，避免闭包问题
   const actionRef = useRef<(() => void) | null>(null)
-  
+
   // 存储子组件的 DOM 元素，用于模拟点击
   const elementRef = useRef<HTMLElement>(null)
 
@@ -71,24 +71,27 @@ export function useChildComponentHandler(
   }, [customAction, extractChildAction])
 
   // 合并 ref 函数
-  const mergedRef = useCallback((element: HTMLElement | null) => {
-    // 设置我们的 ref
-    elementRef.current = element
+  const mergedRef = useCallback(
+    (element: HTMLElement | null) => {
+      // 设置我们的 ref
+      elementRef.current = element
 
-    // 如果子组件已有 ref，也要调用它
-    if (React.isValidElement(children)) {
-      const childProps = children.props as any
-      const existingRef = childProps.ref
+      // 如果子组件已有 ref，也要调用它
+      if (React.isValidElement(children)) {
+        const childProps = children.props as any
+        const existingRef = childProps.ref
 
-      if (existingRef) {
-        if (typeof existingRef === 'function') {
-          existingRef(element)
-        } else if (existingRef && typeof existingRef === 'object') {
-          existingRef.current = element
+        if (existingRef) {
+          if (typeof existingRef === 'function') {
+            existingRef(element)
+          } else if (existingRef && typeof existingRef === 'object') {
+            existingRef.current = element
+          }
         }
       }
-    }
-  }, [children])
+    },
+    [children]
+  )
 
   // 渲染子组件
   const renderChild = useCallback(() => {

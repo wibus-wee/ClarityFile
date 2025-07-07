@@ -14,17 +14,17 @@ export interface ShortcutRegistrationConfig {
   description?: string
   condition?: () => boolean
   validation: ValidationResult
-  actionRef: React.MutableRefObject<(() => void) | null>
+  actionRef: React.RefObject<(() => void) | null>
 }
 
 /**
  * 快捷键注册 Hook
- * 
+ *
  * 职责：
  * - 处理快捷键的注册和注销
  * - 管理快捷键的生命周期
  * - 提供稳定的 action 函数引用
- * 
+ *
  * 这个 Hook 遵循 React.dev 最佳实践：
  * - 单一职责：只处理注册逻辑
  * - 正确的依赖数组管理
@@ -32,7 +32,7 @@ export interface ShortcutRegistrationConfig {
  */
 export function useShortcutRegistration(config: ShortcutRegistrationConfig): string {
   const id = useId()
-  
+
   // 从 store 获取稳定的方法引用
   const register = useShortcutStore((state) => state.register)
   const unregister = useShortcutStore((state) => state.unregister)
@@ -70,6 +70,7 @@ export function useShortcutRegistration(config: ShortcutRegistrationConfig): str
     return () => {
       unregister(id)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     id,
     config.keys,

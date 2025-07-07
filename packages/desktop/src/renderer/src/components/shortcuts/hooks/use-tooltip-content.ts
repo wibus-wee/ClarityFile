@@ -14,12 +14,12 @@ export interface TooltipContentConfig {
 
 /**
  * Tooltip 内容 Hook
- * 
+ *
  * 职责：
  * - 生成格式化的 tooltip 内容
  * - 处理用户偏好设置
  * - 优化内容计算性能
- * 
+ *
  * 这个 Hook 遵循 React.dev 最佳实践：
  * - 使用 useMemo 优化计算
  * - 单一职责：只处理 tooltip 内容
@@ -56,11 +56,7 @@ export function useTooltipContent(config: TooltipContentConfig): {
 
   // 判断是否应该显示 tooltip
   const shouldShowTooltip = useMemo(() => {
-    return (
-      config.showTooltip &&
-      userPreferences.enableTooltips &&
-      Boolean(tooltipContent)
-    )
+    return config.showTooltip && userPreferences.enableTooltips && Boolean(tooltipContent)
   }, [config.showTooltip, userPreferences.enableTooltips, tooltipContent])
 
   return {

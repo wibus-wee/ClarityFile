@@ -1,6 +1,6 @@
 /**
  * Shortcuts Hooks 导出文件
- * 
+ *
  * 这个文件导出所有快捷键相关的自定义 Hooks，
  * 遵循 React.dev 最佳实践的模块化设计
  */
@@ -20,7 +20,3 @@ export type { ShortcutRegistrationConfig } from './use-shortcut-registration'
 // Tooltip 内容 Hook
 export { useTooltipContent } from './use-tooltip-content'
 export type { TooltipContentConfig } from './use-tooltip-content'
-
-// 快捷键注册表 Hook (原有的)
-export { useShortcutRegistry } from './use-shortcut-registry'
-export type { UseShortcutRegistryReturn } from '../types/shortcut.types'
