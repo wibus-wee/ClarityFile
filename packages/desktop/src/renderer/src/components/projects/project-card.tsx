@@ -6,21 +6,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
-import { Calendar, Edit, FolderOpen, MoreHorizontal, Trash2 } from 'lucide-react'
+import {
+  Calendar,
+  Edit,
+  FolderOpen,
+  MoreHorizontal,
+  Trash2,
+  Archive,
+  RotateCcw,
+  Play,
+  Pause
+} from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import type { Project } from './index'
 import { motion } from 'framer-motion'
 import { Link } from '@tanstack/react-router'
+import { SafeImage } from '@renderer/components/ui/safe-image'
 
 interface ProjectCardProps {
   project: Project
   onEdit: (project: Project) => void
   onDelete: (id: string, name: string) => void
+  onStatusChange: (id: string, status: string) => void
   isDeleting: boolean
+  isUpdating: boolean
   viewMode: 'list'
 }
 
-export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  isDeleting,
+  isUpdating
+}: ProjectCardProps) {
+  console.log(project)
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -68,10 +89,19 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
       >
         <motion.div
           layoutId={`project-icon-${project.id}`}
-          className="w-8 h-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0"
+          className="w-8 h-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0 overflow-hidden"
           transition={{ duration: 0.4 }}
         >
-          <FolderOpen className="w-4 h-4 text-primary" />
+          {project.coverAsset && project.coverAsset.mimeType?.startsWith('image/') ? (
+            <SafeImage
+              filePath={project.coverAsset.physicalPath}
+              alt={project.name}
+              className="w-full h-full object-cover bg-transparent"
+              fallbackClassName="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10"
+            />
+          ) : (
+            <FolderOpen className="w-4 h-4 text-primary" />
+          )}
         </motion.div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
@@ -124,19 +154,62 @@ export function ProjectCard({ project, onEdit, onDelete, isDeleting }: ProjectCa
               <MoreHorizontal className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => onEdit(project)}>
               <Edit className="w-4 h-4 mr-2" />
-              编辑
+              编辑项目
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+
+            {/* 状态切换选项 */}
+            {project.status !== 'active' && (
+              <DropdownMenuItem
+                onClick={() => onStatusChange(project.id, 'active')}
+                disabled={isUpdating}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                激活项目
+              </DropdownMenuItem>
+            )}
+
+            {project.status !== 'on_hold' && (
+              <DropdownMenuItem
+                onClick={() => onStatusChange(project.id, 'on_hold')}
+                disabled={isUpdating}
+              >
+                <Pause className="w-4 h-4 mr-2" />
+                暂停项目
+              </DropdownMenuItem>
+            )}
+
+            {project.status !== 'archived' && (
+              <DropdownMenuItem
+                onClick={() => onStatusChange(project.id, 'archived')}
+                disabled={isUpdating}
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                归档项目
+              </DropdownMenuItem>
+            )}
+
+            {project.status === 'archived' && (
+              <DropdownMenuItem
+                onClick={() => onStatusChange(project.id, 'active')}
+                disabled={isUpdating}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                取消归档
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onDelete(project.id, project.name)}
-              disabled={isDeleting}
-              className="text-destructive"
+              disabled={isDeleting || isUpdating}
+              className="text-destructive focus:text-destructive"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              删除
+              删除项目
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

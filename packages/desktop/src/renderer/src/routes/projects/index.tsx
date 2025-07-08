@@ -9,15 +9,21 @@ import {
   SelectTrigger,
   SelectValue
 } from '@clarity/shadcn/ui/select'
-import { useProjects, useDeleteProject, useSearchProjects } from '@renderer/hooks/use-tipc'
+import {
+  useProjects,
+  useDeleteProject,
+  useSearchProjects,
+  useUpdateProject
+} from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
-import { Search, Plus } from 'lucide-react'
+import { Search, Plus, ArrowUpDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ProjectCard,
   ProjectSkeleton,
   ProjectEmptyState,
   ProjectDrawer,
+  DeleteProjectDialog,
   type Project
 } from '@renderer/components/projects'
 import { Shortcut, ShortcutProvider } from '@renderer/components/shortcuts'
@@ -30,11 +36,15 @@ function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [deletingProject, setDeletingProject] = useState<Project | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'createdAt' | 'updatedAt' | 'status'>('updatedAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   // SWR hooks
   const { data: projects, error: projectsError, isLoading: projectsLoading } = useProjects()
   const { trigger: deleteProject, isMutating: isDeletingProject } = useDeleteProject()
+  const { trigger: updateProject, isMutating: isUpdatingProject } = useUpdateProject()
   const { trigger: searchProjects, data: searchResults } = useSearchProjects()
 
   // 项目操作成功回调
@@ -45,17 +55,22 @@ function ProjectsPage() {
     setEditingProject(null)
   }
 
-  const handleDeleteProject = async (projectId: string, projectName: string) => {
-    if (!confirm(`确定要删除项目 "${projectName}" 吗？此操作不可撤销。`)) {
-      return
+  const handleDeleteProject = async (projectId: string, _projectName: string) => {
+    // 找到要删除的项目并打开确认对话框
+    const project = projects?.find((p) => p.id === projectId)
+    if (project) {
+      setDeletingProject(project)
     }
+  }
 
+  const handleConfirmDelete = async (projectId: string, _projectName: string) => {
     try {
       await deleteProject({ id: projectId })
       toast.success('项目删除成功！')
     } catch (error) {
       toast.error('删除项目失败')
       console.error(error)
+      throw error // 重新抛出错误，让对话框处理
     }
   }
 
@@ -76,11 +91,47 @@ function ProjectsPage() {
     setEditingProject(project)
   }
 
-  // 过滤项目
-  const filteredProjects = (searchResults || projects)?.filter((project) => {
-    if (statusFilter === 'all') return true
-    return project.status === statusFilter
-  })
+  const handleStatusChange = async (projectId: string, newStatus: string) => {
+    try {
+      await updateProject({
+        id: projectId,
+        status: newStatus as 'active' | 'on_hold' | 'archived'
+      })
+      toast.success('项目状态更新成功！')
+    } catch (error) {
+      toast.error('更新项目状态失败')
+      console.error(error)
+    }
+  }
+
+  // 过滤和排序项目
+  const filteredAndSortedProjects = (searchResults || projects)
+    ?.filter((project) => {
+      if (statusFilter === 'all') return true
+      return project.status === statusFilter
+    })
+    ?.sort((a, b) => {
+      let comparison = 0
+
+      switch (sortBy) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name)
+          break
+        case 'createdAt':
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          break
+        case 'updatedAt':
+          comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          break
+        case 'status':
+          comparison = a.status.localeCompare(b.status)
+          break
+        default:
+          comparison = 0
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison
+    })
 
   return (
     <ShortcutProvider scope="projects-list">
@@ -128,6 +179,35 @@ function ProjectsPage() {
               <SelectItem value="on_hold">暂停</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select
+            value={sortBy}
+            onValueChange={(value: 'name' | 'createdAt' | 'updatedAt' | 'status') =>
+              setSortBy(value)
+            }
+          >
+            <Shortcut shortcut={['cmd', 's']} description="排序项目" showTooltip={false}>
+              <SelectTrigger className="w-36">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+            </Shortcut>
+            <SelectContent>
+              <SelectItem value="updatedAt">最近更新</SelectItem>
+              <SelectItem value="createdAt">创建时间</SelectItem>
+              <SelectItem value="name">项目名称</SelectItem>
+              <SelectItem value="status">项目状态</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="px-3"
+          >
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </Button>
         </div>
 
         {/* 项目列表 */}
@@ -157,7 +237,7 @@ function ProjectsPage() {
               <div className="text-red-500 mb-2">加载项目失败</div>
               <p className="text-sm text-muted-foreground">请检查网络连接或稍后重试</p>
             </motion.div>
-          ) : filteredProjects && filteredProjects.length > 0 ? (
+          ) : filteredAndSortedProjects && filteredAndSortedProjects.length > 0 ? (
             <motion.div
               key="projects-list"
               initial={{ opacity: 0 }}
@@ -167,13 +247,15 @@ function ProjectsPage() {
               className="divide-y divide-border/50"
             >
               <AnimatePresence>
-                {filteredProjects.map((project) => (
+                {filteredAndSortedProjects.map((project) => (
                   <ProjectCard
                     key={project.id}
                     project={project}
                     onEdit={openEditDialog}
                     onDelete={handleDeleteProject}
+                    onStatusChange={handleStatusChange}
                     isDeleting={isDeletingProject}
+                    isUpdating={isUpdatingProject}
                     viewMode="list"
                   />
                 ))}
@@ -207,6 +289,19 @@ function ProjectsPage() {
           }}
           project={editingProject}
           onSuccess={handleProjectSuccess}
+        />
+
+        {/* 删除确认对话框 */}
+        <DeleteProjectDialog
+          open={!!deletingProject}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeletingProject(null)
+            }
+          }}
+          project={deletingProject}
+          onConfirm={handleConfirmDelete}
+          isDeleting={isDeletingProject}
         />
       </div>
     </ShortcutProvider>

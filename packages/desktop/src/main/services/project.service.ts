@@ -37,7 +37,22 @@ export class ProjectService {
   // 获取所有项目
   static async getProjects() {
     const result = await db.select().from(projects).orderBy(desc(projects.updatedAt))
-    return result
+
+    // 为每个项目获取封面资产信息
+    const projectsWithCovers = await Promise.all(
+      result.map(async (project) => {
+        const coverAsset = project.currentCoverAssetId
+          ? await ProjectAssetsService.getProjectCoverAsset(project.currentCoverAssetId)
+          : null
+
+        return {
+          ...project,
+          coverAsset
+        }
+      })
+    )
+
+    return projectsWithCovers
   }
 
   // 根据 ID 获取项目
