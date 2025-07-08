@@ -14,7 +14,7 @@ export function useSearch(query: string, options?: SearchOptions) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
 
-  const { usageStats, recentItems } = useCommandBox()
+  const { usageStats, recentItems, navigationItems, actionItems } = useCommandBox()
 
   // 数据源 hooks
   const { data: projects } = useProjects()
@@ -43,6 +43,42 @@ export function useSearch(query: string, options?: SearchOptions) {
   // 构建搜索数据源
   const searchableItems = useMemo((): SearchableItem[] => {
     const items: SearchableItem[] = []
+
+    // 导航项数据
+    navigationItems.forEach((navItem) => {
+      items.push({
+        id: navItem.id,
+        type: 'navigation' as any, // 扩展类型以支持导航项
+        title: navItem.title,
+        description: navItem.description || '',
+        tags: [navItem.title, navItem.description || ''].filter(Boolean),
+        path: navItem.path,
+        metadata: {
+          type: 'navigation',
+          shortcut: navItem.shortcut,
+          path: navItem.path
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+    })
+
+    // 操作项数据
+    actionItems.forEach((actionItem) => {
+      items.push({
+        id: actionItem.id,
+        type: 'action' as any, // 扩展类型以支持操作项
+        title: actionItem.title,
+        description: actionItem.description || '',
+        tags: [actionItem.title, actionItem.description || ''].filter(Boolean),
+        metadata: {
+          type: 'action',
+          shortcut: actionItem.shortcut
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+    })
 
     // 项目数据
     if (projects) {
@@ -116,7 +152,7 @@ export function useSearch(query: string, options?: SearchOptions) {
       })
     }
     return items
-  }, [projects, documents, files])
+  }, [navigationItems, actionItems, projects, documents, files])
 
   // 防抖搜索函数
   const debouncedSearch = useDebouncedCallback(
@@ -227,7 +263,7 @@ export function useSearchSuggestions() {
  */
 export function useSearchActions() {
   const router = useRouter()
-  const { addRecentItem, updateUsageStats } = useCommandBox()
+  const { addRecentItem, updateUsageStats, navigationItems, actionItems } = useCommandBox()
 
   const executeSearchAction = useCallback(
     (result: SearchResult) => {
@@ -248,6 +284,23 @@ export function useSearchActions() {
 
       // 根据类型执行相应操作
       switch (result.type) {
+        case 'navigation': {
+          // 执行导航操作
+          if (result.path) {
+            router.navigate({ to: result.path })
+          }
+          break
+        }
+
+        case 'action': {
+          // 执行操作项的 action
+          const actionItem = actionItems.find((item) => item.id === result.id)
+          if (actionItem) {
+            actionItem.action()
+          }
+          break
+        }
+
         case 'project': {
           // 跳转到项目详情
           const projectId = result.id.replace('project-', '')
@@ -289,7 +342,7 @@ export function useSearchActions() {
           console.log('未知操作类型:', result.type)
       }
     },
-    [router, addRecentItem, updateUsageStats]
+    [router, addRecentItem, updateUsageStats, navigationItems, actionItems]
   )
 
   return {

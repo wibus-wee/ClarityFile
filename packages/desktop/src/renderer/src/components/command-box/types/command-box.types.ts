@@ -8,7 +8,14 @@ import { LucideIcon } from 'lucide-react'
 export type CommandItemType = 'navigation' | 'action' | 'search-result' | 'recent' | 'suggestion'
 
 // 搜索结果类型
-export type SearchResultType = 'project' | 'document' | 'file' | 'expense' | 'competition'
+export type SearchResultType =
+  | 'project'
+  | 'document'
+  | 'file'
+  | 'expense'
+  | 'competition'
+  | 'navigation'
+  | 'action'
 
 // 命令项目接口
 export interface CommandItem {

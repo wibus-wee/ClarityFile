@@ -1,6 +1,15 @@
 import { Command } from 'cmdk'
 import { motion } from 'framer-motion'
-import { FolderOpen, FileText, CreditCard, Trophy, Image, File } from 'lucide-react'
+import {
+  FolderOpen,
+  FileText,
+  CreditCard,
+  Trophy,
+  Image,
+  File,
+  Navigation,
+  Zap
+} from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import type { CommandItem } from '../types/command-box.types'
 
@@ -19,7 +28,9 @@ const typeIconMap = {
   file: File,
   expense: CreditCard,
   competition: Trophy,
-  asset: Image
+  asset: Image,
+  navigation: Navigation,
+  action: Zap
 }
 
 // 类型颜色映射
@@ -29,7 +40,9 @@ const typeColorMap = {
   file: 'text-gray-500',
   expense: 'text-orange-500',
   competition: 'text-purple-500',
-  asset: 'text-pink-500'
+  asset: 'text-pink-500',
+  navigation: 'text-indigo-500',
+  action: 'text-yellow-500'
 }
 
 /**
@@ -75,6 +88,10 @@ export function SearchResultItem({
         return '赛事'
       case 'asset':
         return '资产'
+      case 'navigation':
+        return '页面'
+      case 'action':
+        return '操作'
       default:
         return '其他'
     }
@@ -133,7 +150,7 @@ export function SearchResultItem({
       {/* 选中指示器 */}
       {isSelected && (
         <motion.div
-          layoutId="search-result-indicator"
+          layoutId="command-item-indicator"
           className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-primary rounded-full"
           transition={{
             type: 'spring',

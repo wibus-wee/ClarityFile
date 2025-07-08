@@ -41,20 +41,51 @@ export function CommandBox() {
     ? getSearchCommandItems(executeSearchAction)
     : getAllVisibleItems()
 
+  // 自定义的 selectItem 函数，处理搜索模式
+  const handleSelectItem = (index?: number) => {
+    const targetIndex = index ?? selectedIndex
+
+    if (searchQuery.trim()) {
+      // 搜索模式下直接执行搜索结果的 action
+      if (allItems[targetIndex]) {
+        const item = allItems[targetIndex]
+        item.action()
+        close()
+      }
+    } else {
+      // 非搜索模式下使用 store 的 selectItem
+      selectItem(targetIndex)
+    }
+  }
+
   // 键盘导航
   const { handleKeyDown } = useCommandBoxKeyboard({
     selectedIndex,
     setSelectedIndex,
     totalItems: allItems.length,
-    onSelect: selectItem,
+    onSelect: handleSelectItem,
     onClose: close
   })
 
   // 搜索输入框键盘处理
   const { handleKeyDown: handleSearchKeyDown } = useCommandBoxSearchKeyboard({
-    onArrowDown: selectNext,
-    onArrowUp: selectPrevious,
-    onEnter: () => selectItem(selectedIndex),
+    onArrowDown: () => {
+      if (searchQuery.trim()) {
+        // 搜索模式下直接使用 allItems.length
+        setSelectedIndex((selectedIndex + 1) % allItems.length)
+      } else {
+        selectNext()
+      }
+    },
+    onArrowUp: () => {
+      if (searchQuery.trim()) {
+        // 搜索模式下直接使用 allItems.length
+        setSelectedIndex(selectedIndex === 0 ? allItems.length - 1 : selectedIndex - 1)
+      } else {
+        selectPrevious()
+      }
+    },
+    onEnter: () => handleSelectItem(selectedIndex),
     onEscape: close
   })
 
@@ -259,7 +290,7 @@ export function CommandBox() {
                               key={item.id}
                               item={item}
                               isSelected={index === selectedIndex}
-                              onSelect={() => selectItem(index)}
+                              onSelect={() => handleSelectItem(index)}
                               highlightText={highlightText}
                             />
                           ))}

@@ -182,17 +182,11 @@ export const useCommandBoxStore = create<CommandBoxStore>()(
 
         // 辅助方法
         getAllVisibleItems: () => {
-          const {
-            navigationItems,
-            actionItems,
-            searchResults,
-            recentItems,
-            suggestions,
-            searchQuery
-          } = get()
+          const { navigationItems, actionItems, recentItems, suggestions, searchQuery } = get()
 
+          // 搜索模式下返回空数组，让组件层面处理搜索结果
           if (searchQuery.trim()) {
-            return searchResults
+            return []
           }
 
           return [
