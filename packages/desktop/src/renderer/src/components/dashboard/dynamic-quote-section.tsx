@@ -72,18 +72,6 @@ export function DynamicQuoteSection() {
               </Button>
             </div>
           </div>
-
-          {/* API来源指示器 */}
-          {isFromAPI && (
-            <motion.div
-              className="absolute -top-1 -right-1"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: 'spring', stiffness: 500, damping: 30 }}
-            >
-              <div className="w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background shadow-sm" />
-            </motion.div>
-          )}
         </div>
       </motion.div>
     </AnimatePresence>

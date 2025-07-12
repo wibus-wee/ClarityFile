@@ -239,6 +239,32 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     []
   )
 
+  // 更新自定义主题
+  const updateCustomTheme = useCallback(
+    async (themeId: string, updates: Partial<Omit<CustomTheme, 'id' | 'createdAt'>>) => {
+      try {
+        const updatedTheme = await ThemeService.updateCustomTheme(themeId, updates)
+
+        // 更新本地状态
+        setCustomThemes((prev) =>
+          prev.map((theme) => (theme.id === themeId ? updatedTheme : theme))
+        )
+
+        // 如果更新的是当前激活的主题，重新应用 CSS
+        if (activeCustomTheme === themeId && updates.cssContent) {
+          CustomThemeManager.applyCustomThemeCSS(updates.cssContent)
+        }
+
+        console.log('Custom theme updated:', themeId)
+        return updatedTheme
+      } catch (error) {
+        console.error('Failed to update custom theme:', error)
+        throw error
+      }
+    },
+    [activeCustomTheme]
+  )
+
   // 预览主题
   const previewTheme = useCallback((cssContent: string) => {
     try {
@@ -288,6 +314,7 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     applyCustomTheme,
     removeCustomTheme,
     saveCustomTheme,
+    updateCustomTheme,
     previewTheme,
     clearPreview,
     switchToDefaultTheme

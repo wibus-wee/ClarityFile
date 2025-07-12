@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import { Palette, Plus, Eye, Trash2, Download, Sparkles, Check, X } from 'lucide-react'
+import { Palette, Plus, Eye, Trash2, Download, Sparkles, Check, X, Edit } from 'lucide-react'
 
 import { Button } from '@clarity/shadcn/ui/button'
 import { Textarea } from '@clarity/shadcn/ui/textarea'
@@ -18,6 +18,8 @@ import { Separator } from '@clarity/shadcn/ui/separator'
 import { useTheme } from '@renderer/hooks/use-theme'
 import { ThemeImportUtils } from '@renderer/lib/theme-import-utils'
 import { SettingsSection } from './components'
+import type { CustomTheme } from '@renderer/types/theme'
+import { formatFriendlyDate } from '@renderer/lib/utils'
 
 export function CustomThemeSection() {
   const {
@@ -26,6 +28,7 @@ export function CustomThemeSection() {
     applyCustomTheme,
     removeCustomTheme,
     saveCustomTheme,
+    updateCustomTheme,
     previewTheme,
     clearPreview,
     hasCustomTheme,
@@ -38,6 +41,13 @@ export function CustomThemeSection() {
   const [themeDescription, setThemeDescription] = useState('')
   const [isImporting, setIsImporting] = useState(false)
   const [isPreviewing, setIsPreviewing] = useState(false)
+
+  // 编辑相关状态
+  const [editingThemeId, setEditingThemeId] = useState<string | null>(null)
+  const [editCssContent, setEditCssContent] = useState('')
+  const [editThemeName, setEditThemeName] = useState('')
+  const [editThemeDescription, setEditThemeDescription] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
 
   // 处理主题导入
   const handleImportTheme = async () => {
@@ -68,7 +78,6 @@ export function CustomThemeSection() {
       await saveCustomTheme({
         name: themeName,
         description: themeDescription || undefined,
-        author: 'User',
         cssContent
       })
 
@@ -163,6 +172,82 @@ export function CustomThemeSection() {
       toast.success('已切换到默认主题')
     } catch (error) {
       toast.error('切换失败：' + (error instanceof Error ? error.message : '未知错误'))
+    }
+  }
+
+  // 开始编辑主题
+  const handleStartEdit = (theme: CustomTheme) => {
+    // 如果正在编辑其他主题，先取消
+    if (editingThemeId && editingThemeId !== theme.id) {
+      handleCancelEdit()
+    }
+
+    setEditingThemeId(theme.id)
+    setEditThemeName(theme.name)
+    setEditThemeDescription(theme.description || '')
+    setEditCssContent(theme.cssContent)
+    setShowImportForm(false) // 关闭导入表单
+  }
+
+  // 取消编辑
+  const handleCancelEdit = () => {
+    setEditingThemeId(null)
+    setEditThemeName('')
+    setEditThemeDescription('')
+    setEditCssContent('')
+  }
+
+  // 保存编辑
+  const handleSaveEdit = async () => {
+    if (!editingThemeId || !editThemeName.trim() || !editCssContent.trim()) {
+      toast.error('请填写完整的主题信息')
+      return
+    }
+
+    setIsUpdating(true)
+    try {
+      // 验证 CSS 内容
+      const validation = ThemeImportUtils.validateThemeCSS(editCssContent)
+      if (!validation.isValid) {
+        toast.error(`主题验证失败: ${validation.errors.join(', ')}`)
+        return
+      }
+
+      // 检查名称是否与其他主题重复
+      const nameExists = customThemes.some(
+        (theme) =>
+          theme.id !== editingThemeId && theme.name.toLowerCase() === editThemeName.toLowerCase()
+      )
+      if (nameExists) {
+        toast.error('主题名称已存在，请使用不同的名称')
+        return
+      }
+
+      await updateCustomTheme(editingThemeId, {
+        name: editThemeName,
+        description: editThemeDescription || undefined,
+        cssContent: editCssContent
+      })
+
+      toast.success('主题更新成功！')
+      handleCancelEdit()
+    } catch (error) {
+      toast.error('更新失败：' + (error instanceof Error ? error.message : '未知错误'))
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // 获取主题时间信息
+  const getThemeTimeInfo = (theme: CustomTheme) => {
+    const createdTime = new Date(theme.createdAt).getTime()
+    const updatedTime = new Date(theme.updatedAt).getTime()
+
+    // 如果更新时间比创建时间晚超过1分钟，显示更新时间
+    if (updatedTime - createdTime > 60000) {
+      return `${formatFriendlyDate(theme.updatedAt)}更新`
+    } else {
+      return `${formatFriendlyDate(theme.createdAt)}创建`
     }
   }
 
@@ -304,54 +389,123 @@ export function CustomThemeSection() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="flex items-center justify-between p-3 border rounded-lg bg-card"
+                      className="border rounded-lg bg-card"
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-medium truncate">{theme.name}</h5>
-                          {activeCustomTheme === theme.id && (
-                            <Badge variant="default" className="text-xs">
-                              <Check className="w-3 h-3 mr-1" />
-                              已应用
-                            </Badge>
-                          )}
+                      {editingThemeId === theme.id ? (
+                        // 编辑模式
+                        <div className="p-4 space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor={`edit-name-${theme.id}`}>主题名称</Label>
+                              <Input
+                                id={`edit-name-${theme.id}`}
+                                value={editThemeName}
+                                onChange={(e) => setEditThemeName(e.target.value)}
+                                placeholder="主题名称"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`edit-desc-${theme.id}`}>描述 (可选)</Label>
+                              <Input
+                                id={`edit-desc-${theme.id}`}
+                                value={editThemeDescription}
+                                onChange={(e) => setEditThemeDescription(e.target.value)}
+                                placeholder="主题描述"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`edit-css-${theme.id}`}>CSS 内容</Label>
+                            <Textarea
+                              id={`edit-css-${theme.id}`}
+                              value={editCssContent}
+                              onChange={(e) => setEditCssContent(e.target.value)}
+                              placeholder="CSS 代码..."
+                              className="min-h-[100px] max-h-[200px] font-mono text-sm resize-none border-dashed bg-muted/20 focus:bg-background transition-colors"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Button
+                              onClick={handleSaveEdit}
+                              disabled={
+                                isUpdating || !editThemeName.trim() || !editCssContent.trim()
+                              }
+                              size="sm"
+                              type="button"
+                            >
+                              {isUpdating ? '保存中...' : '保存'}
+                            </Button>
+                            <Button
+                              onClick={handleCancelEdit}
+                              variant="outline"
+                              size="sm"
+                              type="button"
+                            >
+                              取消
+                            </Button>
+                          </div>
                         </div>
-                        {theme.description && (
-                          <p className="text-sm text-muted-foreground truncate">
-                            {theme.description}
-                          </p>
-                        )}
-                        {theme.author && (
-                          <p className="text-xs text-muted-foreground">作者: {theme.author}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 ml-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleApplyTheme(theme.id)}
-                          disabled={activeCustomTheme === theme.id}
-                          title={activeCustomTheme === theme.id ? '已应用' : '应用主题'}
-                        >
-                          <Palette className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleExportTheme(theme.id)}
-                          title="导出主题"
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteTheme(theme.id)}
-                          title="删除主题"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      ) : (
+                        // 正常显示模式
+                        <div className="flex items-center justify-between p-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h5 className="font-medium truncate">{theme.name}</h5>
+                              {activeCustomTheme === theme.id && (
+                                <Badge variant="default" className="text-xs">
+                                  <Check className="w-3 h-3 mr-1" />
+                                  已应用
+                                </Badge>
+                              )}
+                            </div>
+                            {theme.description && (
+                              <p className="text-sm text-muted-foreground truncate">
+                                {theme.description}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {getThemeTimeInfo(theme)}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 ml-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleApplyTheme(theme.id)}
+                              disabled={activeCustomTheme === theme.id}
+                              title={activeCustomTheme === theme.id ? '已应用' : '应用主题'}
+                            >
+                              <Palette className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleStartEdit(theme)}
+                              title="编辑主题"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleExportTheme(theme.id)}
+                              title="导出主题"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteTheme(theme.id)}
+                              title="删除主题"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>

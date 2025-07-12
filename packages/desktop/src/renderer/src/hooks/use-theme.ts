@@ -16,6 +16,7 @@ export function useTheme() {
     applyCustomTheme,
     removeCustomTheme,
     saveCustomTheme,
+    updateCustomTheme,
     previewTheme,
     clearPreview,
     switchToDefaultTheme
@@ -36,6 +37,7 @@ export function useTheme() {
     applyCustomTheme, // 应用自定义主题
     removeCustomTheme, // 删除自定义主题
     saveCustomTheme, // 保存自定义主题
+    updateCustomTheme, // 更新自定义主题
     previewTheme, // 预览主题
     clearPreview, // 清除预览
     switchToDefaultTheme, // 切回默认主题

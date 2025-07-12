@@ -37,6 +37,10 @@ export interface ExtendedThemeContextValue extends ThemeContextValue {
   saveCustomTheme: (
     theme: Omit<CustomTheme, 'id' | 'createdAt' | 'updatedAt'>
   ) => Promise<CustomTheme>
+  updateCustomTheme: (
+    themeId: string,
+    updates: Partial<Omit<CustomTheme, 'id' | 'createdAt'>>
+  ) => Promise<CustomTheme>
   previewTheme: (cssContent: string) => void
   clearPreview: () => void
   switchToDefaultTheme: () => Promise<void>
