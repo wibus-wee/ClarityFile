@@ -185,6 +185,61 @@ export const milestoneParticipatingProjectOutputSchema = z.object({
   projectUpdatedAt: z.date()
 })
 
+// 比赛关联文档输出
+export const competitionDocumentOutputSchema = z.object({
+  // 文档版本信息
+  versionId: z.string(),
+  versionTag: z.string(),
+  isGenericVersion: z.boolean(),
+  versionNotes: z.string().nullable(),
+  versionCreatedAt: z.date(),
+  versionUpdatedAt: z.date(),
+  // 逻辑文档信息
+  logicalDocumentId: z.string(),
+  documentName: z.string(),
+  documentType: z.string(),
+  documentDescription: z.string().nullable(),
+  documentStatus: z.string(),
+  // 文件信息
+  managedFileId: z.string(),
+  fileName: z.string(),
+  originalFileName: z.string(),
+  physicalPath: z.string(),
+  mimeType: z.string().nullable(),
+  fileSizeBytes: z.number().nullable(),
+  fileHash: z.string(),
+  uploadedAt: z.date()
+})
+
+// 项目参与比赛输出（包含关联文档）
+export const projectCompetitionWithDocumentsOutputSchema = z.object({
+  // 项目参赛信息
+  statusInMilestone: z.string().nullable(),
+  participatedAt: z.date(),
+  // 里程碑信息
+  milestoneId: z.string(),
+  levelName: z.string(),
+  dueDateMilestone: z.date().nullable(),
+  milestoneNotes: z.string().nullable(),
+  milestoneCreatedAt: z.date(),
+  milestoneUpdatedAt: z.date(),
+  // 赛事系列信息
+  seriesId: z.string(),
+  seriesName: z.string(),
+  seriesNotes: z.string().nullable(),
+  seriesCreatedAt: z.date(),
+  seriesUpdatedAt: z.date(),
+  // 通知文件信息（可能为空）
+  notificationFileName: z.string().nullable(),
+  notificationOriginalFileName: z.string().nullable(),
+  notificationPhysicalPath: z.string().nullable(),
+  notificationMimeType: z.string().nullable(),
+  notificationFileSizeBytes: z.number().nullable(),
+  notificationUploadedAt: z.date().nullable(),
+  // 关联文档列表
+  documents: z.array(competitionDocumentOutputSchema)
+})
+
 // ============================================================================
 // TypeScript 类型导出 (从 Schema 推导)
 // ============================================================================
@@ -223,6 +278,10 @@ export type MilestoneWithProjectsOutput = z.infer<typeof milestoneWithProjectsOu
 export type CompetitionTimelineItemOutput = z.infer<typeof competitionTimelineItemOutputSchema>
 export type MilestoneParticipatingProjectOutput = z.infer<
   typeof milestoneParticipatingProjectOutputSchema
+>
+export type CompetitionDocumentOutput = z.infer<typeof competitionDocumentOutputSchema>
+export type ProjectCompetitionWithDocumentsOutput = z.infer<
+  typeof projectCompetitionWithDocumentsOutputSchema
 >
 
 // ============================================================================

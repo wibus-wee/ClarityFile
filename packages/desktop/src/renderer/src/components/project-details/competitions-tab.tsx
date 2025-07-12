@@ -18,12 +18,14 @@ import {
   Filter,
   Calendar,
   FileText,
-  Download,
   Edit,
   Eye,
   MoreHorizontal,
   Clock,
-  Award
+  Award,
+  ChevronDown,
+  ChevronRight,
+  Download
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -38,6 +40,7 @@ import { AddCompetitionDrawer } from './drawers/add-competition-drawer'
 import { EditCompetitionStatusDialog } from './dialogs/edit-competition-status-dialog'
 import { CompetitionDetailsDialog } from './dialogs/competition-details-dialog'
 import { RemoveCompetitionDialog } from './dialogs/remove-competition-dialog'
+import { CompetitionDocumentsSection } from './competition-documents-section'
 import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 
 interface CompetitionsTabProps {
@@ -51,6 +54,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
     'participated'
   )
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [expandedCompetitions, setExpandedCompetitions] = useState<Set<string>>(new Set())
 
   // Dialog 和 Drawer 状态
   const [addCompetitionOpen, setAddCompetitionOpen] = useState(false)
@@ -87,6 +91,18 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
       // 这里暂时使用 alert 提示，实际应该调用后端接口
       alert(`下载文件: ${competition.notificationOriginalFileName}`)
     }
+  }
+
+  const toggleCompetitionExpansion = (competitionId: string) => {
+    setExpandedCompetitions((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(competitionId)) {
+        newSet.delete(competitionId)
+      } else {
+        newSet.add(competitionId)
+      }
+      return newSet
+    })
   }
 
   // 获取所有状态
@@ -212,161 +228,177 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
       <Separator />
 
       {/* 赛事列表 */}
-      <div className="space-y-4">
+      <div className="space-y-1">
         {filteredCompetitions.length > 0 ? (
           <AnimatePresence>
-            {filteredCompetitions.map((competition, index) => (
-              <motion.div
-                key={`${competition.seriesId}-${competition.milestoneId}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: index * 0.05 }}
-                className="border border-border rounded-lg p-6"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Trophy className="w-5 h-5 text-yellow-500" />
-                      <h3 className="text-lg font-semibold">{competition.seriesName}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        {competition.levelName}
-                      </Badge>
-                      {competition.statusInMilestone && (
-                        <Badge
-                          className={cn('text-xs', getStatusColor(competition.statusInMilestone))}
-                        >
-                          {competition.statusInMilestone}
-                        </Badge>
-                      )}
-                    </div>
+            {filteredCompetitions.map((competition, index) => {
+              const competitionKey = `${competition.seriesId}-${competition.milestoneId}`
+              const isExpanded = expandedCompetitions.has(competitionKey)
+              const hasDocuments = competition.documents && competition.documents.length > 0
 
-                    {competition.seriesNotes && (
-                      <p className="text-muted-foreground mb-3">{competition.seriesNotes}</p>
+              return (
+                <motion.div
+                  key={competitionKey}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ delay: index * 0.02 }}
+                  className="border border-border/60 rounded-lg overflow-hidden bg-card"
+                >
+                  {/* 比赛主行 */}
+                  <div
+                    className={cn(
+                      'flex items-center justify-between p-4 hover:bg-muted/30 transition-colors cursor-pointer',
+                      isExpanded && 'bg-muted/20 border-b border-border/40'
                     )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">参与时间：</span>
-                        <span>{new Date(competition.participatedAt).toLocaleDateString()}</span>
+                    onClick={() => toggleCompetitionExpansion(competitionKey)}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {/* 展开/折叠图标 */}
+                      <div className="flex items-center">
+                        {hasDocuments ? (
+                          isExpanded ? (
+                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          )
+                        ) : (
+                          <div className="w-4 h-4" />
+                        )}
+                        <Trophy className="w-4 h-4 text-yellow-500 ml-2" />
                       </div>
 
-                      {competition.dueDateMilestone && (
-                        <div className="flex items-center gap-2">
-                          <Clock
-                            className={cn(
-                              'w-4 h-4',
-                              isOverdue(competition.dueDateMilestone)
-                                ? 'text-red-500'
-                                : isDeadlineApproaching(competition.dueDateMilestone)
-                                  ? 'text-yellow-500'
-                                  : 'text-muted-foreground'
-                            )}
-                          />
-                          <span className="text-muted-foreground">截止时间：</span>
-                          <span
-                            className={cn(
-                              isOverdue(competition.dueDateMilestone)
-                                ? 'text-red-600 font-medium'
-                                : isDeadlineApproaching(competition.dueDateMilestone)
-                                  ? 'text-yellow-600 font-medium'
-                                  : ''
-                            )}
-                          >
-                            {new Date(competition.dueDateMilestone).toLocaleDateString()}
-                          </span>
-                          {isOverdue(competition.dueDateMilestone) && (
-                            <Badge variant="destructive" className="text-xs ml-1">
-                              已逾期
+                      {/* 比赛信息 */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-medium truncate">{competition.seriesName}</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {competition.levelName}
+                          </Badge>
+                          {competition.statusInMilestone && (
+                            <Badge
+                              className={cn(
+                                'text-xs',
+                                getStatusColor(competition.statusInMilestone)
+                              )}
+                            >
+                              {competition.statusInMilestone}
                             </Badge>
                           )}
-                          {isDeadlineApproaching(competition.dueDateMilestone) &&
-                            !isOverdue(competition.dueDateMilestone) && (
-                              <Badge
-                                variant="secondary"
-                                className="text-xs ml-1 bg-yellow-100 text-yellow-800"
-                              >
-                                即将截止
-                              </Badge>
-                            )}
                         </div>
-                      )}
 
-                      <div className="flex items-center gap-2">
-                        <Award className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">创建时间：</span>
-                        <span>{new Date(competition.milestoneCreatedAt).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(competition.participatedAt).toLocaleDateString()}
+                          </span>
+
+                          {competition.dueDateMilestone && (
+                            <span
+                              className={cn(
+                                'flex items-center gap-1',
+                                isOverdue(competition.dueDateMilestone)
+                                  ? 'text-red-600'
+                                  : isDeadlineApproaching(competition.dueDateMilestone)
+                                    ? 'text-yellow-600'
+                                    : ''
+                              )}
+                            >
+                              <Clock className="w-3 h-3" />
+                              截止 {new Date(competition.dueDateMilestone).toLocaleDateString()}
+                              {isOverdue(competition.dueDateMilestone) && (
+                                <Badge variant="destructive" className="text-xs ml-1">
+                                  已逾期
+                                </Badge>
+                              )}
+                              {isDeadlineApproaching(competition.dueDateMilestone) &&
+                                !isOverdue(competition.dueDateMilestone) && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs ml-1 bg-yellow-100 text-yellow-800"
+                                  >
+                                    即将截止
+                                  </Badge>
+                                )}
+                            </span>
+                          )}
+
+                          {hasDocuments && (
+                            <span className="flex items-center gap-1">
+                              <FileText className="w-3 h-3" />
+                              {competition.documents.length} 个文档
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {competition.milestoneNotes && (
-                      <div className="mt-3 p-3 bg-muted/20 rounded border">
-                        <p className="text-sm text-muted-foreground">
-                          <strong>里程碑备注：</strong> {competition.milestoneNotes}
-                        </p>
-                      </div>
-                    )}
+                    {/* 操作按钮 */}
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => handleEditStatus(competition)}
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        编辑
+                      </Button>
 
-                    {/* 通知文件 */}
-                    {competition.notificationFileName && (
-                      <div className="mt-3 flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                        <FileText className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm text-blue-800 dark:text-blue-300">
-                          通知文件：{competition.notificationOriginalFileName}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-auto"
-                          onClick={() => handleDownloadNotification(competition)}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditStatus(competition)}
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      编辑状态
-                    </Button>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewDetails(competition)}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          查看详情
-                        </DropdownMenuItem>
-                        {competition.notificationFileName && (
-                          <DropdownMenuItem onClick={() => handleDownloadNotification(competition)}>
-                            <Download className="w-4 h-4 mr-2" />
-                            下载通知
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <MoreHorizontal className="w-3 h-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetails(competition)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            查看详情
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleRemoveCompetition(competition)}
-                        >
-                          取消关联
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          {competition.notificationFileName && (
+                            <DropdownMenuItem
+                              onClick={() => handleDownloadNotification(competition)}
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              下载通知
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleRemoveCompetition(competition)}
+                          >
+                            取消关联
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* 展开的文档区域 */}
+                  <AnimatePresence>
+                    {isExpanded && hasDocuments && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-border/40 bg-muted/30"
+                      >
+                        <div className="p-4">
+                          <CompetitionDocumentsSection
+                            documents={competition.documents}
+                            competitionName={competition.seriesName}
+                            levelName={competition.levelName}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
           </AnimatePresence>
         ) : (
           <div className="text-center py-12">

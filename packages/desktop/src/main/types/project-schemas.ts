@@ -146,7 +146,7 @@ export interface ProjectDetailsOutput {
   expenses: import('./expense-schemas').ExpenseTrackingOutput[] // 从 ExpenseTrackingService 获取
   budgetOverview: import('./budget-pool-schemas').ProjectBudgetOverview // 从 BudgetPoolService 获取的项目经费概览
 
-  competitions: any[] // 从 CompetitionService 获取
+  competitions: import('./competition-schemas').ProjectCompetitionWithDocumentsOutput[] // 从 CompetitionService 获取
   tags: any[] // 从 TagService 获取
   coverAsset?: any | null // 从 ProjectAssetsService 获取
   statistics: {

@@ -374,7 +374,7 @@ export class ProjectService {
       ProjectAssetsService.getProjectAssets({ projectId: validatedInput.id }),
       ExpenseTrackingService.getProjectExpenses(validatedInput.id),
       BudgetPoolService.getProjectBudgetOverview(validatedInput.id),
-      CompetitionService.getProjectCompetitions(validatedInput.id),
+      CompetitionService.getProjectCompetitionsWithDocuments(validatedInput.id),
       TagService.getProjectTags(validatedInput.id),
       project.currentCoverAssetId
         ? ProjectAssetsService.getProjectCoverAsset(project.currentCoverAssetId)

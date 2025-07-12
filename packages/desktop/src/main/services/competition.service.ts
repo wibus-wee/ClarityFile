@@ -4,7 +4,9 @@ import {
   competitionMilestones,
   projectCompetitionMilestones,
   managedFiles,
-  projects
+  projects,
+  documentVersions,
+  logicalDocuments
 } from '../../db/schema'
 import { eq, desc, gte, lte, and, count, sql } from 'drizzle-orm'
 import {
@@ -65,6 +67,65 @@ export class CompetitionService {
       .orderBy(desc(projectCompetitionMilestones.createdAt))
 
     return competitions
+  }
+
+  /**
+   * 获取比赛里程碑关联的文档版本
+   */
+  static async getCompetitionMilestoneDocuments(competitionMilestoneId: string) {
+    const documents = await db
+      .select({
+        // 文档版本信息
+        versionId: documentVersions.id,
+        versionTag: documentVersions.versionTag,
+        isGenericVersion: documentVersions.isGenericVersion,
+        versionNotes: documentVersions.notes,
+        versionCreatedAt: documentVersions.createdAt,
+        versionUpdatedAt: documentVersions.updatedAt,
+        // 逻辑文档信息
+        logicalDocumentId: logicalDocuments.id,
+        documentName: logicalDocuments.name,
+        documentType: logicalDocuments.type,
+        documentDescription: logicalDocuments.description,
+        documentStatus: logicalDocuments.status,
+        // 文件信息
+        managedFileId: managedFiles.id,
+        fileName: managedFiles.name,
+        originalFileName: managedFiles.originalFileName,
+        physicalPath: managedFiles.physicalPath,
+        mimeType: managedFiles.mimeType,
+        fileSizeBytes: managedFiles.fileSizeBytes,
+        fileHash: managedFiles.fileHash,
+        uploadedAt: managedFiles.uploadedAt
+      })
+      .from(documentVersions)
+      .innerJoin(logicalDocuments, eq(documentVersions.logicalDocumentId, logicalDocuments.id))
+      .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
+      .where(eq(documentVersions.competitionMilestoneId, competitionMilestoneId))
+      .orderBy(desc(documentVersions.createdAt))
+
+    return documents
+  }
+
+  /**
+   * 获取项目参与的赛事里程碑（包含关联文档信息）
+   */
+  static async getProjectCompetitionsWithDocuments(projectId: string) {
+    // 首先获取基本的比赛信息
+    const competitions = await this.getProjectCompetitions(projectId)
+
+    // 为每个比赛获取关联的文档
+    const competitionsWithDocuments = await Promise.all(
+      competitions.map(async (competition) => {
+        const documents = await this.getCompetitionMilestoneDocuments(competition.milestoneId)
+        return {
+          ...competition,
+          documents
+        }
+      })
+    )
+
+    return competitionsWithDocuments
   }
 
   /**
