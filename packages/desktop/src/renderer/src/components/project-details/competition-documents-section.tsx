@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@clarity/shadcn/ui/select'
-import { FileText, Search, Filter, Calendar, Eye, MoreHorizontal, Tag } from 'lucide-react'
+import { FileText, Search, Filter, Calendar, Eye, MoreHorizontal, Tag, Trophy } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
-import { cn } from '@renderer/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useQuickLookPreviewById, useIsQuickLookAvailable } from '@renderer/hooks/use-tipc'
@@ -87,15 +86,43 @@ export function CompetitionDocumentsSection({
 
   if (documents.length === 0) {
     return (
-      <div className="py-8 text-center">
-        <FileText className="w-8 h-8 mx-auto mb-3 text-muted-foreground opacity-50" />
-        <p className="text-sm text-muted-foreground">此比赛暂无关联文档</p>
+      <div className="space-y-4">
+        {/* 比赛信息标题 */}
+        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+          <Trophy className="w-4 h-4 text-primary" />
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium text-foreground">{competitionName}</span>
+            <span className="text-muted-foreground">·</span>
+            <Badge variant="outline" className="text-xs">
+              {levelName}
+            </Badge>
+          </div>
+        </div>
+
+        <div className="py-8 text-center">
+          <FileText className="w-8 h-8 mx-auto mb-3 text-muted-foreground opacity-50" />
+          <p className="text-sm text-muted-foreground">此比赛暂无关联文档</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
+      {/* 比赛信息标题 */}
+      <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+        <Trophy className="w-4 h-4 text-primary" />
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-medium text-foreground">{competitionName}</span>
+          <span className="text-muted-foreground">·</span>
+          <Badge variant="outline" className="text-xs">
+            {levelName}
+          </Badge>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-muted-foreground">{documents.length} 个文档</span>
+        </div>
+      </div>
+
       {/* 文档筛选工具栏 */}
       <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border/30">
         <div className="relative flex-1 max-w-sm">
