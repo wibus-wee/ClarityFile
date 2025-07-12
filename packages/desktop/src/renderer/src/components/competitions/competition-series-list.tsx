@@ -50,7 +50,7 @@ function SeriesCard({
       exit={{ opacity: 0, y: -20 }}
       whileHover={{ y: -2 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 transition-all duration-200 cursor-pointer"
+      className="group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 cursor-pointer"
       onClick={() => onViewMilestones(series)}
     >
       {/* 头部 */}

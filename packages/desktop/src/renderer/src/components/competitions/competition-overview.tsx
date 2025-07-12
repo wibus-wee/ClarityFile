@@ -29,7 +29,6 @@ function StatCard({ title, value, description, icon: Icon, className }: StatCard
       className={cn(
         'relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6',
         'hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
-        'transition-all duration-200',
         className
       )}
     >
@@ -69,7 +68,7 @@ function QuickAction({
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        'group relative w-full rounded-xl border p-6 text-left transition-all',
+        'group relative w-full rounded-xl border p-6 text-left',
         'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20',
         variant === 'default'
           ? 'bg-background/50 hover:bg-background/80'

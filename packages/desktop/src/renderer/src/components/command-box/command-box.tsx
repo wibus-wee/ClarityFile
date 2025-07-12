@@ -221,8 +221,7 @@ export function CommandBox() {
                     'flex-1 bg-transparent',
                     'text-sm placeholder:text-muted-foreground',
                     'outline-none border-none',
-                    'focus:outline-none focus:ring-0',
-                    'transition-all duration-200'
+                    'focus:outline-none focus:ring-0'
                   )}
                 />
                 <AnimatePresence>
