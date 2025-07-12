@@ -135,6 +135,23 @@ export function competitionRouter(t: ITipc) {
       .input<GetMilestoneParticipatingProjectsInput>()
       .action(async ({ input }) => {
         return await CompetitionService.getMilestoneParticipatingProjects(input.milestoneId)
+      }),
+
+    // 获取项目参与的赛事系列
+    getProjectParticipatedCompetitionSeries: t.procedure
+      .input<{ projectId: string }>()
+      .action(async ({ input }) => {
+        return await CompetitionService.getProjectParticipatedCompetitionSeries(input.projectId)
+      }),
+
+    // 获取项目在特定赛事系列中参与的里程碑
+    getProjectMilestonesInSeries: t.procedure
+      .input<{ projectId: string; seriesId: string }>()
+      .action(async ({ input }) => {
+        return await CompetitionService.getProjectMilestonesInSeries(
+          input.projectId,
+          input.seriesId
+        )
       })
   }
 }

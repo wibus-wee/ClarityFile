@@ -39,7 +39,9 @@ import {
   useUploadDocumentVersion,
   useUpdateDocumentVersion,
   useGetAllCompetitionSeries,
-  useGetCompetitionMilestones
+  useGetCompetitionMilestones,
+  useGetProjectParticipatedCompetitionSeries,
+  useGetProjectMilestonesInSeries
 } from '@renderer/hooks/use-tipc'
 import { useFilePicker } from '@renderer/hooks/use-file-picker'
 import type { ProjectDetailsOutput } from '@main/types/project-schemas'
@@ -100,10 +102,17 @@ export function DocumentVersionFormDrawer({
   const { pickFile } = useFilePicker()
   const uploadDocumentVersion = useUploadDocumentVersion()
   const updateDocumentVersion = useUpdateDocumentVersion()
-  const { data: competitionSeries } = useGetAllCompetitionSeries()
-  const { data: milestones } = useGetCompetitionMilestones(selectedSeriesId, {
-    enabled: !!selectedSeriesId
-  })
+
+  // 只获取项目已参与的赛事系列，而不是所有赛事系列
+  const { data: competitionSeries } = useGetProjectParticipatedCompetitionSeries(
+    projectDetails?.project.id || null
+  )
+
+  // 获取项目在特定赛事系列中参与的里程碑
+  const { data: milestones } = useGetProjectMilestonesInSeries(
+    projectDetails?.project.id || null,
+    selectedSeriesId || null
+  )
 
   const isEdit = mode === 'edit'
   const title = isEdit ? '编辑文档版本' : '添加文档版本'
@@ -367,7 +376,13 @@ export function DocumentVersionFormDrawer({
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="选择赛事系列" />
+                        <SelectValue
+                          placeholder={
+                            competitionSeries && competitionSeries.length > 0
+                              ? '选择赛事系列'
+                              : '项目暂未参与任何赛事'
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {competitionSeries?.map((series) => (
@@ -380,6 +395,7 @@ export function DocumentVersionFormDrawer({
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground mt-1">只显示项目已参与的赛事系列</p>
                   </div>
 
                   {/* 赛事里程碑选择 */}
@@ -402,9 +418,10 @@ export function DocumentVersionFormDrawer({
                                   <div className="flex items-center gap-2">
                                     <Target className="h-4 w-4 text-primary" />
                                     {milestone.levelName}
-                                    {milestone.dueDate && (
+                                    {milestone.dueDateMilestone && (
                                       <span className="text-xs text-muted-foreground">
-                                        ({new Date(milestone.dueDate).toLocaleDateString()})
+                                        ({new Date(milestone.dueDateMilestone).toLocaleDateString()}
+                                        )
                                       </span>
                                     )}
                                   </div>

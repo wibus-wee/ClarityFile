@@ -728,6 +728,22 @@ export function useCompetitionTimeline() {
   return useSWR('competition-timeline', () => tipcClient.getCompetitionTimeline())
 }
 
+export function useGetProjectParticipatedCompetitionSeries(projectId: string | null) {
+  return useSWR(projectId ? ['project-participated-competition-series', projectId] : null, () =>
+    projectId ? tipcClient.getProjectParticipatedCompetitionSeries({ projectId }) : null
+  )
+}
+
+export function useGetProjectMilestonesInSeries(projectId: string | null, seriesId: string | null) {
+  return useSWR(
+    projectId && seriesId ? ['project-milestones-in-series', projectId, seriesId] : null,
+    () =>
+      projectId && seriesId
+        ? tipcClient.getProjectMilestonesInSeries({ projectId, seriesId })
+        : null
+  )
+}
+
 export function useUpdateCompetitionSeries() {
   return useSWRMutation(
     'competition-series',

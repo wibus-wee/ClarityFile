@@ -8,7 +8,7 @@ import {
   documentVersions,
   logicalDocuments
 } from '../../db/schema'
-import { eq, desc, gte, lte, and, count, sql } from 'drizzle-orm'
+import { eq, desc, gte, lte, and, asc, count, sql } from 'drizzle-orm'
 import {
   validateCreateCompetitionSeries,
   validateUpdateCompetitionSeries,
@@ -126,6 +126,64 @@ export class CompetitionService {
     )
 
     return competitionsWithDocuments
+  }
+
+  /**
+   * 获取项目参与的赛事系列
+   */
+  static async getProjectParticipatedCompetitionSeries(projectId: string) {
+    const series = await db
+      .select({
+        id: competitionSeries.id,
+        name: competitionSeries.name,
+        notes: competitionSeries.notes,
+        createdAt: competitionSeries.createdAt,
+        updatedAt: competitionSeries.updatedAt
+      })
+      .from(competitionSeries)
+      .innerJoin(
+        competitionMilestones,
+        eq(competitionSeries.id, competitionMilestones.competitionSeriesId)
+      )
+      .innerJoin(
+        projectCompetitionMilestones,
+        eq(competitionMilestones.id, projectCompetitionMilestones.competitionMilestoneId)
+      )
+      .where(eq(projectCompetitionMilestones.projectId, projectId))
+      .groupBy(competitionSeries.id)
+      .orderBy(desc(competitionSeries.createdAt))
+
+    return series
+  }
+
+  /**
+   * 获取项目在特定赛事系列中参与的里程碑
+   */
+  static async getProjectMilestonesInSeries(projectId: string, seriesId: string) {
+    const milestones = await db
+      .select({
+        id: competitionMilestones.id,
+        levelName: competitionMilestones.levelName,
+        dueDateMilestone: competitionMilestones.dueDateMilestone,
+        notes: competitionMilestones.notes,
+        createdAt: competitionMilestones.createdAt,
+        updatedAt: competitionMilestones.updatedAt,
+        statusInMilestone: projectCompetitionMilestones.statusInMilestone
+      })
+      .from(competitionMilestones)
+      .innerJoin(
+        projectCompetitionMilestones,
+        eq(competitionMilestones.id, projectCompetitionMilestones.competitionMilestoneId)
+      )
+      .where(
+        and(
+          eq(competitionMilestones.competitionSeriesId, seriesId),
+          eq(projectCompetitionMilestones.projectId, projectId)
+        )
+      )
+      .orderBy(asc(competitionMilestones.dueDateMilestone))
+
+    return milestones
   }
 
   /**
