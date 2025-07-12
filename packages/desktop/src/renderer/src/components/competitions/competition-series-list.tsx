@@ -9,7 +9,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
-import { Trophy, Target, MoreHorizontal, Edit, Trash2, Plus, Clock, List } from 'lucide-react'
+import {
+  Trophy,
+  Target,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Plus,
+  Clock,
+  List,
+  Calendar
+} from 'lucide-react'
 import { useGetAllCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -48,38 +58,83 @@ function SeriesCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      whileHover={{ y: -2 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 cursor-pointer"
+      className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer"
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 35
+      }}
       onClick={() => onViewMilestones(series)}
     >
-      {/* 头部 */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Trophy className="h-5 w-5 text-primary" />
+      {/* 左侧：图标和内容 */}
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+          <Trophy className="h-4 w-4 text-primary" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-sm truncate">{series.name}</h3>
+            <Badge
+              variant={series.milestoneCount > 0 ? 'default' : 'secondary'}
+              className="text-xs shrink-0"
+            >
+              {series.milestoneCount > 0 ? '活跃' : '待配置'}
+            </Badge>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-lg">{series.name}</h3>
-            <p className="text-sm text-muted-foreground">
-              创建于 {format(new Date(series.createdAt), 'yyyy年MM月dd日', { locale: zhCN })}
-            </p>
+          {series.notes && (
+            <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{series.notes}</p>
+          )}
+
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Target className="h-3 w-3" />
+              <span>{series.milestoneCount} 个里程碑</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>{format(new Date(series.updatedAt), 'MM月dd日更新', { locale: zhCN })}</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>
+                创建于 {format(new Date(series.createdAt), 'yyyy年MM月dd日', { locale: zhCN })}
+              </span>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* 右侧：操作按钮 */}
+      <div className="flex items-center gap-2 shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            onCreateMilestone(series.id)
+          }}
+          className="gap-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 px-2 text-xs"
+        >
+          <Plus className="h-3 w-3" />
+          添加里程碑
+        </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
@@ -121,44 +176,6 @@ function SeriesCard({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-
-      {/* 描述 */}
-      {series.notes && (
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{series.notes}</p>
-      )}
-
-      {/* 统计信息 */}
-      <div className="flex items-center gap-4 mb-4">
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Target className="h-4 w-4" />
-          <span>{series.milestoneCount} 个里程碑</span>
-        </div>
-
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>{format(new Date(series.updatedAt), 'MM月dd日更新', { locale: zhCN })}</span>
-        </div>
-      </div>
-
-      {/* 状态标签 */}
-      <div className="flex items-center justify-between">
-        <Badge variant={series.milestoneCount > 0 ? 'default' : 'secondary'} className="text-xs">
-          {series.milestoneCount > 0 ? '活跃' : '待配置'}
-        </Badge>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation()
-            onCreateMilestone(series.id)
-          }}
-          className="gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Plus className="h-4 w-4" />
-          添加里程碑
-        </Button>
       </div>
     </motion.div>
   )
@@ -274,9 +291,17 @@ export function CompetitionSeriesList({
 
   if (isLoading) {
     return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="divide-y divide-border/50">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-48 rounded-xl bg-muted/50 animate-pulse" />
+          <div key={i} className="py-3 px-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-md bg-muted/50 animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-muted/50 rounded animate-pulse w-1/3" />
+                <div className="h-3 bg-muted/50 rounded animate-pulse w-1/2" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     )
@@ -323,8 +348,8 @@ export function CompetitionSeriesList({
         </p>
       </div>
 
-      {/* 赛事系列网格 */}
-      <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* 赛事系列列表 */}
+      <motion.div layout className="divide-y divide-border/50">
         <AnimatePresence>
           {filteredAndSortedSeries.map((series) => (
             <SeriesCard

@@ -98,98 +98,85 @@ function MilestoneCard({ milestone, index, onViewDetails, onViewSeries }: Milest
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ y: -2 }}
       className={cn(
-        'group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6',
-        'hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
-        'transition-all duration-200',
-        urgencyLevel === 'overdue' && 'ring-1 ring-red-200 dark:ring-red-800',
-        urgencyLevel === 'today' && 'ring-1 ring-orange-200 dark:ring-orange-800',
-        urgencyLevel === 'tomorrow' && 'ring-1 ring-yellow-200 dark:ring-yellow-800'
+        'group relative flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors',
+        urgencyLevel === 'overdue' && 'border-l-4 border-l-red-500',
+        urgencyLevel === 'today' && 'border-l-4 border-l-orange-500',
+        urgencyLevel === 'tomorrow' && 'border-l-4 border-l-yellow-500',
+        urgencyLevel === 'urgent' && 'border-l-4 border-l-amber-500',
+        urgencyLevel === 'soon' && 'border-l-4 border-l-blue-500',
+        urgencyLevel === 'normal' && 'border-l-4 border-l-green-500'
       )}
+      transition={{
+        delay: index * 0.05,
+        type: 'spring',
+        stiffness: 400,
+        damping: 35
+      }}
     >
-      {/* 紧急程度指示器 */}
-      <div
-        className={cn(
-          'absolute top-0 left-0 w-1 h-full',
-          urgencyLevel === 'overdue' && 'bg-red-500',
-          urgencyLevel === 'today' && 'bg-orange-500',
-          urgencyLevel === 'tomorrow' && 'bg-yellow-500',
-          urgencyLevel === 'urgent' && 'bg-amber-500',
-          urgencyLevel === 'soon' && 'bg-blue-500',
-          urgencyLevel === 'normal' && 'bg-green-500'
-        )}
-      />
+      {/* 左侧：图标和内容 */}
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+          <Target className="h-4 w-4 text-primary" />
+        </div>
 
-      {/* 头部 */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Target className="h-5 w-5 text-primary" />
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-lg">{milestone.levelName}</h3>
-            <Badge variant="secondary" className="text-xs mt-1">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-sm truncate">{milestone.levelName}</h3>
+            <Badge variant="secondary" className="text-xs shrink-0">
               {milestone.seriesName}
             </Badge>
+            <div
+              className={cn(
+                'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0',
+                getUrgencyColor()
+              )}
+            >
+              <UrgencyIcon className="h-3 w-3" />
+              {getUrgencyText()}
+            </div>
           </div>
-        </div>
 
-        <div
-          className={cn(
-            'flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium',
-            getUrgencyColor()
+          {milestone.notes && (
+            <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{milestone.notes}</p>
           )}
-        >
-          <UrgencyIcon className="h-4 w-4" />
-          {getUrgencyText()}
-        </div>
-      </div>
 
-      {/* 描述 */}
-      {milestone.notes && (
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{milestone.notes}</p>
-      )}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            {dueDate && (
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>截止：{format(dueDate, 'MM月dd日', { locale: zhCN })}</span>
+              </div>
+            )}
 
-      {/* 详细信息 */}
-      <div className="space-y-3">
-        {/* 日期信息 */}
-        {dueDate && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>截止日期：{format(dueDate, 'yyyy年MM月dd日 EEEE', { locale: zhCN })}</span>
+            <div className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              <span>{milestone.participatingProjectsCount} 个项目参与</span>
+            </div>
           </div>
-        )}
-
-        {/* 参与项目 */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="h-4 w-4" />
-          <span>{milestone.participatingProjectsCount} 个项目参与</span>
         </div>
       </div>
 
-      {/* 操作按钮 */}
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+      {/* 右侧：操作按钮 */}
+      <div className="flex items-center gap-2 shrink-0">
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={onViewSeries}
+          className="gap-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 px-2 text-xs"
         >
-          <Trophy className="h-4 w-4" />
-          查看赛事系列
+          <Trophy className="h-3 w-3" />
+          查看系列
         </Button>
 
         <Button
           variant="outline"
           size="sm"
-          className="gap-2"
           onClick={() => onViewDetails(milestone)}
+          className="gap-2 h-7 px-2 text-xs"
         >
           查看详情
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-3 w-3" />
         </Button>
       </div>
     </motion.div>
@@ -232,9 +219,17 @@ export function UpcomingMilestones() {
           <div className="h-9 w-24 bg-muted/50 rounded animate-pulse" />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="divide-y divide-border/50">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-64 rounded-xl bg-muted/50 animate-pulse" />
+            <div key={i} className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-muted/50 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted/50 rounded animate-pulse w-1/3" />
+                  <div className="h-3 bg-muted/50 rounded animate-pulse w-1/2" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -329,7 +324,7 @@ export function UpcomingMilestones() {
                 </Badge>
               </div>
 
-              <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <motion.div layout className="divide-y divide-border/50">
                 <AnimatePresence>
                   {categoryMilestones.map((milestone, index) => (
                     <MilestoneCard

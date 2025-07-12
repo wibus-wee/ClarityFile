@@ -24,23 +24,28 @@ interface StatCardProps {
 function StatCard({ title, value, description, icon: Icon, className }: StatCardProps) {
   return (
     <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6',
-        'hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
+        'p-4 border border-border rounded-lg bg-card hover:bg-muted/30 transition-colors',
         className
       )}
+      whileHover={{ scale: 1.04 }}
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 35
+      }}
     >
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
-          <p className="text-sm text-muted-foreground">{description}</p>
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="h-4 w-4 text-primary" />
         </div>
 
-        <div className="rounded-lg bg-primary/10 p-3">
-          <Icon className="h-6 w-6 text-primary" />
+        <div className="flex-1 min-w-0">
+          <div className="text-xl font-bold">{value}</div>
+          <div className="text-sm font-medium text-foreground truncate">{title}</div>
+          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</div>
         </div>
       </div>
     </motion.div>
@@ -64,40 +69,31 @@ function QuickAction({
 }: QuickActionProps) {
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        'group relative w-full rounded-xl border p-6 text-left',
-        'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20',
-        variant === 'default'
-          ? 'bg-background/50 hover:bg-background/80'
-          : 'bg-muted/50 hover:bg-muted/80'
+        'group w-full p-4 border border-border rounded-lg bg-card hover:bg-muted/30 transition-colors text-left',
+        variant === 'secondary' && 'bg-muted/50'
       )}
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 35
+      }}
     >
-      <div className="flex items-start gap-4">
-        <div
-          className={cn(
-            'rounded-lg p-3 transition-colors',
-            variant === 'default'
-              ? 'bg-primary/10 group-hover:bg-primary/20'
-              : 'bg-secondary/50 group-hover:bg-secondary/70'
-          )}
-        >
-          <Icon
-            className={cn(
-              'h-5 w-5',
-              variant === 'default' ? 'text-primary' : 'text-secondary-foreground'
-            )}
-          />
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="h-4 w-4 text-primary" />
         </div>
 
-        <div className="flex-1 space-y-1">
-          <h3 className="font-semibold">{title}</h3>
-          <p className="text-sm text-muted-foreground">{description}</p>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-sm truncate">{title}</h3>
+          <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
         </div>
 
-        <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 shrink-0" />
       </div>
     </motion.button>
   )
@@ -147,7 +143,16 @@ export function CompetitionOverview() {
       <div className="space-y-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-32 rounded-xl bg-muted/50 animate-pulse" />
+            <div key={i} className="p-4 border border-border rounded-lg bg-card">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-muted/50 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 bg-muted/50 rounded animate-pulse w-16" />
+                  <div className="h-4 bg-muted/50 rounded animate-pulse w-20" />
+                  <div className="h-3 bg-muted/50 rounded animate-pulse w-24" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -235,35 +240,48 @@ export function CompetitionOverview() {
             </div>
 
             {milestonesLoading ? (
-              <div className="space-y-3">
+              <div className="divide-y divide-border/50">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded-lg bg-muted/50 animate-pulse" />
+                  <div key={i} className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-md bg-muted/50 animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted/50 rounded animate-pulse w-1/3" />
+                        <div className="h-3 bg-muted/50 rounded animate-pulse w-1/2" />
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : upcomingMilestones && upcomingMilestones.length > 0 ? (
-              <div className="space-y-3">
+              <div className="divide-y divide-border/50">
                 {upcomingMilestones.map((milestone, index) => (
                   <motion.button
                     key={milestone.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
                     onClick={() => handleMilestoneClick(milestone)}
-                    className="flex items-center gap-4 rounded-lg border bg-background/50 p-4 hover:bg-background/80 transition-colors w-full text-left"
+                    className="flex items-center gap-3 py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors w-full text-left"
+                    transition={{
+                      delay: index * 0.1,
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 35
+                    }}
                   >
-                    <div className="rounded-lg bg-primary/10 p-2">
+                    <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
                       <Clock className="h-4 w-4 text-primary" />
                     </div>
 
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{milestone.levelName}</h3>
-                        <Badge variant="secondary" className="text-xs">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-sm truncate">{milestone.levelName}</h3>
+                        <Badge variant="secondary" className="text-xs shrink-0">
                           {milestone.seriesName}
                         </Badge>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         {milestone.dueDate && (
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />

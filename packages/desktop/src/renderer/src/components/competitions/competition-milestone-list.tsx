@@ -24,7 +24,7 @@ import {
 import { useGetCompetitionMilestones } from '@renderer/hooks/use-tipc'
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { cn } from '@renderer/lib/utils'
+
 import { CompetitionMilestoneDrawer } from './drawers/competition-milestone-drawer'
 import { DeleteCompetitionMilestoneDialog } from './dialogs/delete-competition-milestone-dialog'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
@@ -81,107 +81,88 @@ function MilestoneCard({ milestone, onEdit, onDelete, onViewDetails }: Milestone
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      whileHover={{ y: -2 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 cursor-pointer"
+      className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer"
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 35
+      }}
       onClick={() => onViewDetails(milestone)}
     >
-      {/* 头部 */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Target className="h-5 w-5 text-primary" />
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-lg">{milestone.levelName}</h3>
-            <p className="text-sm text-muted-foreground">
-              创建于 {format(new Date(milestone.createdAt), 'yyyy年MM月dd日', { locale: zhCN })}
-            </p>
-          </div>
+      {/* 左侧：图标和内容 */}
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+          <Target className="h-4 w-4 text-primary" />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Badge variant={status.variant} className="text-xs">
-            {status.label}
-          </Badge>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-sm truncate">{milestone.levelName}</h3>
+            <Badge variant={status.variant} className="text-xs shrink-0">
+              {status.label}
+            </Badge>
+          </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onEdit(milestone)
-                }}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                编辑里程碑
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete(milestone)
-                }}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                删除里程碑
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>
+                创建于 {format(new Date(milestone.createdAt), 'MM月dd日', { locale: zhCN })}
+              </span>
+            </div>
+
+            {dueDate && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>截止：{format(dueDate, 'MM月dd日', { locale: zhCN })}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              <span>{projectCount} 个项目参与</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 描述 */}
-      {milestone.description && (
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{milestone.description}</p>
-      )}
-
-      {/* 信息行 */}
-      <div className="flex items-center gap-4 mb-4">
-        {dueDate && (
-          <div className="flex items-center gap-1 text-sm">
-            <Calendar className="h-4 w-4" />
-            <span className={cn(status.color)}>
-              {format(dueDate, 'MM月dd日', { locale: zhCN })}
-            </span>
-          </div>
-        )}
-
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Users className="h-4 w-4" />
-          <span>{projectCount} 个项目</span>
-        </div>
-
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>{format(new Date(milestone.updatedAt), 'MM月dd日更新', { locale: zhCN })}</span>
-        </div>
+      {/* 右侧：操作按钮 */}
+      <div className="flex items-center gap-2 shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(milestone)
+              }}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              编辑里程碑
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(milestone)
+              }}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              删除里程碑
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-
-      {/* 倒计时 */}
-      {dueDate && daysUntilDue !== null && (
-        <div className="text-xs">
-          <span className={cn('font-medium', status.color)}>
-            {daysUntilDue < 0
-              ? `已过期 ${Math.abs(daysUntilDue)} 天`
-              : daysUntilDue === 0
-                ? '今天截止'
-                : `还有 ${daysUntilDue} 天`}
-          </span>
-        </div>
-      )}
     </motion.div>
   )
 }
@@ -257,9 +238,17 @@ export function CompetitionMilestoneList({
         </div>
 
         {/* 里程碑骨架 */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="divide-y divide-border/50">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 rounded-xl bg-muted/50 animate-pulse" />
+            <div key={i} className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-muted/50 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted/50 rounded animate-pulse w-1/3" />
+                  <div className="h-3 bg-muted/50 rounded animate-pulse w-1/2" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -295,7 +284,7 @@ export function CompetitionMilestoneList({
 
       {/* 里程碑列表 */}
       {sortedMilestones.length > 0 ? (
-        <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div layout className="divide-y divide-border/50">
           <AnimatePresence>
             {sortedMilestones.map((milestone) => (
               <MilestoneCard

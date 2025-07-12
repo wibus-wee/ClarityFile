@@ -73,14 +73,18 @@ function TimelineItem({
       {/* 内容卡片 */}
       <div className="ml-12 pb-8">
         <motion.div
-          whileHover={{ y: -1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           className={cn(
-            'rounded-xl border bg-background/50 backdrop-blur-sm p-6',
-            'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20',
+            'p-4 border border-border rounded-lg bg-card hover:bg-muted/30 transition-colors',
             isPast && 'opacity-75',
-            isToday && 'ring-2 ring-primary/20 bg-primary/5'
+            isToday && 'ring-1 ring-primary/30 bg-primary/5'
           )}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 35
+          }}
         >
           {/* 头部信息 */}
           <div className="flex items-start justify-between mb-4">
@@ -88,7 +92,7 @@ function TimelineItem({
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    'rounded-lg p-2',
+                    'w-8 h-8 rounded-md flex items-center justify-center shrink-0',
                     isPast && 'bg-muted/50',
                     isToday && 'bg-primary/10',
                     isFuture && 'bg-primary/10'
@@ -96,7 +100,7 @@ function TimelineItem({
                 >
                   <Target
                     className={cn(
-                      'h-5 w-5',
+                      'h-4 w-4',
                       isPast && 'text-muted-foreground',
                       isToday && 'text-primary',
                       isFuture && 'text-primary'
@@ -104,9 +108,9 @@ function TimelineItem({
                   />
                 </div>
 
-                <div>
-                  <h3 className="font-semibold text-lg">{item.title}</h3>
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-sm truncate">{item.title}</h3>
+                  <div className="flex items-center gap-2 mt-1">
                     <Badge variant="secondary" className="text-xs">
                       {item.seriesName}
                     </Badge>
@@ -117,14 +121,14 @@ function TimelineItem({
 
               {/* 日期和时间 */}
               {itemDate && (
-                <div className="flex items-center gap-4 text-sm text-muted-foreground ml-11">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground ml-11">
                   <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-3 w-3" />
                     {format(itemDate, 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
                   </span>
 
                   <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-3 w-3" />
                     {isPast ? '已过期' : isFuture ? '即将到来' : '今天'}
                   </span>
                 </div>
@@ -147,9 +151,9 @@ function TimelineItem({
           </div>
 
           {/* 基本信息 */}
-          <div className="flex items-center gap-6 text-sm text-muted-foreground ml-11">
+          <div className="flex items-center gap-6 text-xs text-muted-foreground ml-11">
             <span className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
+              <Users className="h-3 w-3" />
               {item.participatingProjectsCount} 个项目参与
             </span>
           </div>
@@ -176,35 +180,35 @@ function TimelineItem({
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 mt-4">
+                <div className="flex items-center gap-2 mt-4">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 h-7 px-2 text-xs"
                     onClick={() => onViewDetails(item)}
                   >
-                    <Target className="h-4 w-4" />
+                    <Target className="h-3 w-3" />
                     查看详情
                   </Button>
 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 h-7 px-2 text-xs"
                     onClick={() => onViewSeries(item)}
                   >
-                    <Trophy className="h-4 w-4" />
-                    查看赛事系列
+                    <Trophy className="h-3 w-3" />
+                    查看系列
                   </Button>
 
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 h-7 px-2 text-xs"
                     onClick={() => onViewProjects(item)}
                   >
-                    <Users className="h-4 w-4" />
-                    查看参与项目
+                    <Users className="h-3 w-3" />
+                    查看项目
                   </Button>
                 </div>
               </motion.div>
@@ -312,9 +316,25 @@ export function CompetitionTimeline({ searchQuery }: CompetitionTimelineProps) {
     return (
       <div className="space-y-8">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex gap-4">
-            <div className="w-4 h-4 rounded-full bg-muted/50 animate-pulse mt-8" />
-            <div className="flex-1 h-32 rounded-xl bg-muted/50 animate-pulse" />
+          <div key={i} className="relative">
+            {/* 时间轴线条 */}
+            <div className="absolute left-6 top-12 bottom-0 w-px bg-border" />
+
+            {/* 时间轴节点 */}
+            <div className="absolute left-4 top-8 w-4 h-4 rounded-full border-2 border-muted bg-muted animate-pulse" />
+
+            {/* 内容卡片 */}
+            <div className="ml-12 pb-8">
+              <div className="p-4 border border-border rounded-lg bg-card">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-muted/50 animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-muted/50 rounded animate-pulse w-1/3" />
+                    <div className="h-3 bg-muted/50 rounded animate-pulse w-1/2" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
