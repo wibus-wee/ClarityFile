@@ -537,11 +537,6 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                       </motion.div>
                     )}
                   </AnimatePresence>
-
-                  {/* 分割线 */}
-                  {index < filteredSeries.length - 1 && (
-                    <div className="border-b border-border/30"></div>
-                  )}
                 </motion.div>
               )
             })}

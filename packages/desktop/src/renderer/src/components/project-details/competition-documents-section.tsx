@@ -152,7 +152,7 @@ export function CompetitionDocumentsSection({
           delay: 0.1,
           ease: [0.04, 0.62, 0.23, 0.98]
         }}
-        className="flex items-center gap-2 pt-2 border-b border-border/30"
+        className="flex items-center gap-2 pt-2"
       >
         <Trophy className="w-4 h-4 text-primary" />
         <div className="flex items-center gap-2 text-sm">
