@@ -17,7 +17,8 @@ export function useTheme() {
     removeCustomTheme,
     saveCustomTheme,
     previewTheme,
-    clearPreview
+    clearPreview,
+    switchToDefaultTheme
   } = useCustomTheme()
 
   return {
@@ -37,6 +38,7 @@ export function useTheme() {
     saveCustomTheme, // 保存自定义主题
     previewTheme, // 预览主题
     clearPreview, // 清除预览
+    switchToDefaultTheme, // 切回默认主题
 
     // 便捷方法
     hasCustomTheme: activeCustomTheme !== null, // 是否有激活的自定义主题
