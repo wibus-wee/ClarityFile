@@ -16,6 +16,7 @@ import { BudgetPoolsTab } from '@renderer/components/project-details/budget-pool
 import { SettingsTab } from '@renderer/components/project-details/settings-tab'
 import { InlineNotFound } from '@renderer/components/not-found'
 import { Shortcut, ShortcutKey, ShortcutProvider } from '@renderer/components/shortcuts'
+import { ProjectDrawer } from '@renderer/components/projects/project-drawer'
 
 // Tab类型定义
 type TabId = 'documents' | 'assets' | 'competitions' | 'expenses' | 'budget-pools' | 'settings'
@@ -70,7 +71,7 @@ export const Route = createFileRoute('/projects/$projectId')({
 function ProjectDetailsPage() {
   const { projectId } = Route.useParams()
   const [activeTab, setActiveTab] = useState<TabId>('documents')
-  const [isEditing, setIsEditing] = useState(false)
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false)
 
   const { data: projectDetails, isLoading, error } = useProjectDetails(projectId)
 
@@ -127,7 +128,7 @@ function ProjectDetailsPage() {
             </div>
             <div className="flex items-center gap-2">
               <Shortcut shortcut={['cmd', 'e']} description="编辑项目">
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
+                <Button variant="outline" size="sm" onClick={() => setEditDrawerOpen(true)}>
                   <Edit className="w-4 h-4 mr-2" />
                   编辑
                 </Button>
@@ -195,6 +196,17 @@ function ProjectDetailsPage() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* 项目编辑抽屉 */}
+      <ProjectDrawer
+        open={editDrawerOpen}
+        onOpenChange={setEditDrawerOpen}
+        project={project}
+        onSuccess={() => {
+          // 编辑成功后可以刷新数据或显示成功提示
+          // 数据会通过 SWR 自动重新获取
+        }}
+      />
     </ShortcutProvider>
   )
 }
