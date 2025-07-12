@@ -39,4 +39,5 @@ export interface ExtendedThemeContextValue extends ThemeContextValue {
   ) => Promise<CustomTheme>
   previewTheme: (cssContent: string) => void
   clearPreview: () => void
+  switchToDefaultTheme: () => Promise<void>
 }

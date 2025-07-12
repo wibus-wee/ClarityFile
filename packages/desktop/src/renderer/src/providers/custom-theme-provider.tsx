@@ -258,6 +258,23 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     }
   }, [])
 
+  // 切回默认主题
+  const switchToDefaultTheme = useCallback(async () => {
+    try {
+      // 清除自定义主题
+      setActiveCustomTheme(null)
+      await ThemeService.setActiveCustomTheme(null)
+
+      // 移除自定义主题 CSS
+      CustomThemeManager.removeCustomThemeCSS()
+
+      console.log('Switched to default theme')
+    } catch (error) {
+      console.error('Failed to switch to default theme:', error)
+      throw error
+    }
+  }, [])
+
   const value: ExtendedThemeContextValue = {
     theme,
     resolvedTheme,
@@ -272,7 +289,8 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     removeCustomTheme,
     saveCustomTheme,
     previewTheme,
-    clearPreview
+    clearPreview,
+    switchToDefaultTheme
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
