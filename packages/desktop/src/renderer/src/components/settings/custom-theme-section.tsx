@@ -19,6 +19,7 @@ import { useTheme } from '@renderer/hooks/use-theme'
 import { ThemeImportUtils } from '@renderer/lib/theme-import-utils'
 import { SettingsSection } from './components'
 import { ThemeColorPreview, DetailedThemeColorPreview } from './theme-color-preview'
+import { FontDetectionDisplay } from './font-detection-display'
 import type { CustomTheme } from '@renderer/types/theme'
 import { formatFriendlyDate } from '@renderer/lib/utils'
 
@@ -329,6 +330,9 @@ export function CustomThemeSection() {
                   />
                 </div>
 
+                {/* 智能字体检测显示 */}
+                {cssContent.trim() && <FontDetectionDisplay cssContent={cssContent} />}
+
                 {/* 色彩预览 */}
                 {cssContent.trim() && (
                   <div className="p-3 border rounded-lg bg-muted/20">
@@ -422,6 +426,11 @@ export function CustomThemeSection() {
                               className="min-h-[100px] max-h-[200px] font-mono text-sm resize-none border-dashed bg-muted/20 focus:bg-background transition-colors"
                             />
                           </div>
+
+                          {/* 智能字体检测显示 */}
+                          {editCssContent.trim() && (
+                            <FontDetectionDisplay cssContent={editCssContent} />
+                          )}
 
                           <div className="flex items-center gap-2">
                             <Button
