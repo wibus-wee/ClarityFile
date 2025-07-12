@@ -78,8 +78,22 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
   const toggleSeriesExpansion = (seriesId: string) => {
     setExpandedSeries((prev) => {
       const newSet = new Set(prev)
-      if (newSet.has(seriesId)) {
+      const isCurrentlyExpanded = newSet.has(seriesId)
+
+      if (isCurrentlyExpanded) {
+        // 关闭父级时，同时关闭该系列下的所有子级里程碑
         newSet.delete(seriesId)
+
+        // 找到该系列下的所有里程碑ID并从展开状态中移除
+        const currentSeries = competitionSeries?.find((series) => series.seriesId === seriesId)
+        if (currentSeries) {
+          const milestoneIds = currentSeries.milestones.map((milestone) => milestone.milestoneId)
+          setExpandedMilestones((prevMilestones) => {
+            const newMilestoneSet = new Set(prevMilestones)
+            milestoneIds.forEach((id) => newMilestoneSet.delete(id))
+            return newMilestoneSet
+          })
+        }
       } else {
         newSet.add(seriesId)
       }
@@ -331,7 +345,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
                   {/* 展开的里程碑列表 */}
                   {isSeriesExpanded && (
-                    <div className="mt-3 mb-3 ml-12 space-y-2">
+                    <div className="mt-3 mb-3 ml-7 space-y-2">
                       {series.milestones.map((milestone) => {
                         const isMilestoneExpanded = expandedMilestones.has(milestone.milestoneId)
                         const hasDocuments = milestone.documents && milestone.documents.length > 0

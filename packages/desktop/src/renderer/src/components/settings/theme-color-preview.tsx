@@ -57,9 +57,9 @@ export function DetailedThemeColorPreview({
   }, [cssContent])
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`flex flex-row gap-20 space-y-3 ${className}`}>
       {/* Light Mode Colors */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <h5 className="text-xs font-medium text-muted-foreground">浅色模式</h5>
         <div className="grid grid-cols-3 gap-2">
           <ColorSwatch
@@ -81,7 +81,7 @@ export function DetailedThemeColorPreview({
       </div>
 
       {/* Dark Mode Colors */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <h5 className="text-xs font-medium text-muted-foreground">深色模式</h5>
         <div className="grid grid-cols-3 gap-2">
           <ColorSwatch
