@@ -36,7 +36,6 @@ import type {
 import type {
   CreateCompetitionSeriesInput,
   CreateCompetitionMilestoneInput,
-  AddProjectToCompetitionInput,
   UpdateProjectCompetitionStatusInput,
   RemoveProjectFromCompetitionInput,
   DeleteCompetitionSeriesInput,
@@ -646,18 +645,6 @@ export function useCreateCompetitionMilestone() {
       const result = await tipcClient.createCompetitionMilestone(arg)
       // 重新验证赛事里程碑
       mutate(['competition-milestones', arg.competitionSeriesId])
-      return result
-    }
-  )
-}
-
-export function useAddProjectToCompetition() {
-  return useSWRMutation(
-    'project-competitions',
-    async (_key, { arg }: { arg: AddProjectToCompetitionInput }) => {
-      const result = await tipcClient.addProjectToCompetition(arg)
-      // 重新验证项目详情
-      mutate(['project-details', arg.projectId])
       return result
     }
   )

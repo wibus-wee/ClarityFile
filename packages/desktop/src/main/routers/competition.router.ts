@@ -3,7 +3,6 @@ import { ITipc } from '../types'
 import type {
   CreateCompetitionSeriesInput,
   CreateCompetitionMilestoneInput,
-  AddProjectToCompetitionInput,
   UpdateProjectCompetitionStatusInput,
   DeleteCompetitionSeriesInput,
   GetProjectCompetitionsInput,
@@ -50,13 +49,6 @@ export function competitionRouter(t: ITipc) {
       .input<CreateCompetitionMilestoneInput>()
       .action(async ({ input }) => {
         return await CompetitionService.createCompetitionMilestone(input)
-      }),
-
-    // 项目参与赛事里程碑
-    addProjectToCompetition: t.procedure
-      .input<AddProjectToCompetitionInput>()
-      .action(async ({ input }) => {
-        return await CompetitionService.addProjectToCompetition(input)
       }),
 
     // 项目参与整个赛事系列

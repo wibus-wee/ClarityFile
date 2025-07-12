@@ -70,10 +70,31 @@ export class CompetitionService {
   }
 
   /**
-   * 获取比赛里程碑关联的文档版本
+   * 获取比赛里程碑关联的文档版本（包含通用文档版本）
    */
   static async getCompetitionMilestoneDocuments(competitionMilestoneId: string) {
-    const documents = await db
+    // 首先获取该里程碑所属的项目ID
+    const milestoneInfo = await db
+      .select({
+        projectId: projectCompetitionMilestones.projectId,
+        seriesId: competitionMilestones.competitionSeriesId
+      })
+      .from(competitionMilestones)
+      .innerJoin(
+        projectCompetitionMilestones,
+        eq(competitionMilestones.id, projectCompetitionMilestones.competitionMilestoneId)
+      )
+      .where(eq(competitionMilestones.id, competitionMilestoneId))
+      .limit(1)
+
+    if (milestoneInfo.length === 0) {
+      return []
+    }
+
+    const { projectId } = milestoneInfo[0]
+
+    // 1. 获取直接关联到该里程碑的文档版本
+    const milestoneDocuments = await db
       .select({
         // 文档版本信息
         versionId: documentVersions.id,
@@ -102,9 +123,60 @@ export class CompetitionService {
       .innerJoin(logicalDocuments, eq(documentVersions.logicalDocumentId, logicalDocuments.id))
       .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
       .where(eq(documentVersions.competitionMilestoneId, competitionMilestoneId))
-      .orderBy(desc(documentVersions.createdAt))
 
-    return documents
+    // 2. 获取该项目下的通用文档版本（isGenericVersion = true）
+    const genericDocuments = await db
+      .select({
+        // 文档版本信息
+        versionId: documentVersions.id,
+        versionTag: documentVersions.versionTag,
+        isGenericVersion: documentVersions.isGenericVersion,
+        versionNotes: documentVersions.notes,
+        versionCreatedAt: documentVersions.createdAt,
+        versionUpdatedAt: documentVersions.updatedAt,
+        // 逻辑文档信息
+        logicalDocumentId: logicalDocuments.id,
+        documentName: logicalDocuments.name,
+        documentType: logicalDocuments.type,
+        documentDescription: logicalDocuments.description,
+        documentStatus: logicalDocuments.status,
+        // 文件信息
+        managedFileId: managedFiles.id,
+        fileName: managedFiles.name,
+        originalFileName: managedFiles.originalFileName,
+        physicalPath: managedFiles.physicalPath,
+        mimeType: managedFiles.mimeType,
+        fileSizeBytes: managedFiles.fileSizeBytes,
+        fileHash: managedFiles.fileHash,
+        uploadedAt: managedFiles.uploadedAt
+      })
+      .from(documentVersions)
+      .innerJoin(logicalDocuments, eq(documentVersions.logicalDocumentId, logicalDocuments.id))
+      .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
+      .where(
+        and(
+          eq(logicalDocuments.projectId, projectId),
+          eq(documentVersions.isGenericVersion, true),
+          // 排除已经有特定赛事版本的逻辑文档的通用版本
+          // 这里需要检查同一逻辑文档是否有其他非通用版本关联到赛事
+          sql`NOT EXISTS (
+            SELECT 1 FROM ${documentVersions} dv2
+            WHERE dv2.logical_document_id = ${documentVersions.logicalDocumentId}
+            AND dv2.is_generic_version = false
+            AND dv2.competition_milestone_id IS NOT NULL
+          )`
+        )
+      )
+
+    // 合并结果并去重
+    const allDocuments = [...milestoneDocuments, ...genericDocuments]
+    const uniqueDocuments = allDocuments.filter(
+      (doc, index, self) => index === self.findIndex((d) => d.versionId === doc.versionId)
+    )
+
+    return uniqueDocuments.sort(
+      (a, b) => new Date(b.versionCreatedAt).getTime() - new Date(a.versionCreatedAt).getTime()
+    )
   }
 
   /**

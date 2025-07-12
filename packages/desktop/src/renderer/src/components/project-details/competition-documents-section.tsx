@@ -187,7 +187,15 @@ export function CompetitionDocumentsSection({
                     <Badge variant="secondary" className="text-xs">
                       {document.versionTag}
                     </Badge>
-                    {!document.isGenericVersion && (
+                    {document.isGenericVersion ? (
+                      <Badge
+                        variant="default"
+                        className="text-xs bg-blue-100 text-blue-700 border-blue-200"
+                      >
+                        <Tag className="w-3 h-3 mr-1" />
+                        通用版本
+                      </Badge>
+                    ) : (
                       <Badge variant="outline" className="text-xs">
                         <Tag className="w-3 h-3 mr-1" />
                         比赛版本
