@@ -18,7 +18,6 @@ import {
   Calendar,
   FileText,
   Clock,
-  ChevronDown,
   ChevronRight,
   Edit,
   Eye,
@@ -285,13 +284,13 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: index * 0.02 }}
-                  className="group"
+                  className="group p-1"
                 >
                   {/* 赛事系列主行 */}
                   <div
                     className={cn(
-                      'flex items-center justify-between py-4 px-1 hover:bg-muted/30 rounded-md transition-all duration-200 cursor-pointer -mx-1',
-                      isSeriesExpanded && 'bg-muted/20'
+                      'mb-2 flex items-center justify-between py-4 px-4 bg-muted/40 hover:bg-muted/60 rounded-md border border-border/50 cursor-pointer -mx-1',
+                      isSeriesExpanded && 'bg-muted/70'
                     )}
                     onClick={() => toggleSeriesExpansion(series.seriesId)}
                   >
@@ -299,11 +298,12 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                       {/* 展开/折叠图标 */}
                       <div className="flex items-center gap-3">
                         {series.milestones.length > 0 ? (
-                          isSeriesExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
-                          )
+                          <motion.div
+                            animate={{ rotate: isSeriesExpanded ? 90 : 0 }}
+                            transition={{ duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] }}
+                          >
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </motion.div>
                         ) : (
                           <div className="w-4 h-4" />
                         )}
@@ -344,161 +344,199 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                   </div>
 
                   {/* 展开的里程碑列表 */}
-                  {isSeriesExpanded && (
-                    <div className="mt-3 mb-3 ml-7 space-y-2">
-                      {series.milestones.map((milestone) => {
-                        const isMilestoneExpanded = expandedMilestones.has(milestone.milestoneId)
-                        const hasDocuments = milestone.documents && milestone.documents.length > 0
+                  <AnimatePresence>
+                    {isSeriesExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.04, 0.62, 0.23, 0.98]
+                        }}
+                        className="mt-3 mb-3 ml-7 space-y-2 overflow-hidden"
+                      >
+                        {series.milestones.map((milestone, milestoneIndex) => {
+                          const isMilestoneExpanded = expandedMilestones.has(milestone.milestoneId)
+                          const hasDocuments = milestone.documents && milestone.documents.length > 0
 
-                        return (
-                          <div key={milestone.milestoneId} className="group/milestone">
-                            {/* 里程碑行 */}
-                            <div
-                              className={cn(
-                                'flex items-center justify-between py-3 px-3 hover:bg-muted/30 rounded-md transition-all duration-200 cursor-pointer -mx-1',
-                                isMilestoneExpanded && 'bg-muted/20'
-                              )}
-                              onClick={() => toggleMilestoneExpansion(milestone.milestoneId)}
+                          return (
+                            <motion.div
+                              key={milestone.milestoneId}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                delay: milestoneIndex * 0.05,
+                                duration: 0.25,
+                                ease: [0.04, 0.62, 0.23, 0.98]
+                              }}
+                              className="group/milestone p-1"
                             >
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  {hasDocuments ? (
-                                    isMilestoneExpanded ? (
-                                      <ChevronDown className="w-3 h-3 text-muted-foreground transition-transform duration-200" />
-                                    ) : (
-                                      <ChevronRight className="w-3 h-3 text-muted-foreground transition-transform duration-200" />
-                                    )
-                                  ) : (
-                                    <div className="w-3 h-3" />
-                                  )}
-                                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-3 mb-1">
-                                    <h4 className="text-sm font-medium truncate text-foreground">
-                                      {milestone.levelName}
-                                    </h4>
-                                    {milestone.statusInMilestone && (
-                                      <span
-                                        className={cn(
-                                          'text-xs font-medium px-2 py-1 rounded-md',
-                                          getStatusColor(milestone.statusInMilestone)
-                                        )}
-                                      >
-                                        {milestone.statusInMilestone}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-1.5">
-                                      <Calendar className="w-3 h-3" />
-                                      参与于{' '}
-                                      {new Date(milestone.participatedAt).toLocaleDateString()}
-                                    </span>
-
-                                    {milestone.dueDateMilestone && (
-                                      <span className="flex items-center gap-1.5">
-                                        <Clock className="w-3 h-3" />
-                                        截止{' '}
-                                        {new Date(milestone.dueDateMilestone).toLocaleDateString()}
-                                      </span>
-                                    )}
-
-                                    {hasDocuments && (
-                                      <span className="flex items-center gap-1.5">
-                                        <FileText className="w-3 h-3" />
-                                        {milestone.documents.length} 个文档
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* 里程碑操作按钮 */}
+                              {/* 里程碑行 */}
                               <div
-                                className="flex items-center gap-1 opacity-0 group-hover/milestone:opacity-100 transition-opacity duration-200"
-                                onClick={(e) => e.stopPropagation()}
+                                className={cn(
+                                  'flex items-center justify-between py-3 px-3 bg-muted/50 border border-border/50 hover:bg-muted/60 rounded-md cursor-pointer -mx-1',
+                                  isMilestoneExpanded && 'bg-muted/70'
+                                )}
+                                onClick={() => toggleMilestoneExpansion(milestone.milestoneId)}
                               >
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 px-2 text-xs font-medium hover:bg-muted transition-colors"
-                                  onClick={() =>
-                                    handleEditMilestoneStatus({
-                                      seriesId: series.seriesId,
-                                      seriesName: series.seriesName,
-                                      milestoneId: milestone.milestoneId,
-                                      levelName: milestone.levelName,
-                                      statusInMilestone: milestone.statusInMilestone
-                                    })
-                                  }
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    {hasDocuments ? (
+                                      <motion.div
+                                        animate={{ rotate: isMilestoneExpanded ? 90 : 0 }}
+                                        transition={{
+                                          duration: 0.2,
+                                          ease: [0.04, 0.62, 0.23, 0.98]
+                                        }}
+                                      >
+                                        <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                                      </motion.div>
+                                    ) : (
+                                      <div className="w-3 h-3" />
+                                    )}
+                                    <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-1">
+                                      <h4 className="text-sm font-medium truncate text-foreground">
+                                        {milestone.levelName}
+                                      </h4>
+                                      {milestone.statusInMilestone && (
+                                        <span
+                                          className={cn(
+                                            'text-xs font-medium px-2 py-1 rounded-md',
+                                            getStatusColor(milestone.statusInMilestone)
+                                          )}
+                                        >
+                                          {milestone.statusInMilestone}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                      <span className="flex items-center gap-1.5">
+                                        <Calendar className="w-3 h-3" />
+                                        参与于{' '}
+                                        {new Date(milestone.participatedAt).toLocaleDateString()}
+                                      </span>
+
+                                      {milestone.dueDateMilestone && (
+                                        <span className="flex items-center gap-1.5">
+                                          <Clock className="w-3 h-3" />
+                                          截止{' '}
+                                          {new Date(
+                                            milestone.dueDateMilestone
+                                          ).toLocaleDateString()}
+                                        </span>
+                                      )}
+
+                                      {hasDocuments && (
+                                        <span className="flex items-center gap-1.5">
+                                          <FileText className="w-3 h-3" />
+                                          {milestone.documents.length} 个文档
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* 里程碑操作按钮 */}
+                                <div
+                                  className="flex items-center gap-1 opacity-0 group-hover/milestone:opacity-100 transition-opacity duration-200"
+                                  onClick={(e) => e.stopPropagation()}
                                 >
-                                  <Edit className="w-3 h-3 mr-1" />
-                                  编辑
-                                </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-2 text-xs font-medium hover:bg-muted transition-colors"
+                                    onClick={() =>
+                                      handleEditMilestoneStatus({
+                                        seriesId: series.seriesId,
+                                        seriesName: series.seriesName,
+                                        milestoneId: milestone.milestoneId,
+                                        levelName: milestone.levelName,
+                                        statusInMilestone: milestone.statusInMilestone
+                                      })
+                                    }
+                                  >
+                                    <Edit className="w-3 h-3 mr-1" />
+                                    编辑
+                                  </Button>
 
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0 hover:bg-muted transition-colors"
-                                    >
-                                      <MoreHorizontal className="w-3 h-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleViewMilestoneDetails({
-                                          seriesId: series.seriesId,
-                                          seriesName: series.seriesName,
-                                          milestoneId: milestone.milestoneId,
-                                          levelName: milestone.levelName,
-                                          statusInMilestone: milestone.statusInMilestone
-                                        })
-                                      }
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      查看详情
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      className="text-destructive"
-                                      onClick={() =>
-                                        handleRemoveMilestone({
-                                          seriesId: series.seriesId,
-                                          seriesName: series.seriesName,
-                                          milestoneId: milestone.milestoneId,
-                                          levelName: milestone.levelName,
-                                          statusInMilestone: milestone.statusInMilestone
-                                        })
-                                      }
-                                    >
-                                      取消关联
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 w-7 p-0 hover:bg-muted transition-colors"
+                                      >
+                                        <MoreHorizontal className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleViewMilestoneDetails({
+                                            seriesId: series.seriesId,
+                                            seriesName: series.seriesName,
+                                            milestoneId: milestone.milestoneId,
+                                            levelName: milestone.levelName,
+                                            statusInMilestone: milestone.statusInMilestone
+                                          })
+                                        }
+                                      >
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        查看详情
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() =>
+                                          handleRemoveMilestone({
+                                            seriesId: series.seriesId,
+                                            seriesName: series.seriesName,
+                                            milestoneId: milestone.milestoneId,
+                                            levelName: milestone.levelName,
+                                            statusInMilestone: milestone.statusInMilestone
+                                          })
+                                        }
+                                      >
+                                        取消关联
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               </div>
-                            </div>
 
-                            {/* 展开的文档列表 */}
-                            {isMilestoneExpanded && hasDocuments && (
-                              <div className="mt-3 ml-5 pl-4 border-l-2 border-muted">
-                                <CompetitionDocumentsSection
-                                  documents={milestone.documents}
-                                  competitionName={series.seriesName}
-                                  levelName={milestone.levelName}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                              {/* 展开的文档列表 */}
+                              <AnimatePresence>
+                                {isMilestoneExpanded && hasDocuments && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{
+                                      duration: 0.25,
+                                      ease: [0.04, 0.62, 0.23, 0.98]
+                                    }}
+                                    className="mt-3 ml-5 pl-4 border-l-2 border-muted overflow-hidden"
+                                  >
+                                    <CompetitionDocumentsSection
+                                      documents={milestone.documents}
+                                      competitionName={series.seriesName}
+                                      levelName={milestone.levelName}
+                                    />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </motion.div>
+                          )
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* 分割线 */}
                   {index < filteredSeries.length - 1 && (

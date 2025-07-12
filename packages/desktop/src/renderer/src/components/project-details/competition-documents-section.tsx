@@ -86,9 +86,26 @@ export function CompetitionDocumentsSection({
 
   if (documents.length === 0) {
     return (
-      <div className="space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.3,
+          ease: [0.04, 0.62, 0.23, 0.98]
+        }}
+        className="space-y-4"
+      >
         {/* 比赛信息标题 */}
-        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            duration: 0.25,
+            delay: 0.1,
+            ease: [0.04, 0.62, 0.23, 0.98]
+          }}
+          className="flex items-center gap-2 pb-2 border-b border-border/30"
+        >
           <Trophy className="w-4 h-4 text-primary" />
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium text-foreground">{competitionName}</span>
@@ -97,20 +114,46 @@ export function CompetitionDocumentsSection({
               {levelName}
             </Badge>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="py-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.25,
+            delay: 0.2,
+            ease: [0.04, 0.62, 0.23, 0.98]
+          }}
+          className="py-8 text-center"
+        >
           <FileText className="w-8 h-8 mx-auto mb-3 text-muted-foreground opacity-50" />
           <p className="text-sm text-muted-foreground">此比赛暂无关联文档</p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.3,
+        ease: [0.04, 0.62, 0.23, 0.98]
+      }}
+      className="space-y-4"
+    >
       {/* 比赛信息标题 */}
-      <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{
+          duration: 0.25,
+          delay: 0.1,
+          ease: [0.04, 0.62, 0.23, 0.98]
+        }}
+        className="flex items-center gap-2 pt-2 border-b border-border/30"
+      >
         <Trophy className="w-4 h-4 text-primary" />
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-foreground">{competitionName}</span>
@@ -121,10 +164,19 @@ export function CompetitionDocumentsSection({
           <span className="text-muted-foreground">·</span>
           <span className="text-muted-foreground">{documents.length} 个文档</span>
         </div>
-      </div>
+      </motion.div>
 
       {/* 文档筛选工具栏 */}
-      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border/30">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.25,
+          delay: 0.15,
+          ease: [0.04, 0.62, 0.23, 0.98]
+        }}
+        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border/30"
+      >
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -161,10 +213,19 @@ export function CompetitionDocumentsSection({
             <SelectItem value="version">版本</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
       {/* 文档列表 */}
-      <div className="space-y-2 p-2 bg-background/50 rounded-lg border border-border/20">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.25,
+          delay: 0.2,
+          ease: [0.04, 0.62, 0.23, 0.98]
+        }}
+        className="space-y-2 p-2 bg-background/50 rounded-lg border border-border/20"
+      >
         <AnimatePresence>
           {filteredDocuments.map((document, index) => (
             <motion.div
@@ -172,7 +233,11 @@ export function CompetitionDocumentsSection({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ delay: index * 0.02 }}
+              transition={{
+                delay: index * 0.03,
+                duration: 0.25,
+                ease: [0.04, 0.62, 0.23, 0.98]
+              }}
               className="group flex items-center justify-between p-3 rounded-lg border border-border/60 bg-card hover:border-border hover:bg-muted/30 transition-all duration-200"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -254,14 +319,23 @@ export function CompetitionDocumentsSection({
             </motion.div>
           ))}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {filteredDocuments.length === 0 && (searchQuery || filterType !== 'all') && (
-        <div className="py-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.25,
+            delay: 0.3,
+            ease: [0.04, 0.62, 0.23, 0.98]
+          }}
+          className="py-8 text-center"
+        >
           <FileText className="w-8 h-8 mx-auto mb-3 text-muted-foreground opacity-50" />
           <p className="text-sm text-muted-foreground">没有找到匹配的文档</p>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

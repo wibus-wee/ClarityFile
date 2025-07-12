@@ -96,17 +96,6 @@ function ProjectDetailsPage() {
   return (
     <ShortcutProvider scope="project-details-page">
       <div className="flex flex-col h-full">
-        {/* 顶部导航栏 */}
-        {/* <div className="flex items-center gap-4 py-6 border-b border-border/50">
-          <Link
-            to="/projects"
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            返回项目列表
-          </Link>
-        </div> */}
-
         {/* 项目头部信息 */}
         <div className="py-6 pt-0 border-b border-border/50">
           <div className="flex items-start justify-between mb-4">
