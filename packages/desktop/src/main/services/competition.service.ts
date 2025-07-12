@@ -308,6 +308,59 @@ export class CompetitionService {
   }
 
   /**
+   * 项目参与整个赛事系列（自动关联该系列下的所有里程碑）
+   */
+  static async addProjectToCompetitionSeries(input: {
+    projectId: string
+    competitionSeriesId: string
+    statusInMilestone?: string
+  }) {
+    // 首先获取该赛事系列下的所有里程碑
+    const milestones = await db
+      .select({ id: competitionMilestones.id })
+      .from(competitionMilestones)
+      .where(eq(competitionMilestones.competitionSeriesId, input.competitionSeriesId))
+
+    if (milestones.length === 0) {
+      throw new Error('该赛事系列下没有里程碑')
+    }
+
+    // 检查项目是否已经参与了该系列的任何里程碑
+    const existingParticipation = await db
+      .select({ milestoneId: projectCompetitionMilestones.competitionMilestoneId })
+      .from(projectCompetitionMilestones)
+      .innerJoin(
+        competitionMilestones,
+        eq(projectCompetitionMilestones.competitionMilestoneId, competitionMilestones.id)
+      )
+      .where(
+        and(
+          eq(projectCompetitionMilestones.projectId, input.projectId),
+          eq(competitionMilestones.competitionSeriesId, input.competitionSeriesId)
+        )
+      )
+
+    if (existingParticipation.length > 0) {
+      throw new Error('项目已经参与了该赛事系列')
+    }
+
+    // 为每个里程碑创建关联记录
+    const insertValues = milestones.map((milestone) => ({
+      projectId: input.projectId,
+      competitionMilestoneId: milestone.id,
+      statusInMilestone: input.statusInMilestone || '准备中'
+    }))
+
+    const results = await db.insert(projectCompetitionMilestones).values(insertValues).returning()
+
+    return {
+      seriesId: input.competitionSeriesId,
+      milestonesAdded: results.length,
+      milestones: results
+    }
+  }
+
+  /**
    * 更新项目在赛事中的状态
    */
   static async updateProjectCompetitionStatus(input: {

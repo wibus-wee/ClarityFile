@@ -59,6 +59,13 @@ export function competitionRouter(t: ITipc) {
         return await CompetitionService.addProjectToCompetition(input)
       }),
 
+    // 项目参与整个赛事系列
+    addProjectToCompetitionSeries: t.procedure
+      .input<{ projectId: string; competitionSeriesId: string; statusInMilestone?: string }>()
+      .action(async ({ input }) => {
+        return await CompetitionService.addProjectToCompetitionSeries(input)
+      }),
+
     // 更新项目在赛事中的状态
     updateProjectCompetitionStatus: t.procedure
       .input<UpdateProjectCompetitionStatusInput>()

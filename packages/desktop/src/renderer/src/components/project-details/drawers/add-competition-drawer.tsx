@@ -32,13 +32,11 @@ import {
 import { Trophy, Plus, Loader2 } from 'lucide-react'
 import {
   useGetAllCompetitionSeries,
-  useGetCompetitionMilestones,
-  useAddProjectToCompetition
+  useAddProjectToCompetitionSeries
 } from '@renderer/hooks/use-tipc'
 
 const addCompetitionSchema = z.object({
   seriesId: z.string().min(1, '请选择赛事系列'),
-  milestoneId: z.string().min(1, '请选择赛事里程碑'),
   statusInMilestone: z.string().optional()
 })
 
@@ -68,20 +66,14 @@ export function AddCompetitionDrawer({
   onSuccess
 }: AddCompetitionDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedSeriesId, setSelectedSeriesId] = useState<string>('')
 
   const { data: competitionSeries, isLoading: isLoadingSeries } = useGetAllCompetitionSeries()
-  const { data: milestones, isLoading: isLoadingMilestones } = useGetCompetitionMilestones(
-    selectedSeriesId,
-    { enabled: !!selectedSeriesId }
-  )
-  const addProjectToCompetition = useAddProjectToCompetition()
+  const addProjectToCompetitionSeries = useAddProjectToCompetitionSeries()
 
   const form = useForm<AddCompetitionFormData>({
     resolver: zodResolver(addCompetitionSchema),
     defaultValues: {
       seriesId: '',
-      milestoneId: '',
       statusInMilestone: '准备中'
     }
   })
@@ -90,25 +82,17 @@ export function AddCompetitionDrawer({
   useEffect(() => {
     if (!open) {
       form.reset()
-      setSelectedSeriesId('')
     }
   }, [open, form])
-
-  // 当选择的系列改变时，重置里程碑选择
-  useEffect(() => {
-    if (selectedSeriesId !== form.getValues('seriesId')) {
-      form.setValue('milestoneId', '')
-    }
-  }, [selectedSeriesId, form])
 
   const onSubmit = async (data: AddCompetitionFormData) => {
     if (!projectId) return
 
     setIsSubmitting(true)
     try {
-      await addProjectToCompetition.trigger({
+      await addProjectToCompetitionSeries.trigger({
         projectId,
-        competitionMilestoneId: data.milestoneId,
+        competitionSeriesId: data.seriesId,
         statusInMilestone: data.statusInMilestone
       })
 
@@ -130,7 +114,7 @@ export function AddCompetitionDrawer({
             关联项目到赛事
           </DrawerTitle>
           <DrawerDescription>
-            选择要关联的赛事系列和具体里程碑，设置项目在该赛事中的状态
+            选择要关联的赛事系列，项目将自动参与该系列下的所有里程碑
           </DrawerDescription>
         </DrawerHeader>
 
@@ -151,10 +135,7 @@ export function AddCompetitionDrawer({
                     <FormItem>
                       <FormLabel>赛事系列 *</FormLabel>
                       <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          setSelectedSeriesId(value)
-                        }}
+                        onValueChange={field.onChange}
                         value={field.value}
                         disabled={isLoadingSeries}
                       >
@@ -186,52 +167,6 @@ export function AddCompetitionDrawer({
                   )}
                 />
 
-                {/* 赛事里程碑选择 */}
-                <FormField
-                  control={form.control}
-                  name="milestoneId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>赛事里程碑 *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={!selectedSeriesId || isLoadingMilestones}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                !selectedSeriesId
-                                  ? '请先选择赛事系列'
-                                  : isLoadingMilestones
-                                    ? '加载中...'
-                                    : '选择赛事里程碑'
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {milestones?.map((milestone) => (
-                            <SelectItem key={milestone.id} value={milestone.id}>
-                              <div className="flex flex-col items-start">
-                                <span className="font-medium">{milestone.levelName}</span>
-                                {milestone.dueDate && (
-                                  <span className="text-xs text-muted-foreground">
-                                    截止: {new Date(milestone.dueDate).toLocaleDateString()}
-                                  </span>
-                                )}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>选择具体的赛事里程碑或阶段</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {/* 状态选择 */}
                 <FormField
                   control={form.control}
@@ -253,7 +188,7 @@ export function AddCompetitionDrawer({
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormDescription>设置项目在该赛事里程碑中的当前状态</FormDescription>
+                      <FormDescription>设置项目在该赛事系列中的初始状态</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

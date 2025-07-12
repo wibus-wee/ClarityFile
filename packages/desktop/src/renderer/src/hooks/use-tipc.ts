@@ -663,6 +663,24 @@ export function useAddProjectToCompetition() {
   )
 }
 
+export function useAddProjectToCompetitionSeries() {
+  return useSWRMutation(
+    'project-competition-series',
+    async (
+      _key,
+      {
+        arg
+      }: { arg: { projectId: string; competitionSeriesId: string; statusInMilestone?: string } }
+    ) => {
+      const result = await tipcClient.addProjectToCompetitionSeries(arg)
+      // 重新验证项目详情和项目参与的赛事系列
+      mutate(['project-details', arg.projectId])
+      mutate(['project-participated-competition-series', arg.projectId])
+      return result
+    }
+  )
+}
+
 export function useUpdateProjectCompetitionStatus() {
   return useSWRMutation(
     'project-competitions',
