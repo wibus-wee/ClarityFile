@@ -12,37 +12,26 @@ import { formatFileSize } from '@renderer/lib/utils'
 import { Trophy, Clock, FileText, Target, Info } from 'lucide-react'
 
 interface CompetitionDetailsDialogProps {
-  competition: {
-    statusInMilestone: string | null
-    milestoneNotes: string | null
-    participatedAt: Date
-    milestoneId: string
-    levelName: string
-    dueDateMilestone: Date | null
-    milestoneCreatedAt: Date
-    milestoneUpdatedAt: Date
+  milestone: {
     seriesId: string
     seriesName: string
-    seriesNotes: string | null
-    seriesCreatedAt: Date
-    seriesUpdatedAt: Date
-    notificationFileName: string | null
-    notificationOriginalFileName: string | null
-    notificationPhysicalPath: string | null
-    notificationMimeType: string | null
-    notificationFileSizeBytes: number | null
-    notificationUploadedAt: Date | null
+    milestoneId: string
+    levelName: string
+    statusInMilestone: string | null
+    dueDateMilestone?: Date | null
+    participatedAt?: Date
+    milestoneNotes?: string | null
   } | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 export function CompetitionDetailsDialog({
-  competition,
+  milestone,
   open,
   onOpenChange
 }: CompetitionDetailsDialogProps) {
-  if (!competition) return null
+  if (!milestone) return null
 
   const getStatusColor = (status: string | null) => {
     switch (status) {
@@ -84,25 +73,18 @@ export function CompetitionDetailsDialog({
           {/* 基本信息 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{competition.seriesName}</h3>
-              {competition.statusInMilestone && (
-                <Badge className={getStatusColor(competition.statusInMilestone)}>
-                  {competition.statusInMilestone}
+              <h3 className="text-lg font-semibold">{milestone.seriesName}</h3>
+              {milestone.statusInMilestone && (
+                <Badge className={getStatusColor(milestone.statusInMilestone)}>
+                  {milestone.statusInMilestone}
                 </Badge>
               )}
             </div>
 
             <div className="flex items-center gap-2 text-muted-foreground">
               <Target className="w-4 h-4" />
-              <span className="font-medium">{competition.levelName}</span>
+              <span className="font-medium">{milestone.levelName}</span>
             </div>
-
-            {competition.seriesNotes && (
-              <div className="flex items-start gap-2 text-sm">
-                <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                <p className="text-muted-foreground">{competition.seriesNotes}</p>
-              </div>
-            )}
           </div>
 
           <Separator />
@@ -115,40 +97,28 @@ export function CompetitionDetailsDialog({
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">参与时间:</span>
-                <p className="font-medium">
-                  {new Date(competition.participatedAt).toLocaleString()}
-                </p>
-              </div>
-
-              {competition.dueDateMilestone && (
+              {milestone.participatedAt && (
                 <div>
-                  <span className="text-muted-foreground">截止时间:</span>
+                  <span className="text-muted-foreground">参与时间:</span>
                   <p className="font-medium">
-                    {new Date(competition.dueDateMilestone).toLocaleString()}
+                    {new Date(milestone.participatedAt).toLocaleString()}
                   </p>
                 </div>
               )}
 
-              <div>
-                <span className="text-muted-foreground">里程碑创建:</span>
-                <p className="font-medium">
-                  {new Date(competition.milestoneCreatedAt).toLocaleString()}
-                </p>
-              </div>
-
-              <div>
-                <span className="text-muted-foreground">最后更新:</span>
-                <p className="font-medium">
-                  {new Date(competition.milestoneUpdatedAt).toLocaleString()}
-                </p>
-              </div>
+              {milestone.dueDateMilestone && (
+                <div>
+                  <span className="text-muted-foreground">截止时间:</span>
+                  <p className="font-medium">
+                    {new Date(milestone.dueDateMilestone).toLocaleString()}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* 里程碑备注 */}
-          {competition.milestoneNotes && (
+          {milestone.milestoneNotes && (
             <>
               <Separator />
               <div className="space-y-3">
@@ -157,64 +127,11 @@ export function CompetitionDetailsDialog({
                   里程碑说明
                 </h4>
                 <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                  {competition.milestoneNotes}
+                  {milestone.milestoneNotes}
                 </p>
               </div>
             </>
           )}
-
-          {/* 通知文件信息 */}
-          {competition.notificationFileName && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <h4 className="font-medium flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  通知文件
-                </h4>
-
-                <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{competition.notificationOriginalFileName}</span>
-                    <Badge variant="outline">
-                      {competition.notificationMimeType || '未知类型'}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>大小: {formatFileSize(competition.notificationFileSizeBytes)}</span>
-                    {competition.notificationUploadedAt && (
-                      <span>
-                        上传: {new Date(competition.notificationUploadedAt).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* 系列信息 */}
-          <Separator />
-          <div className="space-y-3">
-            <h4 className="font-medium">赛事系列信息</h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">系列创建:</span>
-                <p className="font-medium">
-                  {new Date(competition.seriesCreatedAt).toLocaleDateString()}
-                </p>
-              </div>
-
-              <div>
-                <span className="text-muted-foreground">系列更新:</span>
-                <p className="font-medium">
-                  {new Date(competition.seriesUpdatedAt).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </DialogContent>
     </Dialog>

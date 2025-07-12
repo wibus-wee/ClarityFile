@@ -749,6 +749,12 @@ export function useGetProjectMilestonesInSeries(projectId: string | null, series
   )
 }
 
+export function useGetProjectCompetitionsBySeriesWithDocuments(projectId: string | null) {
+  return useSWR(projectId ? ['project-competitions-by-series', projectId] : null, () =>
+    projectId ? tipcClient.getProjectCompetitionsBySeriesWithDocuments({ projectId }) : null
+  )
+}
+
 export function useUpdateCompetitionSeries() {
   return useSWRMutation(
     'competition-series',

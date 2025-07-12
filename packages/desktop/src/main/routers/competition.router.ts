@@ -25,6 +25,13 @@ export function competitionRouter(t: ITipc) {
         return await CompetitionService.getProjectCompetitions(input.projectId)
       }),
 
+    // 获取项目参与的赛事（按赛事系列分组）
+    getProjectCompetitionsBySeriesWithDocuments: t.procedure
+      .input<{ projectId: string }>()
+      .action(async ({ input }) => {
+        return await CompetitionService.getProjectCompetitionsBySeriesWithDocuments(input.projectId)
+      }),
+
     // 获取所有赛事系列
     getAllCompetitionSeries: t.procedure.action(async () => {
       return await CompetitionService.getAllCompetitionSeries()

@@ -124,8 +124,8 @@ export class CompetitionService {
       .innerJoin(managedFiles, eq(documentVersions.managedFileId, managedFiles.id))
       .where(eq(documentVersions.competitionMilestoneId, competitionMilestoneId))
 
-    // 2. 获取该项目下的通用文档版本（isGenericVersion = true）
-    const genericDocuments = await db
+    // 2. 获取该项目下的通用文档版本（isGenericVersion = true），只获取每个逻辑文档的最新版本
+    const allGenericDocuments = await db
       .select({
         // 文档版本信息
         versionId: documentVersions.id,
@@ -158,7 +158,6 @@ export class CompetitionService {
           eq(logicalDocuments.projectId, projectId),
           eq(documentVersions.isGenericVersion, true),
           // 排除已经有特定赛事版本的逻辑文档的通用版本
-          // 这里需要检查同一逻辑文档是否有其他非通用版本关联到赛事
           sql`NOT EXISTS (
             SELECT 1 FROM ${documentVersions} dv2
             WHERE dv2.logical_document_id = ${documentVersions.logicalDocumentId}
@@ -167,6 +166,16 @@ export class CompetitionService {
           )`
         )
       )
+      .orderBy(desc(documentVersions.createdAt))
+
+    // 对通用文档版本按逻辑文档分组，只保留每个逻辑文档的最新版本
+    const genericDocumentsMap = new Map<string, (typeof allGenericDocuments)[0]>()
+    for (const doc of allGenericDocuments) {
+      if (!genericDocumentsMap.has(doc.logicalDocumentId)) {
+        genericDocumentsMap.set(doc.logicalDocumentId, doc)
+      }
+    }
+    const genericDocuments = Array.from(genericDocumentsMap.values())
 
     // 合并结果并去重
     const allDocuments = [...milestoneDocuments, ...genericDocuments]
@@ -198,6 +207,79 @@ export class CompetitionService {
     )
 
     return competitionsWithDocuments
+  }
+
+  /**
+   * 获取项目参与的赛事（按赛事系列分组）
+   */
+  static async getProjectCompetitionsBySeriesWithDocuments(projectId: string) {
+    // 获取项目参与的所有赛事里程碑
+    const competitions = await this.getProjectCompetitions(projectId)
+
+    // 按赛事系列分组
+    const seriesMap = new Map<
+      string,
+      {
+        seriesId: string
+        seriesName: string
+        seriesNotes: string | null
+        seriesCreatedAt: Date
+        seriesUpdatedAt: Date
+        milestones: Array<{
+          milestoneId: string
+          levelName: string
+          dueDateMilestone: Date | null
+          statusInMilestone: string | null
+          participatedAt: Date
+          milestoneNotes: string | null
+          documents: any[]
+        }>
+      }
+    >()
+
+    // 为每个里程碑获取文档并分组
+    for (const competition of competitions) {
+      const documents = await this.getCompetitionMilestoneDocuments(competition.milestoneId)
+
+      const milestone = {
+        milestoneId: competition.milestoneId,
+        levelName: competition.levelName,
+        dueDateMilestone: competition.dueDateMilestone,
+        statusInMilestone: competition.statusInMilestone,
+        participatedAt: competition.participatedAt,
+        milestoneNotes: competition.milestoneNotes,
+        documents
+      }
+
+      if (seriesMap.has(competition.seriesId)) {
+        seriesMap.get(competition.seriesId)!.milestones.push(milestone)
+      } else {
+        seriesMap.set(competition.seriesId, {
+          seriesId: competition.seriesId,
+          seriesName: competition.seriesName,
+          seriesNotes: competition.seriesNotes,
+          seriesCreatedAt: competition.seriesCreatedAt,
+          seriesUpdatedAt: competition.seriesUpdatedAt,
+          milestones: [milestone]
+        })
+      }
+    }
+
+    // 转换为数组并排序
+    const result = Array.from(seriesMap.values())
+      .map((series) => ({
+        ...series,
+        milestones: series.milestones.sort((a, b) => {
+          // 按截止日期排序，没有截止日期的放在最后
+          if (!a.dueDateMilestone && !b.dueDateMilestone) return 0
+          if (!a.dueDateMilestone) return 1
+          if (!b.dueDateMilestone) return -1
+          return new Date(a.dueDateMilestone).getTime() - new Date(b.dueDateMilestone).getTime()
+        })
+      }))
+      .sort((a, b) => new Date(b.seriesCreatedAt).getTime() - new Date(a.seriesCreatedAt).getTime())
+
+    return result
   }
 
   /**
