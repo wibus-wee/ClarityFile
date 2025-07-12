@@ -1,6 +1,13 @@
 import { db } from '../db'
-import { projects } from '../../db/schema'
-import { eq, desc, like, and } from 'drizzle-orm'
+import {
+  projects,
+  managedFiles,
+  projectAssets,
+  logicalDocuments,
+  documentVersions,
+  expenseTrackings
+} from '../../db/schema'
+import { eq, desc, like, and, isNotNull } from 'drizzle-orm'
 import {
   validateCreateProject,
   validateUpdateProject,
@@ -34,6 +41,109 @@ import { CompetitionService } from './competition.service'
 import { TagService } from './tag.service'
 
 export class ProjectService {
+  /**
+   * 更新项目相关的所有受管文件的物理路径
+   * 当项目文件夹重命名后，更新数据库中所有相关文件的路径记录
+   */
+  private static async updateProjectManagedFilesPath(
+    projectId: string,
+    oldFolderPath: string,
+    newFolderPath: string
+  ): Promise<void> {
+    try {
+      console.log(`开始更新项目 ${projectId} 的文件路径: ${oldFolderPath} -> ${newFolderPath}`)
+
+      // 1. 获取项目资产关联的所有文件ID
+      const assetFiles = await db
+        .select({
+          managedFileId: projectAssets.managedFileId
+        })
+        .from(projectAssets)
+        .where(eq(projectAssets.projectId, projectId))
+
+      // 2. 获取项目文档关联的所有文件ID
+      const documentFiles = await db
+        .select({
+          managedFileId: documentVersions.managedFileId
+        })
+        .from(documentVersions)
+        .innerJoin(logicalDocuments, eq(documentVersions.logicalDocumentId, logicalDocuments.id))
+        .where(eq(logicalDocuments.projectId, projectId))
+
+      // 3. 获取项目经费管理关联的所有文件ID（发票等）
+      const expenseFiles = await db
+        .select({
+          managedFileId: expenseTrackings.invoiceManagedFileId
+        })
+        .from(expenseTrackings)
+        .where(
+          and(
+            eq(expenseTrackings.projectId, projectId),
+            isNotNull(expenseTrackings.invoiceManagedFileId)
+          )
+        )
+
+      // 4. 合并所有文件ID并去重
+      const allManagedFileIds = new Set<string>()
+
+      assetFiles.forEach((file) => {
+        if (file.managedFileId) {
+          allManagedFileIds.add(file.managedFileId)
+        }
+      })
+
+      documentFiles.forEach((file) => {
+        if (file.managedFileId) {
+          allManagedFileIds.add(file.managedFileId)
+        }
+      })
+
+      expenseFiles.forEach((file) => {
+        if (file.managedFileId) {
+          allManagedFileIds.add(file.managedFileId)
+        }
+      })
+
+      console.log(`找到 ${allManagedFileIds.size} 个需要更新路径的文件`)
+
+      // 5. 更新每个文件的路径
+      let updatedCount = 0
+      for (const fileId of allManagedFileIds) {
+        // 获取当前文件信息
+        const fileResult = await db
+          .select()
+          .from(managedFiles)
+          .where(eq(managedFiles.id, fileId))
+          .limit(1)
+
+        if (fileResult.length > 0) {
+          const file = fileResult[0]
+
+          // 如果文件路径包含旧的文件夹路径，则更新
+          if (file.physicalPath && file.physicalPath.startsWith(oldFolderPath)) {
+            const newPhysicalPath = file.physicalPath.replace(oldFolderPath, newFolderPath)
+
+            await db
+              .update(managedFiles)
+              .set({
+                physicalPath: newPhysicalPath,
+                updatedAt: new Date()
+              })
+              .where(eq(managedFiles.id, fileId))
+
+            console.log(`文件路径已更新: ${file.physicalPath} -> ${newPhysicalPath}`)
+            updatedCount++
+          }
+        }
+      }
+
+      console.log(`项目 ${projectId} 的文件路径更新完成，共更新了 ${updatedCount} 个文件`)
+    } catch (error) {
+      console.error('更新项目受管文件路径失败:', error)
+      throw error
+    }
+  }
+
   // 获取所有项目
   static async getProjects() {
     const result = await db.select().from(projects).orderBy(desc(projects.updatedAt))
@@ -154,6 +264,19 @@ export class ProjectService {
         console.log(
           `项目 "${oldProject.name}" 重命名为 "${updateData.name}"，文件夹已更新并同步路径: ${newFolderPath}`
         )
+
+        // 更新项目相关的所有受管文件的路径
+        try {
+          const oldFolderPath = oldProject.folderPath
+          if (oldFolderPath) {
+            await this.updateProjectManagedFilesPath(id, oldFolderPath, newFolderPath)
+            console.log(`项目 "${updateData.name}" 的所有文件路径已同步更新`)
+          }
+        } catch (pathUpdateError) {
+          console.error('更新项目文件路径失败:', pathUpdateError)
+          // 注意：这里我们不抛出错误，因为文件夹重命名已经成功
+          // 路径更新失败不应该影响项目的更新，可以后续手动修复
+        }
 
         // 返回包含新路径的项目信息
         return { ...updatedProject, folderPath: newFolderPath }
