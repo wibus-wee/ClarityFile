@@ -8,54 +8,37 @@ const quickActions = [
     title: '创建项目',
     description: '开始一个新的项目',
     icon: FolderPlus,
-    href: '/projects',
-    color:
-      'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-200/50 dark:border-blue-800/50',
-    hoverColor: 'hover:bg-blue-500/20 dark:hover:bg-blue-500/30'
+    href: '/projects'
   },
   {
     title: '添加文档',
     description: '导入或创建文档',
     icon: FileText,
-    href: '/documents',
-    color:
-      'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400 border-green-200/50 dark:border-green-800/50',
-    hoverColor: 'hover:bg-green-500/20 dark:hover:bg-green-500/30'
+    href: '/documents'
   },
   {
     title: '文件管理',
     description: '管理项目文件',
     icon: Upload,
-    href: '/files',
-    color:
-      'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 border-purple-200/50 dark:border-purple-800/50',
-    hoverColor: 'hover:bg-purple-500/20 dark:hover:bg-purple-500/30'
+    href: '/files'
   },
   {
     title: '赛事中心',
     description: '管理比赛信息',
     icon: Trophy,
-    href: '/competitions',
-    color:
-      'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200/50 dark:border-orange-800/50',
-    hoverColor: 'hover:bg-orange-500/20 dark:hover:bg-orange-500/30'
+    href: '/competitions'
   },
   {
     title: '经费报销',
     description: '提交报销申请',
     icon: CreditCard,
-    href: '/expenses',
-    color:
-      'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400 border-red-200/50 dark:border-red-800/50',
-    hoverColor: 'hover:bg-red-500/20 dark:hover:bg-red-500/30'
+    href: '/expenses'
   },
   {
     title: '系统设置',
     description: '配置应用设置',
     icon: Settings,
-    href: '/settings',
-    color: 'bg-muted/50 text-muted-foreground border-border',
-    hoverColor: 'hover:bg-muted/80'
+    href: '/settings'
   }
 ]
 
@@ -85,22 +68,20 @@ export function QuickActionsSection() {
               whileTap={{ scale: 0.98 }}
             >
               <Button
-                variant="ghost"
+                variant="outline"
                 asChild
-                className={`
-                  h-auto p-4 flex flex-col items-start gap-3 border
-                  ${action.color} ${action.hoverColor}
-                  transition-all duration-200
-                `}
+                className="h-auto p-4 justify-start bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 <Link to={action.href} className="w-full">
                   <div className="flex items-center gap-3 w-full">
-                    <div className="p-2 rounded-lg bg-background/50">
-                      <Icon className="w-5 h-5" />
+                    <div className="p-2 rounded-md bg-muted">
+                      <Icon className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="font-medium text-sm">{action.title}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{action.description}</div>
+                      <div className="font-medium text-sm text-foreground">{action.title}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {action.description}
+                      </div>
                     </div>
                   </div>
                 </Link>
