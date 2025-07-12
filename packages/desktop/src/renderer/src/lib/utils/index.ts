@@ -20,3 +20,26 @@ export function formatFileSize(bytes: number | null | undefined): string {
 
   return `${size.toFixed(1)} ${sizes[i]}`
 }
+
+/**
+ * 生成唯一 ID
+ * @returns 唯一标识符字符串
+ */
+export function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+}
+
+/**
+ * 生成主题 ID
+ * @param name 主题名称
+ * @returns 主题 ID
+ */
+export function generateThemeId(name: string): string {
+  const sanitizedName = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  return `theme-${sanitizedName}-${Date.now()}`
+}

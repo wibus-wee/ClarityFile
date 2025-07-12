@@ -1,8 +1,6 @@
 # RFC: Custom Theme Management System
 
 - **Start Date**: 2025-01-12
-- **RFC PR**: (leave this empty)
-- **ClarityFile Issue**: (leave this empty)
 
 ## Summary
 
@@ -13,8 +11,8 @@
 ```typescript
 // 用户导入自定义主题
 const customTheme = {
-  name: "Ocean Blue",
-  description: "A calming blue theme",
+  name: 'Ocean Blue',
+  description: 'A calming blue theme',
   cssContent: `
     :root {
       --background: oklch(0.98 0.02 220);
@@ -103,26 +101,26 @@ interface ExtendedThemeContextValue extends ThemeContextValue {
 ```typescript
 class CustomThemeManager {
   private static styleElement: HTMLStyleElement | null = null
-  
+
   static applyThemeCSS(cssContent: string): void {
     this.removeThemeCSS()
-    
+
     const style = document.createElement('style')
     style.id = 'custom-theme-styles'
     style.textContent = cssContent
-    
+
     // 插入到 head 末尾确保优先级
     document.head.appendChild(style)
     this.styleElement = style
   }
-  
+
   static removeThemeCSS(): void {
     if (this.styleElement) {
       this.styleElement.remove()
       this.styleElement = null
     }
   }
-  
+
   static previewTheme(cssContent: string): void {
     this.applyThemeCSS(cssContent)
   }
@@ -133,30 +131,32 @@ class CustomThemeManager {
 
 ```typescript
 class ThemeService {
-  static async saveCustomTheme(theme: Omit<CustomTheme, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomTheme> {
+  static async saveCustomTheme(
+    theme: Omit<CustomTheme, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<CustomTheme> {
     const newTheme: CustomTheme = {
       ...theme,
       id: generateId(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
-    
+
     // 保存到数据库
-    await this.updateCustomThemes(themes => ({
+    await this.updateCustomThemes((themes) => ({
       ...themes,
       [newTheme.id]: newTheme
     }))
-    
+
     return newTheme
   }
-  
+
   static async deleteCustomTheme(themeId: string): Promise<void> {
-    await this.updateCustomThemes(themes => {
+    await this.updateCustomThemes((themes) => {
       const { [themeId]: deleted, ...rest } = themes
       return rest
     })
   }
-  
+
   static async getCustomThemes(): Promise<CustomTheme[]> {
     const setting = await tipcClient.getSetting({ key: 'appearance.customThemes' })
     return Object.values(setting?.value || {})
@@ -176,11 +176,11 @@ function ThemeImportDialog() {
     description: '',
     author: ''
   })
-  
+
   const handlePreview = () => {
     CustomThemeManager.previewTheme(cssContent)
   }
-  
+
   const handleSave = async () => {
     await ThemeService.saveCustomTheme({
       ...themeMetadata,
@@ -195,7 +195,7 @@ function ThemeImportDialog() {
 ```typescript
 function CustomThemeManager() {
   const { customThemes } = useTheme()
-  
+
   return (
     <div className="space-y-4">
       {customThemes.map(theme => (
@@ -224,7 +224,7 @@ const [activeCustomTheme, setActiveCustomTheme] = useState<string | null>(null)
 // CSS 应用时机
 useEffect(() => {
   if (!isLoading && activeCustomTheme) {
-    const theme = customThemes.find(t => t.id === activeCustomTheme)
+    const theme = customThemes.find((t) => t.id === activeCustomTheme)
     if (theme) {
       CustomThemeManager.applyThemeCSS(theme.cssContent)
     }
@@ -237,6 +237,7 @@ useEffect(() => {
 #### 5.2 扩展外观设置
 
 在 `appearance-settings.tsx` 中添加：
+
 - 自定义主题选择器
 - "管理自定义主题"按钮
 - 主题导入入口
@@ -256,18 +257,21 @@ useEffect(() => {
 ## Adoption strategy
 
 ### Phase 1: 核心功能 (Week 1-2)
+
 - [ ] 实现 `CustomThemeManager` 类
 - [ ] 扩展 `CustomThemeProvider`
 - [ ] 数据库集成和 TIPC 接口
 - [ ] 基础的主题导入功能
 
 ### Phase 2: 用户界面 (Week 3)
+
 - [ ] 主题导入对话框
 - [ ] 主题管理页面
 - [ ] 集成到外观设置页面
 - [ ] 主题预览功能
 
 ### Phase 3: 优化和完善 (Week 4)
+
 - [ ] 主题导出功能
 - [ ] 错误处理和用户反馈
 - [ ] 文档和用户指南

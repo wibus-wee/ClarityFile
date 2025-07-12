@@ -8,15 +8,26 @@ import {
   useCallback,
   PropsWithChildren
 } from 'react'
-import type { Theme, ResolvedTheme, ThemeContextValue } from '@renderer/types/theme'
+import type {
+  Theme,
+  ResolvedTheme,
+  ExtendedThemeContextValue,
+  CustomTheme
+} from '@renderer/types/theme'
 import { useSettingsByCategory, useSetSetting } from '@renderer/hooks/use-tipc'
+import { CustomThemeManager } from '@renderer/lib/custom-theme-manager'
+import { ThemeService } from '@renderer/lib/theme-service'
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
+const ThemeContext = createContext<ExtendedThemeContextValue | undefined>(undefined)
 
 export function CustomThemeProvider({ children }: PropsWithChildren) {
   const [theme, setThemeState] = useState<Theme>('system')
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>('light')
   const [isLoading, setIsLoading] = useState(true)
+
+  // 自定义主题状态
+  const [customThemes, setCustomThemes] = useState<CustomTheme[]>([])
+  const [activeCustomTheme, setActiveCustomTheme] = useState<string | null>(null)
 
   const { data: settings, isLoading: settingsLoading } = useSettingsByCategory('appearance')
   const { trigger: setSetting } = useSetSetting()
@@ -55,6 +66,33 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     root.setAttribute('data-theme', themeToApply)
   }, [])
 
+  // 初始化自定义主题管理器
+  useEffect(() => {
+    CustomThemeManager.initialize()
+    return () => {
+      CustomThemeManager.destroy()
+    }
+  }, [])
+
+  // 加载自定义主题数据
+  useEffect(() => {
+    const loadCustomThemes = async () => {
+      try {
+        const themes = await ThemeService.getCustomThemes()
+        setCustomThemes(themes)
+
+        const activeThemeId = await ThemeService.getActiveCustomTheme()
+        setActiveCustomTheme(activeThemeId)
+      } catch (error) {
+        console.error('Failed to load custom themes:', error)
+      }
+    }
+
+    if (!settingsLoading) {
+      loadCustomThemes()
+    }
+  }, [settingsLoading])
+
   // 从数据库加载初始主题
   useEffect(() => {
     if (!settingsLoading && settings) {
@@ -75,12 +113,29 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     }
   }, [settings, settingsLoading])
 
-  // 应用主题变化
+  // 应用主题变化（包括自定义主题）
   useEffect(() => {
     if (!isLoading) {
+      // 如果有激活的自定义主题，应用自定义主题 CSS
+      if (activeCustomTheme) {
+        const customTheme = customThemes.find((t) => t.id === activeCustomTheme)
+        if (customTheme) {
+          CustomThemeManager.applyCustomThemeCSS(customTheme.cssContent)
+        } else {
+          // 如果找不到自定义主题，清除激活状态并应用默认主题
+          setActiveCustomTheme(null)
+          ThemeService.setActiveCustomTheme(null).catch(console.error)
+          CustomThemeManager.removeCustomThemeCSS()
+        }
+      } else {
+        // 没有自定义主题时，移除自定义主题 CSS
+        CustomThemeManager.removeCustomThemeCSS()
+      }
+
+      // 应用基础主题（light/dark 类名）
       applyTheme(resolvedTheme)
     }
-  }, [resolvedTheme, isLoading, applyTheme])
+  }, [resolvedTheme, isLoading, applyTheme, activeCustomTheme, customThemes])
 
   // 设置主题
   const setTheme = useCallback(
@@ -111,19 +166,119 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
     }
   }, [resolvedTheme, setTheme])
 
-  const value: ThemeContextValue = {
+  // 应用自定义主题
+  const applyCustomTheme = useCallback(
+    async (themeId: string) => {
+      try {
+        const theme = customThemes.find((t) => t.id === themeId)
+        if (!theme) {
+          throw new Error('主题不存在')
+        }
+
+        // 设置激活的自定义主题
+        setActiveCustomTheme(themeId)
+        await ThemeService.setActiveCustomTheme(themeId)
+
+        // 清除基础主题设置，因为现在使用自定义主题
+        setThemeState('system') // 设置为 system 作为默认值
+        await setSetting({
+          key: 'appearance.theme',
+          value: 'system',
+          category: 'appearance',
+          description: '应用主题'
+        })
+
+        console.log('Custom theme applied:', themeId)
+      } catch (error) {
+        console.error('Failed to apply custom theme:', error)
+        throw error
+      }
+    },
+    [customThemes, setSetting]
+  )
+
+  // 移除自定义主题
+  const removeCustomTheme = useCallback(
+    async (themeId: string) => {
+      try {
+        await ThemeService.deleteCustomTheme(themeId)
+
+        // 更新本地状态
+        setCustomThemes((prev) => prev.filter((t) => t.id !== themeId))
+
+        // 如果删除的是当前激活的主题，清除激活状态
+        if (activeCustomTheme === themeId) {
+          setActiveCustomTheme(null)
+        }
+
+        console.log('Custom theme removed:', themeId)
+      } catch (error) {
+        console.error('Failed to remove custom theme:', error)
+        throw error
+      }
+    },
+    [activeCustomTheme]
+  )
+
+  // 保存自定义主题
+  const saveCustomTheme = useCallback(
+    async (themeData: Omit<CustomTheme, 'id' | 'createdAt' | 'updatedAt'>) => {
+      try {
+        const newTheme = await ThemeService.saveCustomTheme(themeData)
+
+        // 更新本地状态
+        setCustomThemes((prev) => [...prev, newTheme])
+
+        console.log('Custom theme saved:', newTheme.id)
+        return newTheme
+      } catch (error) {
+        console.error('Failed to save custom theme:', error)
+        throw error
+      }
+    },
+    []
+  )
+
+  // 预览主题
+  const previewTheme = useCallback((cssContent: string) => {
+    try {
+      CustomThemeManager.previewThemeCSS(cssContent)
+    } catch (error) {
+      console.error('Failed to preview theme:', error)
+      throw error
+    }
+  }, [])
+
+  // 清除预览
+  const clearPreview = useCallback(() => {
+    try {
+      CustomThemeManager.clearPreviewCSS()
+    } catch (error) {
+      console.error('Failed to clear preview:', error)
+    }
+  }, [])
+
+  const value: ExtendedThemeContextValue = {
     theme,
     resolvedTheme,
     systemTheme,
     setTheme,
     toggleTheme,
-    isLoading
+    isLoading,
+    // 自定义主题功能
+    customThemes,
+    activeCustomTheme,
+    applyCustomTheme,
+    removeCustomTheme,
+    saveCustomTheme,
+    previewTheme,
+    clearPreview
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
-export function useCustomTheme() {
+export function useCustomTheme(): ExtendedThemeContextValue {
   const context = useContext(ThemeContext)
   if (context === undefined) {
     throw new Error('useCustomTheme must be used within a CustomThemeProvider')
