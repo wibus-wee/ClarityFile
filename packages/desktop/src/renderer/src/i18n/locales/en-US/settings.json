@@ -1,0 +1,84 @@
+{
+  "title": "Settings",
+  "categories": {
+    "general": "General",
+    "appearance": "Appearance", 
+    "notifications": "Notifications",
+    "language": "Language & Region",
+    "accessibility": "Accessibility",
+    "audioVideo": "Audio & Video",
+    "privacy": "Privacy & Visibility",
+    "advanced": "Advanced"
+  },
+  "descriptions": {
+    "general": "Manage general application settings",
+    "appearance": "Manage application appearance settings",
+    "notifications": "Manage application notification settings",
+    "language": "Manage application language & region",
+    "accessibility": "Manage application accessibility",
+    "audioVideo": "Manage application audio & video",
+    "privacy": "Manage application privacy & visibility",
+    "advanced": "Manage application advanced settings"
+  },
+  "general": {
+    "title": "General Settings",
+    "autoStart": "Start at login",
+    "autoStartDescription": "Automatically start the application when the system starts",
+    "minimizeToTray": "Minimize to system tray",
+    "minimizeToTrayDescription": "Minimize to system tray instead of closing when window is closed",
+    "closeToTray": "Close to system tray",
+    "closeToTrayDescription": "Minimize to system tray when close button is clicked",
+    "autoSave": "Auto save",
+    "autoSaveDescription": "Automatically save document and project changes",
+    "autoSaveInterval": "Auto save interval",
+    "autoSaveIntervalDescription": "Time interval for auto save (minutes)",
+    "defaultProjectPath": "Default project path",
+    "defaultProjectPathDescription": "Default location for new projects",
+    "selectFolder": "Select Folder",
+    "backupSettings": "Backup Settings",
+    "enableBackup": "Enable auto backup",
+    "enableBackupDescription": "Regularly backup project data",
+    "backupInterval": "Backup interval",
+    "backupLocation": "Backup location",
+    "maxBackups": "Maximum backups"
+  },
+  "language": {
+    "title": "Language & Region",
+    "currentLanguage": "Current Language",
+    "selectLanguage": "Select Language",
+    "languageChanged": "Language Changed",
+    "languageChangedDescription": "Language settings have been updated. Some changes may require restarting the application to take effect",
+    "restartRequired": "Restart Required",
+    "restartNow": "Restart Now",
+    "restartLater": "Restart Later",
+    "supportedLanguages": {
+      "zh-CN": "简体中文",
+      "en-US": "English (US)"
+    },
+    "dateFormat": "Date Format",
+    "timeFormat": "Time Format",
+    "timezone": "Timezone",
+    "currency": "Currency",
+    "numberFormat": "Number Format"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "theme": "Theme",
+    "themeDescription": "Choose the application's appearance theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "customTheme": "Custom Theme",
+    "fontSize": "Font Size",
+    "fontFamily": "Font Family",
+    "colorScheme": "Color Scheme",
+    "accentColor": "Accent Color",
+    "sidebar": "Sidebar",
+    "sidebarPosition": "Sidebar Position",
+    "sidebarWidth": "Sidebar Width",
+    "compactMode": "Compact Mode",
+    "compactModeDescription": "Use a more compact interface layout"
+  }
+}

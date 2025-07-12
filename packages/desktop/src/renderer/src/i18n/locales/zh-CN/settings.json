@@ -1,0 +1,84 @@
+{
+  "title": "设置",
+  "categories": {
+    "general": "常规设置",
+    "appearance": "外观设置", 
+    "notifications": "通知设置",
+    "language": "语言与地区",
+    "accessibility": "无障碍",
+    "audioVideo": "音频与视频",
+    "privacy": "隐私与可见性",
+    "advanced": "高级设置"
+  },
+  "descriptions": {
+    "general": "管理应用程序的常规设置",
+    "appearance": "管理应用程序的外观设置",
+    "notifications": "管理应用程序的通知设置",
+    "language": "管理应用程序的语言与地区",
+    "accessibility": "管理应用程序的无障碍",
+    "audioVideo": "管理应用程序的音频与视频",
+    "privacy": "管理应用程序的隐私与可见性",
+    "advanced": "管理应用程序的高级设置"
+  },
+  "general": {
+    "title": "常规设置",
+    "autoStart": "开机自启动",
+    "autoStartDescription": "系统启动时自动启动应用程序",
+    "minimizeToTray": "最小化到系统托盘",
+    "minimizeToTrayDescription": "关闭窗口时最小化到系统托盘而不是退出",
+    "closeToTray": "关闭到系统托盘",
+    "closeToTrayDescription": "点击关闭按钮时最小化到系统托盘",
+    "autoSave": "自动保存",
+    "autoSaveDescription": "自动保存文档和项目更改",
+    "autoSaveInterval": "自动保存间隔",
+    "autoSaveIntervalDescription": "自动保存的时间间隔（分钟）",
+    "defaultProjectPath": "默认项目路径",
+    "defaultProjectPathDescription": "新建项目的默认保存位置",
+    "selectFolder": "选择文件夹",
+    "backupSettings": "备份设置",
+    "enableBackup": "启用自动备份",
+    "enableBackupDescription": "定期备份项目数据",
+    "backupInterval": "备份间隔",
+    "backupLocation": "备份位置",
+    "maxBackups": "最大备份数量"
+  },
+  "language": {
+    "title": "语言与地区",
+    "currentLanguage": "当前语言",
+    "selectLanguage": "选择语言",
+    "languageChanged": "语言已更改",
+    "languageChangedDescription": "语言设置已更新，部分更改可能需要重启应用程序才能生效",
+    "restartRequired": "需要重启",
+    "restartNow": "立即重启",
+    "restartLater": "稍后重启",
+    "supportedLanguages": {
+      "zh-CN": "简体中文",
+      "en-US": "English (US)"
+    },
+    "dateFormat": "日期格式",
+    "timeFormat": "时间格式",
+    "timezone": "时区",
+    "currency": "货币",
+    "numberFormat": "数字格式"
+  },
+  "appearance": {
+    "title": "外观设置",
+    "theme": "主题",
+    "themeDescription": "选择应用程序的外观主题",
+    "themes": {
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统"
+    },
+    "customTheme": "自定义主题",
+    "fontSize": "字体大小",
+    "fontFamily": "字体",
+    "colorScheme": "配色方案",
+    "accentColor": "强调色",
+    "sidebar": "侧边栏",
+    "sidebarPosition": "侧边栏位置",
+    "sidebarWidth": "侧边栏宽度",
+    "compactMode": "紧凑模式",
+    "compactModeDescription": "使用更紧凑的界面布局"
+  }
+}

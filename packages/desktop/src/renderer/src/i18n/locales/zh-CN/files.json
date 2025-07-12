@@ -1,0 +1,48 @@
+{
+  "title": "文件管理",
+  "upload": "上传文件",
+  "download": "下载文件",
+  "delete": "删除文件",
+  "rename": "重命名",
+  "move": "移动",
+  "copy": "复制",
+  "share": "分享",
+  "preview": "预览",
+  "properties": "属性",
+  "search": "搜索文件",
+  "filter": "筛选文件",
+  "sort": "排序",
+  "view": "视图模式",
+  "grid": "网格视图",
+  "list": "列表视图",
+  "details": "详细视图",
+  "folder": "文件夹",
+  "createFolder": "新建文件夹",
+  "emptyFolder": "空文件夹",
+  "fileTypes": {
+    "document": "文档",
+    "image": "图片",
+    "video": "视频",
+    "audio": "音频",
+    "archive": "压缩包",
+    "code": "代码",
+    "other": "其他"
+  },
+  "fields": {
+    "name": "文件名",
+    "type": "文件类型",
+    "size": "文件大小",
+    "modified": "修改时间",
+    "created": "创建时间",
+    "location": "位置",
+    "tags": "标签"
+  },
+  "actions": {
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "openWith": "打开方式",
+    "sendTo": "发送到",
+    "addToFavorites": "添加到收藏",
+    "removeFromFavorites": "从收藏中移除"
+  }
+}

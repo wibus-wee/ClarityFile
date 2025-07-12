@@ -3,6 +3,7 @@
 import { useSearch } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { Bell, Globe, Home, Keyboard, Lock, Paintbrush, Settings, Video } from 'lucide-react'
+import { useTranslation } from '@renderer/i18n/hooks'
 
 import { GeneralSettings } from './settings/general-settings'
 import { AppearanceSettings } from './settings/appearance-settings'
@@ -13,20 +14,46 @@ import { AccessibilitySettings } from './settings/accessibility-settings'
 import { PrivacySettings } from './settings/privacy-settings'
 import { AudioVideoSettings } from './settings/audio-video-settings'
 
-const settingsCategories = [
-  { id: 'general', name: '常规设置', icon: Home, component: GeneralSettings },
-  { id: 'appearance', name: '外观设置', icon: Paintbrush, component: AppearanceSettings },
-  { id: 'notifications', name: '通知设置', icon: Bell, component: NotificationSettings },
-  { id: 'language', name: '语言与地区', icon: Globe, component: LanguageSettings },
-  { id: 'accessibility', name: '无障碍', icon: Keyboard, component: AccessibilitySettings },
-  { id: 'audio-video', name: '音频与视频', icon: Video, component: AudioVideoSettings },
-  { id: 'privacy', name: '隐私与可见性', icon: Lock, component: PrivacySettings },
-  { id: 'advanced', name: '高级设置', icon: Settings, component: AdvancedSettings }
-]
+function useSettingsCategories() {
+  const { t } = useTranslation('settings')
+
+  return [
+    { id: 'general', name: t('categories.general'), icon: Home, component: GeneralSettings },
+    {
+      id: 'appearance',
+      name: t('categories.appearance'),
+      icon: Paintbrush,
+      component: AppearanceSettings
+    },
+    {
+      id: 'notifications',
+      name: t('categories.notifications'),
+      icon: Bell,
+      component: NotificationSettings
+    },
+    { id: 'language', name: t('categories.language'), icon: Globe, component: LanguageSettings },
+    {
+      id: 'accessibility',
+      name: t('categories.accessibility'),
+      icon: Keyboard,
+      component: AccessibilitySettings
+    },
+    {
+      id: 'audio-video',
+      name: t('categories.audioVideo'),
+      icon: Video,
+      component: AudioVideoSettings
+    },
+    { id: 'privacy', name: t('categories.privacy'), icon: Lock, component: PrivacySettings },
+    { id: 'advanced', name: t('categories.advanced'), icon: Settings, component: AdvancedSettings }
+  ]
+}
 
 function SettingsContent() {
+  const { t } = useTranslation('settings')
   const search = useSearch({ from: '/settings' })
   const category = search.category || 'general'
+  const settingsCategories = useSettingsCategories()
 
   const currentCategory =
     settingsCategories.find((cat) => cat.id === category) || settingsCategories[0]
@@ -37,12 +64,10 @@ function SettingsContent() {
       <div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{currentCategory.name}</h1>
-          <p className="text-muted-foreground mt-2">
-            管理应用程序的{currentCategory.name.toLowerCase()}
-          </p>
+          <p className="text-muted-foreground mt-2">{t(`descriptions.${category}`)}</p>
         </div>
 
-        <Suspense fallback={<div>加载中...</div>}>
+        <Suspense fallback={<div>{t('common:loading')}</div>}>
           <CurrentComponent key={category} />
         </Suspense>
       </div>
@@ -51,8 +76,10 @@ function SettingsContent() {
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation('common')
+
   return (
-    <Suspense fallback={<div>加载设置页面...</div>}>
+    <Suspense fallback={<div>{t('loading')}...</div>}>
       <SettingsContent />
     </Suspense>
   )

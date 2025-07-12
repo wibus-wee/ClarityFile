@@ -7,6 +7,9 @@ import './index.css'
 import { routeTree } from './routeTree.gen'
 import { DefaultErrorComponent } from './components/error-boundary'
 
+// Initialize i18n
+import './i18n'
+
 import { scan } from 'react-scan'
 scan({
   enabled: import.meta.env.DEV

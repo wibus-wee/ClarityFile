@@ -1,0 +1,62 @@
+{
+  "title": "Expense Management",
+  "create": "Create Expense Record",
+  "edit": "Edit Expense Record",
+  "delete": "Delete Expense Record",
+  "approve": "Approve",
+  "reject": "Reject",
+  "submit": "Submit",
+  "search": "Search Expense Records",
+  "filter": "Filter",
+  "export": "Export",
+  "import": "Import",
+  "budgetPools": "Budget Pools",
+  "createBudgetPool": "Create Budget Pool",
+  "manageBudgetPools": "Manage Budget Pools",
+  "categories": {
+    "office": "Office Supplies",
+    "equipment": "Equipment Purchase",
+    "materials": "Lab Materials",
+    "travel": "Travel Expenses",
+    "conference": "Conference Fees",
+    "publication": "Publication Fees",
+    "service": "Service Fees",
+    "other": "Other"
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "paid": "Paid",
+    "cancelled": "Cancelled"
+  },
+  "fields": {
+    "title": "Expense Title",
+    "description": "Expense Description",
+    "amount": "Amount",
+    "category": "Expense Category",
+    "date": "Date",
+    "receipt": "Receipt/Invoice",
+    "project": "Related Project",
+    "budgetPool": "Budget Pool",
+    "vendor": "Vendor",
+    "purpose": "Purpose",
+    "status": "Status",
+    "submittedBy": "Submitted By",
+    "approvedBy": "Approved By",
+    "approvedDate": "Approved Date",
+    "paidDate": "Paid Date"
+  },
+  "budgetPool": {
+    "name": "Budget Pool Name",
+    "totalAmount": "Total Amount",
+    "usedAmount": "Used Amount",
+    "remainingAmount": "Remaining Amount",
+    "percentage": "Usage Percentage",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "description": "Description",
+    "project": "Related Project"
+  }
+}

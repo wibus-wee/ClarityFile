@@ -1,0 +1,48 @@
+{
+  "title": "File Management",
+  "upload": "Upload File",
+  "download": "Download File",
+  "delete": "Delete File",
+  "rename": "Rename",
+  "move": "Move",
+  "copy": "Copy",
+  "share": "Share",
+  "preview": "Preview",
+  "properties": "Properties",
+  "search": "Search Files",
+  "filter": "Filter Files",
+  "sort": "Sort",
+  "view": "View Mode",
+  "grid": "Grid View",
+  "list": "List View",
+  "details": "Details View",
+  "folder": "Folder",
+  "createFolder": "Create Folder",
+  "emptyFolder": "Empty Folder",
+  "fileTypes": {
+    "document": "Document",
+    "image": "Image",
+    "video": "Video",
+    "audio": "Audio",
+    "archive": "Archive",
+    "code": "Code",
+    "other": "Other"
+  },
+  "fields": {
+    "name": "File Name",
+    "type": "File Type",
+    "size": "File Size",
+    "modified": "Modified",
+    "created": "Created",
+    "location": "Location",
+    "tags": "Tags"
+  },
+  "actions": {
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "openWith": "Open With",
+    "sendTo": "Send To",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  }
+}

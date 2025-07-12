@@ -1,0 +1,62 @@
+{
+  "title": "经费管理",
+  "create": "创建经费记录",
+  "edit": "编辑经费记录",
+  "delete": "删除经费记录",
+  "approve": "审批",
+  "reject": "拒绝",
+  "submit": "提交",
+  "search": "搜索经费记录",
+  "filter": "筛选",
+  "export": "导出",
+  "import": "导入",
+  "budgetPools": "经费池",
+  "createBudgetPool": "创建经费池",
+  "manageBudgetPools": "管理经费池",
+  "categories": {
+    "office": "办公用品",
+    "equipment": "设备采购",
+    "materials": "实验材料",
+    "travel": "差旅费",
+    "conference": "会议费",
+    "publication": "发表费用",
+    "service": "服务费",
+    "other": "其他"
+  },
+  "status": {
+    "draft": "草稿",
+    "submitted": "已提交",
+    "approved": "已审批",
+    "rejected": "已拒绝",
+    "paid": "已支付",
+    "cancelled": "已取消"
+  },
+  "fields": {
+    "title": "费用标题",
+    "description": "费用描述",
+    "amount": "金额",
+    "category": "费用分类",
+    "date": "发生日期",
+    "receipt": "发票/收据",
+    "project": "关联项目",
+    "budgetPool": "经费池",
+    "vendor": "供应商",
+    "purpose": "用途说明",
+    "status": "状态",
+    "submittedBy": "提交人",
+    "approvedBy": "审批人",
+    "approvedDate": "审批日期",
+    "paidDate": "支付日期"
+  },
+  "budgetPool": {
+    "name": "经费池名称",
+    "totalAmount": "总金额",
+    "usedAmount": "已使用金额",
+    "remainingAmount": "剩余金额",
+    "percentage": "使用比例",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "description": "描述",
+    "project": "关联项目"
+  }
+}
