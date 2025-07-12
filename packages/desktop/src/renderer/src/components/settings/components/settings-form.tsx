@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect, ReactNode } from 'react'
+import { useEffect, ReactNode, useState, useMemo } from 'react'
 import { useForm, UseFormReturn, FieldValues, DefaultValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check } from 'lucide-react'
 
 import { Button } from '@clarity/shadcn/ui/button'
 import { Form } from '@clarity/shadcn/ui/form'
 import { useSettingsByCategory, useSetSetting } from '@renderer/hooks/use-tipc'
+import { Shortcut } from '@renderer/components/shortcuts'
 
 interface SettingItem {
   key: string
@@ -41,6 +44,9 @@ export function SettingsForm<T extends FieldValues>({
   const { data: settings, isLoading } = useSettingsByCategory(category)
   const { trigger: setSetting } = useSetSetting()
 
+  // 保存状态管理
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'success'>('idle')
+
   const form = useForm<T>({
     resolver: zodResolver(schema as any),
     defaultValues
@@ -69,6 +75,8 @@ export function SettingsForm<T extends FieldValues>({
 
   const handleSubmit = async (data: T) => {
     try {
+      setSaveState('saving')
+
       if (onSubmit) {
         await onSubmit(data)
       } else if (mapFormDataToSettings) {
@@ -77,8 +85,6 @@ export function SettingsForm<T extends FieldValues>({
         for (const setting of settingsToSave) {
           await setSetting(setting)
         }
-
-        toast.success(`${category}设置已保存`)
       } else {
         // 默认行为：将所有表单字段保存为设置
         const settingsToSave: SettingItem[] = Object.entries(data).map(([key, value]) => ({
@@ -92,9 +98,18 @@ export function SettingsForm<T extends FieldValues>({
           await setSetting(setting)
         }
       }
+
+      // 保存成功
+      setSaveState('success')
+
+      // 2秒后重置状态
+      setTimeout(() => {
+        setSaveState('idle')
+      }, 2000)
     } catch (error) {
       console.error('保存设置失败:', error)
       toast.error('保存设置失败')
+      setSaveState('idle')
     }
   }
 
@@ -109,9 +124,61 @@ export function SettingsForm<T extends FieldValues>({
           {children(form)}
 
           <div className="flex justify-end">
-            <Button type="submit" className="px-8">
-              {submitButtonText}
-            </Button>
+            <motion.div
+              animate={{
+                width: saveState === 'saving' ? 120 : saveState === 'success' ? 120 : 120
+              }}
+              transition={{
+                duration: 0.3,
+                ease: [0.4, 0.0, 0.2, 1]
+              }}
+              className="overflow-hidden"
+            >
+              <Shortcut shortcut={['cmd', 's']} description="保存设置" showTooltip={false}>
+                <Button type="submit" className="px-8 w-full" disabled={saveState === 'saving'}>
+                  <AnimatePresence mode="wait">
+                    {saveState === 'saving' && (
+                      <motion.span
+                        key="saving"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        保存中...
+                      </motion.span>
+                    )}
+                    {saveState === 'success' && (
+                      <motion.span
+                        key="success"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.4, 0.0, 0.2, 1]
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Check className="h-4 w-4" />
+                        已保存
+                      </motion.span>
+                    )}
+                    {saveState === 'idle' && (
+                      <motion.span
+                        key="idle"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {submitButtonText}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Button>
+              </Shortcut>
+            </motion.div>
           </div>
         </form>
       </Form>
