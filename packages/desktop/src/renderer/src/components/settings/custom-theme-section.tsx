@@ -48,22 +48,37 @@ export function CustomThemeSection() {
 
     setIsImporting(true)
     try {
-      const result = await ThemeImportUtils.importFromCSS(cssContent, themeName, {
+      // 验证 CSS 内容
+      const validation = ThemeImportUtils.validateThemeCSS(cssContent)
+      if (!validation.isValid) {
+        toast.error(`主题验证失败: ${validation.errors.join(', ')}`)
+        return
+      }
+
+      // 检查主题名称是否已存在
+      const nameExists = customThemes.some(
+        (theme) => theme.name.toLowerCase() === themeName.toLowerCase()
+      )
+      if (nameExists) {
+        toast.error('主题名称已存在，请使用不同的名称')
+        return
+      }
+
+      // 使用 provider 的 saveCustomTheme 方法，这样会自动更新本地状态
+      await saveCustomTheme({
+        name: themeName,
         description: themeDescription || undefined,
-        author: 'User'
+        author: 'User',
+        cssContent
       })
 
-      if (result.success) {
-        toast.success(`主题 "${themeName}" 导入成功！`)
-        setCssContent('')
-        setThemeName('')
-        setThemeDescription('')
-        setShowImportForm(false)
-        clearPreview()
-        setIsPreviewing(false)
-      } else {
-        toast.error(result.error || '导入失败')
-      }
+      toast.success(`主题 "${themeName}" 导入成功！`)
+      setCssContent('')
+      setThemeName('')
+      setThemeDescription('')
+      setShowImportForm(false)
+      clearPreview()
+      setIsPreviewing(false)
     } catch (error) {
       toast.error('导入失败：' + (error instanceof Error ? error.message : '未知错误'))
     } finally {
