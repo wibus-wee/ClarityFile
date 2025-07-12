@@ -5,6 +5,7 @@ import { RecentProjectsSection } from './recent-projects-section'
 import { SystemOverviewSection } from './system-overview-section'
 import { QuickSearchSection } from './quick-search-section'
 import { DynamicQuoteSection } from './dynamic-quote-section'
+import { UpcomingCompetitionsSection } from './upcoming-competitions-section'
 
 export function Dashboard() {
   return (
@@ -67,6 +68,15 @@ export function Dashboard() {
             <QuickSearchSection />
           </motion.div>
 
+          {/* 近期比赛 */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
+          >
+            <UpcomingCompetitionsSection />
+          </motion.div>
+
           {/* 系统概览 */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -79,7 +89,7 @@ export function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
+            transition={{ duration: 0.3, delay: 0.35 }}
           >
             <DynamicQuoteSection />
           </motion.div>
