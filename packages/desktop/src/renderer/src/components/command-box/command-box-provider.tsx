@@ -10,12 +10,19 @@ import {
   Plus,
   Upload,
   FileText,
-  DollarSign
+  DollarSign,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
+  Brush,
+  Check
 } from 'lucide-react'
 import { useCommandBox } from './stores/command-box-store'
 import { useSuggestions } from './hooks/use-suggestions'
 import { useGlobalDrawersStore } from '@renderer/stores/global-drawers'
 import { ShortcutProvider, Shortcut } from '@renderer/components/shortcuts'
+import { useTheme } from '@renderer/hooks/use-theme'
 import type { NavigationItem, ActionItem } from './types/command-box.types'
 
 interface CommandBoxProviderProps {
@@ -33,6 +40,18 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
   // 全局状态管理
   const { openExpenseForm, openDocumentForm } = useGlobalDrawersStore()
   // const { openImportAssistant } = useImportAssistantStore() // 暂时未使用
+
+  // 主题管理
+  const {
+    theme,
+    currentTheme,
+    setTheme,
+    customThemes,
+    activeCustomTheme,
+    applyCustomTheme,
+    switchToDefaultTheme,
+    hasCustomTheme
+  } = useTheme()
 
   // 智能建议
   useSuggestions() // 自动运行智能建议生成
@@ -115,6 +134,8 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
         description: '创建一个新的项目',
         icon: Plus,
         shortcut: '⌘N',
+        category: '创建',
+        keywords: ['新建', '项目', '创建', 'new', 'project'],
         action: () => {
           close()
           router.navigate({ to: '/projects' })
@@ -129,6 +150,8 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
         description: '导入文件到当前项目',
         icon: Upload,
         shortcut: '⌘I',
+        category: '文件',
+        keywords: ['导入', '文件', '上传', 'import', 'upload', 'file'],
         action: () => {
           close()
           // 打开导入助手，但需要模拟文件拖拽
@@ -142,6 +165,8 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
         title: '新建文档',
         description: '创建一个新的文档',
         icon: FileText,
+        category: '创建',
+        keywords: ['新建', '文档', '创建', 'new', 'document'],
         action: () => {
           close()
           // 打开新建文档的 drawer
@@ -161,6 +186,8 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
         title: '添加报销',
         description: '添加新的报销记录',
         icon: DollarSign,
+        category: '经费',
+        keywords: ['添加', '报销', '经费', 'expense', 'add'],
         action: () => {
           close()
           // 打开新建报销的 drawer
@@ -177,8 +204,125 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
       }
     ]
 
-    setActionItems(actionItems)
-  }, [setActionItems, close, router, openDocumentForm, openExpenseForm])
+    // 添加外观设置相关的操作项目
+    const appearanceItems: ActionItem[] = [
+      // 基础主题切换
+      {
+        id: 'action-theme-light',
+        type: 'action',
+        title: '浅色主题',
+        description: '切换到浅色主题',
+        icon: Sun,
+        category: '外观设置',
+        keywords: ['浅色', '明亮', '主题', 'light', 'theme', '外观'],
+        action: async () => {
+          close()
+          await setTheme('light')
+        }
+      },
+      {
+        id: 'action-theme-dark',
+        type: 'action',
+        title: '深色主题',
+        description: '切换到深色主题',
+        icon: Moon,
+        category: '外观设置',
+        keywords: ['深色', '暗色', '主题', 'dark', 'theme', '外观'],
+        action: async () => {
+          close()
+          await setTheme('dark')
+        }
+      },
+      {
+        id: 'action-theme-system',
+        type: 'action',
+        title: '跟随系统',
+        description: '主题跟随系统设置',
+        icon: Monitor,
+        category: '外观设置',
+        keywords: ['系统', '自动', '主题', 'system', 'auto', 'theme', '外观'],
+        action: async () => {
+          close()
+          await setTheme('system')
+        }
+      }
+    ]
+
+    // 添加自定义主题切换项目
+    const customThemeItems: ActionItem[] = customThemes.map((customTheme) => ({
+      id: `action-custom-theme-${customTheme.id}`,
+      type: 'action' as const,
+      title: `${customTheme.name}${activeCustomTheme === customTheme.id ? ' ✓' : ''}`,
+      description: customTheme.description || '自定义主题',
+      icon: activeCustomTheme === customTheme.id ? Check : Brush,
+      category: '外观设置',
+      keywords: ['自定义', '主题', customTheme.name, 'custom', 'theme', '外观'],
+      action: async () => {
+        close()
+        if (activeCustomTheme === customTheme.id) {
+          // 如果当前已经是这个主题，则切换回默认主题
+          await switchToDefaultTheme()
+        } else {
+          // 否则切换到这个自定义主题
+          await applyCustomTheme(customTheme.id)
+        }
+      }
+    }))
+
+    // 添加主题管理相关操作
+    const themeManagementItems: ActionItem[] = [
+      {
+        id: 'action-current-theme-status',
+        type: 'action',
+        title: `当前主题: ${hasCustomTheme ? customThemes.find((t) => t.id === activeCustomTheme)?.name || '未知' : theme === 'system' ? `跟随系统 (${currentTheme})` : currentTheme === 'light' ? '浅色' : '深色'}`,
+        description: '显示当前激活的主题信息',
+        icon: Palette,
+        category: '外观设置',
+        keywords: ['当前', '主题', '状态', 'current', 'theme', 'status', '外观'],
+        action: () => {
+          // 这个命令主要用于显示状态，不执行实际操作
+          close()
+        }
+      },
+      {
+        id: 'action-theme-settings',
+        type: 'action',
+        title: '主题管理',
+        description: '打开主题管理页面',
+        icon: Settings,
+        category: '外观设置',
+        keywords: ['主题', '管理', '设置', 'theme', 'settings', 'management', '外观'],
+        action: () => {
+          close()
+          router.navigate({ to: '/settings', search: { tab: 'appearance' } })
+        }
+      }
+    ]
+
+    // 合并所有操作项目
+    const allActionItems = [
+      ...actionItems,
+      ...appearanceItems,
+      ...customThemeItems,
+      ...themeManagementItems
+    ]
+
+    setActionItems(allActionItems)
+  }, [
+    setActionItems,
+    close,
+    router,
+    openDocumentForm,
+    openExpenseForm,
+    theme,
+    currentTheme,
+    setTheme,
+    customThemes,
+    activeCustomTheme,
+    applyCustomTheme,
+    switchToDefaultTheme,
+    hasCustomTheme
+  ])
 
   // 监听路由变化，记录最近访问
   useEffect(() => {

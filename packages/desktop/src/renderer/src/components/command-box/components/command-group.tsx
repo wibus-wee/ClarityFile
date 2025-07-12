@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Command } from 'cmdk'
-import { Navigation, Zap, Clock, Search, Lightbulb, LucideIcon } from 'lucide-react'
+import { Navigation, Zap, Clock, Search, Lightbulb, Palette, LucideIcon } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 
 interface CommandGroupProps {
@@ -16,7 +16,8 @@ const iconMap: Record<string, LucideIcon> = {
   action: Zap,
   recent: Clock,
   search: Search,
-  suggestion: Lightbulb
+  suggestion: Lightbulb,
+  palette: Palette
 }
 
 /**

@@ -318,7 +318,28 @@ export function CommandBox() {
                           {/* 操作分组 */}
                           <CommandGroup title="操作" icon="action">
                             {allItems
-                              .filter((item) => item.type === 'action')
+                              .filter(
+                                (item) => item.type === 'action' && item.category !== '外观设置'
+                              )
+                              .map((item) => {
+                                const itemIndex = allItems.findIndex((i) => i.id === item.id)
+                                return (
+                                  <CommandItem
+                                    key={item.id}
+                                    item={item}
+                                    isSelected={itemIndex === selectedIndex}
+                                    onSelect={() => selectItem(itemIndex)}
+                                  />
+                                )
+                              })}
+                          </CommandGroup>
+
+                          {/* 外观设置分组 */}
+                          <CommandGroup title="外观设置" icon="palette">
+                            {allItems
+                              .filter(
+                                (item) => item.type === 'action' && item.category === '外观设置'
+                              )
                               .map((item) => {
                                 const itemIndex = allItems.findIndex((i) => i.id === item.id)
                                 return (
