@@ -8,6 +8,7 @@ import {
   SettingsSelectField,
   SettingsRadioField
 } from './components'
+import { CustomThemeSection } from './custom-theme-section'
 
 const appearanceSettingsSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']),
@@ -63,7 +64,10 @@ export function AppearanceSettings() {
     >
       {(form) => (
         <>
-          <SettingsSection title="主题设置" description="选择应用程序的外观主题">
+          <SettingsSection
+            title="基础主题设置"
+            description="选择应用程序的基础外观主题。注意：自定义主题激活时会覆盖这些设置。"
+          >
             <div className="grid grid-cols-2 gap-4">
               <SettingsRadioField
                 control={form.control}
@@ -82,6 +86,9 @@ export function AppearanceSettings() {
               />
             </div>
           </SettingsSection>
+
+          {/* 自定义主题管理 */}
+          <CustomThemeSection />
         </>
       )}
     </SettingsForm>
