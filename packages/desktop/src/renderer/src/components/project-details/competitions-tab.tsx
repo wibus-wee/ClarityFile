@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@clarity/shadcn/ui/button'
 import { Input } from '@clarity/shadcn/ui/input'
-import { Badge } from '@clarity/shadcn/ui/badge'
-import { Separator } from '@clarity/shadcn/ui/separator'
+
 import {
   Select,
   SelectContent,
@@ -177,57 +176,43 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
     })
 
   const getStatusColor = (status: string | null) => {
-    if (!status) return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+    if (!status) return 'bg-muted/50 text-muted-foreground'
 
     switch (status.toLowerCase()) {
       case 'submitted':
       case '已提交':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
       case 'in_progress':
       case '进行中':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+        return 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
       case 'completed':
       case '已完成':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+        return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
       case 'awarded':
       case '获奖':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400'
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+        return 'bg-muted/50 text-muted-foreground'
     }
   }
 
-  const isDeadlineApproaching = (deadline: Date | null) => {
-    if (!deadline) return false
-    const now = new Date()
-    const diffDays = Math.ceil(
-      (new Date(deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    )
-    return diffDays <= 7 && diffDays >= 0
-  }
-
-  const isOverdue = (deadline: Date | null) => {
-    if (!deadline) return false
-    return new Date(deadline) < new Date()
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 头部操作栏 */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="搜索赛事..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-9 border-border/60 focus:border-border"
             />
           </div>
 
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-28 h-9 border-border/60">
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -242,7 +227,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
           </Select>
 
           <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-28 h-9 border-border/60">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -256,7 +241,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
         <div className="flex items-center gap-2">
           <Shortcut shortcut={['cmd', 'n']} description="关联到新赛事">
-            <Button onClick={() => setAddCompetitionOpen(true)}>
+            <Button onClick={() => setAddCompetitionOpen(true)} className="h-9 px-4">
               <Plus className="w-4 h-4 mr-2" />
               关联到新赛事
             </Button>
@@ -264,10 +249,8 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
         </div>
       </div>
 
-      <Separator />
-
       {/* 赛事系列列表 */}
-      <div className="space-y-1">
+      <div className="">
         {isLoading ? (
           <div className="text-center py-12">
             <div className="text-muted-foreground">加载中...</div>
@@ -288,52 +271,53 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: index * 0.02 }}
-                  className="border border-border/60 rounded-lg overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow duration-200"
+                  className="group"
                 >
                   {/* 赛事系列主行 */}
                   <div
                     className={cn(
-                      'flex items-center justify-between p-5 hover:bg-muted/40 transition-all duration-200 cursor-pointer',
-                      isSeriesExpanded && 'bg-muted/30 border-b border-border/50'
+                      'flex items-center justify-between py-4 px-1 hover:bg-muted/30 rounded-md transition-all duration-200 cursor-pointer -mx-1',
+                      isSeriesExpanded && 'bg-muted/20'
                     )}
                     onClick={() => toggleSeriesExpansion(series.seriesId)}
                   >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       {/* 展开/折叠图标 */}
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-3">
                         {series.milestones.length > 0 ? (
                           isSeriesExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                            <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                            <ChevronRight className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
                           )
                         ) : (
                           <div className="w-4 h-4" />
                         )}
-                        <Trophy className="w-5 h-5 text-yellow-500 ml-2" />
+                        <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
+                          <Trophy className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                        </div>
                       </div>
 
                       {/* 赛事系列信息 */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-base font-semibold truncate text-foreground">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="text-base font-medium truncate text-foreground">
                             {series.seriesName}
                           </h3>
-                          <Badge variant="outline" className="text-xs font-medium">
-                            {series.milestones.length} 个里程碑
-                          </Badge>
-                          {totalDocuments > 0 && (
-                            <Badge
-                              variant="secondary"
-                              className="text-xs font-medium bg-blue-50 text-blue-700 border-blue-200"
-                            >
-                              {totalDocuments} 个文档
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                              {series.milestones.length} 个里程碑
+                            </span>
+                            {totalDocuments > 0 && (
+                              <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md">
+                                {totalDocuments} 个文档
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1.5">
                             <Calendar className="w-3 h-3" />
                             参与于 {new Date(series.seriesCreatedAt).toLocaleDateString()}
                           </span>
@@ -347,63 +331,61 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
                   {/* 展开的里程碑列表 */}
                   {isSeriesExpanded && (
-                    <div className="border-t border-border/40">
+                    <div className="mt-3 mb-3 ml-12 space-y-2">
                       {series.milestones.map((milestone) => {
                         const isMilestoneExpanded = expandedMilestones.has(milestone.milestoneId)
                         const hasDocuments = milestone.documents && milestone.documents.length > 0
 
                         return (
-                          <div
-                            key={milestone.milestoneId}
-                            className="border-b border-border/20 last:border-b-0"
-                          >
+                          <div key={milestone.milestoneId} className="group/milestone">
                             {/* 里程碑行 */}
                             <div
                               className={cn(
-                                'flex items-center justify-between p-4 pl-10 hover:bg-muted/30 transition-all duration-200 cursor-pointer',
+                                'flex items-center justify-between py-3 px-3 hover:bg-muted/30 rounded-md transition-all duration-200 cursor-pointer -mx-1',
                                 isMilestoneExpanded && 'bg-muted/20'
                               )}
                               onClick={() => toggleMilestoneExpansion(milestone.milestoneId)}
                             >
                               <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-2">
                                   {hasDocuments ? (
                                     isMilestoneExpanded ? (
-                                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                                      <ChevronDown className="w-3 h-3 text-muted-foreground transition-transform duration-200" />
                                     ) : (
-                                      <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                                      <ChevronRight className="w-3 h-3 text-muted-foreground transition-transform duration-200" />
                                     )
                                   ) : (
                                     <div className="w-3 h-3" />
                                   )}
+                                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-3 mb-1">
-                                    <h4 className="text-sm font-semibold truncate text-foreground">
+                                    <h4 className="text-sm font-medium truncate text-foreground">
                                       {milestone.levelName}
                                     </h4>
                                     {milestone.statusInMilestone && (
-                                      <Badge
+                                      <span
                                         className={cn(
-                                          'text-xs font-medium',
+                                          'text-xs font-medium px-2 py-1 rounded-md',
                                           getStatusColor(milestone.statusInMilestone)
                                         )}
                                       >
                                         {milestone.statusInMilestone}
-                                      </Badge>
+                                      </span>
                                     )}
                                   </div>
 
                                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1.5">
                                       <Calendar className="w-3 h-3" />
                                       参与于{' '}
                                       {new Date(milestone.participatedAt).toLocaleDateString()}
                                     </span>
 
                                     {milestone.dueDateMilestone && (
-                                      <span className="flex items-center gap-1">
+                                      <span className="flex items-center gap-1.5">
                                         <Clock className="w-3 h-3" />
                                         截止{' '}
                                         {new Date(milestone.dueDateMilestone).toLocaleDateString()}
@@ -411,7 +393,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                                     )}
 
                                     {hasDocuments && (
-                                      <span className="flex items-center gap-1">
+                                      <span className="flex items-center gap-1.5">
                                         <FileText className="w-3 h-3" />
                                         {milestone.documents.length} 个文档
                                       </span>
@@ -422,13 +404,13 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
                               {/* 里程碑操作按钮 */}
                               <div
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-1 opacity-0 group-hover/milestone:opacity-100 transition-opacity duration-200"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 px-3 text-xs font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                  className="h-7 px-2 text-xs font-medium hover:bg-muted transition-colors"
                                   onClick={() =>
                                     handleEditMilestoneStatus({
                                       seriesId: series.seriesId,
@@ -448,9 +430,9 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-7 w-7 p-0 hover:bg-gray-100 transition-colors"
+                                      className="h-7 w-7 p-0 hover:bg-muted transition-colors"
                                     >
-                                      <MoreHorizontal className="w-4 h-4" />
+                                      <MoreHorizontal className="w-3 h-3" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
@@ -490,14 +472,12 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
 
                             {/* 展开的文档列表 */}
                             {isMilestoneExpanded && hasDocuments && (
-                              <div className="pl-12 pr-6 pb-4 bg-muted/10 border-t border-border/30">
-                                <div className="pt-3">
-                                  <CompetitionDocumentsSection
-                                    documents={milestone.documents}
-                                    competitionName={series.seriesName}
-                                    levelName={milestone.levelName}
-                                  />
-                                </div>
+                              <div className="mt-3 ml-5 pl-4 border-l-2 border-muted">
+                                <CompetitionDocumentsSection
+                                  documents={milestone.documents}
+                                  competitionName={series.seriesName}
+                                  levelName={milestone.levelName}
+                                />
                               </div>
                             )}
                           </div>
@@ -505,19 +485,24 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                       })}
                     </div>
                   )}
+
+                  {/* 分割线 */}
+                  {index < filteredSeries.length - 1 && (
+                    <div className="border-b border-border/30"></div>
+                  )}
                 </motion.div>
               )
             })}
           </AnimatePresence>
         ) : (
-          <div className="text-center py-16">
-            <div className="bg-muted/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-              <Trophy className="w-10 h-10 text-muted-foreground" />
+          <div className="text-center py-20">
+            <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-4">
+              <Trophy className="w-8 h-8 text-muted-foreground/60" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+            <h3 className="text-base font-medium text-foreground mb-2">
               {searchQuery || filterStatus !== 'all' ? '没有找到匹配的赛事' : '暂无参与赛事'}
             </h3>
-            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+            <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto leading-relaxed">
               {searchQuery || filterStatus !== 'all'
                 ? '尝试调整搜索条件或筛选器来查找赛事'
                 : '点击下方按钮来关联项目到赛事系列，开始您的竞赛之旅'}
@@ -525,7 +510,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
             <Shortcut shortcut={['cmd', 'n']} description="关联到新赛事">
               <Button
                 onClick={() => setAddCompetitionOpen(true)}
-                className="bg-primary hover:bg-primary/90"
+                className="bg-primary hover:bg-primary/90 h-9 px-4"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 关联到新赛事
