@@ -18,6 +18,7 @@ import { Separator } from '@clarity/shadcn/ui/separator'
 import { useTheme } from '@renderer/hooks/use-theme'
 import { ThemeImportUtils } from '@renderer/lib/theme-import-utils'
 import { SettingsSection } from './components'
+import { ThemeColorPreview, DetailedThemeColorPreview } from './theme-color-preview'
 import type { CustomTheme } from '@renderer/types/theme'
 import { formatFriendlyDate } from '@renderer/lib/utils'
 
@@ -328,6 +329,14 @@ export function CustomThemeSection() {
                   />
                 </div>
 
+                {/* 色彩预览 */}
+                {cssContent.trim() && (
+                  <div className="p-3 border rounded-lg bg-muted/20">
+                    <h5 className="text-sm font-medium mb-2">色彩预览</h5>
+                    <DetailedThemeColorPreview cssContent={cssContent} />
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     onClick={handleImportTheme}
@@ -448,6 +457,13 @@ export function CustomThemeSection() {
                                 </Badge>
                               )}
                             </div>
+
+                            {/* 色彩预览 */}
+                            <div className="flex items-center gap-2 mt-1 mb-2">
+                              <ThemeColorPreview cssContent={theme.cssContent} />
+                              <span className="text-xs text-muted-foreground">主题色彩</span>
+                            </div>
+
                             {theme.description && (
                               <p className="text-xs text-muted-foreground truncate mb-2">
                                 {theme.description}
