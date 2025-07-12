@@ -162,12 +162,7 @@ export class ThemeImportUtils {
     }
 
     // 检查是否包含必要的 CSS 变量
-    const requiredVariables = [
-      '--background',
-      '--foreground',
-      '--primary',
-      '--primary-foreground'
-    ]
+    const requiredVariables = ['--background', '--foreground', '--primary', '--primary-foreground']
 
     for (const variable of requiredVariables) {
       if (!cssContent.includes(variable)) {

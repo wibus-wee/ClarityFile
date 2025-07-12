@@ -1,6 +1,6 @@
 /**
  * ThemeService - 自定义主题数据管理服务
- * 
+ *
  * 负责自定义主题的数据存储、读取和管理
  * 与数据库 settings 表集成，通过 TIPC 进行数据同步
  */
@@ -19,14 +19,13 @@ export class ThemeService {
   static async getCustomThemes(): Promise<CustomTheme[]> {
     try {
       const setting = await tipcClient.getSetting({ key: this.CUSTOM_THEMES_KEY })
-      
+
       if (!setting || !setting.value) {
         return []
       }
 
-      const themesData = typeof setting.value === 'string' 
-        ? JSON.parse(setting.value) 
-        : setting.value
+      const themesData =
+        typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value
 
       return Object.values(themesData as Record<string, CustomTheme>)
     } catch (error) {
@@ -41,7 +40,7 @@ export class ThemeService {
   static async getCustomTheme(themeId: string): Promise<CustomTheme | null> {
     try {
       const themes = await this.getCustomThemes()
-      return themes.find(theme => theme.id === themeId) || null
+      return themes.find((theme) => theme.id === themeId) || null
     } catch (error) {
       console.error('Failed to get custom theme:', error)
       return null
@@ -65,10 +64,13 @@ export class ThemeService {
 
       // 获取现有主题
       const existingThemes = await this.getCustomThemes()
-      const themesMap = existingThemes.reduce((acc, theme) => {
-        acc[theme.id] = theme
-        return acc
-      }, {} as Record<string, CustomTheme>)
+      const themesMap = existingThemes.reduce(
+        (acc, theme) => {
+          acc[theme.id] = theme
+          return acc
+        },
+        {} as Record<string, CustomTheme>
+      )
 
       // 添加新主题
       themesMap[newTheme.id] = newTheme
@@ -98,10 +100,13 @@ export class ThemeService {
   ): Promise<CustomTheme> {
     try {
       const existingThemes = await this.getCustomThemes()
-      const themesMap = existingThemes.reduce((acc, theme) => {
-        acc[theme.id] = theme
-        return acc
-      }, {} as Record<string, CustomTheme>)
+      const themesMap = existingThemes.reduce(
+        (acc, theme) => {
+          acc[theme.id] = theme
+          return acc
+        },
+        {} as Record<string, CustomTheme>
+      )
 
       const existingTheme = themesMap[themeId]
       if (!existingTheme) {
@@ -139,10 +144,13 @@ export class ThemeService {
   static async deleteCustomTheme(themeId: string): Promise<void> {
     try {
       const existingThemes = await this.getCustomThemes()
-      const themesMap = existingThemes.reduce((acc, theme) => {
-        acc[theme.id] = theme
-        return acc
-      }, {} as Record<string, CustomTheme>)
+      const themesMap = existingThemes.reduce(
+        (acc, theme) => {
+          acc[theme.id] = theme
+          return acc
+        },
+        {} as Record<string, CustomTheme>
+      )
 
       if (!themesMap[themeId]) {
         throw new Error('主题不存在')
@@ -178,14 +186,12 @@ export class ThemeService {
   static async getActiveCustomTheme(): Promise<string | null> {
     try {
       const setting = await tipcClient.getSetting({ key: this.ACTIVE_CUSTOM_THEME_KEY })
-      
+
       if (!setting || !setting.value) {
         return null
       }
 
-      return typeof setting.value === 'string' 
-        ? JSON.parse(setting.value) 
-        : setting.value
+      return typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value
     } catch (error) {
       console.error('Failed to get active custom theme:', error)
       return null
@@ -217,9 +223,8 @@ export class ThemeService {
   static async isThemeNameExists(name: string, excludeId?: string): Promise<boolean> {
     try {
       const themes = await this.getCustomThemes()
-      return themes.some(theme => 
-        theme.name.toLowerCase() === name.toLowerCase() && 
-        theme.id !== excludeId
+      return themes.some(
+        (theme) => theme.name.toLowerCase() === name.toLowerCase() && theme.id !== excludeId
       )
     } catch (error) {
       console.error('Failed to check theme name existence:', error)
@@ -250,7 +255,7 @@ export class ThemeService {
   static async importTheme(jsonString: string): Promise<CustomTheme> {
     try {
       const themeData = JSON.parse(jsonString) as CustomTheme
-      
+
       // 验证主题数据结构
       if (!themeData.name || !themeData.cssContent) {
         throw new Error('主题数据格式不正确')

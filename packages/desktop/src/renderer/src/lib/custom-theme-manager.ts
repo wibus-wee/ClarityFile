@@ -192,7 +192,9 @@ export class CustomThemeManager {
    * 初始化主题管理器（在应用启动时调用）
    */
   static initialize(): void {
-    console.log('CustomThemeManager initialized')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('CustomThemeManager initialized')
+    }
 
     // 清理可能残留的样式元素
     this.removeCustomThemeCSS()
@@ -205,6 +207,8 @@ export class CustomThemeManager {
   static destroy(): void {
     this.removeCustomThemeCSS()
     this.clearPreviewCSS()
-    console.log('CustomThemeManager destroyed')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('CustomThemeManager destroyed')
+    }
   }
 }

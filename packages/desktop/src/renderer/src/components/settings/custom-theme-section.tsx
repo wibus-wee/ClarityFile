@@ -80,8 +80,6 @@ export function CustomThemeSection() {
         description: themeDescription || undefined,
         cssContent
       })
-
-      toast.success(`主题 "${themeName}" 导入成功！`)
       setCssContent('')
       setThemeName('')
       setThemeDescription('')
@@ -105,7 +103,6 @@ export function CustomThemeSection() {
     try {
       previewTheme(cssContent)
       setIsPreviewing(true)
-      toast.success('预览已应用')
     } catch (error) {
       toast.error('预览失败：' + (error instanceof Error ? error.message : '未知错误'))
     }
@@ -115,14 +112,12 @@ export function CustomThemeSection() {
   const handleClearPreview = () => {
     clearPreview()
     setIsPreviewing(false)
-    toast.success('预览已清除')
   }
 
   // 处理应用主题
   const handleApplyTheme = async (themeId: string) => {
     try {
       await applyCustomTheme(themeId)
-      toast.success('主题已应用')
     } catch (error) {
       toast.error('应用失败：' + (error instanceof Error ? error.message : '未知错误'))
     }
@@ -132,7 +127,6 @@ export function CustomThemeSection() {
   const handleDeleteTheme = async (themeId: string) => {
     try {
       await removeCustomTheme(themeId)
-      toast.success('主题已删除')
     } catch (error) {
       toast.error('删除失败：' + (error instanceof Error ? error.message : '未知错误'))
     }
@@ -158,8 +152,6 @@ export function CustomThemeSection() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-
-      toast.success('主题已导出')
     } catch (error) {
       toast.error('导出失败：' + (error instanceof Error ? error.message : '未知错误'))
     }
@@ -169,7 +161,6 @@ export function CustomThemeSection() {
   const handleSwitchToDefault = async () => {
     try {
       await switchToDefaultTheme()
-      toast.success('已切换到默认主题')
     } catch (error) {
       toast.error('切换失败：' + (error instanceof Error ? error.message : '未知错误'))
     }
@@ -228,8 +219,6 @@ export function CustomThemeSection() {
         description: editThemeDescription || undefined,
         cssContent: editCssContent
       })
-
-      toast.success('主题更新成功！')
       handleCancelEdit()
     } catch (error) {
       toast.error('更新失败：' + (error instanceof Error ? error.message : '未知错误'))
@@ -257,7 +246,6 @@ export function CustomThemeSection() {
     setCssContent(template)
     setThemeName('我的自定义主题')
     setThemeDescription('基于默认模板的自定义主题')
-    toast.success('主题模板已加载')
   }
 
   return (
