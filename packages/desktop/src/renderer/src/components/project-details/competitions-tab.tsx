@@ -222,7 +222,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ delay: index * 0.05 }}
-                className="border border-border rounded-lg p-6 hover:shadow-md transition-all"
+                className="border border-border rounded-lg p-6"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
