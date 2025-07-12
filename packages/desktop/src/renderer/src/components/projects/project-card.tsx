@@ -89,15 +89,19 @@ export function ProjectCard({
       >
         <motion.div
           layoutId={`project-icon-${project.id}`}
-          className="w-8 h-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0 overflow-hidden"
+          className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 overflow-hidden ${
+            project.coverAsset && project.coverAsset.mimeType?.startsWith('image/')
+              ? ''
+              : 'bg-gradient-to-br from-primary/20 to-primary/10'
+          }`}
           transition={{ duration: 0.4 }}
         >
           {project.coverAsset && project.coverAsset.mimeType?.startsWith('image/') ? (
             <SafeImage
               filePath={project.coverAsset.physicalPath}
               alt={project.name}
-              className="w-full h-full object-cover bg-transparent"
-              fallbackClassName="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10"
+              className="w-full h-full object-cover rounded-md"
+              fallbackClassName="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 rounded-md"
             />
           ) : (
             <FolderOpen className="w-4 h-4 text-primary" />

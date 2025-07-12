@@ -13,6 +13,7 @@ import { useProjects, useOpenFileWithSystem } from '@renderer/hooks/use-tipc'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { SafeImage } from '@renderer/components/ui/safe-image'
 
 const statusConfig = {
   active: {
@@ -118,8 +119,23 @@ export function RecentProjectsSection() {
                 >
                   <div className="flex items-center gap-4 p-4 border border-border rounded-lg hover:border-primary/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer">
                     {/* 项目图标 */}
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <FolderOpen className="w-5 h-5 text-primary" />
+                    <div
+                      className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${
+                        project.coverAsset && project.coverAsset.mimeType?.startsWith('image/')
+                          ? ''
+                          : 'bg-gradient-to-br from-primary/20 to-primary/10'
+                      }`}
+                    >
+                      {project.coverAsset && project.coverAsset.mimeType?.startsWith('image/') ? (
+                        <SafeImage
+                          filePath={project.coverAsset.physicalPath}
+                          alt={project.name}
+                          className="w-full h-full object-cover rounded-lg"
+                          fallbackClassName="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg"
+                        />
+                      ) : (
+                        <FolderOpen className="w-5 h-5 text-primary" />
+                      )}
                     </div>
 
                     {/* 项目信息 */}
