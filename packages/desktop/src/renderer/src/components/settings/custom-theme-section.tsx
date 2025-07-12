@@ -449,7 +449,7 @@ export function CustomThemeSection() {
                               )}
                             </div>
                             {theme.description && (
-                              <p className="text-sm text-muted-foreground truncate">
+                              <p className="text-xs text-muted-foreground truncate mb-2">
                                 {theme.description}
                               </p>
                             )}
