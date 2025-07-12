@@ -181,7 +181,7 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
           </div>
 
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Shortcut shortcut={['cmd', 'a']} description="添加资产">
+            <Shortcut shortcut={['cmd', 'n']} description="添加资产">
               <Button onClick={() => setCreateAssetOpen(true)} className="gap-2">
                 <Plus className="w-4 h-4" />
                 添加资产

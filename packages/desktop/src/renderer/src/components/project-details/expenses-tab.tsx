@@ -313,7 +313,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Shortcut shortcut={['cmd', 'r']} description="添加新报销">
+          <Shortcut shortcut={['cmd', 'n']} description="添加新报销">
             <Button onClick={handleCreate}>
               <Plus className="w-4 h-4 mr-2" />
               添加新报销
@@ -447,7 +447,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                 ? '没有找到匹配的经费记录'
                 : '开始添加项目经费记录'}
             </p>
-            <Shortcut shortcut={['cmd', 'r']} description="添加新报销">
+            <Shortcut shortcut={['cmd', 'n']} description="添加新报销">
               <Button onClick={handleCreate} size="sm">
                 <Plus className="w-4 h-4 mr-2" />
                 添加新报销

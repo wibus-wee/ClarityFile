@@ -216,7 +216,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Shortcut shortcut={['cmd', 'c']} description="关联到新赛事">
+          <Shortcut shortcut={['cmd', 'n']} description="关联到新赛事">
             <Button onClick={() => setAddCompetitionOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               关联到新赛事
@@ -407,7 +407,7 @@ export function CompetitionsTab({ projectDetails }: CompetitionsTabProps) {
             <p className="text-muted-foreground mb-4">
               {searchQuery || filterStatus !== 'all' ? '没有找到匹配的赛事' : '开始关联项目到赛事'}
             </p>
-            <Shortcut shortcut={['cmd', 'c']} description="关联到新赛事">
+            <Shortcut shortcut={['cmd', 'n']} description="关联到新赛事">
               <Button onClick={() => setAddCompetitionOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 关联到新赛事

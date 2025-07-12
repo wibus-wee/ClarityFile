@@ -218,7 +218,7 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Shortcut shortcut={['cmd', 'd']} description="添加新逻辑文档">
+          <Shortcut shortcut={['cmd', 'n']} description="添加新逻辑文档">
             <Button onClick={() => setCreateDocumentOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               添加新逻辑文档
