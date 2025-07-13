@@ -62,5 +62,13 @@
     "finalReview": "终审",
     "announcement": "结果公布",
     "award": "颁奖典礼"
-  }
+  },
+  "dueDate": "截止",
+  "dueDateLabel": "截止日期",
+  "createTime": "创建时间",
+  "overdue": "已过期 {{days}} 天",
+  "dueToday": "今天截止",
+  "daysLeft": "还有 {{days}} 天",
+  "noDescription": "暂无描述",
+  "noDueDate": "未设置截止日期"
 }

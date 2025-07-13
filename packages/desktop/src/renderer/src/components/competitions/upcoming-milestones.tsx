@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import {
@@ -21,9 +22,9 @@ import {
 } from 'lucide-react'
 import { useUpcomingMilestones } from '@renderer/hooks/use-tipc'
 import { cn } from '@renderer/lib/utils'
-import { format, differenceInDays } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { differenceInDays } from 'date-fns'
 import { useNavigate } from '@tanstack/react-router'
+import { formatFriendlyDate } from '@renderer/lib/i18n-formatters'
 import { MilestoneDetailsDialog } from './dialogs/milestone-details-dialog'
 import { MilestoneParticipatingProjectsDialog } from './dialogs/milestone-participating-projects-dialog'
 import { MilestoneWithProjectsOutput } from '@main/types/competition-schemas'
@@ -36,6 +37,7 @@ interface MilestoneCardProps {
 }
 
 function MilestoneCard({ milestone, index, onViewDetails, onViewSeries }: MilestoneCardProps) {
+  const { t } = useTranslation('competitions')
   const now = new Date()
   const dueDate = milestone.dueDate ? new Date(milestone.dueDate) : null
   const daysUntilDue = dueDate ? differenceInDays(dueDate, now) : null
@@ -145,7 +147,9 @@ function MilestoneCard({ milestone, index, onViewDetails, onViewSeries }: Milest
             {dueDate && (
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                <span>截止：{format(dueDate, 'MM月dd日', { locale: zhCN })}</span>
+                <span>
+                  {t('dueDate')}：{formatFriendlyDate(milestone.dueDate?.toString()!)}
+                </span>
               </div>
             )}
 

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { FileText, Image, DollarSign, Trophy, TrendingUp, Tag } from 'lucide-react'
-import { cn, formatFileSize } from '@renderer/lib/utils'
+import { cn } from '@renderer/lib/utils'
+import { formatFileSize, formatCurrency } from '@renderer/lib/i18n-formatters'
 import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 
 interface ProjectStatisticsProps {
@@ -42,16 +43,6 @@ export function ProjectStatistics({ projectDetails, className }: ProjectStatisti
   const activeCompetitions = competitions.filter(
     (comp) => comp.statusInMilestone === 'active' || comp.statusInMilestone === 'in_progress'
   ).length
-
-  // 格式化金额
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('zh-CN', {
-      style: 'currency',
-      currency: 'CNY',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
 
   // 计算总文件大小
   const totalAssetSize = assets.reduce((sum, asset) => sum + (asset.fileSizeBytes || 0), 0)

@@ -1,5 +1,5 @@
 import { useLocation } from '@tanstack/react-router'
-import { flatRoutes } from '@renderer/routers'
+import { useTranslatedRoutes } from '@renderer/routers'
 import { useProjectDetails } from '@renderer/hooks/use-tipc'
 
 interface BreadcrumbItem {
@@ -10,6 +10,7 @@ interface BreadcrumbItem {
 
 export const useBreadcrumb = () => {
   const location = useLocation()
+  const { flatRoutes } = useTranslatedRoutes()
   const paths = location.pathname.split('/').filter(Boolean)
 
   // 提取可能的动态路由参数

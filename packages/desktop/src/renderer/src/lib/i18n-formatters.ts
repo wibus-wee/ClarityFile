@@ -245,3 +245,24 @@ export function getTimeFormatOptions(language?: SupportedLanguage) {
     ]
   }
 }
+
+/**
+ * 国际化的文件大小格式化
+ */
+export function formatFileSize(
+  bytes: number | null | undefined,
+  language?: SupportedLanguage
+): string {
+  const currentLang = language || getCurrentLanguage()
+
+  if (bytes === null || bytes === undefined) {
+    return currentLang === 'zh-CN' ? '未知大小' : 'Unknown size'
+  }
+  if (bytes === 0) return '0 B'
+
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  const size = bytes / Math.pow(1024, i)
+
+  return `${size.toFixed(1)} ${sizes[i]}`
+}

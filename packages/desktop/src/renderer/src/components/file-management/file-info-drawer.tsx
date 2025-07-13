@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
-import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
 import { MimeTypeUtils } from '@renderer/utils/mime-type-utils'
+import { formatDateTime, formatRelativeTime, formatFileSize } from '@renderer/lib/i18n-formatters'
 import {
   Drawer,
   DrawerContent,
@@ -31,14 +30,6 @@ export function FileInfoDrawer({
   if (!file) return null
 
   const FileIcon = getFileTypeIcon(file.mimeType)
-
-  const formatFileSize = (bytes: number) => {
-    if (!bytes) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-  }
 
   const getFileTypeLabel = (mimeType: string) => {
     return MimeTypeUtils.getFileTypeLabel(mimeType)
@@ -142,12 +133,9 @@ export function FileInfoDrawer({
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">创建时间</label>
                 <div className="space-y-1">
-                  <p className="text-sm">{new Date(file.createdAt).toLocaleString('zh-CN')}</p>
+                  <p className="text-sm">{formatDateTime(file.createdAt)}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(file.createdAt), {
-                      addSuffix: true,
-                      locale: zhCN
-                    })}
+                    {formatRelativeTime(file.createdAt)}
                   </p>
                 </div>
               </div>
@@ -156,12 +144,9 @@ export function FileInfoDrawer({
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground">更新时间</label>
                   <div className="space-y-1">
-                    <p className="text-sm">{new Date(file.updatedAt).toLocaleString('zh-CN')}</p>
+                    <p className="text-sm">{formatDateTime(file.updatedAt)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(file.updatedAt), {
-                        addSuffix: true,
-                        locale: zhCN
-                      })}
+                      {formatRelativeTime(file.updatedAt)}
                     </p>
                   </div>
                 </div>

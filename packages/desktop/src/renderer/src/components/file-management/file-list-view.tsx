@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react'
-import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { formatFileSize, formatRelativeTime } from '@renderer/lib/i18n-formatters'
 
 import { MoreHorizontal, Eye, Edit, Info, Trash2 } from 'lucide-react'
 import { Button } from '@clarity/shadcn/ui/button'
@@ -48,14 +47,6 @@ export function FileListView({
 
   const [hoveredFile, setHoveredFile] = useState<string | null>(null)
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
-
-  const formatFileSize = (bytes: number) => {
-    if (!bytes) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-  }
 
   // 处理文件点击事件
   const handleFileClick = useCallback(
@@ -203,10 +194,7 @@ export function FileListView({
 
                   {/* 修改时间 */}
                   <div className="col-span-1 text-sm text-muted-foreground">
-                    {formatDistanceToNow(new Date(file.createdAt), {
-                      addSuffix: true,
-                      locale: zhCN
-                    })}
+                    {formatRelativeTime(file.createdAt)}
                   </div>
 
                   {/* 操作按钮 */}

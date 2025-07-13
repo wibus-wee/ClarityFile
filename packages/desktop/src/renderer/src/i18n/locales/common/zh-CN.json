@@ -113,5 +113,7 @@
   "nextMonth": "下月",
   "thisYear": "今年",
   "lastYear": "去年",
-  "nextYear": "明年"
+  "nextYear": "明年",
+  "unknownError": "未知错误",
+  "unknownSize": "未知大小"
 }

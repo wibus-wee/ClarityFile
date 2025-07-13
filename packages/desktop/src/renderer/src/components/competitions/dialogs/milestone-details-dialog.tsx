@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -9,9 +10,9 @@ import {
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Target, Calendar, Trophy, Users, Clock, FileText, Edit } from 'lucide-react'
-import { format, differenceInDays, isBefore, startOfDay } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { differenceInDays, isBefore, startOfDay } from 'date-fns'
 import { cn } from '@renderer/lib/utils'
+import { formatFullDate } from '@renderer/lib/i18n-formatters'
 import type {
   MilestoneWithProjectsOutput,
   CompetitionMilestoneOutput
@@ -34,6 +35,7 @@ export function MilestoneDetailsDialog({
   onViewSeries,
   onViewProjects
 }: MilestoneDetailsDialogProps) {
+  const { t } = useTranslation('competitions')
   if (!milestone) return null
 
   const now = new Date()
@@ -111,24 +113,24 @@ export function MilestoneDetailsDialog({
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">截止日期</span>
+                <span className="text-sm font-medium">{t('dueDateLabel')}</span>
               </div>
               <div className="pl-6">
                 {dueDate ? (
                   <div className="space-y-1">
-                    <p className="text-sm">{format(dueDate, 'yyyy年MM月dd日', { locale: zhCN })}</p>
+                    <p className="text-sm">{formatFullDate(milestone.dueDate!)}</p>
                     {daysUntilDue !== null && (
                       <p className={cn('text-xs', status.color)}>
                         {daysUntilDue < 0
-                          ? `已过期 ${Math.abs(daysUntilDue)} 天`
+                          ? t('overdue', { days: Math.abs(daysUntilDue) })
                           : daysUntilDue === 0
-                            ? '今天截止'
-                            : `还有 ${daysUntilDue} 天`}
+                            ? t('dueToday')
+                            : t('daysLeft', { days: daysUntilDue })}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">未设置截止日期</p>
+                  <p className="text-sm text-muted-foreground">{t('noDueDate')}</p>
                 )}
               </div>
             </div>
@@ -144,11 +146,9 @@ export function MilestoneDetailsDialog({
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">创建时间</span>
+                <span className="text-sm font-medium">{t('createTime')}</span>
               </div>
-              <p className="text-sm pl-6">
-                {format(new Date(), 'yyyy年MM月dd日', { locale: zhCN })}
-              </p>
+              <p className="text-sm pl-6">{formatFullDate(new Date().toISOString())}</p>
             </div>
           </div>
 

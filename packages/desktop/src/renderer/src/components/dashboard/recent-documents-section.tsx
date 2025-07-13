@@ -27,9 +27,8 @@ import {
   useOpenFileByIdWithSystem,
   useIsQuickLookAvailable
 } from '@renderer/hooks/use-tipc'
-import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { formatRelativeTime } from '@renderer/lib/i18n-formatters'
 
 // 确保文件名包含扩展名的工具函数
 const ensureFileExtension = (fileName: string, originalFileName: string): string => {
@@ -212,12 +211,7 @@ export function RecentDocumentsSection() {
 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
-                      <span>
-                        {formatDistanceToNow(new Date(file.updatedAt), {
-                          addSuffix: true,
-                          locale: zhCN
-                        })}
-                      </span>
+                      <span>{formatRelativeTime(file.updatedAt)}</span>
                     </div>
                   </div>
 

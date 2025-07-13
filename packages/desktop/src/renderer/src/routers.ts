@@ -32,7 +32,7 @@ export function createRoutes(t: (key: string, options?: any) => string): AppRout
       },
       {
         path: '/files',
-        label: t('files:title'),
+        label: t('navigation:files'),
         icon: Files
       }
     ],
@@ -117,83 +117,9 @@ export function createRoutes(t: (key: string, options?: any) => string): AppRout
   }
 }
 
-// 保持向后兼容的静态路由（用于不需要翻译的场景）
-export const routes: AppRoute = {
-  Features: [
-    {
-      path: '/',
-      label: '仪表板',
-      icon: Gauge
-    },
-    {
-      path: '/files',
-      label: '文件管理',
-      icon: Files
-    }
-  ],
-  Workspace: [
-    {
-      path: '/projects',
-      label: '项目',
-      icon: SquareChartGantt
-    },
-    {
-      path: '/competitions',
-      label: '赛事中心',
-      icon: Trophy
-    },
-    {
-      path: '/expenses',
-      label: '经费报销',
-      icon: CreditCard
-    }
-  ],
-  Others: [
-    {
-      path: '/settings',
-      label: '设置',
-      icon: Settings2,
-      children: [
-        {
-          path: '?category=general',
-          label: '常规设置'
-        },
-        {
-          path: '?category=appearance',
-          label: '外观设置'
-        },
-        {
-          path: '?category=notifications',
-          label: '通知设置'
-        },
-        {
-          path: '?category=language',
-          label: '语言与地区'
-        },
-        {
-          path: '?category=accessibility',
-          label: '无障碍'
-        },
-        {
-          path: '?category=audio-video',
-          label: '音频与视频'
-        },
-        {
-          path: '?category=privacy',
-          label: '隐私与可见性'
-        },
-        {
-          path: '?category=advanced',
-          label: '高级设置'
-        }
-      ]
-    }
-  ]
-}
-
 // Hook for creating translated routes
 export function useTranslatedRoutes() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['navigation', 'settings'])
 
   const translatedRoutes = createRoutes(t as any)
 
@@ -216,21 +142,3 @@ export function useTranslatedRoutes() {
 
   return { flatRoutes, transformedRoutes }
 }
-
-// 保持向后兼容的静态导出
-export const flatRoutes = Object.values(routes).flat()
-export const transformedRoutes = Object.entries(routes).map(([group, routes]) => ({
-  group,
-  items: routes.map((route) => ({
-    title: route.label,
-    url: route.path,
-    icon: route.icon,
-    isActive: route.isActive,
-    ...(route.children && {
-      items: route.children.map((child) => ({
-        title: child.label,
-        url: `${child.path}`
-      }))
-    })
-  }))
-}))

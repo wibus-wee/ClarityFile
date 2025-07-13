@@ -10,9 +10,8 @@ import { FolderOpen, ArrowRight, Calendar, MoreHorizontal, ExternalLink, Eye } f
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { useProjects, useOpenFileWithSystem } from '@renderer/hooks/use-tipc'
-import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { formatRelativeTime } from '@renderer/lib/i18n-formatters'
 import { SafeImage } from '@renderer/components/ui/safe-image'
 
 const statusConfig = {
@@ -155,12 +154,7 @@ export function RecentProjectsSection() {
 
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="w-3 h-3" />
-                        <span>
-                          {formatDistanceToNow(new Date(project.updatedAt), {
-                            addSuffix: true,
-                            locale: zhCN
-                          })}
-                        </span>
+                        <span>{formatRelativeTime(project.updatedAt)}</span>
                       </div>
                     </div>
 
