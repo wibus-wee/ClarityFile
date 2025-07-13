@@ -65,6 +65,211 @@
     "newProject": "新建项目",
     "filterProjects": "筛选项目",
     "sortProjects": "排序项目",
-    "editProject": "编辑项目"
+    "editProject": "编辑项目",
+    "saveSettings": "保存项目设置"
+  },
+  "settingsTab": {
+    "basicInfo": {
+      "title": "基本信息",
+      "description": "配置项目的基本信息和元数据"
+    },
+    "fields": {
+      "name": {
+        "label": "项目名称",
+        "description": "项目的显示名称",
+        "placeholder": "输入项目名称"
+      },
+      "description": {
+        "label": "项目描述",
+        "description": "项目的详细描述信息",
+        "placeholder": "输入项目描述..."
+      },
+      "status": {
+        "label": "项目状态",
+        "description": "当前项目的状态",
+        "placeholder": "选择项目状态"
+      }
+    },
+    "statusOptions": {
+      "active": "进行中",
+      "on_hold": "暂停",
+      "archived": "已归档"
+    },
+    "tags": {
+      "title": "项目标签",
+      "description": "管理项目的分类标签",
+      "manage": "管理标签",
+      "noTags": "暂无标签"
+    },
+    "projectInfo": {
+      "title": "项目信息",
+      "projectId": "项目ID",
+      "createdAt": "创建时间",
+      "updatedAt": "最后更新",
+      "coverAsset": "项目封面"
+    },
+    "dangerZone": {
+      "title": "危险操作",
+      "show": "显示危险操作",
+      "hide": "隐藏危险操作",
+      "archive": {
+        "title": "归档项目",
+        "description": "将项目标记为已归档，不会删除任何数据",
+        "button": "归档"
+      },
+      "delete": {
+        "title": "删除项目",
+        "description": "永久删除项目及其所有相关数据，此操作不可撤销",
+        "button": "删除",
+        "confirm": "确定要删除此项目吗？此操作不可撤销！"
+      }
+    },
+    "actions": {
+      "saveSettings": "保存项目设置"
+    },
+    "messages": {
+      "saveSuccess": "项目设置已保存",
+      "saveFailed": "保存项目设置失败",
+      "deleteSuccess": "项目已删除",
+      "deleteFailed": "删除项目失败",
+      "archiveSuccess": "项目已归档",
+      "archiveFailed": "归档项目失败"
+    }
+  },
+  "dialogs": {
+    "documentDetails": {
+      "title": "查看逻辑文档的详细信息",
+      "description": "描述",
+      "versions": "版本历史",
+      "noVersions": "暂无版本",
+      "fileName": "文件名",
+      "fileSize": "大小",
+      "notes": "备注"
+    },
+    "assetDetails": {
+      "title": "查看资产的详细信息",
+      "projectCover": "项目封面",
+      "noPreview": "无法预览此文件类型",
+      "updatedAt": "更新时间",
+      "fileInfo": "文件信息",
+      "mimeType": "MIME 类型",
+      "physicalPath": "物理路径",
+      "uploadedAt": "上传时间",
+      "download": "下载"
+    },
+    "competitionDetails": {
+      "title": "赛事详情",
+      "description": "查看赛事的详细信息和参与状态",
+      "participatedAt": "参与时间",
+      "dueDate": "截止时间",
+      "notes": "备注",
+      "noNotes": "暂无备注"
+    },
+    "deleteDocument": {
+      "title": "删除文档",
+      "description": "此操作无法撤销，请确认是否继续。",
+      "warning": "此文档包含 {{count}} 个版本，删除后所有版本都将被永久删除。",
+      "confirmText": "删除后，此文档及其所有版本将无法恢复。请确认您真的要删除这个文档。",
+      "cancel": "取消",
+      "confirm": "确认删除",
+      "deleting": "删除中..."
+    },
+    "removeCompetition": {
+      "title": "取消赛事关联",
+      "description": "确定要取消项目与该赛事的关联吗？此操作无法撤销。",
+      "milestone": "里程碑",
+      "warningTitle": "注意事项",
+      "warningItems": {
+        "remove": "项目将从该赛事中移除",
+        "deleteRecords": "相关的参与记录将被删除",
+        "irreversible": "此操作无法撤销"
+      },
+      "cancel": "取消",
+      "confirm": "确认取消关联",
+      "removing": "取消关联中..."
+    },
+    "common": {
+      "cancel": "取消",
+      "confirm": "确认",
+      "delete": "删除",
+      "save": "保存",
+      "edit": "编辑",
+      "close": "关闭"
+    }
+  },
+  "drawers": {
+    "documentDrawer": {
+      "createTitle": "创建新文档",
+      "editTitle": "编辑文档",
+      "createDescription": "填写文档信息来创建新的逻辑文档",
+      "editDescription": "修改 \"{{name}}\" 的文档信息",
+      "fields": {
+        "name": {
+          "label": "文档名称",
+          "placeholder": "输入文档名称"
+        },
+        "type": {
+          "label": "文档类型",
+          "placeholder": "选择或输入文档类型",
+          "searchPlaceholder": "搜索文档类型...",
+          "noResults": "未找到匹配的文档类型",
+          "useCustom": "使用 \"{{value}}\""
+        },
+        "description": {
+          "label": "文档描述",
+          "placeholder": "输入文档描述（可选）"
+        },
+        "status": {
+          "label": "文档状态",
+          "placeholder": "选择文档状态"
+        },
+        "storagePath": {
+          "label": "存储路径段",
+          "placeholder": "自定义文件夹名称（可选）"
+        }
+      },
+      "statusOptions": {
+        "active": "活跃",
+        "draft": "草稿",
+        "archived": "已归档"
+      },
+      "helpTexts": {
+        "nameHelp": "文档名称将用于文件夹命名和组织 ({{count}}/100 字符)",
+        "typeHelp": "可以从预定义选项中选择，也可以输入自定义类型",
+        "descriptionHelp": "可选，帮助您和团队成员了解文档内容 ({{count}}/500 字符)",
+        "storagePathHelp": "可选，自定义文档在项目中的存储文件夹名称 ({{count}}/200 字符)"
+      },
+      "messages": {
+        "createSuccess": "文档创建成功",
+        "createSuccessDesc": "\"{{name}}\" 已成功创建",
+        "updateSuccess": "文档更新成功",
+        "updateSuccessDesc": "\"{{name}}\" 已成功更新",
+        "createError": "创建文档失败",
+        "updateError": "更新文档失败",
+        "errorDesc": "请稍后重试"
+      },
+      "actions": {
+        "cancel": "取消",
+        "create": "创建文档",
+        "update": "更新文档",
+        "creating": "创建中...",
+        "updating": "更新中..."
+      }
+    },
+    "expenseDrawer": {
+      "createTitle": "添加经费记录",
+      "editTitle": "编辑经费记录",
+      "createDescription": "记录项目的经费支出或收入",
+      "editDescription": "修改经费记录信息"
+    },
+    "assetDrawer": {
+      "createTitle": "添加资产",
+      "editTitle": "编辑资产",
+      "uploadTitle": "上传文件"
+    },
+    "competitionDrawer": {
+      "title": "添加赛事关联",
+      "description": "将项目关联到赛事里程碑"
+    }
   }
 }

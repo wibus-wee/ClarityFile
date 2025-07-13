@@ -12,6 +12,7 @@ import { Separator } from '@clarity/shadcn/ui/separator'
 import { SafeImage } from '@renderer/components/ui/safe-image'
 import { formatFileSize } from '@renderer/lib/utils'
 import { Image, Calendar, Download, HardDrive, FileType, Star } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface AssetDetailsDialogProps {
   asset: any | null // 使用 ProjectDetailsOutput['assets'][0] 类型
@@ -26,6 +27,8 @@ export function AssetDetailsDialog({
   onOpenChange,
   isCurrentCover = false
 }: AssetDetailsDialogProps) {
+  const { t } = useTranslation('projects')
+
   const handleDownload = () => {
     if (!asset) return
     // TODO: 实现下载功能
@@ -44,11 +47,11 @@ export function AssetDetailsDialog({
             {isCurrentCover && (
               <Badge className="bg-yellow-500 text-yellow-50">
                 <Star className="w-3 h-3 mr-1" />
-                项目封面
+                {t('dialogs.assetDetails.projectCover')}
               </Badge>
             )}
           </DialogTitle>
-          <DialogDescription>查看资产的详细信息</DialogDescription>
+          <DialogDescription>{t('dialogs.assetDetails.title')}</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -68,7 +71,9 @@ export function AssetDetailsDialog({
             ) : (
               <div className="text-center">
                 <Image className="w-16 h-16 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">无法预览此文件类型</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('dialogs.assetDetails.noPreview')}
+                </p>
               </div>
             )}
           </div>
@@ -108,23 +113,30 @@ export function AssetDetailsDialog({
 
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">更新时间：</span>
+                <span className="text-muted-foreground">
+                  {t('dialogs.assetDetails.updatedAt')}：
+                </span>
                 <span>{new Date(asset.updatedAt).toLocaleString()}</span>
               </div>
             </div>
 
             {asset.mimeType && (
               <div>
-                <h4 className="text-sm font-medium mb-2">文件信息</h4>
+                <h4 className="text-sm font-medium mb-2">{t('dialogs.assetDetails.fileInfo')}</h4>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <div>MIME 类型：{asset.mimeType}</div>
                   <div>
-                    物理路径：
+                    {t('dialogs.assetDetails.mimeType')}：{asset.mimeType}
+                  </div>
+                  <div>
+                    {t('dialogs.assetDetails.physicalPath')}：
                     <code className="text-xs bg-muted px-1 py-0.5 rounded">
                       {asset.physicalPath}
                     </code>
                   </div>
-                  <div>上传时间：{new Date(asset.uploadedAt).toLocaleString()}</div>
+                  <div>
+                    {t('dialogs.assetDetails.uploadedAt')}：
+                    {new Date(asset.uploadedAt).toLocaleString()}
+                  </div>
                 </div>
               </div>
             )}
@@ -150,7 +162,7 @@ export function AssetDetailsDialog({
           <div className="flex justify-end">
             <Button onClick={handleDownload} className="flex items-center gap-2">
               <Download className="w-4 h-4" />
-              下载文件
+              {t('dialogs.assetDetails.download')}
             </Button>
           </div>
         </motion.div>

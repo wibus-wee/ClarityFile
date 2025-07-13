@@ -12,6 +12,7 @@ import {
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { AlertTriangle, Loader2, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useRemoveProjectFromCompetition } from '@renderer/hooks/use-tipc'
 
 interface RemoveCompetitionDialogProps {
@@ -35,6 +36,7 @@ export function RemoveCompetitionDialog({
   onSuccess
 }: RemoveCompetitionDialogProps) {
   const [isRemoving, setIsRemoving] = useState(false)
+  const { t } = useTranslation('projects')
   const removeProjectFromCompetition = useRemoveProjectFromCompetition()
 
   if (!competition) return null
@@ -82,9 +84,9 @@ export function RemoveCompetitionDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-500" />
-            取消赛事关联
+            {t('dialogs.removeCompetition.title')}
           </DialogTitle>
-          <DialogDescription>确定要取消项目与该赛事的关联吗？此操作无法撤销。</DialogDescription>
+          <DialogDescription>{t('dialogs.removeCompetition.description')}</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -105,7 +107,8 @@ export function RemoveCompetitionDialog({
             </div>
 
             <div className="text-sm text-muted-foreground">
-              <span className="font-medium">里程碑:</span> {competition.levelName}
+              <span className="font-medium">{t('dialogs.removeCompetition.milestone')}:</span>{' '}
+              {competition.levelName}
             </div>
           </div>
 
@@ -114,11 +117,13 @@ export function RemoveCompetitionDialog({
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-red-800">注意事项</p>
+                <p className="text-sm font-medium text-red-800">
+                  {t('dialogs.removeCompetition.warningTitle')}
+                </p>
                 <ul className="text-sm text-red-700 space-y-1">
-                  <li>• 项目将从该赛事中移除</li>
-                  <li>• 相关的参与记录将被删除</li>
-                  <li>• 此操作无法撤销</li>
+                  <li>• {t('dialogs.removeCompetition.warningItems.remove')}</li>
+                  <li>• {t('dialogs.removeCompetition.warningItems.deleteRecords')}</li>
+                  <li>• {t('dialogs.removeCompetition.warningItems.irreversible')}</li>
                 </ul>
               </div>
             </div>
@@ -132,18 +137,18 @@ export function RemoveCompetitionDialog({
             onClick={() => onOpenChange(false)}
             disabled={isRemoving}
           >
-            取消
+            {t('dialogs.removeCompetition.cancel')}
           </Button>
           <Button type="button" variant="destructive" onClick={handleRemove} disabled={isRemoving}>
             {isRemoving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                取消关联中...
+                {t('dialogs.removeCompetition.removing')}
               </>
             ) : (
               <>
                 <Trash2 className="w-4 h-4 mr-2" />
-                确认取消关联
+                {t('dialogs.removeCompetition.confirm')}
               </>
             )}
           </Button>

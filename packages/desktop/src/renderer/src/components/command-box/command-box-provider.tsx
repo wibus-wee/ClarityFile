@@ -294,7 +294,7 @@ export function CommandBoxProvider({ children }: CommandBoxProviderProps) {
         keywords: ['主题', '管理', '设置', 'theme', 'settings', 'management', '外观'],
         action: () => {
           close()
-          router.navigate({ to: '/settings', search: { tab: 'appearance' } })
+          router.navigate({ to: '/settings' })
         }
       }
     ]

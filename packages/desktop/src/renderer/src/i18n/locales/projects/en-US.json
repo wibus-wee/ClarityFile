@@ -63,6 +63,211 @@
     "newProject": "New Project",
     "filterProjects": "Filter Projects",
     "sortProjects": "Sort Projects",
-    "editProject": "Edit Project"
+    "editProject": "Edit Project",
+    "saveSettings": "Save Project Settings"
+  },
+  "settingsTab": {
+    "basicInfo": {
+      "title": "Basic Information",
+      "description": "Configure basic project information and metadata"
+    },
+    "fields": {
+      "name": {
+        "label": "Project Name",
+        "description": "Display name of the project",
+        "placeholder": "Enter project name"
+      },
+      "description": {
+        "label": "Project Description",
+        "description": "Detailed description of the project",
+        "placeholder": "Enter project description..."
+      },
+      "status": {
+        "label": "Project Status",
+        "description": "Current status of the project",
+        "placeholder": "Select project status"
+      }
+    },
+    "statusOptions": {
+      "active": "Active",
+      "on_hold": "On Hold",
+      "archived": "Archived"
+    },
+    "tags": {
+      "title": "Project Tags",
+      "description": "Manage project classification tags",
+      "manage": "Manage Tags",
+      "noTags": "No tags"
+    },
+    "projectInfo": {
+      "title": "Project Information",
+      "projectId": "Project ID",
+      "createdAt": "Created At",
+      "updatedAt": "Last Updated",
+      "coverAsset": "Project Cover"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "show": "Show Danger Zone",
+      "hide": "Hide Danger Zone",
+      "archive": {
+        "title": "Archive Project",
+        "description": "Mark project as archived, no data will be deleted",
+        "button": "Archive"
+      },
+      "delete": {
+        "title": "Delete Project",
+        "description": "Permanently delete project and all related data, this action cannot be undone",
+        "button": "Delete",
+        "confirm": "Are you sure you want to delete this project? This action cannot be undone!"
+      }
+    },
+    "actions": {
+      "saveSettings": "Save Project Settings"
+    },
+    "messages": {
+      "saveSuccess": "Project settings saved",
+      "saveFailed": "Failed to save project settings",
+      "deleteSuccess": "Project deleted",
+      "deleteFailed": "Failed to delete project",
+      "archiveSuccess": "Project archived",
+      "archiveFailed": "Failed to archive project"
+    }
+  },
+  "dialogs": {
+    "documentDetails": {
+      "title": "View logical document details",
+      "description": "Description",
+      "versions": "Version History",
+      "noVersions": "No versions",
+      "fileName": "File Name",
+      "fileSize": "Size",
+      "notes": "Notes"
+    },
+    "assetDetails": {
+      "title": "View asset details",
+      "projectCover": "Project Cover",
+      "noPreview": "Cannot preview this file type",
+      "updatedAt": "Updated At",
+      "fileInfo": "File Information",
+      "mimeType": "MIME Type",
+      "physicalPath": "Physical Path",
+      "uploadedAt": "Uploaded At",
+      "download": "Download"
+    },
+    "competitionDetails": {
+      "title": "Competition Details",
+      "description": "View competition details and participation status",
+      "participatedAt": "Participated At",
+      "dueDate": "Due Date",
+      "notes": "Notes",
+      "noNotes": "No notes"
+    },
+    "deleteDocument": {
+      "title": "Delete Document",
+      "description": "This action cannot be undone, please confirm to continue.",
+      "warning": "This document contains {{count}} versions, all versions will be permanently deleted after deletion.",
+      "confirmText": "After deletion, this document and all its versions cannot be recovered. Please confirm that you really want to delete this document.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Delete",
+      "deleting": "Deleting..."
+    },
+    "removeCompetition": {
+      "title": "Remove Competition Association",
+      "description": "Are you sure you want to remove the association between this project and the competition? This action cannot be undone.",
+      "milestone": "Milestone",
+      "warningTitle": "Important Notes",
+      "warningItems": {
+        "remove": "Project will be removed from this competition",
+        "deleteRecords": "Related participation records will be deleted",
+        "irreversible": "This action cannot be undone"
+      },
+      "cancel": "Cancel",
+      "confirm": "Confirm Remove Association",
+      "removing": "Removing association..."
+    },
+    "common": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "delete": "Delete",
+      "save": "Save",
+      "edit": "Edit",
+      "close": "Close"
+    }
+  },
+  "drawers": {
+    "documentDrawer": {
+      "createTitle": "Create New Document",
+      "editTitle": "Edit Document",
+      "createDescription": "Fill in document information to create a new logical document",
+      "editDescription": "Modify \"{{name}}\" document information",
+      "fields": {
+        "name": {
+          "label": "Document Name",
+          "placeholder": "Enter document name"
+        },
+        "type": {
+          "label": "Document Type",
+          "placeholder": "Select or enter document type",
+          "searchPlaceholder": "Search document types...",
+          "noResults": "No matching document types found",
+          "useCustom": "Use \"{{value}}\""
+        },
+        "description": {
+          "label": "Document Description",
+          "placeholder": "Enter document description (optional)"
+        },
+        "status": {
+          "label": "Document Status",
+          "placeholder": "Select document status"
+        },
+        "storagePath": {
+          "label": "Storage Path Segment",
+          "placeholder": "Custom folder name (optional)"
+        }
+      },
+      "statusOptions": {
+        "active": "Active",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "helpTexts": {
+        "nameHelp": "Document name will be used for folder naming and organization ({{count}}/100 characters)",
+        "typeHelp": "You can select from predefined options or enter a custom type",
+        "descriptionHelp": "Optional, helps you and team members understand document content ({{count}}/500 characters)",
+        "storagePathHelp": "Optional, customize the storage folder name for documents in the project ({{count}}/200 characters)"
+      },
+      "messages": {
+        "createSuccess": "Document created successfully",
+        "createSuccessDesc": "\"{{name}}\" has been successfully created",
+        "updateSuccess": "Document updated successfully",
+        "updateSuccessDesc": "\"{{name}}\" has been successfully updated",
+        "createError": "Failed to create document",
+        "updateError": "Failed to update document",
+        "errorDesc": "Please try again later"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "create": "Create Document",
+        "update": "Update Document",
+        "creating": "Creating...",
+        "updating": "Updating..."
+      }
+    },
+    "expenseDrawer": {
+      "createTitle": "Add Expense Record",
+      "editTitle": "Edit Expense Record",
+      "createDescription": "Record project expenses or income",
+      "editDescription": "Modify expense record information"
+    },
+    "assetDrawer": {
+      "createTitle": "Add Asset",
+      "editTitle": "Edit Asset",
+      "uploadTitle": "Upload File"
+    },
+    "competitionDrawer": {
+      "title": "Add Competition Association",
+      "description": "Associate project with competition milestone"
+    }
   }
 }

@@ -9,6 +9,7 @@ import {
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Separator } from '@clarity/shadcn/ui/separator'
 import { FileText, Calendar, Hash } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { LogicalDocumentWithVersionsOutput } from '@main/types/document-schemas'
 
 interface DocumentDetailsDialogProps {
@@ -22,6 +23,8 @@ export function DocumentDetailsDialog({
   open,
   onOpenChange
 }: DocumentDetailsDialogProps) {
+  const { t } = useTranslation('projects')
+
   if (!document) return null
 
   const getStatusColor = (status: string) => {
@@ -45,7 +48,7 @@ export function DocumentDetailsDialog({
             <FileText className="w-5 h-5 text-primary" />
             {document.name}
           </DialogTitle>
-          <DialogDescription>查看逻辑文档的详细信息</DialogDescription>
+          <DialogDescription>{t('dialogs.documentDetails.title')}</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -62,7 +65,9 @@ export function DocumentDetailsDialog({
 
             {document.description && (
               <div>
-                <h4 className="text-sm font-medium mb-2">描述</h4>
+                <h4 className="text-sm font-medium mb-2">
+                  {t('dialogs.documentDetails.description')}
+                </h4>
                 <p className="text-sm text-muted-foreground">{document.description}</p>
               </div>
             )}
@@ -96,7 +101,9 @@ export function DocumentDetailsDialog({
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Hash className="w-4 h-4 text-muted-foreground" />
-              <h4 className="text-sm font-medium">文档版本 ({document.versions.length})</h4>
+              <h4 className="text-sm font-medium">
+                {t('dialogs.documentDetails.versions')} ({document.versions.length})
+              </h4>
             </div>
 
             {document.versions.length > 0 ? (
@@ -129,11 +136,20 @@ export function DocumentDetailsDialog({
                     </div>
 
                     <div className="text-xs text-muted-foreground space-y-1">
-                      <div>文件名：{version.originalFileName}</div>
+                      <div>
+                        {t('dialogs.documentDetails.fileName')}：{version.originalFileName}
+                      </div>
                       {version.fileSizeBytes && (
-                        <div>大小：{(version.fileSizeBytes / 1024).toFixed(1)} KB</div>
+                        <div>
+                          {t('dialogs.documentDetails.fileSize')}：
+                          {(version.fileSizeBytes / 1024).toFixed(1)} KB
+                        </div>
                       )}
-                      {version.notes && <div>备注：{version.notes}</div>}
+                      {version.notes && (
+                        <div>
+                          {t('dialogs.documentDetails.notes')}：{version.notes}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -141,7 +157,7 @@ export function DocumentDetailsDialog({
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">暂无版本</p>
+                <p className="text-sm">{t('dialogs.documentDetails.noVersions')}</p>
               </div>
             )}
           </div>

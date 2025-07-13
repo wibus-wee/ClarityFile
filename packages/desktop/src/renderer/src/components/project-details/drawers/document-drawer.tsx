@@ -28,6 +28,7 @@ import {
   CommandList
 } from '@clarity/shadcn/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@clarity/shadcn/ui/popover'
+import { useTranslation } from 'react-i18next'
 import { FileText, Edit, Loader2, Plus, Check, ChevronsUpDown } from 'lucide-react'
 import { useCreateLogicalDocument, useUpdateLogicalDocument } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
@@ -91,6 +92,7 @@ function DocumentTypeCombobox({
 }: DocumentTypeComboboxProps) {
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
+  const { t } = useTranslation('projects')
 
   // 过滤选项
   const filteredOptions = COMMON_DOCUMENT_TYPES.filter(
@@ -140,14 +142,16 @@ function DocumentTypeCombobox({
       <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput
-            placeholder="搜索文档类型..."
+            placeholder={t('drawers.documentDrawer.fields.type.searchPlaceholder')}
             value={searchValue}
             onValueChange={setSearchValue}
           />
           <CommandList>
             <CommandEmpty className="py-6 text-center text-sm">
               <div className="space-y-2">
-                <p className="text-muted-foreground">未找到匹配的文档类型</p>
+                <p className="text-muted-foreground">
+                  {t('drawers.documentDrawer.fields.type.noResults')}
+                </p>
                 {searchValue.trim() && (
                   <Button
                     variant="ghost"
@@ -156,7 +160,9 @@ function DocumentTypeCombobox({
                     className="h-8 text-xs"
                   >
                     <Plus className="mr-1 h-3 w-3" />
-                    使用 &quot;{searchValue.trim()}&quot;
+                    {t('drawers.documentDrawer.fields.type.useCustom', {
+                      value: searchValue.trim()
+                    })}
                   </Button>
                 )}
               </div>
@@ -194,7 +200,11 @@ function DocumentTypeCombobox({
                     className="flex items-center gap-2 py-2"
                   >
                     <Plus className="h-4 w-4" />
-                    <span>使用 &quot;{searchValue.trim()}&quot;</span>
+                    <span>
+                      {t('drawers.documentDrawer.fields.type.useCustom', {
+                        value: searchValue.trim()
+                      })}
+                    </span>
                   </CommandItem>
                 </CommandGroup>
               )}
@@ -214,6 +224,7 @@ export function DocumentDrawer({
   onSuccess
 }: DocumentDrawerProps) {
   const isEdit = !!document
+  const { t } = useTranslation('projects')
   const { trigger: createDocument, isMutating: isCreating } = useCreateLogicalDocument()
   const { trigger: updateDocument, isMutating: isUpdating } = useUpdateLogicalDocument()
 
@@ -266,8 +277,8 @@ export function DocumentDrawer({
         }
         await updateDocument(input)
 
-        toast.success('文档更新成功', {
-          description: `"${data.name}" 已成功更新`
+        toast.success(t('drawers.documentDrawer.messages.updateSuccess'), {
+          description: t('drawers.documentDrawer.messages.updateSuccessDesc', { name: data.name })
         })
       } else {
         // 创建模式
@@ -280,8 +291,8 @@ export function DocumentDrawer({
         }
         const createdDocument = await createDocument(input)
 
-        toast.success('文档创建成功', {
-          description: `"${data.name}" 已成功创建`
+        toast.success(t('drawers.documentDrawer.messages.createSuccess'), {
+          description: t('drawers.documentDrawer.messages.createSuccessDesc', { name: data.name })
         })
 
         // 重置表单
@@ -306,9 +317,15 @@ export function DocumentDrawer({
       onSuccess?.()
     } catch (error) {
       console.error(`${isEdit ? '更新' : '创建'}文档失败:`, error)
-      toast.error(`${isEdit ? '更新' : '创建'}文档失败`, {
-        description: error instanceof Error ? error.message : '请稍后重试'
-      })
+      toast.error(
+        isEdit
+          ? t('drawers.documentDrawer.messages.updateError')
+          : t('drawers.documentDrawer.messages.createError'),
+        {
+          description:
+            error instanceof Error ? error.message : t('drawers.documentDrawer.messages.errorDesc')
+        }
+      )
     }
   }
 
@@ -334,9 +351,15 @@ export function DocumentDrawer({
               )}
             </div>
             <div>
-              <DrawerTitle className="text-xl">{isEdit ? '编辑文档' : '创建新文档'}</DrawerTitle>
+              <DrawerTitle className="text-xl">
+                {isEdit
+                  ? t('drawers.documentDrawer.editTitle')
+                  : t('drawers.documentDrawer.createTitle')}
+              </DrawerTitle>
               <DrawerDescription className="text-sm">
-                {isEdit ? `修改 "${document?.name}" 的文档信息` : '填写文档信息来创建新的逻辑文档'}
+                {isEdit
+                  ? t('drawers.documentDrawer.editDescription', { name: document?.name })
+                  : t('drawers.documentDrawer.createDescription')}
               </DrawerDescription>
             </div>
           </div>
@@ -356,11 +379,12 @@ export function DocumentDrawer({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      文档名称 <span className="text-destructive">*</span>
+                      {t('drawers.documentDrawer.fields.name.label')}{' '}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="为您的文档起一个名字"
+                        placeholder={t('drawers.documentDrawer.fields.name.placeholder')}
                         maxLength={100}
                         autoFocus
                         {...field}
@@ -368,7 +392,9 @@ export function DocumentDrawer({
                     </FormControl>
                     <FormMessage />
                     <p className="text-xs text-muted-foreground">
-                      文档名称将用于文件夹命名和组织 ({field.value?.length || 0}/100 字符)
+                      {t('drawers.documentDrawer.helpTexts.nameHelp', {
+                        count: field.value?.length || 0
+                      })}
                     </p>
                   </FormItem>
                 )}
@@ -381,16 +407,17 @@ export function DocumentDrawer({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      文档类型 <span className="text-destructive">*</span>
+                      {t('drawers.documentDrawer.fields.type.label')}{' '}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <DocumentTypeCombobox
                       value={field.value}
                       onValueChange={field.onChange}
-                      placeholder="选择或输入文档类型"
+                      placeholder={t('drawers.documentDrawer.fields.type.placeholder')}
                     />
                     <FormMessage />
                     <p className="text-xs text-muted-foreground">
-                      可以从预定义选项中选择，也可以输入自定义类型
+                      {t('drawers.documentDrawer.helpTexts.typeHelp')}
                     </p>
                   </FormItem>
                 )}
@@ -402,10 +429,10 @@ export function DocumentDrawer({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>文档描述</FormLabel>
+                    <FormLabel>{t('drawers.documentDrawer.fields.description.label')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="简要描述这个文档的内容和用途..."
+                        placeholder={t('drawers.documentDrawer.fields.description.placeholder')}
                         rows={3}
                         maxLength={500}
                         className="resize-none"
@@ -414,7 +441,9 @@ export function DocumentDrawer({
                     </FormControl>
                     <FormMessage />
                     <p className="text-xs text-muted-foreground">
-                      可选，帮助您和团队成员了解文档内容 ({field.value?.length || 0}/500 字符)
+                      {t('drawers.documentDrawer.helpTexts.descriptionHelp', {
+                        count: field.value?.length || 0
+                      })}
                     </p>
                   </FormItem>
                 )}
@@ -426,13 +455,19 @@ export function DocumentDrawer({
                 name="defaultStoragePathSegment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>存储路径段</FormLabel>
+                    <FormLabel>{t('drawers.documentDrawer.fields.storagePath.label')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="自定义文件夹名称（可选）" maxLength={200} {...field} />
+                      <Input
+                        placeholder={t('drawers.documentDrawer.fields.storagePath.placeholder')}
+                        maxLength={200}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                     <p className="text-xs text-muted-foreground">
-                      可选，自定义文档在项目中的存储文件夹名称 ({field.value?.length || 0}/200 字符)
+                      {t('drawers.documentDrawer.helpTexts.storagePathHelp', {
+                        count: field.value?.length || 0
+                      })}
                     </p>
                   </FormItem>
                 )}
@@ -447,19 +482,23 @@ export function DocumentDrawer({
                   disabled={isMutating}
                   className="flex-1"
                 >
-                  取消
+                  {t('drawers.documentDrawer.actions.cancel')}
                 </Button>
 
                 <Button type="submit" disabled={isMutating} className="flex-1 gap-2">
                   {isMutating ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      {isEdit ? '更新中...' : '创建中...'}
+                      {isEdit
+                        ? t('drawers.documentDrawer.actions.updating')
+                        : t('drawers.documentDrawer.actions.creating')}
                     </>
                   ) : (
                     <>
                       {isEdit ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                      {isEdit ? '更新文档' : '创建文档'}
+                      {isEdit
+                        ? t('drawers.documentDrawer.actions.update')
+                        : t('drawers.documentDrawer.actions.create')}
                     </>
                   )}
                 </Button>

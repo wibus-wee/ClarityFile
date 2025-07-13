@@ -10,6 +10,7 @@ import {
 } from '@clarity/shadcn/ui/dialog'
 import { Button } from '@clarity/shadcn/ui/button'
 import { AlertTriangle, FileText } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useDeleteLogicalDocument } from '@renderer/hooks/use-tipc'
 import type { LogicalDocumentWithVersionsOutput } from '@main/types/document-schemas'
 
@@ -27,6 +28,7 @@ export function DeleteDocumentDialog({
   onSuccess
 }: DeleteDocumentDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const { t } = useTranslation('projects')
   const deleteDocument = useDeleteLogicalDocument()
 
   const handleDelete = async () => {
@@ -52,9 +54,9 @@ export function DeleteDocumentDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            删除文档
+            {t('dialogs.deleteDocument.title')}
           </DialogTitle>
-          <DialogDescription>此操作无法撤销，请确认是否继续。</DialogDescription>
+          <DialogDescription>{t('dialogs.deleteDocument.description')}</DialogDescription>
         </DialogHeader>
 
         <motion.div
@@ -75,22 +77,22 @@ export function DeleteDocumentDialog({
           {document.versions.length > 0 && (
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
               <p className="text-sm text-destructive">
-                ⚠️ 此文档包含 {document.versions.length} 个版本，删除后所有版本都将被永久删除。
+                ⚠️ {t('dialogs.deleteDocument.warning', { count: document.versions.length })}
               </p>
             </div>
           )}
 
-          <p className="text-sm text-muted-foreground">
-            删除后，此文档及其所有版本将无法恢复。请确认您真的要删除这个文档。
-          </p>
+          <p className="text-sm text-muted-foreground">{t('dialogs.deleteDocument.confirmText')}</p>
         </motion.div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
-            取消
+            {t('dialogs.deleteDocument.cancel')}
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? '删除中...' : '确认删除'}
+            {isDeleting
+              ? t('dialogs.deleteDocument.deleting')
+              : t('dialogs.deleteDocument.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

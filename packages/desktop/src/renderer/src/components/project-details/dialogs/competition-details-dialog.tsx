@@ -9,6 +9,7 @@ import {
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Separator } from '@clarity/shadcn/ui/separator'
 import { Trophy, Clock, FileText, Target } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface CompetitionDetailsDialogProps {
   milestone: {
@@ -30,6 +31,8 @@ export function CompetitionDetailsDialog({
   open,
   onOpenChange
 }: CompetitionDetailsDialogProps) {
+  const { t } = useTranslation('projects')
+
   if (!milestone) return null
 
   const getStatusColor = (status: string | null) => {
@@ -58,9 +61,9 @@ export function CompetitionDetailsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            赛事详情
+            {t('dialogs.competitionDetails.title')}
           </DialogTitle>
-          <DialogDescription>查看赛事的详细信息和参与状态</DialogDescription>
+          <DialogDescription>{t('dialogs.competitionDetails.description')}</DialogDescription>
         </DialogHeader>
 
         <motion.div
