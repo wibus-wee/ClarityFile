@@ -8,8 +8,7 @@ import {
 } from '@clarity/shadcn/ui/dialog'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Separator } from '@clarity/shadcn/ui/separator'
-import { formatFileSize } from '@renderer/lib/utils'
-import { Trophy, Clock, FileText, Target, Info } from 'lucide-react'
+import { Trophy, Clock, FileText, Target } from 'lucide-react'
 
 interface CompetitionDetailsDialogProps {
   milestone: {

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Quote, RefreshCw } from 'lucide-react'
 
 export function DynamicQuoteSection() {
-  const { quote, isLoading: quoteLoading, refresh: refreshQuote, isFromAPI } = useDynamicQuote()
+  const { quote, isLoading: quoteLoading, refresh: refreshQuote } = useDynamicQuote()
 
   return (
     <AnimatePresence mode="wait">

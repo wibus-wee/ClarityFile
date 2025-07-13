@@ -38,8 +38,6 @@ import { FileText, Upload, FolderOpen, Trophy, Target, Edit } from 'lucide-react
 import {
   useUploadDocumentVersion,
   useUpdateDocumentVersion,
-  useGetAllCompetitionSeries,
-  useGetCompetitionMilestones,
   useGetProjectParticipatedCompetitionSeries,
   useGetProjectMilestonesInSeries
 } from '@renderer/hooks/use-tipc'

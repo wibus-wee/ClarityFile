@@ -1,6 +1,6 @@
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
-import { Trophy, Calendar, Clock, ArrowRight, AlertCircle } from 'lucide-react'
+import { Trophy, Calendar, ArrowRight, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUpcomingMilestones } from '@renderer/hooks/use-tipc'
 import { cn } from '@renderer/lib/utils'
@@ -31,8 +31,10 @@ function MilestoneItem({ milestone, index }: MilestoneItemProps) {
     if (daysUntilDue < 0) return { level: 'overdue', color: 'bg-destructive', text: '已过期' }
     if (daysUntilDue === 0) return { level: 'today', color: 'bg-destructive', text: '今天截止' }
     if (daysUntilDue === 1) return { level: 'tomorrow', color: 'bg-orange-500', text: '明天截止' }
-    if (daysUntilDue <= 3) return { level: 'urgent', color: 'bg-orange-500', text: `${daysUntilDue}天后` }
-    if (daysUntilDue <= 7) return { level: 'soon', color: 'bg-yellow-500', text: `${daysUntilDue}天后` }
+    if (daysUntilDue <= 3)
+      return { level: 'urgent', color: 'bg-orange-500', text: `${daysUntilDue}天后` }
+    if (daysUntilDue <= 7)
+      return { level: 'soon', color: 'bg-yellow-500', text: `${daysUntilDue}天后` }
     return { level: 'normal', color: 'bg-green-500', text: `${daysUntilDue}天后` }
   }
 
@@ -77,10 +79,7 @@ function MilestoneItem({ milestone, index }: MilestoneItemProps) {
         <div className="flex items-center gap-2 shrink-0">
           <Badge
             variant="secondary"
-            className={cn(
-              'text-xs text-white border-0',
-              urgencyInfo.color
-            )}
+            className={cn('text-xs text-white border-0', urgencyInfo.color)}
           >
             {urgencyInfo.text}
           </Badge>
@@ -93,7 +92,7 @@ function MilestoneItem({ milestone, index }: MilestoneItemProps) {
 
 export function UpcomingCompetitionsSection() {
   const navigate = useNavigate()
-  const { data: milestones, isLoading } = useUpcomingMilestones(3)
+  const { data: milestones } = useUpcomingMilestones(3)
 
   // 条件渲染：没有比赛时完全不显示
   if (!milestones || milestones.length === 0) {
@@ -124,11 +123,7 @@ export function UpcomingCompetitionsSection() {
 
       <div className="space-y-2">
         {milestones.map((milestone, index) => (
-          <MilestoneItem
-            key={milestone.id}
-            milestone={milestone}
-            index={index}
-          />
+          <MilestoneItem key={milestone.id} milestone={milestone} index={index} />
         ))}
       </div>
     </div>
