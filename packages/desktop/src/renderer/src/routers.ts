@@ -195,7 +195,7 @@ export const routes: AppRoute = {
 export function useTranslatedRoutes() {
   const { t } = useTranslation()
 
-  const translatedRoutes = createRoutes(t)
+  const translatedRoutes = createRoutes(t as any)
 
   const flatRoutes = Object.values(translatedRoutes).flat()
   const transformedRoutes = Object.entries(translatedRoutes).map(([group, routes]) => ({

@@ -1,20 +1,26 @@
 'use client'
 
+import { useTranslation } from '@renderer/i18n/hooks'
+
 export function PrivacySettings() {
+  const { t } = useTranslation()
+
   return (
     <div className="space-y-8">
       {/* 数据隐私 */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium">数据隐私</h3>
-          <p className="text-sm text-muted-foreground">管理应用程序的隐私设置和数据保护</p>
+          <h3 className="text-lg font-medium">{t('settings:privacy.dataPrivacy')}</h3>
+          <p className="text-sm text-muted-foreground">
+            {t('settings:privacy.dataPrivacyDescription')}
+          </p>
         </div>
 
         <div className="space-y-4">
           <div className="rounded-lg border border-dashed border-muted-foreground/25 p-8 text-center">
-            <p className="text-muted-foreground">隐私设置功能正在开发中...</p>
+            <p className="text-muted-foreground">{t('settings:privacy.privacyInDevelopment')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              即将支持数据加密、访问权限、隐私模式等功能
+              {t('settings:privacy.privacyUpcomingFeatures')}
             </p>
           </div>
         </div>
@@ -23,15 +29,17 @@ export function PrivacySettings() {
       {/* 可见性设置 */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium">可见性设置</h3>
-          <p className="text-sm text-muted-foreground">控制信息的可见性和共享范围</p>
+          <h3 className="text-lg font-medium">{t('settings:privacy.visibilitySettings')}</h3>
+          <p className="text-sm text-muted-foreground">
+            {t('settings:privacy.visibilityDescription')}
+          </p>
         </div>
 
         <div className="space-y-4">
           <div className="rounded-lg border border-dashed border-muted-foreground/25 p-8 text-center">
-            <p className="text-muted-foreground">可见性设置功能正在开发中...</p>
+            <p className="text-muted-foreground">{t('settings:privacy.visibilityInDevelopment')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              即将支持项目可见性、文件共享权限、协作设置等功能
+              {t('settings:privacy.visibilityUpcomingFeatures')}
             </p>
           </div>
         </div>

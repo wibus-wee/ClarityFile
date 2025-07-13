@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { useTranslation, useLanguage } from '@renderer/i18n/hooks'
 import { useSetSetting } from '@renderer/hooks/use-tipc'
+import type { SupportedLanguage } from '@renderer/i18n/types'
 import {
   SettingsForm,
   SettingsSection,
@@ -65,7 +66,7 @@ const mapFormDataToSettings = (data: LanguageSettingsForm) => [
 ]
 
 export function LanguageSettings() {
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation()
   const { availableLanguages, changeLanguage, currentLanguage } = useLanguage()
   const { trigger: setSetting } = useSetSetting()
 
@@ -82,7 +83,7 @@ export function LanguageSettings() {
     try {
       // 如果语言发生变化，先切换语言
       if (data.language !== currentLanguage) {
-        await changeLanguage(data.language as any)
+        await changeLanguage(data.language as SupportedLanguage)
       }
 
       // 然后保存所有设置到数据库

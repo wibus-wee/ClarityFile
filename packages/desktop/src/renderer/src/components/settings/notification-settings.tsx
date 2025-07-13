@@ -1,6 +1,7 @@
 'use client'
 
 import { z } from 'zod'
+import { useTranslation } from '@renderer/i18n/hooks'
 
 import {
   SettingsForm,
@@ -39,126 +40,141 @@ const soundOptions = [
   { value: 'none', label: '无声音' }
 ]
 
-const mapFormDataToSettings = (data: NotificationSettingsForm) => [
-  {
-    key: 'notifications.enabled',
-    value: data.enabled,
-    category: 'notifications',
-    description: '启用通知'
-  },
-  {
-    key: 'notifications.sound',
-    value: data.sound,
-    category: 'notifications',
-    description: '通知声音'
-  },
-  {
-    key: 'notifications.desktop',
-    value: data.desktop,
-    category: 'notifications',
-    description: '桌面通知'
-  },
-  {
-    key: 'notifications.projectUpdates',
-    value: data.projectUpdates,
-    category: 'notifications',
-    description: '项目更新通知'
-  },
-  {
-    key: 'notifications.fileChanges',
-    value: data.fileChanges,
-    category: 'notifications',
-    description: '文件变更通知'
-  },
-  {
-    key: 'notifications.systemAlerts',
-    value: data.systemAlerts,
-    category: 'notifications',
-    description: '系统警告通知'
-  },
-  {
-    key: 'notifications.soundType',
-    value: data.soundType,
-    category: 'notifications',
-    description: '通知声音类型'
-  }
-]
-
 export function NotificationSettings() {
+  const { t } = useTranslation()
+
+  const soundOptions = [
+    { value: 'default', label: t('settings:notifications.soundOptions.default') },
+    { value: 'chime', label: t('settings:notifications.soundOptions.chime') },
+    { value: 'bell', label: t('settings:notifications.soundOptions.bell') },
+    { value: 'none', label: t('settings:notifications.soundOptions.none') }
+  ]
+
+  const mapFormDataToSettings = (data: NotificationSettingsForm) => [
+    {
+      key: 'notifications.enabled',
+      value: data.enabled,
+      category: 'notifications',
+      description: t('settings:notifications.enabled')
+    },
+    {
+      key: 'notifications.sound',
+      value: data.sound,
+      category: 'notifications',
+      description: t('settings:notifications.sound')
+    },
+    {
+      key: 'notifications.desktop',
+      value: data.desktop,
+      category: 'notifications',
+      description: t('settings:notifications.desktop')
+    },
+    {
+      key: 'notifications.projectUpdates',
+      value: data.projectUpdates,
+      category: 'notifications',
+      description: t('settings:notifications.projectUpdates')
+    },
+    {
+      key: 'notifications.fileChanges',
+      value: data.fileChanges,
+      category: 'notifications',
+      description: t('settings:notifications.fileChanges')
+    },
+    {
+      key: 'notifications.systemAlerts',
+      value: data.systemAlerts,
+      category: 'notifications',
+      description: t('settings:notifications.systemAlerts')
+    },
+    {
+      key: 'notifications.soundType',
+      value: data.soundType,
+      category: 'notifications',
+      description: t('settings:notifications.soundType')
+    }
+  ]
+
   return (
     <SettingsForm
       category="notifications"
       schema={notificationSettingsSchema}
       defaultValues={defaultValues}
       mapFormDataToSettings={mapFormDataToSettings}
-      submitButtonText="保存设置"
+      submitButtonText={t('common:save')}
     >
       {(form) => (
         <>
-          <SettingsSection title="基本设置" description="管理应用程序的通知偏好">
+          <SettingsSection
+            title={t('settings:notifications.basicSettings')}
+            description={t('settings:notifications.basicDescription')}
+          >
             <SettingsSwitchField
               control={form.control}
               name="enabled"
-              label="启用通知"
-              description="接收应用程序通知"
+              label={t('settings:notifications.enabled')}
+              description={t('settings:notifications.enabledDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="sound"
-              label="通知声音"
-              description="播放通知声音"
+              label={t('settings:notifications.sound')}
+              description={t('settings:notifications.soundDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="desktop"
-              label="桌面通知"
-              description="显示桌面通知"
+              label={t('settings:notifications.desktop')}
+              description={t('settings:notifications.desktopDescription')}
               className="flex flex-row items-center justify-between py-2"
               showSeparator={false}
             />
           </SettingsSection>
 
-          <SettingsSection title="声音设置" description="配置通知声音选项">
+          <SettingsSection
+            title={t('settings:notifications.soundType')}
+            description={t('settings:notifications.soundTypeDescription')}
+          >
             <SettingsSelectField
               control={form.control}
               name="soundType"
-              label="通知声音类型"
-              description="选择通知播放的声音类型"
-              placeholder="选择声音类型"
+              label={t('settings:notifications.soundType')}
+              description={t('settings:notifications.soundTypeDescription')}
+              placeholder={t('settings:notifications.soundTypeDescription')}
               options={soundOptions}
             />
           </SettingsSection>
 
           <SettingsSection
-            title="通知类型"
-            description="选择要接收的通知类型"
+            title={t('settings:notifications.projectUpdates')}
+            description={t('settings:notifications.basicDescription')}
             showSeparator={false}
           >
             <SettingsSwitchField
               control={form.control}
               name="projectUpdates"
-              label="项目更新"
-              description="项目状态变更时通知"
+              label={t('settings:notifications.projectUpdates')}
+              description={t('settings:notifications.projectUpdatesDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="fileChanges"
-              label="文件变更"
-              description="文件被修改时通知"
+              label={t('settings:notifications.fileChanges')}
+              description={t('settings:notifications.fileChangesDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="systemAlerts"
-              label="系统警告"
-              description="系统错误和警告通知"
+              label={t('settings:notifications.systemAlerts')}
+              description={t('settings:notifications.systemAlertsDescription')}
               className="flex flex-row items-center justify-between py-2"
               showSeparator={false}
             />

@@ -4,6 +4,7 @@ import { useSearch } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { Bell, Globe, Home, Keyboard, Lock, Paintbrush, Settings, Video } from 'lucide-react'
 import { useTranslation } from '@renderer/i18n/hooks'
+import type { TranslationKeys } from '@renderer/i18n/types'
 
 import { GeneralSettings } from './settings/general-settings'
 import { AppearanceSettings } from './settings/appearance-settings'
@@ -50,7 +51,7 @@ function useSettingsCategories() {
 }
 
 function SettingsContent() {
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation()
   const search = useSearch({ from: '/settings' })
   const category = search.category || 'general'
   const settingsCategories = useSettingsCategories()
@@ -59,12 +60,30 @@ function SettingsContent() {
     settingsCategories.find((cat) => cat.id === category) || settingsCategories[0]
   const CurrentComponent = currentCategory.component
 
+  // 创建类型安全的描述键映射
+  const getDescriptionKey = (categoryId: string) => {
+    const keyMap: Record<string, string> = {
+      general: 'settings:descriptions.general',
+      appearance: 'settings:descriptions.appearance',
+      notifications: 'settings:descriptions.notifications',
+      language: 'settings:descriptions.language',
+      accessibility: 'settings:descriptions.accessibility',
+      'audio-video': 'settings:descriptions.audioVideo',
+      privacy: 'settings:descriptions.privacy',
+      advanced: 'settings:descriptions.advanced'
+    }
+
+    return keyMap[categoryId] || 'settings:descriptions.general'
+  }
+
   return (
     <div className="overflow-y-auto">
       <div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{currentCategory.name}</h1>
-          <p className="text-muted-foreground mt-2">{t(`descriptions.${category}`)}</p>
+          <p className="text-muted-foreground mt-2">
+            {t(getDescriptionKey(category) as TranslationKeys)}
+          </p>
         </div>
 
         <Suspense fallback={<div>{t('common:loading')}</div>}>
