@@ -2,16 +2,15 @@
  * 国际化格式化工具
  * 提供支持多语言的日期、时间、货币等格式化功能
  */
-
-import type { SupportedLanguage } from '@renderer/i18n/types'
+import i18n from '@renderer/i18n'
+import type { SupportedLanguage } from '@renderer/i18n/constants'
 
 /**
- * 获取当前语言设置
+ * 获取当前语言设置 (响应式)
+ * @returns 当前 i18next 实例中的语言
  */
 function getCurrentLanguage(): SupportedLanguage {
-  // 从 localStorage 或其他地方获取当前语言设置
-  const savedLanguage = localStorage.getItem('i18nextLng') as SupportedLanguage
-  return savedLanguage || 'zh-CN'
+  return (i18n.language as SupportedLanguage) || 'zh-CN'
 }
 
 /**

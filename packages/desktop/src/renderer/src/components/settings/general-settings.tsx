@@ -1,8 +1,8 @@
 'use client'
 
 import { z } from 'zod'
-import { useTranslation } from '@renderer/i18n/hooks'
-import type { GeneralTranslationFunction } from '@renderer/i18n/types'
+import { useTranslation } from 'react-i18next'
+import { TFunction } from 'i18next'
 
 import {
   SettingsForm,
@@ -13,9 +13,9 @@ import {
 } from './components'
 
 // 创建动态 schema 函数，支持翻译
-function createGeneralSettingsSchema(t: GeneralTranslationFunction) {
+function createGeneralSettingsSchema(t: TFunction) {
   return z.object({
-    appName: z.string().min(1, t('general.appNameValidation')),
+    appName: z.string().min(1, t('settings:general.appNameValidation')),
     autoSave: z.boolean(),
     autoBackup: z.boolean(),
     backupInterval: z.number().min(1).max(60),
@@ -49,7 +49,7 @@ const defaultValues: GeneralSettingsForm = {
 }
 
 export function GeneralSettings() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['settings', 'common'])
 
   const generalSettingsSchema = createGeneralSettingsSchema(t)
 
@@ -59,43 +59,43 @@ export function GeneralSettings() {
       key: 'general.appName',
       value: data.appName,
       category: 'general',
-      description: t('general.appName')
+      description: t('settings:general.appName')
     },
     {
       key: 'general.autoSave',
       value: data.autoSave,
       category: 'general',
-      description: t('general.autoSave')
+      description: t('settings:general.autoSave')
     },
     {
       key: 'general.autoBackup',
       value: data.autoBackup,
       category: 'general',
-      description: t('general.autoBackup')
+      description: t('settings:general.autoBackup')
     },
     {
       key: 'general.backupInterval',
       value: data.backupInterval,
       category: 'general',
-      description: t('general.backupInterval')
+      description: t('settings:general.backupInterval')
     },
     {
       key: 'general.defaultProjectPath',
       value: data.defaultProjectPath,
       category: 'general',
-      description: t('general.defaultProjectPath')
+      description: t('settings:general.defaultProjectPath')
     },
     {
       key: 'general.maxRecentProjects',
       value: data.maxRecentProjects,
       category: 'general',
-      description: t('general.maxRecentProjects')
+      description: t('settings:general.maxRecentProjects')
     },
     {
       key: 'general.description',
       value: data.description || '',
       category: 'general',
-      description: t('general.description')
+      description: t('settings:general.description')
     }
   ]
 
@@ -109,56 +109,59 @@ export function GeneralSettings() {
     >
       {(form) => (
         <>
-          <SettingsSection title={t('general.title')} description={t('descriptions.general')}>
+          <SettingsSection
+            title={t('settings:general.title')}
+            description={t('settings:descriptions.general')}
+          >
             <SettingsInputField
               control={form.control}
               name="appName"
-              label={t('general.appName')}
-              description={t('general.appNameDescription')}
+              label={t('settings:general.appName')}
+              description={t('settings:general.appNameDescription')}
               placeholder="ClarityFile"
             />
 
             <SettingsTextareaField
               control={form.control}
               name="description"
-              label={t('general.description')}
-              description={t('general.descriptionDescription')}
+              label={t('settings:general.description')}
+              description={t('settings:general.descriptionDescription')}
               placeholder="文件管理和项目组织工具"
               resize={false}
             />
           </SettingsSection>
 
           <SettingsSection
-            title={t('general.backupSettings')}
-            description={t('general.autoSaveDescription')}
+            title={t('settings:general.backupSettings')}
+            description={t('settings:general.autoSaveDescription')}
           >
             <SettingsSwitchField
               control={form.control}
               name="autoSave"
-              label={t('general.autoSave')}
-              description={t('general.autoSaveDescription')}
+              label={t('settings:general.autoSave')}
+              description={t('settings:general.autoSaveDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="autoBackup"
-              label={t('general.autoBackup')}
-              description={t('general.autoBackupDescription')}
+              label={t('settings:general.autoBackup')}
+              description={t('settings:general.autoBackupDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
           </SettingsSection>
 
           <SettingsSection
-            title={t('general.defaultProjectPath')}
-            description={t('general.defaultProjectPathDescription')}
+            title={t('settings:general.defaultProjectPath')}
+            description={t('settings:general.defaultProjectPathDescription')}
           >
             <div className="grid grid-cols-2 gap-4">
               <SettingsInputField
                 control={form.control}
                 name="backupInterval"
-                label={t('general.backupInterval')}
-                description={t('general.backupIntervalDescription')}
+                label={t('settings:general.backupInterval')}
+                description={t('settings:general.backupIntervalDescription')}
                 type="number"
                 min="1"
                 max="60"
@@ -168,8 +171,8 @@ export function GeneralSettings() {
               <SettingsInputField
                 control={form.control}
                 name="maxRecentProjects"
-                label={t('general.maxRecentProjects')}
-                description={t('general.maxRecentProjectsDescription')}
+                label={t('settings:general.maxRecentProjects')}
+                description={t('settings:general.maxRecentProjectsDescription')}
                 type="number"
                 min="1"
                 max="20"
@@ -180,8 +183,8 @@ export function GeneralSettings() {
             <SettingsInputField
               control={form.control}
               name="defaultProjectPath"
-              label={t('general.defaultProjectPath')}
-              description={t('general.defaultProjectPathDescription')}
+              label={t('settings:general.defaultProjectPath')}
+              description={t('settings:general.defaultProjectPathDescription')}
               placeholder="/Users/username/Documents/ClarityFile"
               type="directory"
             />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslation } from '@renderer/i18n/hooks'
+import { useTranslation } from 'react-i18next'
 
 export function PrivacySettings() {
   const { t } = useTranslation()

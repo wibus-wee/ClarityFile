@@ -15,7 +15,7 @@ import { Avatar } from '@heroui/react'
 import { CONSTANTS } from '@renderer/constants'
 import { useAppStore } from '@renderer/stores/app'
 import { useTranslatedRoutes } from '@renderer/routers'
-import { useTranslation } from '@renderer/i18n/hooks'
+import { useTranslation } from 'react-i18next'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppStore((state) => state.user)

@@ -3,6 +3,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
+import { i18nPlugin } from './vite-i18n-plugin'
 
 const ReactCompilerConfig = {
   target: '19' // '17' | '18' | '19'
@@ -28,6 +29,7 @@ export default defineConfig({
       }
     },
     plugins: [
+      i18nPlugin(),
       tanstackRouter({
         target: 'react',
         autoCodeSplitting: true,

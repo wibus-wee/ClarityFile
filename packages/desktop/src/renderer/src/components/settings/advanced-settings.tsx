@@ -1,7 +1,7 @@
 'use client'
 
 import { z } from 'zod'
-import { useTranslation } from '@renderer/i18n/hooks'
+import { useTranslation } from 'react-i18next'
 
 import {
   SettingsForm,

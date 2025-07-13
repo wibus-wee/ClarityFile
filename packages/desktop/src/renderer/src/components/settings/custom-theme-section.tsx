@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Palette, Plus, Eye, Trash2, Download, Sparkles, Check, X, Edit } from 'lucide-react'
-import { useTranslation } from '@renderer/i18n/hooks'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@clarity/shadcn/ui/button'
 import { Textarea } from '@clarity/shadcn/ui/textarea'

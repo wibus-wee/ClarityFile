@@ -4,7 +4,10 @@
   "description": "",
   "scripts": {
     "desktop": "pnpm -C packages/desktop",
-    "www": "pnpm -C packages/www"
+    "www": "pnpm -C packages/www",
+    "i18n:stats": "tsx scripts/calculate-i18n-completeness.ts",
+    "i18n:add-locale": "tsx scripts/add-i18n-locale.ts",
+    "i18n:validate": "tsx scripts/validate-i18n-keys.ts"
   },
   "keywords": [],
   "author": "",

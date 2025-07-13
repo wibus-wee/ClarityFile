@@ -1,9 +1,10 @@
 'use client'
 
 import { z } from 'zod'
-import { useTranslation, useLanguage } from '@renderer/i18n/hooks'
+import { useTranslation } from 'react-i18next'
 import { useSetSetting } from '@renderer/hooks/use-tipc'
-import type { SupportedLanguage } from '@renderer/i18n/types'
+import { useI18nStore } from '@renderer/i18n/store'
+import { LANGUAGES_CONFIG, SupportedLanguage } from '@renderer/i18n/constants'
 import {
   SettingsForm,
   SettingsSection,
@@ -66,11 +67,11 @@ const mapFormDataToSettings = (data: LanguageSettingsForm) => [
 ]
 
 export function LanguageSettings() {
-  const { t } = useTranslation()
-  const { availableLanguages, changeLanguage, currentLanguage } = useLanguage()
+  const { t } = useTranslation(['settings', 'common'])
+  const { language: currentLanguage, actions } = useI18nStore()
   const { trigger: setSetting } = useSetSetting()
 
-  const languageOptions = availableLanguages.map((lang) => ({
+  const languageOptions = LANGUAGES_CONFIG.map((lang) => ({
     value: lang.code,
     label: `${lang.flag} ${lang.nativeName}`
   }))
@@ -83,7 +84,7 @@ export function LanguageSettings() {
     try {
       // 如果语言发生变化，先切换语言
       if (data.language !== currentLanguage) {
-        await changeLanguage(data.language as SupportedLanguage)
+        await actions.changeLanguage(data.language as SupportedLanguage)
       }
 
       // 然后保存所有设置到数据库
@@ -119,41 +120,47 @@ export function LanguageSettings() {
     >
       {(form) => (
         <>
-          <SettingsSection title={t('language.title')} description={t('descriptions.language')}>
+          <SettingsSection
+            title={t('settings:language.title')}
+            description={t('settings:descriptions.language')}
+          >
             <SettingsSelectField
               control={form.control}
               name="language"
-              label={t('language.currentLanguage')}
-              description={t('language.selectLanguage')}
-              placeholder={t('language.selectLanguage')}
+              label={t('settings:language.currentLanguage')}
+              description={t('settings:language.selectLanguage')}
+              placeholder={t('settings:language.selectLanguage')}
               options={languageOptions}
             />
 
             <SettingsSwitchField
               control={form.control}
               name="autoDetectLanguage"
-              label="自动检测语言"
-              description="根据系统语言自动切换应用语言"
+              label={t('settings:language.autoDetectLanguage')}
+              description={t('settings:language.autoDetectLanguageDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
           </SettingsSection>
 
-          <SettingsSection title="地区格式" description="配置日期、时间和数字的显示格式">
+          <SettingsSection
+            title={t('settings:language.regionFormat')}
+            description={t('settings:language.regionFormatDescription')}
+          >
             <SettingsSelectField
               control={form.control}
               name="dateFormat"
-              label={t('language.dateFormat')}
-              description="选择日期的显示格式"
-              placeholder="选择日期格式"
+              label={t('settings:language.dateFormat')}
+              description={t('settings:language.selectDateFormat')}
+              placeholder={t('settings:language.selectDateFormat')}
               options={dateFormatOptions}
             />
 
             <SettingsSelectField
               control={form.control}
               name="timeFormat"
-              label={t('language.timeFormat')}
-              description="选择时间的显示格式"
-              placeholder="选择时间格式"
+              label={t('settings:language.timeFormat')}
+              description={t('settings:language.selectTimeFormat')}
+              placeholder={t('settings:language.selectTimeFormat')}
               options={timeFormatOptions}
             />
           </SettingsSection>

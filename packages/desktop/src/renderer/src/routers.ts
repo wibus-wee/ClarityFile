@@ -7,7 +7,7 @@ import {
   Trophy,
   Settings2
 } from 'lucide-react'
-import { useTranslation } from '@renderer/i18n/hooks'
+import { useTranslation } from 'react-i18next'
 
 export interface AppRoute {
   [key: string]: AppRouteItem[]

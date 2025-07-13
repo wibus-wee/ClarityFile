@@ -8,12 +8,17 @@ import { routeTree } from './routeTree.gen'
 import { DefaultErrorComponent } from './components/error-boundary'
 
 // Initialize i18n
-import './i18n'
+import { useI18nStore } from './i18n/store'
 
 import { scan } from 'react-scan'
 scan({
   enabled: import.meta.env.DEV
 })
+
+// Initialize i18n before rendering the app
+// We can get the initial language from localStorage or use a default
+const initialLanguage = (localStorage.getItem('i18nextLng') as any) || 'zh-CN'
+useI18nStore.getState().actions.initialize(initialLanguage)
 
 const hashHistory = createHashHistory()
 
