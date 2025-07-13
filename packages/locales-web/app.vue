@@ -15,8 +15,12 @@
             class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 rounded transition-all">
             <div class="i-carbon-moon dark:i-carbon-sun text-sm"></div>
           </button>
-          <button
-            class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 rounded transition-all">
+          <button @click="saveAllChanges" :class="[
+            'p-1.5 rounded transition-all',
+            translations.hasUnsavedChanges
+              ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900'
+          ]">
             <div class="i-carbon-save text-sm"></div>
           </button>
           <button
@@ -50,17 +54,34 @@
               <h2 class="text-lg font-light text-gray-900 dark:text-gray-100">
                 {{ activeNamespace || 'Select a namespace' }}
               </h2>
-              <p class="text-sm text-gray-400 dark:text-gray-500 mt-0.5 opacity-75">
-                Translation keys and values
-              </p>
+              <div class="flex items-center gap-4 mt-1">
+                <p class="text-sm text-gray-400 dark:text-gray-500 opacity-75">
+                  {{ translations.translationEntries.length }} keys
+                </p>
+                <div v-if="translations.translationProgress" class="flex items-center gap-2">
+                  <div class="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 transition-all duration-300"
+                      :style="{ width: `${translations.translationProgress}%` }"></div>
+                  </div>
+                  <span class="text-xs text-gray-400 dark:text-gray-500">
+                    {{ translations.translationProgress }}%
+                  </span>
+                </div>
+                <div v-if="translations.hasUnsavedChanges" class="flex items-center gap-1.5">
+                  <div class="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+                  <span class="text-xs text-amber-600 dark:text-amber-400">
+                    {{ translations.modifiedEntries.length }} unsaved
+                  </span>
+                </div>
+              </div>
             </div>
             <div class="flex items-center gap-3">
-              <button
+              <button @click="addNewKey"
                 class="px-2 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-900 rounded transition-all flex items-center gap-1.5">
                 <div class="i-carbon-add text-xs"></div>
                 Add Key
               </button>
-              <button
+              <button @click="addNewLanguage"
                 class="px-2 py-1 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-all flex items-center gap-1.5">
                 <div class="i-carbon-language text-xs"></div>
                 Add Language
@@ -85,26 +106,31 @@
 </template>
 
 <script setup>
-// 模拟数据
-const namespaces = ref([
-  { name: 'common', label: '通用', count: 25 },
-  { name: 'navigation', label: '导航', count: 15 },
-  { name: 'files', label: '文件管理', count: 48 },
-  { name: 'settings', label: '设置', count: 32 },
-  { name: 'dashboard', label: '仪表板', count: 18 },
-])
+// 使用 composables
+const fileSystem = useFileSystem()
+const translations = useTranslations()
 
-const languages = ref([
-  { code: 'zh-CN', name: '简体中文' },
-  { code: 'en-US', name: 'English' },
-])
+// 从 composables 获取状态
+const { namespaces, isLoading, error } = fileSystem
+const { activeNamespace, languages } = translations
 
-const activeNamespace = ref('files')
+// 初始化：设置默认的 locales 路径
+onMounted(() => {
+  // 在实际应用中，这个路径应该从配置或用户选择中获取
+  fileSystem.setLocalesPath('./locales')
 
+  // 默认选择第一个命名空间
+  if (namespaces.value.length > 0) {
+    translations.selectNamespace('files')
+  }
+})
+
+// 选择命名空间
 function selectNamespace(namespace) {
-  activeNamespace.value = namespace
+  translations.selectNamespace(namespace)
 }
 
+// 切换深色模式
 function toggleDarkMode() {
   const html = document.documentElement
   if (html.classList.contains('dark')) {
@@ -112,5 +138,34 @@ function toggleDarkMode() {
   } else {
     html.classList.add('dark')
   }
+}
+
+// 保存所有修改
+async function saveAllChanges() {
+  const success = await translations.saveAllChanges()
+  if (success) {
+    console.log('所有修改已保存')
+  } else {
+    console.error('保存失败')
+  }
+}
+
+// 添加新键
+function addNewKey() {
+  const keyPath = prompt('请输入新键的路径 (例如: actions.newAction):')
+  if (keyPath && keyPath.trim()) {
+    translations.addTranslationKey(keyPath.trim())
+  }
+}
+
+// 添加新语言
+function addNewLanguage() {
+  const code = prompt('请输入语言代码 (例如: fr-FR):')
+  if (!code || !code.trim()) return
+
+  const name = prompt('请输入语言名称 (例如: Français):')
+  if (!name || !name.trim()) return
+
+  translations.addLanguage(code.trim(), name.trim())
 }
 </script>
