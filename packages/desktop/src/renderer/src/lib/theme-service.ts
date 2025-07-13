@@ -191,7 +191,7 @@ export class ThemeService {
         return null
       }
 
-      return typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value
+      return JSON.parse(setting.value as string)
     } catch (error) {
       console.error('Failed to get active custom theme:', error)
       return null

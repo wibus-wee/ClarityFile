@@ -67,7 +67,7 @@ const mapFormDataToSettings = (data: LanguageSettingsForm) => [
 ]
 
 export function LanguageSettings() {
-  const { t } = useTranslation(['settings', 'common'])
+  const { t } = useTranslation(['settings'])
   const { language: currentLanguage, actions } = useI18nStore()
   const { trigger: setSetting } = useSetSetting()
 
@@ -116,51 +116,47 @@ export function LanguageSettings() {
       schema={languageSettingsSchema}
       defaultValues={defaultValues}
       onSubmit={handleSubmit}
-      submitButtonText={t('common:save')}
     >
       {(form) => (
         <>
-          <SettingsSection
-            title={t('settings:language.title')}
-            description={t('settings:descriptions.language')}
-          >
+          <SettingsSection title={t('language.title')} description={t('descriptions.language')}>
             <SettingsSelectField
               control={form.control}
               name="language"
-              label={t('settings:language.currentLanguage')}
-              description={t('settings:language.selectLanguage')}
-              placeholder={t('settings:language.selectLanguage')}
+              label={t('language.currentLanguage')}
+              description={t('language.selectLanguage')}
+              placeholder={t('language.selectLanguage')}
               options={languageOptions}
             />
 
             <SettingsSwitchField
               control={form.control}
               name="autoDetectLanguage"
-              label={t('settings:language.autoDetectLanguage')}
-              description={t('settings:language.autoDetectLanguageDescription')}
+              label={t('language.autoDetectLanguage')}
+              description={t('language.autoDetectLanguageDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
           </SettingsSection>
 
           <SettingsSection
-            title={t('settings:language.regionFormat')}
-            description={t('settings:language.regionFormatDescription')}
+            title={t('language.regionFormat')}
+            description={t('language.regionFormatDescription')}
           >
             <SettingsSelectField
               control={form.control}
               name="dateFormat"
-              label={t('settings:language.dateFormat')}
-              description={t('settings:language.selectDateFormat')}
-              placeholder={t('settings:language.selectDateFormat')}
+              label={t('language.dateFormat')}
+              description={t('language.selectDateFormat')}
+              placeholder={t('language.selectDateFormat')}
               options={dateFormatOptions}
             />
 
             <SettingsSelectField
               control={form.control}
               name="timeFormat"
-              label={t('settings:language.timeFormat')}
-              description={t('settings:language.selectTimeFormat')}
-              placeholder={t('settings:language.selectTimeFormat')}
+              label={t('language.timeFormat')}
+              description={t('language.selectTimeFormat')}
+              placeholder={t('language.selectTimeFormat')}
               options={timeFormatOptions}
             />
           </SettingsSection>

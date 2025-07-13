@@ -15,7 +15,9 @@ import {
   validateCreateCompetitionMilestone,
   validateUpdateCompetitionMilestone,
   validateAddProjectToCompetition,
-  CompetitionMilestoneOutput
+  CompetitionMilestoneOutput,
+  ProjectCompetitionWithDocumentsOutput,
+  CompetitionDocumentOutput
 } from '../types/competition-schemas'
 
 /**
@@ -191,7 +193,9 @@ export class CompetitionService {
   /**
    * 获取项目参与的赛事里程碑（包含关联文档信息）
    */
-  static async getProjectCompetitionsWithDocuments(projectId: string) {
+  static async getProjectCompetitionsWithDocuments(
+    projectId: string
+  ): Promise<ProjectCompetitionWithDocumentsOutput[]> {
     // 首先获取基本的比赛信息
     const competitions = await this.getProjectCompetitions(projectId)
 
@@ -199,9 +203,13 @@ export class CompetitionService {
     const competitionsWithDocuments = await Promise.all(
       competitions.map(async (competition) => {
         const documents = await this.getCompetitionMilestoneDocuments(competition.milestoneId)
+        // 过滤掉 fileHash 为 null 的文档，以满足输出类型的要求
+        const validDocuments = documents.filter(
+          (doc): doc is CompetitionDocumentOutput => doc.fileHash != null
+        )
         return {
           ...competition,
-          documents
+          documents: validDocuments
         }
       })
     )

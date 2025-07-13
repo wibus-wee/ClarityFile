@@ -32,22 +32,14 @@ const defaultValues: NotificationSettingsForm = {
   soundType: 'default'
 }
 
-const soundOptions = [
-  { value: 'default', label: '默认' },
-  { value: 'subtle', label: '轻柔' },
-  { value: 'modern', label: '现代' },
-  { value: 'classic', label: '经典' },
-  { value: 'none', label: '无声音' }
-]
-
 export function NotificationSettings() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
 
   const soundOptions = [
-    { value: 'default', label: t('settings:notifications.soundOptions.default') },
-    { value: 'chime', label: t('settings:notifications.soundOptions.chime') },
-    { value: 'bell', label: t('settings:notifications.soundOptions.bell') },
-    { value: 'none', label: t('settings:notifications.soundOptions.none') }
+    { value: 'default', label: t('notifications.soundOptions.default') },
+    { value: 'chime', label: t('notifications.soundOptions.chime') },
+    { value: 'bell', label: t('notifications.soundOptions.bell') },
+    { value: 'none', label: t('notifications.soundOptions.none') }
   ]
 
   const mapFormDataToSettings = (data: NotificationSettingsForm) => [
@@ -55,43 +47,43 @@ export function NotificationSettings() {
       key: 'notifications.enabled',
       value: data.enabled,
       category: 'notifications',
-      description: t('settings:notifications.enabled')
+      description: t('notifications.enabled')
     },
     {
       key: 'notifications.sound',
       value: data.sound,
       category: 'notifications',
-      description: t('settings:notifications.sound')
+      description: t('notifications.sound')
     },
     {
       key: 'notifications.desktop',
       value: data.desktop,
       category: 'notifications',
-      description: t('settings:notifications.desktop')
+      description: t('notifications.desktop')
     },
     {
       key: 'notifications.projectUpdates',
       value: data.projectUpdates,
       category: 'notifications',
-      description: t('settings:notifications.projectUpdates')
+      description: t('notifications.projectUpdates')
     },
     {
       key: 'notifications.fileChanges',
       value: data.fileChanges,
       category: 'notifications',
-      description: t('settings:notifications.fileChanges')
+      description: t('notifications.fileChanges')
     },
     {
       key: 'notifications.systemAlerts',
       value: data.systemAlerts,
       category: 'notifications',
-      description: t('settings:notifications.systemAlerts')
+      description: t('notifications.systemAlerts')
     },
     {
       key: 'notifications.soundType',
       value: data.soundType,
       category: 'notifications',
-      description: t('settings:notifications.soundType')
+      description: t('notifications.soundType')
     }
   ]
 
@@ -101,80 +93,79 @@ export function NotificationSettings() {
       schema={notificationSettingsSchema}
       defaultValues={defaultValues}
       mapFormDataToSettings={mapFormDataToSettings}
-      submitButtonText={t('common:save')}
     >
       {(form) => (
         <>
           <SettingsSection
-            title={t('settings:notifications.basicSettings')}
-            description={t('settings:notifications.basicDescription')}
+            title={t('notifications.basicSettings')}
+            description={t('notifications.basicDescription')}
           >
             <SettingsSwitchField
               control={form.control}
               name="enabled"
-              label={t('settings:notifications.enabled')}
-              description={t('settings:notifications.enabledDescription')}
+              label={t('notifications.enabled')}
+              description={t('notifications.enabledDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="sound"
-              label={t('settings:notifications.sound')}
-              description={t('settings:notifications.soundDescription')}
+              label={t('notifications.sound')}
+              description={t('notifications.soundDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="desktop"
-              label={t('settings:notifications.desktop')}
-              description={t('settings:notifications.desktopDescription')}
+              label={t('notifications.desktop')}
+              description={t('notifications.desktopDescription')}
               className="flex flex-row items-center justify-between py-2"
               showSeparator={false}
             />
           </SettingsSection>
 
           <SettingsSection
-            title={t('settings:notifications.soundType')}
-            description={t('settings:notifications.soundTypeDescription')}
+            title={t('notifications.soundType')}
+            description={t('notifications.soundTypeDescription')}
           >
             <SettingsSelectField
               control={form.control}
               name="soundType"
-              label={t('settings:notifications.soundType')}
-              description={t('settings:notifications.soundTypeDescription')}
-              placeholder={t('settings:notifications.soundTypeDescription')}
+              label={t('notifications.soundType')}
+              description={t('notifications.soundTypeDescription')}
+              placeholder={t('notifications.soundTypeDescription')}
               options={soundOptions}
             />
           </SettingsSection>
 
           <SettingsSection
-            title={t('settings:notifications.projectUpdates')}
-            description={t('settings:notifications.basicDescription')}
+            title={t('notifications.projectUpdates')}
+            description={t('notifications.basicDescription')}
             showSeparator={false}
           >
             <SettingsSwitchField
               control={form.control}
               name="projectUpdates"
-              label={t('settings:notifications.projectUpdates')}
-              description={t('settings:notifications.projectUpdatesDescription')}
+              label={t('notifications.projectUpdates')}
+              description={t('notifications.projectUpdatesDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="fileChanges"
-              label={t('settings:notifications.fileChanges')}
-              description={t('settings:notifications.fileChangesDescription')}
+              label={t('notifications.fileChanges')}
+              description={t('notifications.fileChangesDescription')}
               className="flex flex-row items-center justify-between py-2"
             />
 
             <SettingsSwitchField
               control={form.control}
               name="systemAlerts"
-              label={t('settings:notifications.systemAlerts')}
-              description={t('settings:notifications.systemAlertsDescription')}
+              label={t('notifications.systemAlerts')}
+              description={t('notifications.systemAlertsDescription')}
               className="flex flex-row items-center justify-between py-2"
               showSeparator={false}
             />

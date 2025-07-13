@@ -76,7 +76,6 @@ export function AppearanceSettings() {
       schema={appearanceSettingsSchema}
       defaultValues={defaultValues}
       mapFormDataToSettings={mapFormDataToSettings}
-      submitButtonText={t('common:save')}
     >
       {(form) => (
         <>

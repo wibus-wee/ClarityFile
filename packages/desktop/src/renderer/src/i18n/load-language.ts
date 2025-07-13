@@ -107,7 +107,7 @@ if (import.meta.env.DEV) {
         if (!lang || !namespace) return
 
         i18n.addResourceBundle(lang, namespace, resources, true, true)
-        await i18n.reloadResources([lang], { ns: namespace })
+        await i18n.reloadResources([lang], namespace)
         console.log(`[i18n-hmr] Hot reloaded: ${lang}/${namespace}`)
       } catch (e) {
         console.error('[i18n-hmr] Failed to process update:', e)

@@ -5,13 +5,13 @@
  * 当用户切换到其他语言或需要非核心模块的翻译时，应用将通过 `loadLanguage` 函数动态异步加载对应的语言包。
  */
 
-import common_zhCN from './locales/zh-CN/common.json'
-import settings_zhCN from './locales/zh-CN/settings.json'
-import navigation_zhCN from './locales/zh-CN/navigation.json'
+import common_zhCN from './locales/common/zh-CN.json'
+import settings_zhCN from './locales/settings/zh-CN.json'
+import navigation_zhCN from './locales/navigation/zh-CN.json'
 
-import common_enUS from './locales/en-US/common.json'
-import settings_enUS from './locales/en-US/settings.json'
-import navigation_enUS from './locales/en-US/navigation.json'
+import common_enUS from './locales/common/en-US.json'
+import settings_enUS from './locales/settings/en-US.json'
+import navigation_enUS from './locales/navigation/en-US.json'
 
 export const defaultResources = {
   'zh-CN': {

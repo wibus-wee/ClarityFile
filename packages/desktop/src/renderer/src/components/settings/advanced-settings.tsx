@@ -32,44 +32,44 @@ const defaultValues: AdvancedSettingsForm = {
 }
 
 export function AdvancedSettings() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
 
   const mapFormDataToSettings = (data: AdvancedSettingsForm) => [
     {
       key: 'advanced.debugMode',
       value: data.debugMode,
       category: 'advanced',
-      description: t('settings:advanced.debugMode')
+      description: t('advanced.debugMode')
     },
     {
       key: 'advanced.developerTools',
       value: data.developerTools,
       category: 'advanced',
-      description: t('settings:advanced.developerTools')
+      description: t('advanced.developerTools')
     },
     {
       key: 'advanced.experimentalFeatures',
       value: data.experimentalFeatures,
       category: 'advanced',
-      description: t('settings:advanced.experimentalFeatures')
+      description: t('advanced.experimentalFeatures')
     },
     {
       key: 'advanced.logLevel',
       value: data.logLevel,
       category: 'advanced',
-      description: t('settings:advanced.logLevel')
+      description: t('advanced.logLevel')
     },
     {
       key: 'advanced.maxLogFiles',
       value: data.maxLogFiles,
       category: 'advanced',
-      description: t('settings:advanced.maxLogFiles')
+      description: t('advanced.maxLogFiles')
     },
     {
       key: 'advanced.enableTelemetry',
       value: data.enableTelemetry,
       category: 'advanced',
-      description: t('settings:advanced.enableTelemetry')
+      description: t('advanced.enableTelemetry')
     }
   ]
 
@@ -79,55 +79,54 @@ export function AdvancedSettings() {
       schema={advancedSettingsSchema}
       defaultValues={defaultValues}
       mapFormDataToSettings={mapFormDataToSettings}
-      submitButtonText={t('common:save')}
     >
       {(form) => (
         <>
           <SettingsSection
-            title={t('settings:advanced.developerOptions')}
-            description={t('settings:advanced.developerDescription')}
+            title={t('advanced.developerOptions')}
+            description={t('advanced.developerDescription')}
           >
             <SettingsSwitchField
               control={form.control}
               name="debugMode"
-              label={t('settings:advanced.debugMode')}
-              description={t('settings:advanced.debugModeDescription')}
+              label={t('advanced.debugMode')}
+              description={t('advanced.debugModeDescription')}
             />
 
             <SettingsSwitchField
               control={form.control}
               name="developerTools"
-              label={t('settings:advanced.developerTools')}
-              description={t('settings:advanced.developerToolsDescription')}
+              label={t('advanced.developerTools')}
+              description={t('advanced.developerToolsDescription')}
             />
 
             <SettingsSwitchField
               control={form.control}
               name="experimentalFeatures"
-              label={t('settings:advanced.experimentalFeatures')}
-              description={t('settings:advanced.experimentalFeaturesDescription')}
+              label={t('advanced.experimentalFeatures')}
+              description={t('advanced.experimentalFeaturesDescription')}
               showSeparator={false}
             />
           </SettingsSection>
 
           <SettingsSection
-            title={t('settings:advanced.logLevel')}
-            description={t('settings:advanced.logLevelDescription')}
+            title={t('advanced.logLevel')}
+            description={t('advanced.logLevelDescription')}
           >
             <div className="grid grid-cols-2 gap-4">
               <SettingsInputField
                 control={form.control}
                 name="logLevel"
-                label={t('settings:advanced.logLevel')}
-                description={t('settings:advanced.logLevelDescription')}
+                label={t('advanced.logLevel')}
+                description={t('advanced.logLevelDescription')}
                 placeholder="info"
               />
 
               <SettingsInputField
                 control={form.control}
                 name="maxLogFiles"
-                label={t('settings:advanced.maxLogFiles')}
-                description={t('settings:advanced.maxLogFilesDescription')}
+                label={t('advanced.maxLogFiles')}
+                description={t('advanced.maxLogFilesDescription')}
                 type="number"
                 min="1"
                 max="100"
@@ -136,15 +135,15 @@ export function AdvancedSettings() {
           </SettingsSection>
 
           <SettingsSection
-            title={t('settings:advanced.enableTelemetry')}
-            description={t('settings:advanced.enableTelemetryDescription')}
+            title={t('advanced.enableTelemetry')}
+            description={t('advanced.enableTelemetryDescription')}
             showSeparator={false}
           >
             <SettingsSwitchField
               control={form.control}
               name="enableTelemetry"
-              label={t('settings:advanced.enableTelemetry')}
-              description={t('settings:advanced.enableTelemetryDescription')}
+              label={t('advanced.enableTelemetry')}
+              description={t('advanced.enableTelemetryDescription')}
               showSeparator={false}
             />
           </SettingsSection>
