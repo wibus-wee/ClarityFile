@@ -15,6 +15,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "i18n:types": "tsx scripts/generate-i18n-types.ts",
     "start": "pnpm rebuild:sqlite3:electron && electron-vite preview",
     "dev": "pnpm rebuild:sqlite3:electron && electron-vite dev",
     "build": "npm run typecheck && pnpm rebuild:sqlite3:electron && electron-vite build",
@@ -81,6 +82,8 @@
     "drizzle-kit": "^0.31.1",
     "electron": "^35.1.5",
     "electron-builder": "26.0.12",
-    "electron-vite": "^3.1.0"
+    "electron-vite": "^3.1.0",
+    "i18next-resources-to-backend": "1.2.1",
+    "tsx": "4.20.3"
   }
 }

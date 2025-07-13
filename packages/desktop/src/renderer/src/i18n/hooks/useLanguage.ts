@@ -1,10 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { 
-  SupportedLanguage, 
-  UseLanguageReturn, 
-  LanguageConfig 
-} from '../types'
+import type { SupportedLanguage, UseLanguageReturn, LanguageConfig } from '../types'
 import { SUPPORTED_LANGUAGES } from '../types'
 
 /**
@@ -19,37 +15,41 @@ export function useLanguage(): UseLanguageReturn {
   const currentLanguage = i18n.language as SupportedLanguage
 
   // 获取可用语言列表
-  const availableLanguages: LanguageConfig[] = Object.values(SUPPORTED_LANGUAGES)
+  const availableLanguages: LanguageConfig[] = SUPPORTED_LANGUAGES
 
   // 切换语言
-  const changeLanguage = useCallback(async (language: SupportedLanguage) => {
-    if (language === currentLanguage || isChanging) {
-      return
-    }
+  const changeLanguage = useCallback(
+    async (language: SupportedLanguage) => {
+      if (language === currentLanguage || isChanging) {
+        return
+      }
 
-    setIsChanging(true)
-    
-    try {
-      await i18n.changeLanguage(language)
-      
-      // 保存到本地存储
-      localStorage.setItem('i18nextLng', language)
-      
-      // 触发自定义事件，通知其他组件语言已更改
-      window.dispatchEvent(new CustomEvent('languageChanged', {
-        detail: {
-          language,
-          previousLanguage: currentLanguage
-        }
-      }))
-      
-    } catch (error) {
-      console.error('Failed to change language:', error)
-      throw error
-    } finally {
-      setIsChanging(false)
-    }
-  }, [currentLanguage, i18n, isChanging])
+      setIsChanging(true)
+
+      try {
+        await i18n.changeLanguage(language)
+
+        // 保存到本地存储
+        localStorage.setItem('i18nextLng', language)
+
+        // 触发自定义事件，通知其他组件语言已更改
+        window.dispatchEvent(
+          new CustomEvent('languageChanged', {
+            detail: {
+              language,
+              previousLanguage: currentLanguage
+            }
+          })
+        )
+      } catch (error) {
+        console.error('Failed to change language:', error)
+        throw error
+      } finally {
+        setIsChanging(false)
+      }
+    },
+    [currentLanguage, i18n, isChanging]
+  )
 
   return {
     currentLanguage,
