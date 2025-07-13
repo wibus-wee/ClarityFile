@@ -6,10 +6,10 @@ import chalk from 'chalk'
 import prompts from 'prompts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const LOCALES_DIR = path.resolve(__dirname, '../../packages/desktop/src/renderer/src/i18n/locales')
+const LOCALES_DIR = path.resolve(__dirname, '../locales')
 const CONSTANTS_FILE = path.resolve(
   __dirname,
-  '../../packages/desktop/src/renderer/src/i18n/constants.ts'
+  '../packages/desktop/src/renderer/src/i18n/constants.ts'
 )
 
 /**
@@ -42,8 +42,10 @@ async function main() {
   const namespaces = getNamespaces(LOCALES_DIR)
 
   // 1. 在每个命名空间下创建空的 .json 文件
-  console.log(chalk.blue(`
-1. 正在为语言 '${newLocale}' 创建 .json 文件...`))
+  console.log(
+    chalk.blue(`
+1. 正在为语言 '${newLocale}' 创建 .json 文件...`)
+  )
   let filesCreated = 0
   for (const ns of namespaces) {
     const filePath = path.join(LOCALES_DIR, ns, `${newLocale}.json`)
@@ -62,8 +64,10 @@ async function main() {
   }
 
   // 2. 更新 constants.ts 文件
-  console.log(chalk.blue(`
-2. 正在更新 i18n/constants.ts...`))
+  console.log(
+    chalk.blue(`
+2. 正在更新 i18n/constants.ts...`)
+  )
   try {
     let content = fs.readFileSync(CONSTANTS_FILE, 'utf-8')
     const regex = /(export const SUPPORTED_LANGUAGES = \[\s*)([^\]]*)(\s*\])/

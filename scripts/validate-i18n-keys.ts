@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import chalk from 'chalk'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const LOCALES_DIR = path.resolve(__dirname, '../packages/desktop/src/renderer/src/i18n/locales')
+const LOCALES_DIR = path.resolve(__dirname, '../locales')
 const BASE_LANGUAGE = 'zh-CN'
 
 let errorCount = 0
