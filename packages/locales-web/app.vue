@@ -11,13 +11,38 @@
         </div>
 
         <div class="flex items-center gap-1">
+          <!-- 语言选择器 -->
+          <div class="relative language-selector">
+            <button @click="showLanguageSelector = !showLanguageSelector"
+              class="px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-200/10 rounded transition-all flex items-center gap-1.5">
+              <span>{{ getCurrentLanguage.name }}</span>
+              <div class="i-carbon-chevron-down text-xs opacity-60"></div>
+            </button>
+
+            <!-- 语言选择下拉菜单 -->
+            <div v-if="showLanguageSelector"
+              class="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-hex-121212 border border-gray-200/20 dark:border-gray-200/20 rounded z-50">
+              <div class="py-1">
+                <button v-for="lang in availableLanguages.filter(l => l.code !== currentLanguage)" :key="lang.code"
+                  @click="selectLanguage(lang.code)" :class="[
+                    'w-full text-left px-3 py-1.5 text-sm transition-colors',
+                    currentLanguage === lang.code
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-200/10'
+                  ]">
+                  {{ lang.name }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <button @click="toggleDarkMode"
-            class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 rounded transition-all">
+            class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-200/10 rounded transition-all">
             <div class="i-carbon-moon dark:i-carbon-sun text-sm"></div>
           </button>
           <button @click="saveAllChanges" :class="[
             'p-1.5 rounded transition-all',
-            translations.hasUnsavedChanges
+            hasUnsavedChanges
               ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
               : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900'
           ]">
@@ -47,7 +72,7 @@
       </aside>
 
       <!-- 右侧：键值对表格编辑器 -->
-      <main class="flex-1 flex flex-col">
+      <main class="flex-1 flex flex-col min-w-0">
         <div class="border-b border-gray-100 dark:border-gray-800 p-4">
           <div class="flex-between">
             <div>
@@ -56,21 +81,21 @@
               </h2>
               <div class="flex items-center gap-4 mt-1">
                 <p class="text-sm text-gray-400 dark:text-gray-500 opacity-75">
-                  {{ translations.translationEntries.length }} keys
+                  {{ translationEntries.length }} keys
                 </p>
-                <div v-if="translations.translationProgress" class="flex items-center gap-2">
+                <div v-if="translationProgress" class="flex items-center gap-2">
                   <div class="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div class="h-full bg-emerald-500 transition-all duration-300"
-                      :style="{ width: `${translations.translationProgress}%` }"></div>
+                      :style="{ width: `${translationProgress}%` }"></div>
                   </div>
                   <span class="text-xs text-gray-400 dark:text-gray-500">
-                    {{ translations.translationProgress }}%
+                    {{ translationProgress }}%
                   </span>
                 </div>
-                <div v-if="translations.hasUnsavedChanges" class="flex items-center gap-1.5">
+                <div v-if="hasUnsavedChanges" class="flex items-center gap-1.5">
                   <div class="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
                   <span class="text-xs text-amber-600 dark:text-amber-400">
-                    {{ translations.modifiedEntries.length }} unsaved
+                    {{ modifiedEntries.length }} unsaved
                   </span>
                 </div>
               </div>
@@ -102,17 +127,29 @@
         </div>
       </main>
     </div>
+
+    <!-- Dialog 组件 -->
+    <Dialog :is-open="dialog.isOpen.value" :title="dialog.dialogOptions.value.title"
+      :message="dialog.dialogOptions.value.message" :type="dialog.dialogOptions.value.type"
+      :placeholder="dialog.dialogOptions.value.placeholder" :confirm-text="dialog.dialogOptions.value.confirmText"
+      :cancel-text="dialog.dialogOptions.value.cancelText" @confirm="dialog.handleConfirm"
+      @cancel="dialog.handleCancel" />
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
 // 使用 composables
 const fileSystem = useFileSystem()
 const translations = useTranslations()
 
 // 从 composables 获取状态
-const { namespaces, isLoading, error } = fileSystem
-const { activeNamespace, languages } = translations
+const { namespaces } = fileSystem
+const { activeNamespace, languages, currentLanguage, availableLanguages, getCurrentLanguage, hasUnsavedChanges, translationEntries, translationProgress, modifiedEntries, dialog } = translations
+
+// 语言选择器状态
+const showLanguageSelector = ref(false)
 
 // 初始化：设置默认的 locales 路径
 onMounted(() => {
@@ -151,21 +188,50 @@ async function saveAllChanges() {
 }
 
 // 添加新键
-function addNewKey() {
-  const keyPath = prompt('请输入新键的路径 (例如: actions.newAction):')
-  if (keyPath && keyPath.trim()) {
-    translations.addTranslationKey(keyPath.trim())
+async function addNewKey() {
+  try {
+    const keyPath = await dialog.prompt('请输入新键的路径 (例如: actions.newAction):', '', '添加新键')
+    if (keyPath && keyPath.trim()) {
+      await translations.addTranslationKey(keyPath.trim())
+    }
+  } catch (error) {
+    // 用户取消了操作
   }
 }
 
+// 语言选择功能
+function selectLanguage(languageCode) {
+  translations.selectLanguage(languageCode)
+  showLanguageSelector.value = false // 选择后关闭下拉菜单
+}
+
+// 点击外部关闭语言选择器
+function handleClickOutside(event) {
+  if (!event.target.closest('.language-selector')) {
+    showLanguageSelector.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
 // 添加新语言
-function addNewLanguage() {
-  const code = prompt('请输入语言代码 (例如: fr-FR):')
-  if (!code || !code.trim()) return
+async function addNewLanguage() {
+  try {
+    const code = await dialog.prompt('请输入语言代码 (例如: fr-FR):', '', '添加新语言')
+    if (!code || !code.trim()) return
 
-  const name = prompt('请输入语言名称 (例如: Français):')
-  if (!name || !name.trim()) return
+    const name = await dialog.prompt('请输入语言名称 (例如: Français):', '', '添加新语言')
+    if (!name || !name.trim()) return
 
-  translations.addLanguage(code.trim(), name.trim())
+    await translations.addLanguage(code.trim(), name.trim())
+  } catch (error) {
+    // 用户取消了操作
+  }
 }
 </script>

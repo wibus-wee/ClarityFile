@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 interface Language {
   code: string
   name: string
+  isBase?: boolean
 }
 
 interface TranslationEntry {
@@ -14,30 +15,52 @@ interface TranslationEntry {
 
 export const useTranslations = () => {
   const fileSystem = useFileSystem()
-  
+  const dialog = useDialog()
+
   const activeNamespace = ref<string>('')
-  const languages = ref<Language[]>([
-    { code: 'zh-CN', name: '简体中文' },
+  // 改为单选模式 - 当前编辑的语言
+  const currentLanguage = ref<string>('en-US')
+  const availableLanguages = ref<Language[]>([
+    { code: 'zh-CN', name: '简体中文', isBase: true },
     { code: 'en-US', name: 'English' }
   ])
-  
+
+  // 当前显示的语言列表（基准语言 + 当前选中语言）
+  const languages = computed(() => {
+    const baseLanguage = availableLanguages.value.find((lang) => lang.isBase)
+    const currentLang = availableLanguages.value.find((lang) => lang.code === currentLanguage.value)
+
+    const result = []
+    if (baseLanguage) result.push(baseLanguage)
+    if (currentLang && currentLang.code !== baseLanguage?.code) result.push(currentLang)
+
+    return result
+  })
+
+  // 基准语言
+  const baseLanguage = computed(
+    () => availableLanguages.value.find((lang) => lang.isBase) || availableLanguages.value[0]
+  )
+
   const translationEntries = ref<TranslationEntry[]>([])
   const isLoading = ref(false)
   const hasUnsavedChanges = ref(false)
 
   // 计算属性
-  const modifiedEntries = computed(() => 
-    translationEntries.value.filter(entry => entry.isModified)
+  const modifiedEntries = computed(() =>
+    translationEntries.value.filter((entry) => entry.isModified)
   )
 
   const translationProgress = computed(() => {
     const total = translationEntries.value.length * languages.value.length
     const completed = translationEntries.value.reduce((count, entry) => {
-      return count + languages.value.filter(lang => 
-        entry.values[lang.code] && entry.values[lang.code].trim()
-      ).length
+      return (
+        count +
+        languages.value.filter((lang) => entry.values[lang.code] && entry.values[lang.code].trim())
+          .length
+      )
     }, 0)
-    
+
     return total > 0 ? Math.round((completed / total) * 100) : 0
   })
 
@@ -62,7 +85,7 @@ export const useTranslations = () => {
     try {
       // 加载所有语言的翻译文件
       const translationData: Record<string, any> = {}
-      
+
       for (const language of languages.value) {
         const data = await fileSystem.readNamespaceFile(namespace, language.code)
         if (data) {
@@ -72,21 +95,23 @@ export const useTranslations = () => {
 
       // 收集所有的翻译键
       const allKeys = new Set<string>()
-      Object.values(translationData).forEach(data => {
+      Object.values(translationData).forEach((data) => {
         collectKeys(data, '', allKeys)
       })
 
       // 创建翻译条目
-      translationEntries.value = Array.from(allKeys).map(key => ({
+      translationEntries.value = Array.from(allKeys).map((key) => ({
         key: key.split('.').pop() || key,
         path: key,
-        values: languages.value.reduce((acc, lang) => {
-          acc[lang.code] = getValueByPath(translationData[lang.code] || {}, key) || ''
-          return acc
-        }, {} as Record<string, string>),
+        values: languages.value.reduce(
+          (acc, lang) => {
+            acc[lang.code] = getValueByPath(translationData[lang.code] || {}, key) || ''
+            return acc
+          },
+          {} as Record<string, string>
+        ),
         isModified: false
       }))
-
     } catch (err) {
       console.error('Failed to load namespace translations:', err)
     } finally {
@@ -96,9 +121,9 @@ export const useTranslations = () => {
 
   // 递归收集所有键路径
   const collectKeys = (obj: any, prefix: string, keys: Set<string>) => {
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       const fullKey = prefix ? `${prefix}.${key}` : key
-      
+
       if (typeof obj[key] === 'object' && obj[key] !== null) {
         collectKeys(obj[key], fullKey, keys)
       } else {
@@ -118,14 +143,14 @@ export const useTranslations = () => {
   const setValueByPath = (obj: any, path: string, value: string) => {
     const keys = path.split('.')
     const lastKey = keys.pop()!
-    
+
     const target = keys.reduce((current, key) => {
       if (!current[key] || typeof current[key] !== 'object') {
         current[key] = {}
       }
       return current[key]
     }, obj)
-    
+
     target[lastKey] = value
   }
 
@@ -148,14 +173,14 @@ export const useTranslations = () => {
     try {
       // 为每种语言重建数据结构
       const languageData: Record<string, any> = {}
-      
-      languages.value.forEach(lang => {
+
+      languages.value.forEach((lang) => {
         languageData[lang.code] = {}
       })
 
       // 将所有条目的值设置到对应的数据结构中
-      translationEntries.value.forEach(entry => {
-        languages.value.forEach(lang => {
+      translationEntries.value.forEach((entry) => {
+        languages.value.forEach((lang) => {
           if (entry.values[lang.code]) {
             setValueByPath(languageData[lang.code], entry.path, entry.values[lang.code])
           }
@@ -169,14 +194,14 @@ export const useTranslations = () => {
           language.code,
           languageData[language.code]
         )
-        
+
         if (!success) {
           throw new Error(`Failed to save ${language.code}`)
         }
       }
 
       // 重置修改状态
-      translationEntries.value.forEach(entry => {
+      translationEntries.value.forEach((entry) => {
         entry.isModified = false
       })
       hasUnsavedChanges.value = false
@@ -193,9 +218,9 @@ export const useTranslations = () => {
     if (!activeNamespace.value) return false
 
     // 检查键是否已存在
-    const exists = translationEntries.value.some(entry => entry.path === keyPath)
+    const exists = translationEntries.value.some((entry) => entry.path === keyPath)
     if (exists) {
-      alert('该键已存在')
+      await dialog.alert('该键已存在')
       return false
     }
 
@@ -203,16 +228,19 @@ export const useTranslations = () => {
     const newEntry: TranslationEntry = {
       key: keyPath.split('.').pop() || keyPath,
       path: keyPath,
-      values: languages.value.reduce((acc, lang) => {
-        acc[lang.code] = ''
-        return acc
-      }, {} as Record<string, string>),
+      values: languages.value.reduce(
+        (acc, lang) => {
+          acc[lang.code] = ''
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       isModified: true
     }
 
     translationEntries.value.push(newEntry)
     hasUnsavedChanges.value = true
-    
+
     return true
   }
 
@@ -222,20 +250,37 @@ export const useTranslations = () => {
     hasUnsavedChanges.value = true
   }
 
-  // 添加新语言
-  const addLanguage = async (code: string, name: string) => {
+  // 语言选择管理 - 改为单选
+  const selectLanguage = (languageCode: string) => {
+    currentLanguage.value = languageCode
+  }
+
+  const getCurrentLanguage = computed(() => {
+    return (
+      availableLanguages.value.find((lang) => lang.code === currentLanguage.value) ||
+      availableLanguages.value[1]
+    )
+  })
+
+  // 添加新语言到可用列表
+  const addAvailableLanguage = async (code: string, name: string) => {
     // 检查语言是否已存在
-    const exists = languages.value.some(lang => lang.code === code)
+    const exists = availableLanguages.value.some((lang) => lang.code === code)
     if (exists) {
-      alert('该语言已存在')
+      await dialog.alert('该语言已存在')
       return false
     }
 
-    // 添加语言
-    languages.value.push({ code, name })
+    // 添加语言到可用列表
+    availableLanguages.value.push({ code, name })
+
+    // 自动选择新添加的语言
+    if (!selectedLanguages.value.includes(code)) {
+      selectedLanguages.value.push(code)
+    }
 
     // 为所有现有条目添加新语言的空值
-    translationEntries.value.forEach(entry => {
+    translationEntries.value.forEach((entry) => {
       entry.values[code] = ''
       entry.isModified = true
     })
@@ -244,9 +289,16 @@ export const useTranslations = () => {
     return true
   }
 
+  // 兼容旧的addLanguage方法
+  const addLanguage = addAvailableLanguage
+
   return {
     activeNamespace: readonly(activeNamespace),
+    currentLanguage: readonly(currentLanguage),
+    availableLanguages: readonly(availableLanguages),
     languages: readonly(languages),
+    baseLanguage: readonly(baseLanguage),
+    getCurrentLanguage: readonly(getCurrentLanguage),
     translationEntries: readonly(translationEntries),
     isLoading: readonly(isLoading),
     hasUnsavedChanges: readonly(hasUnsavedChanges),
@@ -258,6 +310,9 @@ export const useTranslations = () => {
     saveAllChanges,
     addTranslationKey,
     deleteTranslationKey,
-    addLanguage
+    addLanguage,
+    addAvailableLanguage,
+    selectLanguage,
+    dialog
   }
 }
