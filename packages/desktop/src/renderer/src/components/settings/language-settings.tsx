@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { useTranslation, useLanguage } from '@renderer/i18n/hooks'
-import { LanguageSelector } from '@renderer/i18n/components'
 import { useSetSetting } from '@renderer/hooks/use-tipc'
 import {
   SettingsForm,
@@ -21,12 +20,15 @@ const languageSettingsSchema = z.object({
 
 type LanguageSettingsForm = z.infer<typeof languageSettingsSchema>
 
-const defaultValues: LanguageSettingsForm = {
-  language: 'zh-CN',
-  autoDetectLanguage: false,
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: '24h',
-  numberFormat: 'zh-CN'
+// 动态默认值函数，从当前语言状态获取
+function createDefaultValues(currentLanguage: string): LanguageSettingsForm {
+  return {
+    language: currentLanguage,
+    autoDetectLanguage: false,
+    dateFormat: 'YYYY-MM-DD',
+    timeFormat: '24h',
+    numberFormat: currentLanguage
+  }
 }
 
 const mapFormDataToSettings = (data: LanguageSettingsForm) => [
@@ -71,6 +73,9 @@ export function LanguageSettings() {
     value: lang.code,
     label: `${lang.flag} ${lang.nativeName}`
   }))
+
+  // 使用当前语言创建默认值
+  const defaultValues = createDefaultValues(currentLanguage)
 
   // 自定义提交处理函数，集成语言切换逻辑
   const handleSubmit = async (data: LanguageSettingsForm) => {
@@ -150,25 +155,6 @@ export function LanguageSettings() {
               placeholder="选择时间格式"
               options={timeFormatOptions}
             />
-          </SettingsSection>
-
-          {/* 语言选择器预览 */}
-          <SettingsSection title="语言选择器预览" description="预览语言切换组件的外观">
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium min-w-20">默认样式:</span>
-                <LanguageSelector
-                  variant="default"
-                  showFlag={true}
-                  showNativeName={true}
-                  className="w-48"
-                />
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium min-w-20">紧凑样式:</span>
-                <LanguageSelector variant="compact" showFlag={true} showNativeName={true} />
-              </div>
-            </div>
           </SettingsSection>
         </>
       )}

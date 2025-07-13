@@ -14,38 +14,41 @@ import {
 import { Avatar } from '@heroui/react'
 import { CONSTANTS } from '@renderer/constants'
 import { useAppStore } from '@renderer/stores/app'
-import { transformedRoutes } from '@renderer/routers'
-
-const data = {
-  navMain: transformedRoutes,
-  navSecondary: [
-    {
-      title: '帮助支持',
-      url: '#',
-      icon: LifeBuoy
-    },
-    {
-      title: '意见反馈',
-      url: '#',
-      icon: Send
-    },
-    {
-      title: '错误测试',
-      url: '#/error-test',
-      icon: AlertTriangle
-    }
-  ],
-  projects: [
-    // {
-    //   name: "Design Engineering",
-    //   url: "#",
-    //   icon: Frame,
-    // },
-  ]
-}
+import { useTranslatedRoutes } from '@renderer/routers'
+import { useTranslation } from '@renderer/i18n/hooks'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppStore((state) => state.user)
+  const { t } = useTranslation('navigation')
+  const { transformedRoutes } = useTranslatedRoutes()
+
+  const data = {
+    navMain: transformedRoutes,
+    navSecondary: [
+      {
+        title: t('help'),
+        url: '#',
+        icon: LifeBuoy
+      },
+      {
+        title: '意见反馈',
+        url: '#',
+        icon: Send
+      },
+      {
+        title: '错误测试',
+        url: '#/error-test',
+        icon: AlertTriangle
+      }
+    ],
+    projects: [
+      // {
+      //   name: "Design Engineering",
+      //   url: "#",
+      //   icon: Frame,
+      // },
+    ]
+  }
 
   return (
     <Sidebar variant="inset" {...props}>
