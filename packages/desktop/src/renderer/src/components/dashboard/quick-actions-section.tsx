@@ -2,51 +2,54 @@ import { Button } from '@clarity/shadcn/ui/button'
 import { FolderPlus, FileText, Upload, Settings, Trophy, CreditCard } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-
-const quickActions = [
-  {
-    title: '创建项目',
-    description: '开始一个新的项目',
-    icon: FolderPlus,
-    href: '/projects'
-  },
-  {
-    title: '添加文档',
-    description: '导入或创建文档',
-    icon: FileText,
-    href: '/documents'
-  },
-  {
-    title: '文件管理',
-    description: '管理项目文件',
-    icon: Upload,
-    href: '/files'
-  },
-  {
-    title: '赛事中心',
-    description: '管理比赛信息',
-    icon: Trophy,
-    href: '/competitions'
-  },
-  {
-    title: '经费报销',
-    description: '提交报销申请',
-    icon: CreditCard,
-    href: '/expenses'
-  },
-  {
-    title: '系统设置',
-    description: '配置应用设置',
-    icon: Settings,
-    href: '/settings'
-  }
-]
+import { useTranslation } from 'react-i18next'
 
 export function QuickActionsSection() {
+  const { t } = useTranslation('dashboard')
+
+  const quickActions = [
+    {
+      title: t('quickActions.actions.createProject.title'),
+      description: t('quickActions.actions.createProject.description'),
+      icon: FolderPlus,
+      href: '/projects'
+    },
+    {
+      title: t('quickActions.actions.addDocument.title'),
+      description: t('quickActions.actions.addDocument.description'),
+      icon: FileText,
+      href: '/documents'
+    },
+    {
+      title: t('quickActions.actions.fileManagement.title'),
+      description: t('quickActions.actions.fileManagement.description'),
+      icon: Upload,
+      href: '/files'
+    },
+    {
+      title: t('quickActions.actions.competitions.title'),
+      description: t('quickActions.actions.competitions.description'),
+      icon: Trophy,
+      href: '/competitions'
+    },
+    {
+      title: t('quickActions.actions.expenses.title'),
+      description: t('quickActions.actions.expenses.description'),
+      icon: CreditCard,
+      href: '/expenses'
+    },
+    {
+      title: t('quickActions.actions.settings.title'),
+      description: t('quickActions.actions.settings.description'),
+      icon: Settings,
+      href: '/settings'
+    }
+  ]
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">快速操作</h2>
+        <h2 className="text-xl font-semibold">{t('quickActions.title')}</h2>
         {/* <Button variant="ghost" size="sm" asChild>
           <Link to="/settings">
             查看全部

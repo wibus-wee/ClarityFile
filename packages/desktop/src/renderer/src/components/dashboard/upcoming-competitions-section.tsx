@@ -4,9 +4,10 @@ import { Trophy, Calendar, ArrowRight, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUpcomingMilestones } from '@renderer/hooks/use-tipc'
 import { cn } from '@renderer/lib/utils'
-import { format, differenceInDays } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { differenceInDays } from 'date-fns'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+import { formatFriendlyDate } from '@renderer/lib/i18n-formatters'
 
 interface MilestoneItemProps {
   milestone: {
@@ -21,21 +22,54 @@ interface MilestoneItemProps {
 
 function MilestoneItem({ milestone, index }: MilestoneItemProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation('dashboard')
   const now = new Date()
   const dueDate = milestone.dueDate ? new Date(milestone.dueDate) : null
   const daysUntilDue = dueDate ? differenceInDays(dueDate, now) : null
 
   // 确定紧急程度和颜色
   const getUrgencyInfo = () => {
-    if (daysUntilDue === null) return { level: 'normal', color: 'bg-muted', text: '无截止日期' }
-    if (daysUntilDue < 0) return { level: 'overdue', color: 'bg-destructive', text: '已过期' }
-    if (daysUntilDue === 0) return { level: 'today', color: 'bg-destructive', text: '今天截止' }
-    if (daysUntilDue === 1) return { level: 'tomorrow', color: 'bg-orange-500', text: '明天截止' }
+    if (daysUntilDue === null)
+      return {
+        level: 'normal',
+        color: 'bg-muted',
+        text: t('upcomingCompetitions.urgency.noDueDate')
+      }
+    if (daysUntilDue < 0)
+      return {
+        level: 'overdue',
+        color: 'bg-destructive',
+        text: t('upcomingCompetitions.urgency.overdue')
+      }
+    if (daysUntilDue === 0)
+      return {
+        level: 'today',
+        color: 'bg-destructive',
+        text: t('upcomingCompetitions.urgency.today')
+      }
+    if (daysUntilDue === 1)
+      return {
+        level: 'tomorrow',
+        color: 'bg-orange-500',
+        text: t('upcomingCompetitions.urgency.tomorrow')
+      }
     if (daysUntilDue <= 3)
-      return { level: 'urgent', color: 'bg-orange-500', text: `${daysUntilDue}天后` }
+      return {
+        level: 'urgent',
+        color: 'bg-orange-500',
+        text: `${daysUntilDue}${t('upcomingCompetitions.urgency.daysLater')}`
+      }
     if (daysUntilDue <= 7)
-      return { level: 'soon', color: 'bg-yellow-500', text: `${daysUntilDue}天后` }
-    return { level: 'normal', color: 'bg-green-500', text: `${daysUntilDue}天后` }
+      return {
+        level: 'soon',
+        color: 'bg-yellow-500',
+        text: `${daysUntilDue}${t('upcomingCompetitions.urgency.daysLater')}`
+      }
+    return {
+      level: 'normal',
+      color: 'bg-green-500',
+      text: `${daysUntilDue}${t('upcomingCompetitions.urgency.daysLater')}`
+    }
   }
 
   const urgencyInfo = getUrgencyInfo()
@@ -65,13 +99,16 @@ function MilestoneItem({ milestone, index }: MilestoneItemProps) {
             {dueDate && (
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                <span>{format(dueDate, 'MM/dd', { locale: zhCN })}</span>
+                <span>{formatFriendlyDate(dueDate.toISOString())}</span>
               </div>
             )}
             {milestone.participatingProjectsCount > 0 && (
               <div className="flex items-center gap-1">
                 <Trophy className="w-3 h-3" />
-                <span>{milestone.participatingProjectsCount}个项目</span>
+                <span>
+                  {milestone.participatingProjectsCount}
+                  {t('upcomingCompetitions.projectCount')}
+                </span>
               </div>
             )}
           </div>
@@ -92,6 +129,7 @@ function MilestoneItem({ milestone, index }: MilestoneItemProps) {
 
 export function UpcomingCompetitionsSection() {
   const navigate = useNavigate()
+  const { t } = useTranslation('dashboard')
   const { data: milestones } = useUpcomingMilestones(3)
 
   // 条件渲染：没有比赛时完全不显示
@@ -108,7 +146,7 @@ export function UpcomingCompetitionsSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">近期比赛</h2>
+          <h2 className="text-xl font-semibold">{t('upcomingCompetitions.title')}</h2>
         </div>
         <Button
           variant="ghost"
@@ -116,7 +154,7 @@ export function UpcomingCompetitionsSection() {
           onClick={handleViewAll}
           className="text-xs text-muted-foreground hover:text-foreground"
         >
-          查看全部
+          {t('upcomingCompetitions.viewAll')}
           <ArrowRight className="w-3 h-3 ml-1" />
         </Button>
       </div>

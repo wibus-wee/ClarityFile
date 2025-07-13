@@ -6,6 +6,7 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 export const NAMESPACES = [
   'common',
   'competitions',
+  'dashboard',
   'expenses',
   'files',
   'navigation',

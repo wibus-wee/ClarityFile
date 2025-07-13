@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { WelcomeSection } from './welcome-section'
 import { QuickActionsSection } from './quick-actions-section'
 import { RecentProjectsSection } from './recent-projects-section'
@@ -8,19 +9,21 @@ import { DynamicQuoteSection } from './dynamic-quote-section'
 import { UpcomingCompetitionsSection } from './upcoming-competitions-section'
 
 export function Dashboard() {
+  const { t } = useTranslation('dashboard')
+
   return (
     <div className="container mx-auto">
       {/* 页面标题 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">仪表板</h1>
-        <p className="text-muted-foreground mt-2">今日事今日毕，重要信息不错过</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
 
-      {/* 主要内容区域 */}
+      {/* {t('comments.mainContent')} */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* 左侧主要内容 */}
+        {/* {t('comments.leftContent')} */}
         <div className="lg:col-span-8 space-y-6">
-          {/* 欢迎区域 */}
+          {/* {t('comments.welcomeArea')} */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -29,7 +32,7 @@ export function Dashboard() {
             <WelcomeSection />
           </motion.div>
 
-          {/* 快速操作 */}
+          {/* {t('comments.quickActionsArea')} */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -38,7 +41,7 @@ export function Dashboard() {
             <QuickActionsSection />
           </motion.div>
 
-          {/* 最近项目 */}
+          {/* {t('comments.recentProjectsArea')} */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -47,7 +50,7 @@ export function Dashboard() {
             <RecentProjectsSection />
           </motion.div>
 
-          {/* 最近文档 */}
+          {/* {t('comments.recentDocumentsArea')} */}
           {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -57,9 +60,9 @@ export function Dashboard() {
           </motion.div> */}
         </div>
 
-        {/* 右侧边栏 */}
+        {/* {t('comments.rightSidebar')} */}
         <div className="lg:col-span-4 space-y-4">
-          {/* 快速搜索 */}
+          {/* {t('comments.quickSearchArea')} */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -68,7 +71,7 @@ export function Dashboard() {
             <QuickSearchSection />
           </motion.div>
 
-          {/* 近期比赛 */}
+          {/* {t('comments.upcomingCompetitionsArea')} */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -77,7 +80,7 @@ export function Dashboard() {
             <UpcomingCompetitionsSection />
           </motion.div>
 
-          {/* 系统概览 */}
+          {/* {t('comments.systemOverviewArea')} */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -85,7 +88,7 @@ export function Dashboard() {
           >
             <SystemOverviewSection />
           </motion.div>
-          {/* 动态文案 */}
+          {/* {t('comments.dynamicQuoteArea')} */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -118,7 +118,7 @@ export function MilestoneDetailsDialog({
               <div className="pl-6">
                 {dueDate ? (
                   <div className="space-y-1">
-                    <p className="text-sm">{formatFullDate(milestone.dueDate!)}</p>
+                    <p className="text-sm">{formatFullDate(milestone.dueDate!.toISOString())}</p>
                     {daysUntilDue !== null && (
                       <p className={cn('text-xs', status.color)}>
                         {daysUntilDue < 0

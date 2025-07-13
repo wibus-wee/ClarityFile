@@ -1,0 +1,157 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Get things done today, never miss important information",
+  "sections": {
+    "welcome": "Welcome",
+    "quickActions": "Quick Actions",
+    "recentProjects": "Recent Projects",
+    "recentDocuments": "Recent Documents",
+    "quickSearch": "Quick Search",
+    "upcomingCompetitions": "Upcoming Competitions",
+    "systemOverview": "System Overview",
+    "dynamicQuote": "Dynamic Quote"
+  },
+  "welcome": {
+    "greetings": {
+      "lateNight": ["It's late", "Still up?", "Take care of yourself"],
+      "morning": ["Good morning", "A new day begins", "Early bird catches the worm"],
+      "forenoon": ["Good morning", "Great work mode", "Stay focused"],
+      "afternoon": ["Good afternoon", "Afternoon time", "Keep going"],
+      "evening": ["Good evening", "Hard work today", "Time to relax"],
+      "night": ["It's late", "Time to rest", "Keep up tomorrow"],
+      "default": "Hello"
+    },
+    "messages": {
+      "lateNight": [
+        "Night owl mode on, protect your eyes",
+        "Take breaks during late work",
+        "Late nights hurt, moderation is key"
+      ],
+      "morning": [
+        "A new day, a new beginning!",
+        "Morning sunshine cheers you on",
+        "A beautiful day starts here"
+      ],
+      "forenoon": [
+        "Morning time, peak efficiency",
+        "Focused work, full harvest",
+        "Keep this pace, great job!"
+      ],
+      "afternoon": [
+        "Afternoon time, keep moving",
+        "Tea time yet?",
+        "Stay focused, you're awesome!"
+      ],
+      "evening": [
+        "Good evening, hard work today",
+        "Evening time, relax a bit",
+        "Review today's achievements"
+      ],
+      "night": [
+        "It's late, time to prepare for rest",
+        "Tomorrow is a new beginning",
+        "Rest early, stay healthy"
+      ],
+      "default": "Welcome back to ClarityFile"
+    },
+    "defaultUser": "User",
+    "todayIs": "Today is"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "actions": {
+      "createProject": {
+        "title": "Create Project",
+        "description": "Start a new project"
+      },
+      "addDocument": {
+        "title": "Add Document",
+        "description": "Import or create documents"
+      },
+      "fileManagement": {
+        "title": "File Management",
+        "description": "Manage project files"
+      },
+      "competitions": {
+        "title": "Competitions",
+        "description": "Manage competition info"
+      },
+      "expenses": {
+        "title": "Expenses",
+        "description": "Submit expense claims"
+      },
+      "settings": {
+        "title": "Settings",
+        "description": "Configure app settings"
+      }
+    }
+  },
+  "recentProjects": {
+    "title": "Recent Projects",
+    "viewAll": "View All",
+    "loading": "Recent Projects",
+    "loadError": "Failed to load projects",
+    "empty": {
+      "title": "No projects yet",
+      "action": "Create your first project"
+    },
+    "status": {
+      "active": "Active",
+      "on_hold": "On Hold",
+      "archived": "Archived"
+    },
+    "actions": {
+      "openFolder": "Open Folder",
+      "viewDetails": "View Details"
+    },
+    "errors": {
+      "folderNotExists": "Project folder path does not exist, please create project folder first",
+      "openFolderFailed": "Failed to open project folder:",
+      "unknownError": "Unknown error"
+    }
+  },
+  "systemOverview": {
+    "title": "System Overview",
+    "stats": {
+      "activeProjects": "Active Projects",
+      "managedFiles": "Managed Files"
+    },
+    "systemStatus": {
+      "title": "System Status",
+      "database": "Database Connection",
+      "fileSystem": "File System",
+      "lastSync": "Last Sync",
+      "normal": "Normal",
+      "justNow": "Just now"
+    }
+  },
+  "quickSearch": {
+    "title": "Quick Search",
+    "placeholder": "Search projects, documents, tags...",
+    "searchFor": "Search for",
+    "recentSearches": "Recent Searches",
+    "popularSearches": "Popular Searches",
+    "tip": "💡 Tip: Use",
+    "globalSearchShortcut": "to quickly open global search",
+    "popularTags": [
+      "Business Plan",
+      "Project Report",
+      "PPT Template",
+      "Technical Docs",
+      "Competition Materials"
+    ],
+    "recentTags": ["Challenge Cup", "Innovation", "Patent Application"]
+  },
+  "upcomingCompetitions": {
+    "title": "Upcoming Competitions",
+    "viewAll": "View All",
+    "urgency": {
+      "noDueDate": "No due date",
+      "overdue": "Overdue",
+      "today": "Due today",
+      "tomorrow": "Due tomorrow",
+      "daysLater": "days left"
+    },
+    "projectCount": "projects"
+  }
+}

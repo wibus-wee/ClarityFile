@@ -4,15 +4,16 @@ import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Search, Clock, TrendingUp, Hash } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-
-// 模拟的热门搜索和最近搜索
-const popularSearches = ['商业计划书', '项目汇报', 'PPT模板', '技术文档', '比赛资料']
-
-const recentSearches = ['挑战杯', '创新创业', '专利申请']
+import { useTranslation } from 'react-i18next'
 
 export function QuickSearchSection() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
+  const { t } = useTranslation('dashboard')
+
+  // 从翻译中获取搜索数据
+  const popularSearches = t('quickSearch.popularTags', { returnObjects: true }) as string[]
+  const recentSearches = t('quickSearch.recentTags', { returnObjects: true }) as string[]
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -30,14 +31,14 @@ export function QuickSearchSection() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">快速搜索</h2>
+      <h2 className="text-xl font-semibold">{t('quickSearch.title')}</h2>
 
       {/* 搜索输入框 */}
       <div className="relative">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="搜索项目、文档、标签..."
+            placeholder={t('quickSearch.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
@@ -70,7 +71,7 @@ export function QuickSearchSection() {
                     onClick={() => handleSearch(searchQuery)}
                   >
                     <Search className="w-4 h-4 mr-2" />
-                    搜索 &quot;{searchQuery}&quot;
+                    {t('quickSearch.searchFor')} &quot;{searchQuery}&quot;
                   </Button>
                 )}
 
@@ -78,7 +79,9 @@ export function QuickSearchSection() {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">最近搜索</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t('quickSearch.recentSearches')}
+                      </span>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {recentSearches.map((search) => (
@@ -104,7 +107,7 @@ export function QuickSearchSection() {
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">热门搜索</span>
+          <span className="text-sm font-medium">{t('quickSearch.popularSearches')}</span>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -126,9 +129,9 @@ export function QuickSearchSection() {
       {/* 搜索提示 */}
       <div className="p-3 bg-muted/30 rounded-lg border border-dashed border-border">
         <p className="text-xs text-muted-foreground">
-          💡 提示：使用{' '}
+          {t('quickSearch.tip')}{' '}
           <kbd className="px-1 py-0.5 bg-background border rounded text-xs">Cmd+K</kbd>{' '}
-          快速打开全局搜索
+          {t('quickSearch.globalSearchShortcut')}
         </p>
       </div>
     </div>

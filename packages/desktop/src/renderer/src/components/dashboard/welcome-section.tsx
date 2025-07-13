@@ -1,8 +1,11 @@
 import { useAppStore } from '@renderer/stores/app'
 import { Avatar } from '@heroui/react'
 import { Sparkles, Sun, Moon, Coffee } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { formatFullDate } from '@renderer/lib/i18n-formatters'
 export function WelcomeSection() {
   const user = useAppStore((state) => state.user)
+  const { t } = useTranslation('dashboard')
 
   // 获取当前时间和问候语
   const getGreeting = () => {
@@ -11,37 +14,37 @@ export function WelcomeSection() {
       // 深夜 0-5点
       {
         condition: hour >= 0 && hour < 6,
-        messages: ['夜深了', '还在熬夜呢', '注意休息哦'],
+        messages: t('welcome.greetings.lateNight', { returnObjects: true }) as string[],
         icon: Moon
       },
       // 早晨 6-9点
       {
         condition: hour >= 6 && hour < 9,
-        messages: ['早上好', '新的一天开始了', '早起的鸟儿有虫吃'],
+        messages: t('welcome.greetings.morning', { returnObjects: true }) as string[],
         icon: Sun
       },
       // 上午 9-12点
       {
         condition: hour >= 9 && hour < 12,
-        messages: ['上午好', '工作状态不错', '保持专注'],
+        messages: t('welcome.greetings.forenoon', { returnObjects: true }) as string[],
         icon: Sun
       },
       // 下午 12-18点
       {
         condition: hour >= 12 && hour < 18,
-        messages: ['下午好', '午后时光', '继续加油'],
+        messages: t('welcome.greetings.afternoon', { returnObjects: true }) as string[],
         icon: Sun
       },
       // 晚上 18-22点
       {
         condition: hour >= 18 && hour < 22,
-        messages: ['晚上好', '辛苦一天了', '该放松一下了'],
+        messages: t('welcome.greetings.evening', { returnObjects: true }) as string[],
         icon: Moon
       },
       // 深夜 22-24点
       {
         condition: hour >= 22,
-        messages: ['夜深了', '该休息了', '明天继续努力'],
+        messages: t('welcome.greetings.night', { returnObjects: true }) as string[],
         icon: Moon
       }
     ]
@@ -53,7 +56,7 @@ export function WelcomeSection() {
       return { text: randomMessage, icon: currentGreeting.icon }
     }
 
-    return { text: '你好', icon: Sun }
+    return { text: t('welcome.greetings.default'), icon: Sun }
   }
 
   const greeting = getGreeting()
@@ -66,32 +69,32 @@ export function WelcomeSection() {
       // 深夜 0-5点
       {
         condition: hour >= 0 && hour < 6,
-        messages: ['夜猫子模式开启，记得保护眼睛', '深夜工作要注意休息哦', '熬夜伤身，适度为好']
+        messages: t('welcome.messages.lateNight', { returnObjects: true }) as string[]
       },
       // 早晨 6-9点
       {
         condition: hour >= 6 && hour < 9,
-        messages: ['新的一天，新的开始！', '早晨的阳光为你加油', '美好的一天从这里开始']
+        messages: t('welcome.messages.morning', { returnObjects: true }) as string[]
       },
       // 上午 9-12点
       {
         condition: hour >= 9 && hour < 12,
-        messages: ['上午时光，效率最佳', '专注工作，收获满满', '保持这个节奏，很棒！']
+        messages: t('welcome.messages.forenoon', { returnObjects: true }) as string[]
       },
       // 下午 12-18点
       {
         condition: hour >= 12 && hour < 18,
-        messages: ['午后时光，继续前进', '下午茶时间到了吗？', '保持专注，你很棒！']
+        messages: t('welcome.messages.afternoon', { returnObjects: true }) as string[]
       },
       // 晚上 18-22点
       {
         condition: hour >= 18 && hour < 22,
-        messages: ['晚上好，今天辛苦了', '夜晚时光，放松一下', '回顾今天的收获吧']
+        messages: t('welcome.messages.evening', { returnObjects: true }) as string[]
       },
       // 深夜 22-24点
       {
         condition: hour >= 22,
-        messages: ['夜深了，该准备休息了', '明天又是新的开始', '早点休息，保持健康']
+        messages: t('welcome.messages.night', { returnObjects: true }) as string[]
       }
     ]
 
@@ -100,7 +103,7 @@ export function WelcomeSection() {
       return currentMessage.messages[Math.floor(Math.random() * currentMessage.messages.length)]
     }
 
-    return '欢迎回到 ClarityFile'
+    return t('welcome.messages.default')
   }
 
   return (
@@ -127,7 +130,7 @@ export function WelcomeSection() {
           <div className="flex items-center gap-2 mb-1">
             <GreetingIcon className="w-5 h-5 text-primary" />
             <span className="text-lg font-medium text-foreground">
-              {greeting.text}，{user?.name || '用户'}
+              {greeting.text}，{user?.name || t('welcome.defaultUser')}
             </span>
           </div>
           <p className="text-muted-foreground text-sm">{getWelcomeMessage()}</p>
@@ -146,13 +149,7 @@ export function WelcomeSection() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
           <span>
-            今天是{' '}
-            {new Date().toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long'
-            })}
+            {t('welcome.todayIs')} {formatFullDate(new Date().toISOString())}
           </span>
         </div>
       </div>

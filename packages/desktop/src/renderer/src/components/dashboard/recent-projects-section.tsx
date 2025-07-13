@@ -13,27 +13,29 @@ import { useProjects, useOpenFileWithSystem } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { formatRelativeTime } from '@renderer/lib/i18n-formatters'
 import { SafeImage } from '@renderer/components/ui/safe-image'
-
-const statusConfig = {
-  active: {
-    label: '活跃',
-    color:
-      'bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/50'
-  },
-  on_hold: {
-    label: '暂停',
-    color:
-      'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800/50'
-  },
-  archived: {
-    label: '已归档',
-    color: 'bg-muted/50 text-muted-foreground border-border'
-  }
-}
+import { useTranslation } from 'react-i18next'
 
 export function RecentProjectsSection() {
   const { data: projects, isLoading, error } = useProjects()
   const { trigger: openFileWithSystem } = useOpenFileWithSystem()
+  const { t } = useTranslation('dashboard')
+
+  const statusConfig = {
+    active: {
+      label: t('recentProjects.status.active'),
+      color:
+        'bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/50'
+    },
+    on_hold: {
+      label: t('recentProjects.status.on_hold'),
+      color:
+        'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800/50'
+    },
+    archived: {
+      label: t('recentProjects.status.archived'),
+      color: 'bg-muted/50 text-muted-foreground border-border'
+    }
+  }
 
   // 获取最近的5个项目
   const recentProjects = projects?.slice(0, 5) || []
@@ -41,7 +43,7 @@ export function RecentProjectsSection() {
   // 处理打开项目文件夹
   const handleOpenProjectFolder = async (project: any) => {
     if (!project.folderPath) {
-      toast.error('项目文件夹路径不存在，请先创建项目文件夹')
+      toast.error(t('recentProjects.errors.folderNotExists'))
       return
     }
 
@@ -49,14 +51,16 @@ export function RecentProjectsSection() {
       await openFileWithSystem({ filePath: project.folderPath })
     } catch (error) {
       console.error('打开项目文件夹失败:', error)
-      toast.error(`打开项目文件夹失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      toast.error(
+        `${t('recentProjects.errors.openFolderFailed')} ${error instanceof Error ? error.message : t('recentProjects.errors.unknownError')}`
+      )
     }
   }
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">最近项目</h2>
+        <h2 className="text-xl font-semibold">{t('recentProjects.loading')}</h2>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
@@ -69,9 +73,9 @@ export function RecentProjectsSection() {
   if (error) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">最近项目</h2>
+        <h2 className="text-xl font-semibold">{t('recentProjects.title')}</h2>
         <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
-          <p className="text-sm text-destructive">加载项目失败</p>
+          <p className="text-sm text-destructive">{t('recentProjects.loadError')}</p>
         </div>
       </div>
     )
@@ -80,10 +84,10 @@ export function RecentProjectsSection() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">最近项目</h2>
+        <h2 className="text-xl font-semibold">{t('recentProjects.title')}</h2>
         <Button variant="ghost" size="sm" asChild>
           <Link to="/projects">
-            查看全部
+            {t('recentProjects.viewAll')}
             <ArrowRight className="w-4 h-4 ml-1" />
           </Link>
         </Button>
@@ -92,9 +96,9 @@ export function RecentProjectsSection() {
       {recentProjects.length === 0 ? (
         <div className="text-center py-8 border border-dashed border-border rounded-lg">
           <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground mb-4">还没有项目</p>
+          <p className="text-muted-foreground mb-4">{t('recentProjects.empty.title')}</p>
           <Button asChild>
-            <Link to="/projects">创建第一个项目</Link>
+            <Link to="/projects">{t('recentProjects.empty.action')}</Link>
           </Button>
         </div>
       ) : (
@@ -154,7 +158,7 @@ export function RecentProjectsSection() {
 
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="w-3 h-3" />
-                        <span>{formatRelativeTime(project.updatedAt)}</span>
+                        <span>{formatRelativeTime(project.updatedAt.toISOString())}</span>
                       </div>
                     </div>
 
@@ -190,7 +194,7 @@ export function RecentProjectsSection() {
                           <DropdownMenuItem asChild>
                             <Link to="/projects/$projectId" params={{ projectId: project.id }}>
                               <Eye className="w-4 h-4 mr-2" />
-                              查看详情
+                              {t('recentProjects.actions.viewDetails')}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -200,7 +204,7 @@ export function RecentProjectsSection() {
                             }}
                           >
                             <FolderOpen className="w-4 h-4 mr-2" />
-                            打开文件夹
+                            {t('recentProjects.actions.openFolder')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

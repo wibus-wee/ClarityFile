@@ -211,7 +211,7 @@ export function RecentDocumentsSection() {
 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
-                      <span>{formatRelativeTime(file.updatedAt)}</span>
+                      <span>{formatRelativeTime(file.updatedAt.toISOString())}</span>
                     </div>
                   </div>
 

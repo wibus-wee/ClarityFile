@@ -9,6 +9,7 @@ import common_zhCN from './locales/common/zh-CN.json'
 import settings_zhCN from './locales/settings/zh-CN.json'
 import navigation_zhCN from './locales/navigation/zh-CN.json'
 import competitions_zhCN from './locales/competitions/zh-CN.json'
+import dashboard_zhCN from './locales/dashboard/zh-CN.json'
 import expenses_zhCN from './locales/expenses/zh-CN.json'
 import files_zhCN from './locales/files/zh-CN.json'
 import projects_zhCN from './locales/projects/zh-CN.json'
@@ -17,6 +18,7 @@ import common_enUS from './locales/common/en-US.json'
 import settings_enUS from './locales/settings/en-US.json'
 import navigation_enUS from './locales/navigation/en-US.json'
 import competitions_enUS from './locales/competitions/en-US.json'
+import dashboard_enUS from './locales/dashboard/en-US.json'
 import expenses_enUS from './locales/expenses/en-US.json'
 import files_enUS from './locales/files/en-US.json'
 import projects_enUS from './locales/projects/en-US.json'
@@ -27,6 +29,7 @@ export const defaultResources = {
     settings: settings_zhCN,
     navigation: navigation_zhCN,
     competitions: competitions_zhCN,
+    dashboard: dashboard_zhCN,
     expenses: expenses_zhCN,
     files: files_zhCN,
     projects: projects_zhCN
@@ -36,6 +39,7 @@ export const defaultResources = {
     settings: settings_enUS,
     navigation: navigation_enUS,
     competitions: competitions_enUS,
+    dashboard: dashboard_enUS,
     expenses: expenses_enUS,
     files: files_enUS,
     projects: projects_enUS

@@ -1,6 +1,7 @@
 import { FileText, Activity, Database } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useProjects, useFileSystemStats } from '@renderer/hooks/use-tipc'
+import { useTranslation } from 'react-i18next'
 
 interface StatCardProps {
   title: string
@@ -32,6 +33,7 @@ function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
 export function SystemOverviewSection() {
   const { data: projects } = useProjects()
   const { data: fileStats } = useFileSystemStats()
+  const { t } = useTranslation('dashboard')
 
   // 计算统计数据
   const fileCount = fileStats?.totalFiles || 0
@@ -45,13 +47,13 @@ export function SystemOverviewSection() {
     //   color: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
     // },
     {
-      title: '活跃项目',
+      title: t('systemOverview.stats.activeProjects'),
       value: activeProjects,
       icon: Activity,
       color: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400'
     },
     {
-      title: '管理文件',
+      title: t('systemOverview.stats.managedFiles'),
       value: fileCount,
       icon: FileText,
       color: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'
@@ -68,7 +70,7 @@ export function SystemOverviewSection() {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Database className="w-5 h-5 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">系统概览</h2>
+        <h2 className="text-xl font-semibold">{t('systemOverview.title')}</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -93,21 +95,25 @@ export function SystemOverviewSection() {
       >
         <div className="flex items-center gap-2 mb-3">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-sm font-medium">系统状态</span>
+          <span className="text-sm font-medium">{t('systemOverview.systemStatus.title')}</span>
         </div>
 
         <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex justify-between">
-            <span>数据库连接</span>
-            <span className="text-green-600 dark:text-green-400">正常</span>
+            <span>{t('systemOverview.systemStatus.database')}</span>
+            <span className="text-green-600 dark:text-green-400">
+              {t('systemOverview.systemStatus.normal')}
+            </span>
           </div>
           <div className="flex justify-between">
-            <span>文件系统</span>
-            <span className="text-green-600 dark:text-green-400">正常</span>
+            <span>{t('systemOverview.systemStatus.fileSystem')}</span>
+            <span className="text-green-600 dark:text-green-400">
+              {t('systemOverview.systemStatus.normal')}
+            </span>
           </div>
           <div className="flex justify-between">
-            <span>最后同步</span>
-            <span>刚刚</span>
+            <span>{t('systemOverview.systemStatus.lastSync')}</span>
+            <span>{t('systemOverview.systemStatus.justNow')}</span>
           </div>
         </div>
       </motion.div>
