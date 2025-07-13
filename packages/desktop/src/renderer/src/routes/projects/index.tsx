@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Input } from '@clarity/shadcn/ui/input'
 import { Button } from '@clarity/shadcn/ui/button'
 import {
@@ -33,6 +34,8 @@ export const Route = createFileRoute('/projects/')({
 })
 
 function ProjectsPage() {
+  const { t } = useTranslation('projects')
+  const { t: tCommon } = useTranslation('common')
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
@@ -66,9 +69,9 @@ function ProjectsPage() {
   const handleConfirmDelete = async (projectId: string, _projectName: string) => {
     try {
       await deleteProject({ id: projectId })
-      toast.success('项目删除成功！')
+      toast.success(t('messages.deleteSuccess'))
     } catch (error) {
-      toast.error('删除项目失败')
+      toast.error(t('messages.deleteFailed'))
       console.error(error)
       throw error // 重新抛出错误，让对话框处理
     }
@@ -82,7 +85,7 @@ function ProjectsPage() {
     try {
       await searchProjects({ query: searchQuery })
     } catch (error) {
-      toast.error('搜索失败')
+      toast.error(tCommon('messages.searchFailed'))
       console.error(error)
     }
   }
@@ -97,9 +100,9 @@ function ProjectsPage() {
         id: projectId,
         status: newStatus as 'active' | 'on_hold' | 'archived'
       })
-      toast.success('项目状态更新成功！')
+      toast.success(t('messages.updateSuccess'))
     } catch (error) {
-      toast.error('更新项目状态失败')
+      toast.error(t('messages.updateFailed'))
       console.error(error)
     }
   }
@@ -139,15 +142,15 @@ function ProjectsPage() {
         {/* 页面头部 */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">项目</h1>
-            <p className="text-muted-foreground">管理您的所有项目，创建新项目并跟踪进度</p>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+            <p className="text-muted-foreground">{t('subtitle')}</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Shortcut shortcut={['cmd', 'n']} description="新建项目">
+            <Shortcut shortcut={['cmd', 'n']} description={t('shortcuts.newProject')}>
               <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
                 <Plus className="w-4 h-4" />
-                新建项目
+                {t('createNew')}
               </Button>
             </Shortcut>
           </div>
@@ -158,7 +161,7 @@ function ProjectsPage() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="搜索项目..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -167,16 +170,20 @@ function ProjectsPage() {
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <Shortcut shortcut={['cmd', 'p']} description="筛选项目" showTooltip={false}>
+            <Shortcut
+              shortcut={['cmd', 'p']}
+              description={t('shortcuts.filterProjects')}
+              showTooltip={false}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
             </Shortcut>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value="active">活跃</SelectItem>
-              <SelectItem value="archived">已归档</SelectItem>
-              <SelectItem value="on_hold">暂停</SelectItem>
+              <SelectItem value="all">{t('status.all')}</SelectItem>
+              <SelectItem value="active">{tCommon('states.active')}</SelectItem>
+              <SelectItem value="archived">{tCommon('states.archived')}</SelectItem>
+              <SelectItem value="on_hold">{t('status.on_hold')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -186,17 +193,21 @@ function ProjectsPage() {
               setSortBy(value)
             }
           >
-            <Shortcut shortcut={['cmd', 's']} description="排序项目" showTooltip={false}>
+            <Shortcut
+              shortcut={['cmd', 's']}
+              description={t('shortcuts.sortProjects')}
+              showTooltip={false}
+            >
               <SelectTrigger className="w-36">
                 <ArrowUpDown className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
             </Shortcut>
             <SelectContent>
-              <SelectItem value="updatedAt">最近更新</SelectItem>
-              <SelectItem value="createdAt">创建时间</SelectItem>
-              <SelectItem value="name">项目名称</SelectItem>
-              <SelectItem value="status">项目状态</SelectItem>
+              <SelectItem value="updatedAt">{t('sortBy.updatedAt')}</SelectItem>
+              <SelectItem value="createdAt">{t('sortBy.createdAt')}</SelectItem>
+              <SelectItem value="name">{t('sortBy.name')}</SelectItem>
+              <SelectItem value="status">{t('sortBy.status')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -234,8 +245,8 @@ function ProjectsPage() {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center justify-center py-12 text-center"
             >
-              <div className="text-red-500 mb-2">加载项目失败</div>
-              <p className="text-sm text-muted-foreground">请检查网络连接或稍后重试</p>
+              <div className="text-red-500 mb-2">{t('messages.loadFailed')}</div>
+              <p className="text-sm text-muted-foreground">{tCommon('messages.networkError')}</p>
             </motion.div>
           ) : filteredAndSortedProjects && filteredAndSortedProjects.length > 0 ? (
             <motion.div

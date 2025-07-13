@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProjectDetails } from '@renderer/hooks/use-tipc'
 import { Button } from '@clarity/shadcn/ui/button'
@@ -23,19 +24,9 @@ type TabId = 'documents' | 'assets' | 'competitions' | 'expenses' | 'budget-pool
 
 interface Tab {
   id: TabId
-  label: string
+  labelKey: string
   icon: React.ComponentType<{ className?: string }>
 }
-
-// Tab配置
-const tabs: Tab[] = [
-  { id: 'documents', label: '文档', icon: FileText },
-  { id: 'assets', label: '资产', icon: Image },
-  { id: 'competitions', label: '参与赛事', icon: Trophy },
-  { id: 'expenses', label: '经费记录', icon: DollarSign },
-  { id: 'budget-pools', label: '经费池', icon: PieChart },
-  { id: 'settings', label: '设置', icon: Settings }
-]
 
 // 状态颜色映射
 function getStatusColor(status: string) {
@@ -51,34 +42,47 @@ function getStatusColor(status: string) {
   }
 }
 
-function getStatusText(status: string) {
-  switch (status) {
-    case 'active':
-      return '进行中'
-    case 'archived':
-      return '已归档'
-    case 'on_hold':
-      return '暂停'
-    default:
-      return status
-  }
-}
-
 export const Route = createFileRoute('/projects/$projectId')({
   component: ProjectDetailsPage
 })
 
 function ProjectDetailsPage() {
+  const { t } = useTranslation('projects')
+  const { t: tCommon } = useTranslation('common')
   const { projectId } = Route.useParams()
   const [activeTab, setActiveTab] = useState<TabId>('documents')
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
 
   const { data: projectDetails, isLoading, error } = useProjectDetails(projectId)
 
+  // Tab配置 - 移到组件内部以使用 t 函数
+  const tabs: Tab[] = [
+    { id: 'documents', labelKey: 'tabs.documents', icon: FileText },
+    { id: 'assets', labelKey: 'tabs.assets', icon: Image },
+    { id: 'competitions', labelKey: 'tabs.competitions', icon: Trophy },
+    { id: 'expenses', labelKey: 'tabs.expenses', icon: DollarSign },
+    { id: 'budget-pools', labelKey: 'tabs.budgetPools', icon: PieChart },
+    { id: 'settings', labelKey: 'tabs.settings', icon: Settings }
+  ]
+
+  // 获取状态文本的函数
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active':
+        return tCommon('states.inProgress')
+      case 'archived':
+        return tCommon('states.archived')
+      case 'on_hold':
+        return t('status.on_hold')
+      default:
+        return status
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">加载中...</div>
+        <div className="text-muted-foreground">{tCommon('states.loading')}</div>
       </div>
     )
   }
@@ -86,12 +90,37 @@ function ProjectDetailsPage() {
   if (error || !projectDetails) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-destructive">加载项目详情失败</div>
+        <div className="text-destructive">{t('messages.loadDetailsFailed')}</div>
       </div>
     )
   }
 
   const { project } = projectDetails
+
+  // 渲染Tab内容的函数
+  const renderTabContent = (tabId: TabId, projectDetails: any) => {
+    switch (tabId) {
+      case 'documents':
+        return <DocumentsTab projectDetails={projectDetails} />
+      case 'assets':
+        return <AssetsTab projectDetails={projectDetails} />
+      case 'competitions':
+        return <CompetitionsTab projectDetails={projectDetails} />
+      case 'expenses':
+        return <ExpensesTab projectDetails={projectDetails} />
+      case 'budget-pools':
+        return <BudgetPoolsTab projectDetails={projectDetails} />
+      case 'settings':
+        return <SettingsTab projectDetails={projectDetails} />
+      default:
+        return (
+          <InlineNotFound
+            title={tCommon('messages.contentNotFound')}
+            description={tCommon('messages.componentError')}
+          />
+        )
+    }
+  }
 
   return (
     <ShortcutProvider scope="project-details-page">
@@ -110,16 +139,24 @@ function ProjectDetailsPage() {
                 <p className="text-muted-foreground mb-4">{project.description}</p>
               )}
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <span>创建时间：{new Date(project.createdAt).toLocaleDateString()}</span>
-                <span>更新时间：{new Date(project.updatedAt).toLocaleDateString()}</span>
-                {project.folderPath && <span>项目路径：{project.folderPath}</span>}
+                <span>
+                  {tCommon('fields.createdAt')}：{new Date(project.createdAt).toLocaleDateString()}
+                </span>
+                <span>
+                  {tCommon('fields.updatedAt')}：{new Date(project.updatedAt).toLocaleDateString()}
+                </span>
+                {project.folderPath && (
+                  <span>
+                    {t('fields.folderPath')}：{project.folderPath}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Shortcut shortcut={['cmd', 'e']} description="编辑项目">
+              <Shortcut shortcut={['cmd', 'e']} description={t('shortcuts.editProject')}>
                 <Button variant="outline" size="sm" onClick={() => setEditDrawerOpen(true)}>
                   <Edit className="w-4 h-4 mr-2" />
-                  编辑
+                  {t('editProject')}
                 </Button>
               </Shortcut>
             </div>
@@ -142,7 +179,7 @@ function ProjectDetailsPage() {
                 <Shortcut
                   shortcut={['cmd', (index + 1).toString() as ShortcutKey]}
                   key={tab.id}
-                  description={tab.label}
+                  description={t(tab.labelKey as any)}
                 >
                   <button
                     onClick={() => setActiveTab(tab.id)}
@@ -154,7 +191,7 @@ function ProjectDetailsPage() {
                     )}
                   >
                     <Icon className="w-4 h-4" />
-                    {tab.label}
+                    {t(tab.labelKey as any)}
                     {isActive && (
                       <motion.div
                         layoutId="activeProjectTab"
@@ -198,27 +235,4 @@ function ProjectDetailsPage() {
       />
     </ShortcutProvider>
   )
-}
-
-// 渲染Tab内容的函数
-function renderTabContent(tabId: TabId, projectDetails: any) {
-  switch (tabId) {
-    case 'documents':
-      return <DocumentsTab projectDetails={projectDetails} />
-    case 'assets':
-      return <AssetsTab projectDetails={projectDetails} />
-    case 'competitions':
-      return <CompetitionsTab projectDetails={projectDetails} />
-
-    case 'expenses':
-      return <ExpensesTab projectDetails={projectDetails} />
-    case 'budget-pools':
-      return <BudgetPoolsTab projectDetails={projectDetails} />
-    case 'settings':
-      return <SettingsTab projectDetails={projectDetails} />
-    default:
-      return (
-        <InlineNotFound title="内容未找到" description="似乎出现了程序组件故障，代码出现问题" />
-      )
-  }
 }

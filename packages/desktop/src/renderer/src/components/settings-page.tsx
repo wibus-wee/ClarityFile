@@ -50,7 +50,7 @@ function useSettingsCategories() {
 }
 
 function SettingsContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('common')
   const search = useSearch({ from: '/settings' })
   const category = search.category || 'general'
   const settingsCategories = useSettingsCategories()
@@ -80,10 +80,10 @@ function SettingsContent() {
       <div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{currentCategory.name}</h1>
-          <p className="text-muted-foreground mt-2">{t(getDescriptionKey(category) as string)}</p>
+          <p className="text-muted-foreground mt-2">{t(getDescriptionKey(category) as any)}</p>
         </div>
 
-        <Suspense fallback={<div>{t('common:loading')}</div>}>
+        <Suspense fallback={<div>{t('states.loading')}</div>}>
           <CurrentComponent key={category} />
         </Suspense>
       </div>
@@ -95,7 +95,7 @@ export function SettingsPage() {
   const { t } = useTranslation('common')
 
   return (
-    <Suspense fallback={<div>{t('loading')}...</div>}>
+    <Suspense fallback={<div>{t('states.loading')}...</div>}>
       <SettingsContent />
     </Suspense>
   )

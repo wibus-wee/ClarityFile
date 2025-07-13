@@ -1,7 +1,10 @@
 {
   "title": "项目",
+  "subtitle": "管理您的所有项目，创建新项目并跟踪进度",
   "create": "创建项目",
+  "createNew": "新建项目",
   "edit": "编辑项目",
+  "editProject": "编辑",
   "delete": "删除项目",
   "archive": "归档项目",
   "restore": "恢复项目",
@@ -9,25 +12,32 @@
   "export": "导出项目",
   "import": "导入项目",
   "search": "搜索项目",
+  "searchPlaceholder": "搜索项目...",
   "filter": "筛选项目",
-  "sort": "排序",
-  "view": "视图",
-  "list": "列表",
-  "grid": "网格",
-  "details": "详情",
-  "overview": "概览",
+
   "documents": "文档",
   "assets": "资产",
   "competitions": "参与赛事",
   "resources": "关联资源",
   "budget": "经费",
   "settings": "设置",
+  "tabs": {
+    "documents": "文档",
+    "assets": "资产",
+    "competitions": "参与赛事",
+    "expenses": "经费记录",
+    "budgetPools": "经费池",
+    "settings": "设置"
+  },
   "status": {
-    "active": "进行中",
-    "completed": "已完成",
-    "paused": "已暂停",
-    "cancelled": "已取消",
-    "archived": "已归档"
+    "all": "全部状态",
+    "on_hold": "暂停"
+  },
+  "sortBy": {
+    "updatedAt": "最近更新",
+    "createdAt": "创建时间",
+    "name": "项目名称",
+    "status": "项目状态"
   },
   "fields": {
     "name": "项目名称",
@@ -35,16 +45,26 @@
     "type": "项目类型",
     "category": "项目分类",
     "status": "项目状态",
-    "startDate": "开始日期",
-    "endDate": "结束日期",
-    "deadline": "截止日期",
-    "priority": "优先级",
-    "tags": "标签",
+
     "location": "项目位置",
     "budget": "项目预算",
-    "progress": "进度",
     "team": "团队成员",
     "client": "客户",
-    "manager": "项目经理"
+    "manager": "项目经理",
+    "folderPath": "项目路径"
+  },
+  "messages": {
+    "deleteSuccess": "项目删除成功！",
+    "deleteFailed": "删除项目失败",
+    "updateSuccess": "项目状态更新成功！",
+    "updateFailed": "更新项目状态失败",
+    "loadFailed": "加载项目失败",
+    "loadDetailsFailed": "加载项目详情失败"
+  },
+  "shortcuts": {
+    "newProject": "新建项目",
+    "filterProjects": "筛选项目",
+    "sortProjects": "排序项目",
+    "editProject": "编辑项目"
   }
 }

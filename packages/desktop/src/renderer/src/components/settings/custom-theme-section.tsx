@@ -25,8 +25,7 @@ import type { CustomTheme } from '@renderer/types/theme'
 import { formatFriendlyDate } from '@renderer/lib/i18n-formatters'
 
 export function CustomThemeSection() {
-  const { t } = useTranslation('settings')
-  const { t: tCommon } = useTranslation('common')
+  const { t } = useTranslation(['settings', 'common'])
   const {
     customThemes,
     activeCustomTheme,
@@ -98,7 +97,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.importFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     } finally {
@@ -119,7 +118,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.previewFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     }
@@ -138,7 +137,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.applyFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     }
@@ -151,7 +150,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.deleteFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     }
@@ -180,7 +179,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.exportFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     }
@@ -193,7 +192,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.switchFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     }
@@ -260,7 +259,7 @@ export function CustomThemeSection() {
     } catch (error) {
       toast.error(
         t('appearance.customTheme.errors.updateFailed', {
-          error: error instanceof Error ? error.message : tCommon('unknownError')
+          error: error instanceof Error ? error.message : t('common:messages.unknownError')
         })
       )
     } finally {

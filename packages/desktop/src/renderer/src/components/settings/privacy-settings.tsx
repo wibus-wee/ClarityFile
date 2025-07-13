@@ -3,24 +3,22 @@
 import { useTranslation } from 'react-i18next'
 
 export function PrivacySettings() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
 
   return (
     <div className="space-y-8">
       {/* 数据隐私 */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium">{t('settings:privacy.dataPrivacy')}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t('settings:privacy.dataPrivacyDescription')}
-          </p>
+          <h3 className="text-lg font-medium">{t('privacy.dataPrivacy')}</h3>
+          <p className="text-sm text-muted-foreground">{t('privacy.dataPrivacyDescription')}</p>
         </div>
 
         <div className="space-y-4">
           <div className="rounded-lg border border-dashed border-muted-foreground/25 p-8 text-center">
-            <p className="text-muted-foreground">{t('settings:privacy.privacyInDevelopment')}</p>
+            <p className="text-muted-foreground">{t('privacy.privacyInDevelopment')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              {t('settings:privacy.privacyUpcomingFeatures')}
+              {t('privacy.privacyUpcomingFeatures')}
             </p>
           </div>
         </div>
@@ -29,17 +27,15 @@ export function PrivacySettings() {
       {/* 可见性设置 */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium">{t('settings:privacy.visibilitySettings')}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t('settings:privacy.visibilityDescription')}
-          </p>
+          <h3 className="text-lg font-medium">{t('privacy.visibilitySettings')}</h3>
+          <p className="text-sm text-muted-foreground">{t('privacy.visibilityDescription')}</p>
         </div>
 
         <div className="space-y-4">
           <div className="rounded-lg border border-dashed border-muted-foreground/25 p-8 text-center">
-            <p className="text-muted-foreground">{t('settings:privacy.visibilityInDevelopment')}</p>
+            <p className="text-muted-foreground">{t('privacy.visibilityInDevelopment')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              {t('settings:privacy.visibilityUpcomingFeatures')}
+              {t('privacy.visibilityUpcomingFeatures')}
             </p>
           </div>
         </div>

@@ -1,7 +1,10 @@
 {
   "title": "Projects",
+  "subtitle": "Manage all your projects, create new projects and track progress",
   "create": "Create Project",
+  "createNew": "New Project",
   "edit": "Edit Project",
+  "editProject": "Edit",
   "delete": "Delete Project",
   "archive": "Archive Project",
   "restore": "Restore Project",
@@ -9,25 +12,31 @@
   "export": "Export Project",
   "import": "Import Project",
   "search": "Search Projects",
+  "searchPlaceholder": "Search projects...",
   "filter": "Filter Projects",
-  "sort": "Sort",
-  "view": "View",
-  "list": "List",
-  "grid": "Grid",
-  "details": "Details",
-  "overview": "Overview",
   "documents": "Documents",
   "assets": "Assets",
   "competitions": "Competitions",
   "resources": "Resources",
   "budget": "Budget",
   "settings": "Settings",
+  "tabs": {
+    "documents": "Documents",
+    "assets": "Assets",
+    "competitions": "Competitions",
+    "expenses": "Expense Records",
+    "budgetPools": "Budget Pools",
+    "settings": "Settings"
+  },
   "status": {
-    "active": "Active",
-    "completed": "Completed",
-    "paused": "Paused",
-    "cancelled": "Cancelled",
-    "archived": "Archived"
+    "all": "All Status",
+    "on_hold": "On Hold"
+  },
+  "sortBy": {
+    "updatedAt": "Recently Updated",
+    "createdAt": "Created Date",
+    "name": "Project Name",
+    "status": "Project Status"
   },
   "fields": {
     "name": "Project Name",
@@ -35,16 +44,25 @@
     "type": "Project Type",
     "category": "Project Category",
     "status": "Project Status",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "deadline": "Deadline",
-    "priority": "Priority",
-    "tags": "Tags",
     "location": "Project Location",
     "budget": "Project Budget",
-    "progress": "Progress",
     "team": "Team Members",
     "client": "Client",
-    "manager": "Project Manager"
+    "manager": "Project Manager",
+    "folderPath": "Project Path"
+  },
+  "messages": {
+    "deleteSuccess": "Project deleted successfully!",
+    "deleteFailed": "Failed to delete project",
+    "updateSuccess": "Project status updated successfully!",
+    "updateFailed": "Failed to update project status",
+    "loadFailed": "Failed to load projects",
+    "loadDetailsFailed": "Failed to load project details"
+  },
+  "shortcuts": {
+    "newProject": "New Project",
+    "filterProjects": "Filter Projects",
+    "sortProjects": "Sort Projects",
+    "editProject": "Edit Project"
   }
 }
