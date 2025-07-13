@@ -16,7 +16,7 @@ import { set } from 'es-toolkit/compat'
  */
 export function i18nPlugin(): Plugin {
   const __dirname = path.dirname(fileURLToPath(import.meta.url))
-  const localesDir = path.resolve(__dirname, '../../src/renderer/src/i18n/locales')
+  const localesDir = path.resolve(__dirname, '../../locales')
 
   return {
     name: 'vite-plugin-i18n-locales',
