@@ -105,6 +105,8 @@
       "cancel": "Cancel",
       "created": "Created",
       "updated": "Updated",
+      "createdAt": "Created {{date}}",
+      "updatedAt": "Updated {{date}}",
       "errors": {
         "nameAndCssRequired": "Please enter theme name and CSS content",
         "validationFailed": "Theme validation failed: {{errors}}",

@@ -105,6 +105,8 @@
       "cancel": "取消",
       "created": "创建",
       "updated": "更新",
+      "createdAt": "{{date}}创建",
+      "updatedAt": "{{date}}更新",
       "errors": {
         "nameAndCssRequired": "请输入主题名称和 CSS 内容",
         "validationFailed": "主题验证失败: {{errors}}",

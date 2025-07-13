@@ -275,9 +275,13 @@ export function CustomThemeSection() {
 
     // 如果更新时间比创建时间晚超过1分钟，显示更新时间
     if (updatedTime - createdTime > 60000) {
-      return `${formatFriendlyDate(theme.updatedAt)}${t('appearance.customTheme.updated')}`
+      return t('appearance.customTheme.updatedAt', {
+        date: formatFriendlyDate(theme.updatedAt)
+      })
     } else {
-      return `${formatFriendlyDate(theme.createdAt)}${t('appearance.customTheme.created')}`
+      return t('appearance.customTheme.createdAt', {
+        date: formatFriendlyDate(theme.createdAt)
+      })
     }
   }
 
