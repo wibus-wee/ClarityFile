@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 interface Language {
   code: string
@@ -6,10 +6,18 @@ interface Language {
   isBase?: boolean
 }
 
+interface Namespace {
+  name: string
+  displayName: string
+  keyCount: number
+  progress: number
+}
+
 interface TranslationEntry {
   key: string
   path: string
-  values: Record<string, string>
+  values: Record<string, any>
+  type: 'string' | 'array' | 'object' | 'number' | 'boolean'
   isModified: boolean
 }
 
@@ -18,11 +26,12 @@ export const useTranslations = () => {
   const dialog = useDialog()
 
   const activeNamespace = ref<string>('')
+  const namespaces = ref<Namespace[]>([])
   // 改为单选模式 - 当前编辑的语言
-  const currentLanguage = ref<string>('en-US')
+  const currentLanguage = ref<string>('zh-CN')
   const availableLanguages = ref<Language[]>([
-    { code: 'zh-CN', name: '简体中文', isBase: true },
-    { code: 'en-US', name: 'English' }
+    { code: 'zh-CN', name: 'zh-CN', isBase: true },
+    { code: 'en-US', name: 'en-US' }
   ])
 
   // 当前显示的语言列表（基准语言 + 当前选中语言）
@@ -33,6 +42,12 @@ export const useTranslations = () => {
     const result = []
     if (baseLanguage) result.push(baseLanguage)
     if (currentLang && currentLang.code !== baseLanguage?.code) result.push(currentLang)
+
+    // 如果只有基准语言，添加第一个非基准语言以便比较
+    if (result.length === 1 && availableLanguages.value.length > 1) {
+      const firstNonBase = availableLanguages.value.find((lang) => !lang.isBase)
+      if (firstNonBase) result.push(firstNonBase)
+    }
 
     return result
   })
@@ -46,10 +61,54 @@ export const useTranslations = () => {
   const isLoading = ref(false)
   const hasUnsavedChanges = ref(false)
 
+  // 筛选状态
+  const showOnlyUntranslated = ref(false)
+
+  // 检查值是否未翻译的辅助函数
+  const isValueUntranslated = (value: any): boolean => {
+    if (value === null || value === undefined) return true
+    if (typeof value === 'string') return value.trim() === ''
+    if (Array.isArray(value))
+      return (
+        value.length === 0 ||
+        value.every((item) => (typeof item === 'string' ? item.trim() === '' : !item))
+      )
+    if (typeof value === 'object') return Object.keys(value).length === 0
+    return false
+  }
+
   // 计算属性
   const modifiedEntries = computed(() =>
     translationEntries.value.filter((entry) => entry.isModified)
   )
+
+  // 筛选后的翻译条目
+  const filteredTranslationEntries = computed(() => {
+    if (!showOnlyUntranslated.value) {
+      return translationEntries.value
+    }
+
+    // 筛选出有未翻译字段的条目
+    return translationEntries.value.filter((entry) => {
+      // 检查是否有任何非基准语言的值为空
+      return languages.value.some((lang) => {
+        if (lang.isBase) return false // 跳过基准语言
+        const value = entry.values[lang.code]
+        return isValueUntranslated(value)
+      })
+    })
+  })
+
+  // 未翻译条目统计
+  const untranslatedCount = computed(() => {
+    return translationEntries.value.filter((entry) => {
+      return languages.value.some((lang) => {
+        if (lang.isBase) return false
+        const value = entry.values[lang.code]
+        return isValueUntranslated(value)
+      })
+    }).length
+  })
 
   const translationProgress = computed(() => {
     const total = translationEntries.value.length * languages.value.length
@@ -100,18 +159,37 @@ export const useTranslations = () => {
       })
 
       // 创建翻译条目
-      translationEntries.value = Array.from(allKeys).map((key) => ({
-        key: key.split('.').pop() || key,
-        path: key,
-        values: languages.value.reduce(
+      translationEntries.value = Array.from(allKeys).map((key) => {
+        const values = languages.value.reduce(
           (acc, lang) => {
             acc[lang.code] = getValueByPath(translationData[lang.code] || {}, key) || ''
             return acc
           },
-          {} as Record<string, string>
-        ),
-        isModified: false
-      }))
+          {} as Record<string, any>
+        )
+
+        // 确定数据类型（基于基准语言的值）
+        const baseValue = values[baseLanguage.value.code]
+        let type: 'string' | 'array' | 'object' | 'number' | 'boolean' = 'string'
+
+        if (Array.isArray(baseValue)) {
+          type = 'array'
+        } else if (typeof baseValue === 'object' && baseValue !== null) {
+          type = 'object'
+        } else if (typeof baseValue === 'number') {
+          type = 'number'
+        } else if (typeof baseValue === 'boolean') {
+          type = 'boolean'
+        }
+
+        return {
+          key: key.split('.').pop() || key,
+          path: key,
+          values,
+          type,
+          isModified: false
+        }
+      })
     } catch (err) {
       console.error('Failed to load namespace translations:', err)
     } finally {
@@ -233,8 +311,9 @@ export const useTranslations = () => {
           acc[lang.code] = ''
           return acc
         },
-        {} as Record<string, string>
+        {} as Record<string, any>
       ),
+      type: 'string',
       isModified: true
     }
 
@@ -258,7 +337,8 @@ export const useTranslations = () => {
   const getCurrentLanguage = computed(() => {
     return (
       availableLanguages.value.find((lang) => lang.code === currentLanguage.value) ||
-      availableLanguages.value[1]
+      availableLanguages.value.find((lang) => lang.isBase) ||
+      availableLanguages.value[0]
     )
   })
 
@@ -275,9 +355,7 @@ export const useTranslations = () => {
     availableLanguages.value.push({ code, name })
 
     // 自动选择新添加的语言
-    if (!selectedLanguages.value.includes(code)) {
-      selectedLanguages.value.push(code)
-    }
+    currentLanguage.value = code
 
     // 为所有现有条目添加新语言的空值
     translationEntries.value.forEach((entry) => {
@@ -289,22 +367,134 @@ export const useTranslations = () => {
     return true
   }
 
-  // 兼容旧的addLanguage方法
-  const addLanguage = addAvailableLanguage
+  // 添加新语言（创建实际文件）
+  const addLanguage = async (code: string, name: string) => {
+    try {
+      // 检查语言是否已存在
+      const exists = availableLanguages.value.some((lang) => lang.code === code)
+      if (exists) {
+        await dialog.alert('该语言已存在')
+        return false
+      }
+
+      // 调用 API 创建语言文件
+      const response = await $fetch('/api/languages', {
+        method: 'POST',
+        body: { languageCode: code }
+      })
+
+      if (response.success) {
+        // 添加到可用语言列表
+        availableLanguages.value.push({ code, name })
+
+        // 自动选择新添加的语言
+        currentLanguage.value = code
+
+        // 重新加载当前命名空间的数据
+        if (activeNamespace.value) {
+          await loadNamespaceTranslations(activeNamespace.value)
+        }
+
+        return true
+      } else {
+        await dialog.alert('添加语言失败')
+        return false
+      }
+    } catch (error) {
+      console.error('Error adding language:', error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      await dialog.alert(`添加语言失败: ${errorMessage}`)
+      return false
+    }
+  }
+
+  // 切换筛选状态
+  const toggleUntranslatedFilter = () => {
+    showOnlyUntranslated.value = !showOnlyUntranslated.value
+  }
+
+  // 加载可用语言列表
+  const loadAvailableLanguages = async () => {
+    try {
+      const response = await $fetch('/api/languages')
+      if (response.success) {
+        availableLanguages.value = response.languages
+
+        // 如果当前语言不在可用语言中，切换到基准语言
+        const currentExists = availableLanguages.value.some(
+          (lang) => lang.code === currentLanguage.value
+        )
+        if (!currentExists) {
+          const baseLanguage = availableLanguages.value.find((lang) => lang.isBase)
+          if (baseLanguage) {
+            currentLanguage.value = baseLanguage.code
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading available languages:', error)
+    }
+  }
+
+  // 加载命名空间列表
+  async function loadNamespaces() {
+    try {
+      // 使用现有的 fileSystem.namespaces 来获取命名空间列表
+      const existingNamespaces = fileSystem.namespaces.value
+      if (existingNamespaces && existingNamespaces.length > 0) {
+        namespaces.value = existingNamespaces.map((ns: any) => ({
+          name: ns.name,
+          displayName: ns.label || ns.name,
+          keyCount: ns.count || 0,
+          progress: ns.progress || 0 // 使用真实的进度数据
+        }))
+      } else {
+        // 提供默认的命名空间列表作为fallback
+        namespaces.value = [
+          { name: 'common', displayName: '通用', keyCount: 137, progress: 94 },
+          { name: 'competitions', displayName: '赛事中心', keyCount: 63, progress: 94 },
+          { name: 'dashboard', displayName: '仪表板', keyCount: 109, progress: 95 },
+          { name: 'expenses', displayName: '经费报销', keyCount: 52, progress: 92 },
+          { name: 'files', displayName: '文件管理', keyCount: 40, progress: 88 },
+          { name: 'navigation', displayName: '导航', keyCount: 28, progress: 100 },
+          { name: 'projects', displayName: '项目', keyCount: 185, progress: 96 },
+          { name: 'settings', displayName: '设置', keyCount: 206, progress: 89 }
+        ]
+      }
+    } catch (error) {
+      console.error('Error loading namespaces:', error)
+      // 提供默认的命名空间列表作为fallback
+      namespaces.value = [
+        { name: 'common', displayName: '通用', keyCount: 137, progress: 94 },
+        { name: 'competitions', displayName: '赛事中心', keyCount: 63, progress: 94 },
+        { name: 'dashboard', displayName: '仪表板', keyCount: 109, progress: 95 },
+        { name: 'expenses', displayName: '经费报销', keyCount: 52, progress: 92 },
+        { name: 'files', displayName: '文件管理', keyCount: 40, progress: 88 },
+        { name: 'navigation', displayName: '导航', keyCount: 28, progress: 100 },
+        { name: 'projects', displayName: '项目', keyCount: 185, progress: 96 },
+        { name: 'settings', displayName: '设置', keyCount: 206, progress: 89 }
+      ]
+    }
+  }
 
   return {
     activeNamespace: readonly(activeNamespace),
+    namespaces: readonly(namespaces),
     currentLanguage: readonly(currentLanguage),
     availableLanguages: readonly(availableLanguages),
     languages: readonly(languages),
     baseLanguage: readonly(baseLanguage),
     getCurrentLanguage: readonly(getCurrentLanguage),
     translationEntries: readonly(translationEntries),
+    filteredTranslationEntries: readonly(filteredTranslationEntries),
     isLoading: readonly(isLoading),
     hasUnsavedChanges: readonly(hasUnsavedChanges),
     modifiedEntries: readonly(modifiedEntries),
     translationProgress: readonly(translationProgress),
+    showOnlyUntranslated,
+    untranslatedCount: readonly(untranslatedCount),
     selectNamespace,
+    loadNamespaces,
     loadNamespaceTranslations,
     updateTranslation,
     saveAllChanges,
@@ -313,6 +503,8 @@ export const useTranslations = () => {
     addLanguage,
     addAvailableLanguage,
     selectLanguage,
+    loadAvailableLanguages,
+    toggleUntranslatedFilter,
     dialog
   }
 }

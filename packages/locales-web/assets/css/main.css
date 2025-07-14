@@ -1,4 +1,5 @@
 @import '@unocss/reset/tailwind.css';
+@import './antfu-colors.css';
 
 /* antfu风格的基础样式 */
 body {
@@ -8,15 +9,9 @@ body {
 }
 
 
-/* 平滑的动画效果 */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
 /* 自定义滚动条 - antfu风格 */
 ::-webkit-scrollbar {
+  display: none;
   width: 6px;
   height: 6px;
 }
