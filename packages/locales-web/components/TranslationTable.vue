@@ -53,11 +53,14 @@
               <!-- 语言列 -->
               <td v-for="language in languages" :key="language.code" class="px-4 py-2 text-sm align-top">
                 <div class="relative">
-                  <textarea :value="item.values[language.code]" :placeholder="`输入 ${language.name} 翻译...`"
-                    class="w-full px-2 py-1 text-sm bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none border-none"
-                    rows="1" @input="markAsChanged(index, language.code, $event.target.value)"
+                  <textarea :ref="el => textareaRefs[`${index}-${language.code}`] = el" name="translation"
+                    :value="item.values[language.code]" :placeholder="`输入 ${language.name} 翻译...`"
+                    class="w-full px-2 py-1 text-sm bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none border-none min-h-6"
+                    style="overflow: hidden;"
+                    @input="markAsChanged(index, language.code, $event.target.value); autoResize($event.target)"
+                    @focus="autoResize($event.target)"
                     @blur="saveTranslation(index, language.code, $event.target.value)">
-                </textarea>
+                  </textarea>
                   <div v-if="item.values[language.code]" class="absolute top-2 right-2 w-2 h-2 rounded-full"
                     :class="getTranslationStatus(index) === 'changed' ? 'bg-amber-400' : 'bg-emerald-400'">
                   </div>
@@ -88,6 +91,8 @@
 </template>
 
 <script setup>
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
+
 const props = defineProps({
   namespace: {
     type: String,
@@ -101,6 +106,9 @@ const props = defineProps({
 
 const searchQuery = ref('')
 const translations = useTranslations()
+
+// textarea 引用
+const textareaRefs = ref({})
 
 // 从 composable 获取数据
 const { translationEntries, updateTranslation, deleteTranslationKey } = translations
@@ -161,4 +169,47 @@ async function copyToClipboard(text) {
     console.error('复制失败:', err)
   }
 }
+
+// 自动调整 textarea 高度
+function autoResize(textarea) {
+  if (!textarea) return
+
+  // 临时移除 overflow hidden 以获取正确的 scrollHeight
+  const originalOverflow = textarea.style.overflow
+  textarea.style.overflow = 'visible'
+
+  // 重置高度以获取正确的 scrollHeight
+  textarea.style.height = 'auto'
+
+  // 设置最小高度（24px，对应 min-h-6）
+  const minHeight = 24
+
+  // 计算新高度，至少为最小高度，并添加一些额外的空间
+  const newHeight = Math.max(textarea.scrollHeight + 2, minHeight)
+
+  // 应用新高度
+  textarea.style.height = newHeight + 'px'
+
+  // 恢复 overflow hidden
+  textarea.style.overflow = originalOverflow || 'hidden'
+}
+
+// 监听翻译数据变化，自动调整所有 textarea 高度
+watch(translationEntries, () => {
+  nextTick(() => {
+    Object.values(textareaRefs.value).forEach(textarea => {
+      if (textarea) autoResize(textarea)
+    })
+  })
+}, { deep: true })
+
+// 在组件挂载后为所有现有的 textarea 调整高度
+onMounted(() => {
+  // 延迟执行以确保 DOM 已渲染
+  nextTick(() => {
+    Object.values(textareaRefs.value).forEach(textarea => {
+      if (textarea) autoResize(textarea)
+    })
+  })
+})
 </script>

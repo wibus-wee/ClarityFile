@@ -119,7 +119,7 @@
           <TranslationTable v-if="activeNamespace" :namespace="activeNamespace" :languages="languages" />
           <div v-else class="flex-center h-full text-gray-400 dark:text-gray-500">
             <div class="text-center">
-              <div class="i-carbon-translate text-4xl mb-4 opacity-30"></div>
+              <div class="i-carbon-translate text-4xl mb-4 opacity-30 mx-auto"></div>
               <h3 class="text-base font-light mb-1">Choose a namespace</h3>
               <p class="text-sm opacity-60">Select a namespace from the sidebar to start editing translations</p>
             </div>
