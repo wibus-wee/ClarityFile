@@ -115,8 +115,27 @@ export const useTranslations = () => {
     const completed = translationEntries.value.reduce((count, entry) => {
       return (
         count +
-        languages.value.filter((lang) => entry.values[lang.code] && entry.values[lang.code].trim())
-          .length
+        languages.value.filter((lang) => {
+          const value = entry.values[lang.code]
+          if (!value) return false
+
+          // 处理字符串类型
+          if (typeof value === 'string') {
+            return value.trim() !== ''
+          }
+
+          // 处理数组类型
+          if (Array.isArray(value)) {
+            return value.length > 0 && value.some((item) => item && item.trim && item.trim() !== '')
+          }
+
+          // 处理对象类型
+          if (typeof value === 'object') {
+            return Object.keys(value).length > 0
+          }
+
+          return false
+        }).length
       )
     }, 0)
 
@@ -125,6 +144,11 @@ export const useTranslations = () => {
 
   // 选择命名空间
   const selectNamespace = async (namespace: string) => {
+    // 如果选择的是当前命名空间，直接返回
+    if (activeNamespace.value === namespace) {
+      return
+    }
+
     if (hasUnsavedChanges.value) {
       const shouldSave = confirm('有未保存的修改，是否保存？')
       if (shouldSave) {
@@ -139,7 +163,7 @@ export const useTranslations = () => {
   // 加载命名空间的翻译数据
   const loadNamespaceTranslations = async (namespace: string) => {
     isLoading.value = true
-    translationEntries.value = []
+    // 不立即清空数据，等新数据加载完成后再替换，避免闪烁
 
     try {
       // 加载所有语言的翻译文件
@@ -202,7 +226,10 @@ export const useTranslations = () => {
     Object.keys(obj).forEach((key) => {
       const fullKey = prefix ? `${prefix}.${key}` : key
 
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
+      if (Array.isArray(obj[key])) {
+        // 数组作为一个整体键，不递归进入
+        keys.add(fullKey)
+      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
         collectKeys(obj[key], fullKey, keys)
       } else {
         keys.add(fullKey)
@@ -211,14 +238,14 @@ export const useTranslations = () => {
   }
 
   // 根据路径获取值
-  const getValueByPath = (obj: any, path: string): string => {
+  const getValueByPath = (obj: any, path: string): any => {
     return path.split('.').reduce((current, key) => {
       return current && current[key] !== undefined ? current[key] : ''
     }, obj)
   }
 
   // 根据路径设置值
-  const setValueByPath = (obj: any, path: string, value: string) => {
+  const setValueByPath = (obj: any, path: string, value: any) => {
     const keys = path.split('.')
     const lastKey = keys.pop()!
 
@@ -439,17 +466,17 @@ export const useTranslations = () => {
   // 加载命名空间列表
   async function loadNamespaces() {
     try {
-      // 使用现有的 fileSystem.namespaces 来获取命名空间列表
-      const existingNamespaces = fileSystem.namespaces.value
-      if (existingNamespaces && existingNamespaces.length > 0) {
-        namespaces.value = existingNamespaces.map((ns: any) => ({
+      // 直接调用 API 获取真实的命名空间数据
+      const response = await $fetch('/api/namespaces')
+      if (response && response.namespaces && response.namespaces.length > 0) {
+        namespaces.value = response.namespaces.map((ns: any) => ({
           name: ns.name,
           displayName: ns.label || ns.name,
           keyCount: ns.count || 0,
           progress: ns.progress || 0 // 使用真实的进度数据
         }))
       } else {
-        // 提供默认的命名空间列表作为fallback
+        // 如果 API 返回空数据，提供默认的命名空间列表作为fallback
         namespaces.value = [
           { name: 'common', displayName: '通用', keyCount: 137, progress: 94 },
           { name: 'competitions', displayName: '赛事中心', keyCount: 63, progress: 94 },
@@ -463,7 +490,7 @@ export const useTranslations = () => {
       }
     } catch (error) {
       console.error('Error loading namespaces:', error)
-      // 提供默认的命名空间列表作为fallback
+      // API 调用失败时，提供默认的命名空间列表作为fallback
       namespaces.value = [
         { name: 'common', displayName: '通用', keyCount: 137, progress: 94 },
         { name: 'competitions', displayName: '赛事中心', keyCount: 63, progress: 94 },

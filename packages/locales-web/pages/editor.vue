@@ -13,7 +13,7 @@
 
           <!-- 主题切换按钮 -->
           <button @click="toggleDark"
-            class="p-1.5 text-antfu-text-soft hover:text-antfu-text hover:bg-antfu-bg-soft rounded transition-all"
+            class="p-1.5 text-antfu-text-soft hover:text-antfu-text hover:bg-antfu-soft rounded transition-all"
             :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
             <div :class="isDark ? 'i-carbon-sun' : 'i-carbon-moon'" class="text-sm"></div>
           </button>
@@ -45,7 +45,7 @@
                 'w-full text-left p-3 text-sm rounded transition-all',
                 activeNamespace === namespace.name
                   ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                  : 'text-antfu-text-soft hover:text-antfu-text hover:bg-antfu-bg-soft'
+                  : 'text-antfu-text-soft hover:text-antfu-text hover:bg-antfu-soft border-transparent border'
               ]">
               <div class="font-medium">{{ namespace.displayName }}</div>
               <div class="text-xs opacity-60 mt-1">
@@ -67,7 +67,7 @@
     <!-- 右侧：翻译表格编辑器 -->
     <main class="flex-1 flex flex-col min-w-0">
       <!-- 编辑器头部 -->
-      <div class="border-b border-antfu-border p-4">
+      <div class="border-b border-antfu-border p-4.1">
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-lg font-light text-antfu-text">
@@ -102,7 +102,7 @@
               'px-2 py-1 text-sm rounded transition-all flex items-center gap-1.5',
               showOnlyUntranslated
                 ? 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20'
-                : 'text-antfu-text-soft hover:text-antfu-text hover:bg-antfu-bg-soft'
+                : 'text-antfu-text-soft hover:text-antfu-text hover:bg-antfu-soft'
             ]">
               <div class="i-carbon-filter text-xs"></div>
               <span>{{ showOnlyUntranslated ? 'Show All' : 'Untranslated' }}</span>
@@ -161,7 +161,6 @@ const {
   untranslatedCount,
   selectNamespace,
   toggleUntranslatedFilter,
-  saveAllChanges,
   loadNamespaces,
   loadNamespaceTranslations
 } = useTranslations()
@@ -189,8 +188,15 @@ const handleAddLanguage = (data) => {
 onMounted(async () => {
   await loadNamespaces()
 
-  // 如果有预选的 namespace，加载其翻译数据
-  if (activeNamespace.value) {
+  // 检查URL参数中是否有指定的命名空间
+  const route = useRoute()
+  const namespaceFromQuery = route.query.namespace
+
+  if (namespaceFromQuery) {
+    // 如果URL中有命名空间参数，自动选择该命名空间
+    await selectNamespace(namespaceFromQuery)
+  } else if (activeNamespace.value) {
+    // 如果有预选的 namespace，加载其翻译数据
     await loadNamespaceTranslations(activeNamespace.value)
   }
 })

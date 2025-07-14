@@ -4,7 +4,8 @@ import { join, resolve } from 'path'
 export default defineEventHandler(async (event) => {
   try {
     // 获取项目根目录下的 locales 文件夹路径
-    const projectRoot = resolve(process.cwd())
+    // 从 packages/locales-web 向上两级到达项目根目录
+    const projectRoot = resolve(process.cwd(), '../../')
     const localesPath = join(projectRoot, 'locales')
 
     console.log('Reading locales from:', localesPath)

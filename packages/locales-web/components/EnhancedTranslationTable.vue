@@ -33,19 +33,30 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-antfu-border">
-            <tr v-for="(item, index) in filteredTranslations" :key="item.path" class="group hover:bg-antfu-bg-soft">
+            <tr v-for="(item, index) in filteredTranslations" :key="item.path" class="group hover:bg-antfu-soft">
               <!-- Key列 -->
-              <td class="px-4 py-2 text-sm font-mono text-gray-900 dark:text-gray-100 align-top">
+              <td class="px-4 py-2 text-sm font-mono text-antfu-text align-top">
                 <div class="flex items-center gap-2">
-                  <div>
-                    <div class="font-medium">{{ item.key }}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 opacity-75">{{ item.path }}</div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <!-- 展开/折叠按钮（仅数组类型显示） -->
+                      <button v-if="item.type === 'array'" @click="toggleExpanded(item.path)"
+                        class="p-1 text-antfu-text-mute hover:text-antfu-text hover:bg-antfu-soft rounded transition-all">
+                        <div :class="expandedItems.has(item.path) ? 'i-carbon-chevron-down' : 'i-carbon-chevron-right'"
+                          class="text-xs"></div>
+                      </button>
+                      <div class="font-medium">{{ item.key }}</div>
+                    </div>
+                    <div class="text-xs text-antfu-text-mute opacity-75 max-w-68 truncate">{{ item.path }}</div>
                     <div v-if="item.type !== 'string'" class="text-xs text-blue-500 dark:text-blue-400 opacity-75">
                       {{ item.type }}
+                      <span v-if="item.type === 'array' && Array.isArray(item.values[languages[0]?.code])">
+                        ({{ item.values[languages[0]?.code].length }} items)
+                      </span>
                     </div>
                   </div>
                   <button
-                    class="p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 rounded transition-all"
+                    class="p-1 opacity-0 group-hover:opacity-100 text-antfu-text-mute hover:text-antfu-text hover:bg-antfu-soft rounded transition-all"
                     @click="copyToClipboard(item.path)">
                     <div class="i-carbon-copy text-xs"></div>
                   </button>
@@ -60,22 +71,40 @@
                     <textarea :value="item.values[language.code] || ''"
                       @input="handleTextareaInput(item.path, language.code, $event)"
                       :placeholder="`输入 ${language.code} 翻译...`"
-                      class="w-full px-2 py-1 text-sm border-0 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none focus:ring-1 focus:ring-emerald-500 rounded"
+                      class="w-full px-2 py-1 text-sm border-0 bg-transparent text-antfu-text placeholder-antfu-text-mute resize-none focus:outline-none focus:ring-1 focus:ring-emerald-500 rounded"
                       :class="getFieldClass(item.values[language.code], language.isBase)" rows="1"
                       @focus="autoResize"></textarea>
                   </template>
 
                   <!-- 数组编辑器 -->
                   <template v-else-if="item.type === 'array'">
-                    <div class="min-h-8 p-2 border border-gray-200 dark:border-gray-600 rounded">
+                    <!-- 展开状态：显示完整的数组编辑器 -->
+                    <div v-if="expandedItems.has(item.path)" class="min-h-8 p-3 rounded">
                       <ArrayEditor :model-value="item.values[language.code] || []"
                         @update:model-value="updateTranslation(item.path, language.code, $event)" />
+                    </div>
+                    <!-- 折叠状态：显示数组摘要 -->
+                    <div v-else
+                      class="min-h-8 p-2 text-sm text-antfu-text-mute cursor-pointer hover:bg-antfu-bg-soft rounded transition-all"
+                      @click="toggleExpanded(item.path)">
+                      <div v-if="Array.isArray(item.values[language.code]) && item.values[language.code].length > 0">
+                        <div class="text-xs opacity-60 mb-1">{{ item.values[language.code].length }} items</div>
+                        <div class="text-xs truncate">
+                          {{ item.values[language.code].slice(0, 2).join(', ') }}
+                          <span v-if="item.values[language.code].length > 2">...</span>
+                        </div>
+                      </div>
+                      <div v-else class="text-xs opacity-40">Empty array</div>
+                      <div class="text-xs opacity-40 mt-1 flex items-center gap-1">
+                        <div class="i-carbon-chevron-right text-xs"></div>
+                        <span>Click to expand</span>
+                      </div>
                     </div>
                   </template>
 
                   <!-- 其他复杂数据结构编辑器 -->
                   <template v-else>
-                    <div class="min-h-8 p-2 border border-gray-200 dark:border-gray-600 rounded">
+                    <div class="min-h-8 p-2 border border-antfu-border rounded">
                       <JsonEditor :model-value="item.values[language.code]"
                         @update:model-value="updateTranslation(item.path, language.code, $event)"
                         :placeholder="`输入 ${language.code} 翻译...`" />
@@ -108,7 +137,7 @@
         </table>
 
         <!-- 空状态 -->
-        <div v-if="filteredTranslations.length === 0" class="flex-center h-32 text-gray-400 dark:text-gray-500">
+        <div v-if="filteredTranslations.length === 0" class="flex-center h-32 text-antfu-text-mute">
           <div class="text-center">
             <div class="i-carbon-search text-2xl mb-2 opacity-30 mx-auto"></div>
             <p class="text-sm">{{ searchQuery ? 'No matching translations found' : 'No translations available' }}</p>
@@ -136,12 +165,34 @@ const props = defineProps({
 // 搜索查询
 const searchQuery = ref('')
 
+// 展开状态管理
+const expandedItems = ref(new Set())
+
 // 使用翻译数据
 const {
   filteredTranslationEntries,
   updateTranslation,
-  deleteEntry
+  deleteEntry,
+  loadNamespaceTranslations
 } = useTranslations()
+
+// 监听命名空间变化，重新加载数据
+watch(() => props.namespace, async (newNamespace) => {
+  if (newNamespace) {
+    await loadNamespaceTranslations(newNamespace)
+    // 清空展开状态
+    expandedItems.value.clear()
+  }
+}, { immediate: true })
+
+// 切换展开状态
+const toggleExpanded = (path) => {
+  if (expandedItems.value.has(path)) {
+    expandedItems.value.delete(path)
+  } else {
+    expandedItems.value.add(path)
+  }
+}
 
 // 过滤后的翻译条目
 const filteredTranslations = computed(() => {

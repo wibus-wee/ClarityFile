@@ -8,6 +8,18 @@ body {
   padding: 0;
 }
 
+input:focus {
+  outline: none;
+
+}
+
+button:focus {
+  outline: none;
+}
+
+select:focus {
+  outline: none;
+}
 
 /* 自定义滚动条 - antfu风格 */
 ::-webkit-scrollbar {

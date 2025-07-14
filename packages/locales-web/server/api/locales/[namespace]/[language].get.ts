@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     console.error(`Failed to read ${namespace}/${language}:`, error)
 
-    if (error.code === 'ENOENT') {
+    if ((error as any).code === 'ENOENT') {
       throw createError({
         statusCode: 404,
         statusMessage: `Translation file ${namespace}/${language}.json not found`

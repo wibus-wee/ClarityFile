@@ -137,7 +137,7 @@ useHead({
 const { isDark, toggleDark } = useSettings()
 
 // 使用翻译数据
-const { namespaces, languages, loadNamespaces, selectNamespace } = useTranslations()
+const { namespaces, languages, loadNamespaces } = useTranslations()
 
 // 计算统计信息
 const totalKeys = computed(() => {
@@ -158,8 +158,8 @@ async function refreshNamespaces() {
 
 // 导航到指定命名空间
 async function navigateToNamespace(namespaceName) {
-  await selectNamespace(namespaceName)
-  await navigateTo('/editor')
+  // 直接导航到带有命名空间参数的编辑器页面
+  await navigateTo(`/editor?namespace=${namespaceName}`)
 }
 
 // 页面加载时获取数据

@@ -5,14 +5,14 @@
   --color-bg: #ffffff;
   --color-bg-soft: #f8f8f8;
   --color-bg-mute: #f2f2f2;
-  
+
   --color-text: #2c2c2c;
   --color-text-soft: #6c6c6c;
   --color-text-mute: #8c8c8c;
-  
+
   --color-border: #e5e5e5;
   --color-border-soft: #f0f0f0;
-  
+
   /* 绿色主题 */
   --color-primary: #10b981;
   --color-primary-soft: #34d399;
@@ -26,14 +26,14 @@
   --color-bg: #121212;
   --color-bg-soft: #1a1a1a;
   --color-bg-mute: #222222;
-  
+
   --color-text: #e5e5e5;
   --color-text-soft: #a3a3a3;
   --color-text-mute: #737373;
-  
+
   --color-border: #2a2a2a;
   --color-border-soft: #1f1f1f;
-  
+
   /* 绿色主题 - 深色模式 */
   --color-primary: #34d399;
   --color-primary-soft: #6ee7b7;
@@ -43,24 +43,81 @@
 }
 
 /* 工具类 */
-.bg-antfu { background-color: var(--color-bg); }
-.bg-antfu-soft { background-color: var(--color-bg-soft); }
-.bg-antfu-mute { background-color: var(--color-bg-mute); }
+.bg-antfu {
+  background-color: var(--color-bg);
+}
 
-.text-antfu { color: var(--color-text); }
-.text-antfu-soft { color: var(--color-text-soft); }
-.text-antfu-mute { color: var(--color-text-mute); }
+.bg-antfu-soft {
+  background-color: var(--color-bg-soft);
+}
 
-.border-antfu { border-color: var(--color-border); }
-.border-antfu-soft { border-color: var(--color-border-soft); }
+.bg-antfu-mute {
+  background-color: var(--color-bg-mute);
+}
 
-.bg-primary-antfu { background-color: var(--color-primary-bg); }
-.text-primary-antfu { color: var(--color-primary); }
-.border-primary-antfu { border-color: var(--color-primary-border); }
+.bg-antfu-bg-soft {
+  background-color: var(--color-bg-soft);
+}
+
+.text-antfu {
+  color: var(--color-text);
+}
+
+.text-antfu-soft {
+  color: var(--color-text-soft);
+}
+
+.text-antfu-mute {
+  color: var(--color-text-mute);
+}
+
+.border-antfu {
+  border-color: var(--color-border);
+}
+
+.border-antfu-soft {
+  border-color: var(--color-border-soft);
+}
+
+.bg-primary-antfu {
+  background-color: var(--color-primary-bg);
+}
+
+.text-primary-antfu {
+  color: var(--color-primary);
+}
+
+.border-primary-antfu {
+  border-color: var(--color-primary-border);
+}
 
 /* hover 状态 */
-.hover\:bg-antfu-soft:hover { background-color: var(--color-bg-soft); }
-.hover\:bg-antfu-mute:hover { background-color: var(--color-bg-mute); }
-.hover\:text-antfu:hover { color: var(--color-text); }
-.hover\:text-antfu-soft:hover { color: var(--color-text-soft); }
-.hover\:border-antfu:hover { border-color: var(--color-border); }
+.hover\:bg-antfu-soft:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.hover\:bg-antfu-mute:hover {
+  background-color: var(--color-bg-mute);
+}
+
+.hover\:text-antfu:hover {
+  color: var(--color-text);
+}
+
+.hover\:text-antfu-soft:hover {
+  color: var(--color-text-soft);
+}
+
+.hover\:border-antfu:hover {
+  border-color: var(--color-border);
+}
+
+/* Array item group hover utilities */
+.array-item-group:hover .array-item-group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+/* Alternative approach using data attributes */
+[data-array-item]:hover [data-delete-button] {
+  opacity: 1;
+}
