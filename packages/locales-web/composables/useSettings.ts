@@ -1,7 +1,17 @@
 import { useDark, useToggle, useStorage } from '@vueuse/core'
+import type { ThemeConfig } from '~/types'
 
 // 设置默认值
-const DEFAULT_SETTINGS = {
+interface AppSettings {
+  theme: 'light' | 'dark' | 'auto'
+  interfaceLanguage: string
+  autoSave: boolean
+  showKeyPaths: boolean
+  baseLanguage: string
+  prettyPrint: boolean
+}
+
+const DEFAULT_SETTINGS: AppSettings = {
   theme: 'auto',
   interfaceLanguage: 'zh-CN',
   autoSave: true,

@@ -60,16 +60,20 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
+      data: {
+        filesCreated,
+        namespaces: namespaceDirs,
+        languageCode
+      },
       message: `Successfully created ${filesCreated} files for language ${languageCode}`,
-      filesCreated,
-      namespaces: namespaceDirs
+      timestamp: new Date().toISOString()
     }
 
   } catch (error) {
     console.error('Error adding language:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to add language: ${error.message}`
+      statusMessage: `Failed to add language: ${error instanceof Error ? error.message : String(error)}`
     })
   }
 })

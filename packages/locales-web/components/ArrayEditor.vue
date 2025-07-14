@@ -39,15 +39,22 @@
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  modelValue: {
-    type: Array,
-    default: () => []
-  }
+<script setup lang="ts">
+interface Props {
+  /** 数组值 */
+  modelValue: string[]
+}
+
+interface Emits {
+  /** 更新数组值 */
+  'update:modelValue': [value: string[]]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: () => []
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<Emits>()
 
 function updateItem(index, value) {
   const newArray = [...props.modelValue]

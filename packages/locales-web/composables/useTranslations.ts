@@ -1,25 +1,10 @@
 import { ref, computed } from 'vue'
-
-interface Language {
-  code: string
-  name: string
-  isBase?: boolean
-}
-
-interface Namespace {
-  name: string
-  displayName: string
-  keyCount: number
-  progress: number
-}
-
-interface TranslationEntry {
-  key: string
-  path: string
-  values: Record<string, any>
-  type: 'string' | 'array' | 'object' | 'number' | 'boolean'
-  isModified: boolean
-}
+import type {
+  Language,
+  Namespace,
+  TranslationEntry,
+  ApiResponse
+} from '~/types'
 
 // 全局状态 - 在模块级别定义，确保单例
 const activeNamespace = ref<string>('')
@@ -444,9 +429,9 @@ export const useTranslations = () => {
   // 加载可用语言列表
   const loadAvailableLanguages = async () => {
     try {
-      const response = await $fetch('/api/languages')
-      if (response.success) {
-        availableLanguages.value = response.languages
+      const response = await $fetch<ApiResponse<{ languages: Language[], count: number }>>('/api/languages')
+      if (response.success && response.data) {
+        availableLanguages.value = response.data.languages
 
         // 如果当前语言不在可用语言中，切换到基准语言
         const currentExists = availableLanguages.value.some(
@@ -468,9 +453,9 @@ export const useTranslations = () => {
   async function loadNamespaces() {
     try {
       // 直接调用 API 获取真实的命名空间数据
-      const response = await $fetch('/api/namespaces')
-      if (response && response.namespaces && response.namespaces.length > 0) {
-        namespaces.value = response.namespaces.map((ns: any) => ({
+      const response = await $fetch<ApiResponse<{ namespaces: any[] }>>('/api/namespaces')
+      if (response && response.success && response.data?.namespaces && response.data.namespaces.length > 0) {
+        namespaces.value = response.data.namespaces.map((ns: any) => ({
           name: ns.name,
           displayName: ns.label || ns.name,
           keyCount: ns.count || 0,
@@ -478,30 +463,12 @@ export const useTranslations = () => {
         }))
       } else {
         // 如果 API 返回空数据，提供默认的命名空间列表作为fallback
-        namespaces.value = [
-          { name: 'common', displayName: '通用', keyCount: 137, progress: 94 },
-          { name: 'competitions', displayName: '赛事中心', keyCount: 63, progress: 94 },
-          { name: 'dashboard', displayName: '仪表板', keyCount: 109, progress: 95 },
-          { name: 'expenses', displayName: '经费报销', keyCount: 52, progress: 92 },
-          { name: 'files', displayName: '文件管理', keyCount: 40, progress: 88 },
-          { name: 'navigation', displayName: '导航', keyCount: 28, progress: 100 },
-          { name: 'projects', displayName: '项目', keyCount: 185, progress: 96 },
-          { name: 'settings', displayName: '设置', keyCount: 206, progress: 89 }
-        ]
+        namespaces.value = []
       }
     } catch (error) {
       console.error('Error loading namespaces:', error)
       // API 调用失败时，提供默认的命名空间列表作为fallback
-      namespaces.value = [
-        { name: 'common', displayName: '通用', keyCount: 137, progress: 94 },
-        { name: 'competitions', displayName: '赛事中心', keyCount: 63, progress: 94 },
-        { name: 'dashboard', displayName: '仪表板', keyCount: 109, progress: 95 },
-        { name: 'expenses', displayName: '经费报销', keyCount: 52, progress: 92 },
-        { name: 'files', displayName: '文件管理', keyCount: 40, progress: 88 },
-        { name: 'navigation', displayName: '导航', keyCount: 28, progress: 100 },
-        { name: 'projects', displayName: '项目', keyCount: 185, progress: 96 },
-        { name: 'settings', displayName: '设置', keyCount: 206, progress: 89 }
-      ]
+      namespaces.value = []
     }
   }
 

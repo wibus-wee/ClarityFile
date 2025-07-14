@@ -37,9 +37,13 @@ export default defineEventHandler(async (event) => {
     
     return {
       success: true,
-      namespace,
-      language,
-      message: 'Translation file saved successfully'
+      data: {
+        namespace,
+        language,
+        filePath: filePath.replace(projectRoot, '').replace(/\\/g, '/')
+      },
+      message: 'Translation file saved successfully',
+      timestamp: new Date().toISOString()
     }
   } catch (error) {
     console.error(`Failed to write ${namespace}/${language}:`, error)

@@ -37,8 +37,8 @@ export default defineEventHandler(async (event) => {
           const data = JSON.parse(content)
           count = countKeys(data)
 
-          // 计算翻译进度
-          progress = await calculateTranslationProgress(entryPath, languages, data)
+          // 计算翻译进度（采用更简单的方式）
+          progress = await calculateSimpleTranslationProgress(entryPath, languages, count)
         } catch (err) {
           console.warn(`Failed to count keys for ${entry}:`, err)
         }
@@ -54,45 +54,47 @@ export default defineEventHandler(async (event) => {
     }
 
     return {
-      namespaces: namespaces.sort((a, b) => a.name.localeCompare(b.name))
+      success: true,
+      data: {
+        namespaces: namespaces.sort((a, b) => a.name.localeCompare(b.name))
+      },
+      timestamp: new Date().toISOString()
     }
   } catch (error) {
     console.error('Failed to read namespaces:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to read namespaces'
+      statusMessage: `Failed to read namespaces: ${error instanceof Error ? error.message : String(error)}`
     })
   }
 })
 
-// 递归计算对象中的键数量
+// 递归计算对象中的键数量（与用户脚本保持一致）
 function countKeys(obj: any): number {
-  let count = 0
-
-  for (const key in obj) {
-    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-      count += countKeys(obj[key])
-    } else {
-      count++
-    }
+  if (typeof obj !== 'object' || obj === null) {
+    return 0
   }
-
-  return count
+  return Object.keys(obj).reduce((acc, key) => {
+    const value = obj[key]
+    if (typeof value === 'object' && value !== null) {
+      return acc + countKeys(value)
+    }
+    return acc + 1
+  }, 0)
 }
 
-// 计算翻译进度
-async function calculateTranslationProgress(
+// 简单的翻译进度计算（与用户脚本逻辑一致）
+async function calculateSimpleTranslationProgress(
   namespacePath: string,
   languages: string[],
-  baseData: any
+  baseKeyCount: number
 ): Promise<number> {
-  if (languages.length <= 1) return 100 // 只有基准语言时，进度为100%
+  if (languages.length <= 1 || baseKeyCount === 0) return 100
 
-  const totalKeys = countKeys(baseData)
-  if (totalKeys === 0) return 100
-
-  let totalTranslated = 0
   const nonBaseLanguages = languages.filter((lang) => lang !== 'zh-CN')
+  if (nonBaseLanguages.length === 0) return 100
+
+  let totalCompleteness = 0
 
   for (const lang of nonBaseLanguages) {
     try {
@@ -101,50 +103,17 @@ async function calculateTranslationProgress(
       const content = await readFile(langFile, 'utf-8')
       const langData = JSON.parse(content)
 
-      const translatedKeys = countTranslatedKeys(baseData, langData)
-      totalTranslated += translatedKeys
+      const langKeyCount = countKeys(langData)
+      const completeness = Math.min(100, Math.round((langKeyCount / baseKeyCount) * 100))
+      totalCompleteness += completeness
     } catch (err) {
-      // 如果语言文件不存在，该语言的翻译数为0
+      // 如果语言文件不存在，该语言的完成度为0
       console.warn(`Failed to read ${lang} file for progress calculation:`, err)
+      totalCompleteness += 0
     }
   }
 
-  const maxPossibleTranslations = totalKeys * nonBaseLanguages.length
-  return maxPossibleTranslations > 0
-    ? Math.round((totalTranslated / maxPossibleTranslations) * 100)
-    : 100
-}
-
-// 递归计算已翻译的键数量
-function countTranslatedKeys(baseObj: any, translatedObj: any, path = ''): number {
-  let count = 0
-
-  for (const key in baseObj) {
-    const currentPath = path ? `${path}.${key}` : key
-
-    if (typeof baseObj[key] === 'object' && baseObj[key] !== null && !Array.isArray(baseObj[key])) {
-      // 嵌套对象
-      if (translatedObj && typeof translatedObj[key] === 'object' && translatedObj[key] !== null) {
-        count += countTranslatedKeys(baseObj[key], translatedObj[key], currentPath)
-      }
-    } else {
-      // 叶子节点
-      if (translatedObj && translatedObj[key] !== undefined && translatedObj[key] !== null) {
-        if (Array.isArray(translatedObj[key])) {
-          // 数组类型：检查是否有内容
-          count += translatedObj[key].length > 0 ? 1 : 0
-        } else if (typeof translatedObj[key] === 'string') {
-          // 字符串类型：检查是否非空
-          count += translatedObj[key].trim() !== '' ? 1 : 0
-        } else {
-          // 其他类型：只要存在就算翻译了
-          count += 1
-        }
-      }
-    }
-  }
-
-  return count
+  return Math.round(totalCompleteness / nonBaseLanguages.length)
 }
 
 // 获取命名空间的显示标签

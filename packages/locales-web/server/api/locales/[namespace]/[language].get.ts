@@ -24,9 +24,13 @@ export default defineEventHandler(async (event) => {
     const data = JSON.parse(content)
 
     return {
-      namespace,
-      language,
-      data
+      success: true,
+      data: {
+        namespace,
+        language,
+        content: data
+      },
+      timestamp: new Date().toISOString()
     }
   } catch (error) {
     console.error(`Failed to read ${namespace}/${language}:`, error)

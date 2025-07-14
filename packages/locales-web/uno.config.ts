@@ -91,18 +91,21 @@ export default defineConfig({
 
   theme: {
     colors: {
-      // antfu 风格的颜色系统
+      // antfu 风格的颜色系统 - 完整版
       antfu: {
         bg: 'var(--color-bg)',
         'bg-soft': 'var(--color-bg-soft)',
         'bg-mute': 'var(--color-bg-mute)',
+        'bg-hover': 'var(--color-bg-hover)',
         text: 'var(--color-text)',
         'text-soft': 'var(--color-text-soft)',
         'text-mute': 'var(--color-text-mute)',
         border: 'var(--color-border)',
-        'border-soft': 'var(--color-border-soft)'
+        'border-soft': 'var(--color-border-soft)',
+        'border-hover': 'var(--color-border-hover)'
       },
       primary: {
+        DEFAULT: 'var(--color-primary)',
         50: '#ecfdf5',
         100: '#d1fae5',
         200: '#a7f3d0',
@@ -112,8 +115,35 @@ export default defineConfig({
         600: '#059669',
         700: '#047857',
         800: '#065f46',
-        900: '#064e3b'
+        900: '#064e3b',
+        soft: 'var(--color-primary-soft)',
+        mute: 'var(--color-primary-mute)',
+        hover: 'var(--color-primary-hover)',
+        active: 'var(--color-primary-active)'
+      },
+      success: {
+        DEFAULT: 'var(--color-success)'
+      },
+      warning: {
+        DEFAULT: 'var(--color-warning)'
+      },
+      error: {
+        DEFAULT: 'var(--color-error)'
+      },
+      info: {
+        DEFAULT: 'var(--color-info)'
       }
+    },
+    boxShadow: {
+      'antfu-sm': 'var(--shadow-sm)',
+      'antfu': 'var(--shadow)',
+      'antfu-md': 'var(--shadow-md)'
+    },
+    borderRadius: {
+      'antfu-sm': 'var(--radius-sm)',
+      'antfu': 'var(--radius)',
+      'antfu-md': 'var(--radius-md)',
+      'antfu-lg': 'var(--radius-lg)'
     }
   },
 

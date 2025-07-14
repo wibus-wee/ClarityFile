@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import type { ApiResponse } from '~/types'
 
 interface NamespaceInfo {
   name: string
@@ -38,8 +39,8 @@ export const useFileSystem = () => {
   // 读取特定命名空间的翻译文件
   const readNamespaceFile = async (namespace: string, language: string) => {
     try {
-      const response = (await $fetch(`/api/locales/${namespace}/${language}`)) as any
-      return response.data
+      const response = await $fetch<ApiResponse<{ namespace: string, language: string, content: any }>>(`/api/locales/${namespace}/${language}`)
+      return response.success ? response.data?.content : null
     } catch (err) {
       console.error(`Failed to read ${namespace}/${language}:`, err)
       return null
@@ -49,10 +50,11 @@ export const useFileSystem = () => {
   // 写入翻译文件
   const writeNamespaceFile = async (namespace: string, language: string, data: any) => {
     try {
-      await $fetch(`/api/locales/${namespace}/${language}`, {
+      const response = await $fetch<ApiResponse<{ namespace: string, language: string, filePath: string }>>(`/api/locales/${namespace}/${language}`, {
         method: 'PUT',
         body: { data }
       })
+      return response.success
       return true
     } catch (err) {
       console.error(`Failed to write ${namespace}/${language}:`, err)
@@ -64,7 +66,7 @@ export const useFileSystem = () => {
   const createNamespaceFile = async (namespace: string, language: string) => {
     try {
       await $fetch(`/api/locales/${namespace}/${language}`, {
-        method: 'POST',
+        method: 'POST' as any,
         body: { data: {} }
       })
       return true
@@ -78,7 +80,7 @@ export const useFileSystem = () => {
   const deleteNamespaceFile = async (namespace: string, language: string) => {
     try {
       await $fetch(`/api/locales/${namespace}/${language}`, {
-        method: 'DELETE'
+        method: 'DELETE' as any
       })
       return true
     } catch (err) {

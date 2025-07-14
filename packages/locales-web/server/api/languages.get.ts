@@ -57,15 +57,18 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      languages: languageObjects,
-      count: languages.length
+      data: {
+        languages: languageObjects,
+        count: languages.length
+      },
+      timestamp: new Date().toISOString()
     }
 
   } catch (error) {
     console.error('Error getting languages:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to get languages: ${error.message}`
+      statusMessage: `Failed to get languages: ${error instanceof Error ? error.message : String(error)}`
     })
   }
 })
