@@ -196,7 +196,7 @@ const toggleExpanded = (path) => {
 
 // 过滤后的翻译条目
 const filteredTranslations = computed(() => {
-  // 首先获取基于筛选状态的条目
+  // 首先获取基于筛选状态的条目（这已经包含了 untranslated filter 的逻辑）
   let entries = filteredTranslationEntries.value || []
 
   // 然后应用搜索过滤
@@ -216,9 +216,9 @@ const filteredTranslations = computed(() => {
 
 // 获取字段样式类
 function getFieldClass(value, isBase) {
-  if (isBase) {
-    return 'bg-emerald-50/50 dark:bg-emerald-900/10'
-  }
+  // if (isBase) {
+  //   return 'bg-emerald-50/50 dark:bg-emerald-900/10'
+  // }
   if (isUntranslated(value)) {
     return 'bg-red-50/50 dark:bg-red-900/10 border-red-200 dark:border-red-800'
   }

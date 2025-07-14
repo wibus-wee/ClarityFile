@@ -21,48 +21,49 @@ interface TranslationEntry {
   isModified: boolean
 }
 
+// 全局状态 - 在模块级别定义，确保单例
+const activeNamespace = ref<string>('')
+const namespaces = ref<Namespace[]>([])
+// 改为单选模式 - 当前编辑的语言
+const currentLanguage = ref<string>('zh-CN')
+const availableLanguages = ref<Language[]>([
+  { code: 'zh-CN', name: 'zh-CN', isBase: true },
+  { code: 'en-US', name: 'en-US' }
+])
+
+// 当前显示的语言列表（基准语言 + 当前选中语言）
+const languages = computed(() => {
+  const baseLanguage = availableLanguages.value.find((lang) => lang.isBase)
+  const currentLang = availableLanguages.value.find((lang) => lang.code === currentLanguage.value)
+
+  const result = []
+  if (baseLanguage) result.push(baseLanguage)
+  if (currentLang && currentLang.code !== baseLanguage?.code) result.push(currentLang)
+
+  // 如果只有基准语言，添加第一个非基准语言以便比较
+  if (result.length === 1 && availableLanguages.value.length > 1) {
+    const firstNonBase = availableLanguages.value.find((lang) => !lang.isBase)
+    if (firstNonBase) result.push(firstNonBase)
+  }
+
+  return result
+})
+
+// 基准语言
+const baseLanguage = computed(
+  () => availableLanguages.value.find((lang) => lang.isBase) || availableLanguages.value[0]
+)
+
+const translationEntries = ref<TranslationEntry[]>([])
+const isLoading = ref(false)
+const hasUnsavedChanges = ref(false)
+
+// 筛选状态
+const showOnlyUntranslated = ref(false)
+
 export const useTranslations = () => {
   const fileSystem = useFileSystem()
   const dialog = useDialog()
-
-  const activeNamespace = ref<string>('')
-  const namespaces = ref<Namespace[]>([])
-  // 改为单选模式 - 当前编辑的语言
-  const currentLanguage = ref<string>('zh-CN')
-  const availableLanguages = ref<Language[]>([
-    { code: 'zh-CN', name: 'zh-CN', isBase: true },
-    { code: 'en-US', name: 'en-US' }
-  ])
-
-  // 当前显示的语言列表（基准语言 + 当前选中语言）
-  const languages = computed(() => {
-    const baseLanguage = availableLanguages.value.find((lang) => lang.isBase)
-    const currentLang = availableLanguages.value.find((lang) => lang.code === currentLanguage.value)
-
-    const result = []
-    if (baseLanguage) result.push(baseLanguage)
-    if (currentLang && currentLang.code !== baseLanguage?.code) result.push(currentLang)
-
-    // 如果只有基准语言，添加第一个非基准语言以便比较
-    if (result.length === 1 && availableLanguages.value.length > 1) {
-      const firstNonBase = availableLanguages.value.find((lang) => !lang.isBase)
-      if (firstNonBase) result.push(firstNonBase)
-    }
-
-    return result
-  })
-
-  // 基准语言
-  const baseLanguage = computed(
-    () => availableLanguages.value.find((lang) => lang.isBase) || availableLanguages.value[0]
-  )
-
-  const translationEntries = ref<TranslationEntry[]>([])
-  const isLoading = ref(false)
-  const hasUnsavedChanges = ref(false)
-
-  // 筛选状态
-  const showOnlyUntranslated = ref(false)
 
   // 检查值是否未翻译的辅助函数
   const isValueUntranslated = (value: any): boolean => {
