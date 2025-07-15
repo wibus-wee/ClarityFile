@@ -26,8 +26,8 @@ export const useFileSystem = () => {
     error.value = null
 
     try {
-      const response = await $fetch('/api/namespaces')
-      namespaces.value = response.namespaces
+      const response = await $fetch<ApiResponse<{ namespaces: NamespaceInfo[] }>>('/api/namespaces')
+      namespaces.value = response.data?.namespaces || []
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load namespaces'
       console.error('Failed to load namespaces:', err)
@@ -39,7 +39,9 @@ export const useFileSystem = () => {
   // 读取特定命名空间的翻译文件
   const readNamespaceFile = async (namespace: string, language: string) => {
     try {
-      const response = await $fetch<ApiResponse<{ namespace: string, language: string, content: any }>>(`/api/locales/${namespace}/${language}`)
+      const response = await $fetch<
+        ApiResponse<{ namespace: string; language: string; content: any }>
+      >(`/api/locales/${namespace}/${language}`)
       return response.success ? response.data?.content : null
     } catch (err) {
       console.error(`Failed to read ${namespace}/${language}:`, err)
@@ -50,12 +52,13 @@ export const useFileSystem = () => {
   // 写入翻译文件
   const writeNamespaceFile = async (namespace: string, language: string, data: any) => {
     try {
-      const response = await $fetch<ApiResponse<{ namespace: string, language: string, filePath: string }>>(`/api/locales/${namespace}/${language}`, {
+      const response = await $fetch<
+        ApiResponse<{ namespace: string; language: string; filePath: string }>
+      >(`/api/locales/${namespace}/${language}`, {
         method: 'PUT',
         body: { data }
       })
       return response.success
-      return true
     } catch (err) {
       console.error(`Failed to write ${namespace}/${language}:`, err)
       return false

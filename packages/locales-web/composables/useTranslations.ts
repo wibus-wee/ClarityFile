@@ -454,7 +454,12 @@ export const useTranslations = () => {
     try {
       // 直接调用 API 获取真实的命名空间数据
       const response = await $fetch<ApiResponse<{ namespaces: any[] }>>('/api/namespaces')
-      if (response && response.success && response.data?.namespaces && response.data.namespaces.length > 0) {
+      if (
+        response &&
+        response.success &&
+        response.data?.namespaces &&
+        response.data.namespaces.length > 0
+      ) {
         namespaces.value = response.data.namespaces.map((ns: any) => ({
           name: ns.name,
           displayName: ns.label || ns.name,

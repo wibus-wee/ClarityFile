@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     for (const namespace of namespaces) {
       const namespacePath = join(localesPath, namespace)
       if (existsSync(namespacePath)) {
-        const stat = await import('node:fs').then(fs => fs.promises.stat(namespacePath))
+        const stat = await import('node:fs').then((fs) => fs.promises.stat(namespacePath))
         if (stat.isDirectory()) {
           namespaceDirs.push(namespace)
         }
@@ -48,9 +48,9 @@ export default defineEventHandler(async (event) => {
     // 在每个命名空间下创建空的 .json 文件
     for (const namespace of namespaceDirs) {
       const filePath = join(localesPath, namespace, `${languageCode}.json`)
-      
+
       if (!existsSync(filePath)) {
-        await writeFile(filePath, '{}\\n', 'utf-8')
+        await writeFile(filePath, '{}\n', 'utf-8')
         console.log(`Created: ${filePath}`)
         filesCreated++
       } else {
@@ -68,7 +68,6 @@ export default defineEventHandler(async (event) => {
       message: `Successfully created ${filesCreated} files for language ${languageCode}`,
       timestamp: new Date().toISOString()
     }
-
   } catch (error) {
     console.error('Error adding language:', error)
     throw createError({
