@@ -1,10 +1,5 @@
 import { ref, computed } from 'vue'
-import type {
-  Language,
-  Namespace,
-  TranslationEntry,
-  ApiResponse
-} from '~/types'
+import type { Language, Namespace, TranslationEntry, ApiResponse } from '~/types'
 
 // 全局状态 - 在模块级别定义，确保单例
 const activeNamespace = ref<string>('')
@@ -76,6 +71,11 @@ export const useTranslations = () => {
 
     // 筛选出有未翻译字段的条目
     return translationEntries.value.filter((entry) => {
+      // 如果条目正在被修改，保持可见（避免输入时条目消失）
+      if (entry.isModified) {
+        return true
+      }
+
       // 检查是否有任何非基准语言的值为空
       return languages.value.some((lang) => {
         if (lang.isBase) return false // 跳过基准语言
@@ -246,8 +246,17 @@ export const useTranslations = () => {
   }
 
   // 更新翻译值
-  const updateTranslation = (entryIndex: number, languageCode: string, value: string) => {
-    const entry = translationEntries.value[entryIndex]
+  const updateTranslation = (pathOrIndex: string | number, languageCode: string, value: string) => {
+    let entry: TranslationEntry | undefined
+
+    if (typeof pathOrIndex === 'string') {
+      // 根据路径查找条目
+      entry = translationEntries.value.find((e) => e.path === pathOrIndex)
+    } else {
+      // 根据索引查找条目（保持向后兼容）
+      entry = translationEntries.value[pathOrIndex]
+    }
+
     if (entry) {
       entry.values[languageCode] = value
       entry.isModified = true
@@ -272,8 +281,10 @@ export const useTranslations = () => {
       // 将所有条目的值设置到对应的数据结构中
       translationEntries.value.forEach((entry) => {
         languages.value.forEach((lang) => {
-          if (entry.values[lang.code]) {
-            setValueByPath(languageData[lang.code], entry.path, entry.values[lang.code])
+          const value = entry.values[lang.code]
+          // 只要值不是 null 或 undefined，就保存（包括空字符串）
+          if (value !== null && value !== undefined) {
+            setValueByPath(languageData[lang.code], entry.path, value)
           }
         })
       })
@@ -337,9 +348,21 @@ export const useTranslations = () => {
   }
 
   // 删除翻译键
-  const deleteTranslationKey = (entryIndex: number) => {
-    translationEntries.value.splice(entryIndex, 1)
-    hasUnsavedChanges.value = true
+  const deleteTranslationKey = (pathOrIndex: string | number) => {
+    let targetIndex: number = -1
+
+    if (typeof pathOrIndex === 'string') {
+      // 根据路径查找索引
+      targetIndex = translationEntries.value.findIndex((e) => e.path === pathOrIndex)
+    } else {
+      // 直接使用索引（保持向后兼容）
+      targetIndex = pathOrIndex
+    }
+
+    if (targetIndex !== -1) {
+      translationEntries.value.splice(targetIndex, 1)
+      hasUnsavedChanges.value = true
+    }
   }
 
   // 语言选择管理 - 改为单选
@@ -429,7 +452,8 @@ export const useTranslations = () => {
   // 加载可用语言列表
   const loadAvailableLanguages = async () => {
     try {
-      const response = await $fetch<ApiResponse<{ languages: Language[], count: number }>>('/api/languages')
+      const response =
+        await $fetch<ApiResponse<{ languages: Language[]; count: number }>>('/api/languages')
       if (response.success && response.data) {
         availableLanguages.value = response.data.languages
 

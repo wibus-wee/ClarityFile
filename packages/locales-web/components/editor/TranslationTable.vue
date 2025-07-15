@@ -134,19 +134,16 @@ function toggleExpanded(path: string) {
 
 // 处理翻译更新
 function handleUpdateTranslation(path: string, languageCode: string, value: any) {
-  const entryIndex = filteredTranslationEntries.value.findIndex(entry => entry.path === path)
-  if (entryIndex !== -1) {
-    updateTranslation(entryIndex, languageCode, value)
-  }
+  // 直接传递路径，让 updateTranslation 函数根据路径查找条目
+  updateTranslation(path, languageCode, value)
 }
 
 // 处理删除条目
 function handleDeleteEntry(index: number) {
-  const actualIndex = filteredTranslationEntries.value.findIndex(
-    entry => entry.path === filteredTranslations.value[index].path
-  )
-  if (actualIndex !== -1) {
-    deleteTranslationKey(actualIndex)
+  const entry = filteredTranslations.value[index]
+  if (entry) {
+    // 直接传递路径，让 deleteTranslationKey 函数根据路径查找条目
+    deleteTranslationKey(entry.path)
   }
 }
 
