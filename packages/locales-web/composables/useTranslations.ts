@@ -143,6 +143,15 @@ export const useTranslations = () => {
     }
 
     activeNamespace.value = namespace
+
+    // 更新 URL 参数
+    if (import.meta.client) {
+      const router = useRouter()
+      await router.push({
+        query: { namespace }
+      })
+    }
+
     await loadNamespaceTranslations(namespace)
   }
 
