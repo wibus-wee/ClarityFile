@@ -97,11 +97,18 @@ export const useTranslations = () => {
   })
 
   const translationProgress = computed(() => {
-    const total = translationEntries.value.length * languages.value.length
+    // 排除基准语言，只计算需要翻译的语言
+    const nonBaseLanguages = languages.value.filter((lang) => lang.code !== 'zh-CN')
+
+    if (nonBaseLanguages.length === 0 || translationEntries.value.length === 0) {
+      return 100 // 如果没有需要翻译的语言，则认为100%完成
+    }
+
+    const total = translationEntries.value.length * nonBaseLanguages.length
     const completed = translationEntries.value.reduce((count, entry) => {
       return (
         count +
-        languages.value.filter((lang) => {
+        nonBaseLanguages.filter((lang) => {
           const value = entry.values[lang.code]
           if (!value) return false
 
