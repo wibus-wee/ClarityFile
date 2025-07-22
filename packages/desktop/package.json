@@ -82,7 +82,7 @@
     "drizzle-kit": "^0.31.1",
     "electron": "^35.1.5",
     "electron-builder": "26.0.12",
-    "electron-vite": "^3.1.0",
+    "electron-vite": "^4.0.0",
     "es-toolkit": "1.39.7",
     "i18next-resources-to-backend": "1.2.1",
     "prompts": "2.4.2",
