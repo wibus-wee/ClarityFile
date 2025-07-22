@@ -1,0 +1,345 @@
+/* antfu 风格的颜色系统 */
+
+:root {
+  /* 基础颜色 - 浅色模式 */
+  --color-bg: #ffffff;
+  --color-bg-soft: #f8f9fa;
+  --color-bg-mute: #f1f3f4;
+  --color-bg-hover: #f5f5f5;
+
+  /* 文本颜色 */
+  --color-text: #2c3e50;
+  --color-text-soft: #6c757d;
+  --color-text-mute: #adb5bd;
+
+  /* 边框颜色 */
+  --color-border: #e9ecef;
+  --color-border-soft: #f1f3f4;
+  --color-border-hover: #dee2e6;
+
+  /* 绿色主题 - 更符合 antfu 风格 */
+  --color-primary: #10b981;
+  --color-primary-soft: #34d399;
+  --color-primary-mute: #6ee7b7;
+  --color-primary-hover: #059669;
+  --color-primary-active: #047857;
+  --color-primary-bg: #ecfdf5;
+  --color-primary-border: #a7f3d0;
+
+  /* 功能性颜色 */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  /* 圆角 */
+  --radius-sm: 0.25rem;
+  --radius: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+.dark {
+  /* 深色模式 - antfu 风格 */
+  --color-bg: #121212;
+  --color-bg-soft: #1a1a1a;
+  --color-bg-mute: #2a2a2a;
+  --color-bg-hover: #262626;
+
+  /* 文本颜色 */
+  --color-text: #e8eaed;
+  --color-text-soft: #9aa0a6;
+  --color-text-mute: #5f6368;
+
+  /* 边框颜色 */
+  --color-border: #3c4043;
+  --color-border-soft: #2a2a2a;
+  --color-border-hover: #484848;
+
+  /* 绿色主题 - 深色模式调亮 */
+  --color-primary: #34d399;
+  --color-primary-soft: #6ee7b7;
+  --color-primary-mute: #a7f3d0;
+  --color-primary-hover: #10b981;
+  --color-primary-active: #059669;
+  --color-primary-bg: rgba(52, 211, 153, 0.1);
+  --color-primary-border: rgba(52, 211, 153, 0.3);
+
+  /* 功能性颜色 - 深色模式 */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
+
+  /* 阴影在深色模式下更深 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+}
+
+/* 工具类 */
+.bg-antfu {
+  background-color: var(--color-bg);
+}
+
+.bg-antfu-soft {
+  background-color: var(--color-bg-soft);
+}
+
+.bg-antfu-mute {
+  background-color: var(--color-bg-mute);
+}
+
+.bg-antfu-bg-soft {
+  background-color: var(--color-bg-soft);
+}
+
+.text-antfu {
+  color: var(--color-text);
+}
+
+.text-antfu-soft {
+  color: var(--color-text-soft);
+}
+
+.text-antfu-mute {
+  color: var(--color-text-mute);
+}
+
+.border-antfu {
+  border-color: var(--color-border);
+}
+
+.border-antfu-soft {
+  border-color: var(--color-border-soft);
+}
+
+.bg-primary-antfu {
+  background-color: var(--color-primary-bg);
+}
+
+.text-primary-antfu {
+  color: var(--color-primary);
+}
+
+.border-primary-antfu {
+  border-color: var(--color-primary-border);
+}
+
+/* hover 状态 */
+.hover\:bg-antfu-soft:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.hover\:bg-antfu-mute:hover {
+  background-color: var(--color-bg-mute);
+}
+
+.hover\:text-antfu:hover {
+  color: var(--color-text);
+}
+
+.hover\:text-antfu-soft:hover {
+  color: var(--color-text-soft);
+}
+
+.hover\:border-antfu:hover {
+  border-color: var(--color-border);
+}
+
+/* Array item group hover utilities */
+.array-item-group:hover .array-item-group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+/* Alternative approach using data attributes */
+[data-array-item]:hover [data-delete-button] {
+  opacity: 1;
+}
+
+/* 新增的 antfu 风格工具类 */
+.antfu-soft {
+  background-color: var(--color-bg-soft);
+}
+
+.antfu-soft:hover {
+  background-color: var(--color-bg-hover);
+}
+
+/* 功能性颜色工具类 */
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.text-info {
+  color: var(--color-info);
+}
+
+.bg-success {
+  background-color: var(--color-success);
+}
+
+.bg-warning {
+  background-color: var(--color-warning);
+}
+
+.bg-error {
+  background-color: var(--color-error);
+}
+
+.bg-info {
+  background-color: var(--color-info);
+}
+
+/* 阴影工具类 */
+.shadow-antfu-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-antfu {
+  box-shadow: var(--shadow);
+}
+
+.shadow-antfu-md {
+  box-shadow: var(--shadow-md);
+}
+
+/* 圆角工具类 */
+.rounded-antfu-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-antfu {
+  border-radius: var(--radius);
+}
+
+.rounded-antfu-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-antfu-lg {
+  border-radius: var(--radius-lg);
+}
+
+/* 过渡动画 */
+.transition-antfu {
+  transition: all 0.2s ease;
+}
+
+.transition-antfu-colors {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* 交互状态增强 */
+.hover\:bg-antfu-hover:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.hover\:border-antfu-hover:hover {
+  border-color: var(--color-border-hover);
+}
+
+.hover\:text-primary:hover {
+  color: var(--color-primary-hover);
+}
+
+.active\:bg-primary-active:active {
+  background-color: var(--color-primary-active);
+}
+
+/* 全局样式增强 */
+::selection {
+  background-color: var(--color-primary-mute);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* 表单元素样式 */
+input, textarea, select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* 按钮增强 */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 链接样式 */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* 表格增强 */
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background-color: var(--color-bg-soft);
+  font-weight: 500;
+}
+
+tr:hover {
+  background-color: var(--color-bg-hover);
+}
+
+/* 代码块样式 */
+code, pre {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* 键盘快捷键样式 */
+kbd {
+  background-color: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+}

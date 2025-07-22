@@ -2,7 +2,16 @@
   "title": "赛事中心",
   "series": "赛事系列",
   "timeline": "时间线",
-  "milestones": "里程碑",
+  "milestones": {
+    "registration": "报名开始",
+    "registrationEnd": "报名截止",
+    "submission": "作品提交",
+    "submissionEnd": "提交截止",
+    "preliminaryReview": "初审",
+    "finalReview": "终审",
+    "announcement": "结果公布",
+    "award": "颁奖典礼"
+  },
   "create": "创建赛事",
   "edit": "编辑赛事",
   "delete": "删除赛事",
@@ -52,16 +61,6 @@
     "contact": "联系方式",
     "website": "官方网站",
     "tags": "标签"
-  },
-  "milestones": {
-    "registration": "报名开始",
-    "registrationEnd": "报名截止",
-    "submission": "作品提交",
-    "submissionEnd": "提交截止",
-    "preliminaryReview": "初审",
-    "finalReview": "终审",
-    "announcement": "结果公布",
-    "award": "颁奖典礼"
   },
   "dueDate": "截止",
   "dueDateLabel": "截止日期",

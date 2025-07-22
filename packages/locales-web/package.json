@@ -1,0 +1,24 @@
+{
+  "name": "locales-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/devtools": "latest",
+    "@pinia/nuxt": "^0.11.1",
+    "nuxt": "^3.16.0",
+    "pinia": "^3.0.3",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/typescript-build": "^3.0.2"
+  }
+}

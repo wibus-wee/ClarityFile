@@ -36,17 +36,12 @@
 6.  **信息强关联：** 打破信息孤岛，将文档、比赛、成果、资产、经费等信息相互关联。
 7.  **本地化优先：** 数据存储在本地，用户对自己的数据有完全控制权，兼容现有云同步备份方案。
 
-## Monorepo 设计
+## Packages
 
-项目使用了 monorepo 的架构，我们将代码都拆分并分别放到了 `packages/` 目录下。
-
-- `desktop`: ClarityFile 的核心桌面应用代码。
-- `www`: ClarityFile 的官方网站，用于展示项目、提供下载等。
-- `shadcn`: shadcn/ui 的本地化版本，用于统一 UI 组件库。同时为各类子项目提供统一的 UI 组件。
-
-> 值得一提的是，在从 single repo 迁移到 monorepo 的过程中，碰到了好一些坑，主要集中在配置上的一些问题
-
-具体体现在 TailwindCSS 的配置上，由于 monorepo 的存在，导致了 TailwindCSS 的配置需要进行一定的修改，才能保证各个子项目都能正确地应用 TailwindCSS。具体配置可以去查看 `shadcn/global.css`，我使用 `@source` 进行了特别的配置。(Learn from using heroui in Tailwind v4)
+- `packages/desktop`: ClarityFile 的核心桌面应用代码。
+- `packages/locales-web`: ClarityFile 的本地化编辑器，用于管理 ClarityFile 的本地化。
+- `packages/www`: ClarityFile 的官方网站，用于展示项目、提供下载等。
+- `packages/shadcn`: shadcn/ui 的本地化版本，用于统一 UI 组件库。同时为各类子项目提供统一的 UI 组件。
 
 ## Author
 

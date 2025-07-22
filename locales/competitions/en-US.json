@@ -2,7 +2,16 @@
   "title": "Competition Center",
   "series": "Competition Series",
   "timeline": "Timeline",
-  "milestones": "Milestones",
+  "milestones": {
+    "registration": "Registration Opens",
+    "registrationEnd": "Registration Closes",
+    "submission": "Submission Opens",
+    "submissionEnd": "Submission Closes",
+    "preliminaryReview": "Preliminary Review",
+    "finalReview": "Final Review",
+    "announcement": "Results Announcement",
+    "award": "Award Ceremony"
+  },
   "create": "Create Competition",
   "edit": "Edit Competition",
   "delete": "Delete Competition",
@@ -53,14 +62,12 @@
     "website": "Website",
     "tags": "Tags"
   },
-  "milestones": {
-    "registration": "Registration Opens",
-    "registrationEnd": "Registration Closes",
-    "submission": "Submission Opens",
-    "submissionEnd": "Submission Closes",
-    "preliminaryReview": "Preliminary Review",
-    "finalReview": "Final Review",
-    "announcement": "Results Announcement",
-    "award": "Award Ceremony"
-  }
+  "dueDate": "",
+  "dueDateLabel": "",
+  "createTime": "",
+  "overdue": "",
+  "dueToday": "",
+  "daysLeft": "",
+  "noDescription": "",
+  "noDueDate": ""
 }
