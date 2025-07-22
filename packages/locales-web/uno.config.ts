@@ -136,12 +136,12 @@ export default defineConfig({
     },
     boxShadow: {
       'antfu-sm': 'var(--shadow-sm)',
-      'antfu': 'var(--shadow)',
+      antfu: 'var(--shadow)',
       'antfu-md': 'var(--shadow-md)'
     },
     borderRadius: {
       'antfu-sm': 'var(--radius-sm)',
-      'antfu': 'var(--radius)',
+      antfu: 'var(--radius)',
       'antfu-md': 'var(--radius-md)',
       'antfu-lg': 'var(--radius-lg)'
     }

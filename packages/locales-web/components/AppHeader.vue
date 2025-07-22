@@ -91,11 +91,11 @@
 </template>
 
 <script setup>
-import { useSettings } from '~/composables/useSettings'
-import { useTranslations } from '~/composables/useTranslations'
+import { useSettingsNew } from '~/composables/useSettingsNew'
+import { useTranslationsNew } from '~/composables/useTranslationsNew'
 
 // 设置和主题
-const { toggleDark, isDark } = useSettings()
+const { toggleDark, isDark } = useSettingsNew()
 
 // 翻译相关（仅在编辑页面需要）
 const route = useRoute()
@@ -108,7 +108,7 @@ const {
   saveAllChanges,
   activeNamespace,
   namespaces
-} = useTranslations()
+} = useTranslationsNew()
 
 // 显示保存按钮的条件
 const showSaveButton = computed(() => isEditingPage.value && hasUnsavedChanges.value)

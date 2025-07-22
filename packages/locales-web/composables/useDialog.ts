@@ -24,7 +24,7 @@ export const useDialog = () => {
         cancelText: '取消',
         ...options
       }
-      
+
       resolvePromise.value = resolve
       rejectPromise.value = reject
       isOpen.value = true
@@ -50,7 +50,11 @@ export const useDialog = () => {
   }
 
   // 显示输入对话框
-  const prompt = (message: string, placeholder?: string, title?: string): Promise<string | null> => {
+  const prompt = (
+    message: string,
+    placeholder?: string,
+    title?: string
+  ): Promise<string | null> => {
     return showDialog({
       type: 'prompt',
       message,
@@ -103,7 +107,7 @@ export const useDialog = () => {
     // 状态
     isOpen: readonly(isOpen),
     dialogOptions: readonly(dialogOptions),
-    
+
     // 方法
     alert,
     confirm,

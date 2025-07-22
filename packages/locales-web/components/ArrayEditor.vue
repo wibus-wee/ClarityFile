@@ -19,7 +19,7 @@
           {{ index + 1 }}
         </div>
         <!-- 输入框 -->
-        <input :value="item" @input="updateItem(index, $event.target.value)"
+        <input :value="item" @input="updateItem(index, ($event.target as HTMLInputElement).value)"
           class="flex-1 px-0 text-sm bg-transparent text-antfu-text placeholder-antfu-text-mute border-0 focus:outline-none"
           :placeholder="`Item ${index + 1}`" />
         <!-- 删除按钮 -->
@@ -56,7 +56,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-function updateItem(index, value) {
+function updateItem(index: number, value: string) {
   const newArray = [...props.modelValue]
   newArray[index] = value
   emit('update:modelValue', newArray)
@@ -67,7 +67,7 @@ function addItem() {
   emit('update:modelValue', newArray)
 }
 
-function removeItem(index) {
+function removeItem(index: number) {
   const newArray = props.modelValue.filter((_, i) => i !== index)
   emit('update:modelValue', newArray)
 }

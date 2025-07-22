@@ -125,8 +125,8 @@
 </template>
 
 <script setup>
-import { useTranslations } from '~/composables/useTranslations'
-import { useSettings } from '~/composables/useSettings'
+import { useTranslationsNew } from '~/composables/useTranslationsNew'
+import { useSettingsNew } from '~/composables/useSettingsNew'
 
 // 设置页面标题
 useHead({
@@ -134,10 +134,10 @@ useHead({
 })
 
 // 使用设置（主题切换）
-const { isDark, toggleDark } = useSettings()
+const { isDark, toggleDark } = useSettingsNew()
 
 // 使用翻译数据
-const { namespaces, languages, loadNamespaces } = useTranslations()
+const { namespaces, languages, loadNamespaces } = useTranslationsNew()
 
 // 计算统计信息
 const totalKeys = computed(() => {

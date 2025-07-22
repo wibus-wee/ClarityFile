@@ -3,13 +3,13 @@
  * 用于运行时验证数据是否符合定义的类型
  */
 
-import type { 
-  Language, 
-  Namespace, 
-  TranslationEntry, 
+import type {
+  Language,
+  Namespace,
+  TranslationEntry,
   ApiResponse,
   ValidationResult,
-  ValidationError 
+  ValidationError
 } from '~/types'
 
 /**
@@ -46,7 +46,7 @@ export function validateNamespace(obj: any): obj is Namespace {
  */
 export function validateTranslationEntry(obj: any): obj is TranslationEntry {
   const validTypes = ['string', 'array', 'object', 'number', 'boolean']
-  
+
   return (
     typeof obj === 'object' &&
     obj !== null &&
@@ -100,9 +100,11 @@ export function createValidationError(
 export function isEmptyTranslationValue(value: any): boolean {
   if (value === null || value === undefined) return true
   if (typeof value === 'string') return value.trim() === ''
-  if (Array.isArray(value)) return value.length === 0 || value.every(item => 
-    typeof item === 'string' ? item.trim() === '' : !item
-  )
+  if (Array.isArray(value))
+    return (
+      value.length === 0 ||
+      value.every((item) => (typeof item === 'string' ? item.trim() === '' : !item))
+    )
   if (typeof value === 'object') return Object.keys(value).length === 0
   return false
 }
@@ -141,34 +143,31 @@ export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj
   }
-  
+
   if (obj instanceof Date) {
     return new Date(obj.getTime()) as T
   }
-  
+
   if (Array.isArray(obj)) {
-    return obj.map(item => deepClone(item)) as T
+    return obj.map((item) => deepClone(item)) as T
   }
-  
+
   const cloned = {} as T
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       cloned[key] = deepClone(obj[key])
     }
   }
-  
+
   return cloned
 }
 
 /**
  * 类型安全的对象合并
  */
-export function mergeObjects<T extends Record<string, any>>(
-  target: T,
-  source: Partial<T>
-): T {
+export function mergeObjects<T extends Record<string, any>>(target: T, source: Partial<T>): T {
   const result = { ...target }
-  
+
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       const sourceValue = source[key]
@@ -177,7 +176,7 @@ export function mergeObjects<T extends Record<string, any>>(
       }
     }
   }
-  
+
   return result
 }
 

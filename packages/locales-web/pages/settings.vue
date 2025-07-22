@@ -180,7 +180,7 @@
 </template>
 
 <script setup>
-import { useSettings } from '~/composables/useSettings'
+import { useSettingsNew } from '~/composables/useSettingsNew'
 
 // 设置页面标题
 useHead({
@@ -197,7 +197,7 @@ const {
   prettyPrint,
   setTheme,
   resetSettings
-} = useSettings()
+} = useSettingsNew()
 
 // 主题选项
 const themeOptions = [

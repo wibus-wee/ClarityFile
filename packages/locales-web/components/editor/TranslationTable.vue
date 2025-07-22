@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useTranslations } from '~/composables/useTranslations'
+import { useTranslationsNew } from '~/composables/useTranslationsNew'
 import type { Language, TranslationEntry } from '~/types'
 
 // 导入子组件
@@ -91,12 +91,12 @@ interface Props {
 const props = defineProps<Props>()
 
 // 使用翻译数据
-const { 
-  filteredTranslationEntries, 
-  updateTranslation, 
+const {
+  filteredTranslationEntries,
+  updateTranslation,
   deleteTranslationKey,
-  showOnlyUntranslated 
-} = useTranslations()
+  showOnlyUntranslated
+} = useTranslationsNew()
 
 // 搜索防抖
 const debouncedSearchQuery = ref('')

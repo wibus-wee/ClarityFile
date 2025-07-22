@@ -21,7 +21,7 @@ export function useDebouncedRef<T>(value: Ref<T>, delay: number = 300): Ref<T> {
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
-      
+
       timeoutId = setTimeout(() => {
         debouncedValue.value = newValue
         timeoutId = null
@@ -39,10 +39,7 @@ export function useDebouncedRef<T>(value: Ref<T>, delay: number = 300): Ref<T> {
  * @param delay 延迟时间（毫秒）
  * @returns 防抖后的函数
  */
-export function useDebouncedFn<T extends (...args: any[]) => any>(
-  fn: T,
-  delay: number = 300
-): T {
+export function useDebouncedFn<T extends (...args: any[]) => any>(fn: T, delay: number = 300): T {
   let timeoutId: NodeJS.Timeout | null = null
 
   const debouncedFn = ((...args: Parameters<T>) => {
@@ -112,7 +109,7 @@ export function useSearchDebounce(initialValue: string = '', delay: number = 300
   const searchQuery = ref(initialValue)
   const debouncedSearchQuery = ref(initialValue)
   const isSearching = ref(false)
-  
+
   let timeoutId: NodeJS.Timeout | null = null
 
   // 监听搜索查询变化
@@ -120,7 +117,7 @@ export function useSearchDebounce(initialValue: string = '', delay: number = 300
     searchQuery,
     (newQuery) => {
       isSearching.value = true
-      
+
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
@@ -140,11 +137,11 @@ export function useSearchDebounce(initialValue: string = '', delay: number = 300
       clearTimeout(timeoutId)
       timeoutId = null
     }
-    
+
     if (query !== undefined) {
       searchQuery.value = query
     }
-    
+
     debouncedSearchQuery.value = searchQuery.value
     isSearching.value = false
   }
@@ -181,25 +178,25 @@ export function useSearchDebounce(initialValue: string = '', delay: number = 300
  * @param delay 节流间隔时间（毫秒）
  * @returns 节流后的函数
  */
-export function useThrottledFn<T extends (...args: any[]) => any>(
-  fn: T,
-  delay: number = 300
-): T {
+export function useThrottledFn<T extends (...args: any[]) => any>(fn: T, delay: number = 300): T {
   let lastExecTime = 0
   let timeoutId: NodeJS.Timeout | null = null
 
   const throttledFn = ((...args: Parameters<T>) => {
     const now = Date.now()
-    
+
     if (now - lastExecTime >= delay) {
       lastExecTime = now
       fn(...args)
     } else if (!timeoutId) {
-      timeoutId = setTimeout(() => {
-        lastExecTime = Date.now()
-        fn(...args)
-        timeoutId = null
-      }, delay - (now - lastExecTime))
+      timeoutId = setTimeout(
+        () => {
+          lastExecTime = Date.now()
+          fn(...args)
+          timeoutId = null
+        },
+        delay - (now - lastExecTime)
+      )
     }
   }) as T
 
@@ -226,20 +223,17 @@ export function useAdaptiveDebounce<T extends (...args: any[]) => any>(
 
   const adaptiveDebouncedFn = ((...args: Parameters<T>) => {
     const now = Date.now()
-    
+
     // 重置计数器
     if (now - lastCallTime > resetInterval) {
       callCount = 0
     }
-    
+
     callCount++
     lastCallTime = now
-    
+
     // 根据调用频率计算延迟时间
-    const adaptiveDelay = Math.min(
-      maxDelay,
-      Math.max(minDelay, minDelay + (callCount - 1) * 50)
-    )
+    const adaptiveDelay = Math.min(maxDelay, Math.max(minDelay, minDelay + (callCount - 1) * 50))
 
     if (timeoutId) {
       clearTimeout(timeoutId)

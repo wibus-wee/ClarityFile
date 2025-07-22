@@ -24,16 +24,16 @@ export default defineEventHandler(async (event) => {
     // 从每个命名空间收集语言文件
     for (const namespace of namespaces) {
       const namespacePath = join(localesPath, namespace)
-      
+
       if (existsSync(namespacePath)) {
-        const stat = await import('node:fs').then(fs => fs.promises.stat(namespacePath))
+        const stat = await import('node:fs').then((fs) => fs.promises.stat(namespacePath))
         if (stat.isDirectory()) {
           const files = await readdir(namespacePath)
-          
+
           // 收集所有 .json 文件的语言代码
           files
-            .filter(file => file.endsWith('.json'))
-            .forEach(file => {
+            .filter((file) => file.endsWith('.json'))
+            .forEach((file) => {
               const languageCode = file.replace('.json', '')
               languageSet.add(languageCode)
             })
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     })
 
     // 构建语言对象数组
-    const languageObjects = languages.map(code => ({
+    const languageObjects = languages.map((code) => ({
       code,
       name: code, // 使用代码作为显示名称
       isBase: code === 'zh-CN'
@@ -63,7 +63,6 @@ export default defineEventHandler(async (event) => {
       },
       timestamp: new Date().toISOString()
     }
-
   } catch (error) {
     console.error('Error getting languages:', error)
     throw createError({

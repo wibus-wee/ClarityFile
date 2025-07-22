@@ -11,10 +11,10 @@
 </template>
 
 <script setup>
-import { useSettings } from '~/composables/useSettings'
+import { useSettingsNew } from '~/composables/useSettingsNew'
 
 // 初始化设置
-const { isDark } = useSettings()
+const { isDark } = useSettingsNew()
 
 // 监听深色模式变化并应用到HTML元素
 watch(isDark, (dark) => {

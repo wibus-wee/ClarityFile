@@ -83,88 +83,119 @@ function countKeys(obj: any): number {
   }, 0)
 }
 
-// 检查值是否已翻译的辅助函数
-function isValueTranslated(value: any): boolean {
-  if (value === null || value === undefined) return false
-  if (typeof value === 'string') return value.trim() !== ''
-  if (Array.isArray(value)) {
-    return value.length > 0 && value.some((item) =>
-      item && typeof item === 'string' && item.trim() !== ''
-    )
-  }
-  if (typeof value === 'object') return Object.keys(value).length > 0
-  return false
-}
+// 这些函数已被新的算法替代，不再需要
 
-// 递归计算已翻译的键数量
-function countTranslatedKeys(obj: any, baseObj: any, prefix: string = ''): number {
-  if (typeof baseObj !== 'object' || baseObj === null) return 0
-
-  let translatedCount = 0
-
-  for (const key of Object.keys(baseObj)) {
-    const fullKey = prefix ? `${prefix}.${key}` : key
-    const baseValue = baseObj[key]
-    const translatedValue = obj && obj[key]
-
-    if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
-      // 递归处理嵌套对象
-      translatedCount += countTranslatedKeys(translatedValue, baseValue, fullKey)
-    } else {
-      // 检查叶子节点是否已翻译
-      if (isValueTranslated(translatedValue)) {
-        translatedCount++
-      }
-    }
-  }
-
-  return translatedCount
-}
-
-// 翻译进度计算（检查实际翻译内容）
+// 翻译进度计算（与前端 Pinia store 算法完全一致）
 async function calculateSimpleTranslationProgress(
   namespacePath: string,
   languages: string[],
   baseKeyCount: number
 ): Promise<number> {
-  if (languages.length <= 1 || baseKeyCount === 0) return 100
-
+  // 排除基准语言，只计算需要翻译的语言
   const nonBaseLanguages = languages.filter((lang) => lang !== 'zh-CN')
-  if (nonBaseLanguages.length === 0) return 100
 
-  // 读取基准语言文件作为参考
-  let baseData: any = {}
+  if (nonBaseLanguages.length === 0 || baseKeyCount === 0) {
+    return 100 // 如果没有需要翻译的语言，则认为100%完成
+  }
+
+  // 读取所有语言文件
+  const translationData: Record<string, any> = {}
+
   try {
     const { readFile } = await import('fs/promises')
+
+    // 读取基准语言文件
     const baseFile = join(namespacePath, 'zh-CN.json')
     const baseContent = await readFile(baseFile, 'utf-8')
-    baseData = JSON.parse(baseContent)
+    translationData['zh-CN'] = JSON.parse(baseContent)
+
+    // 读取其他语言文件
+    for (const lang of nonBaseLanguages) {
+      try {
+        const langFile = join(namespacePath, `${lang}.json`)
+        const content = await readFile(langFile, 'utf-8')
+        translationData[lang] = JSON.parse(content)
+      } catch (err) {
+        console.warn(`Failed to read ${lang} file:`, err)
+        translationData[lang] = {}
+      }
+    }
   } catch (err) {
-    console.warn('Failed to read base language file:', err)
+    console.warn('Failed to read translation files:', err)
     return 0
   }
 
-  let totalCompleteness = 0
+  // 收集所有的翻译键（与前端逻辑一致）
+  const allKeys = new Set<string>()
+  Object.values(translationData).forEach((data) => {
+    collectKeys(data, '', allKeys)
+  })
 
-  for (const lang of nonBaseLanguages) {
-    try {
-      const { readFile } = await import('fs/promises')
-      const langFile = join(namespacePath, `${lang}.json`)
-      const content = await readFile(langFile, 'utf-8')
-      const langData = JSON.parse(content)
+  // 创建翻译条目（模拟前端的 translationEntries）
+  const translationEntries = Array.from(allKeys).map((key) => {
+    const values: Record<string, any> = {}
 
-      // 计算实际已翻译的键数量
-      const translatedKeyCount = countTranslatedKeys(langData, baseData)
-      const completeness = Math.min(100, Math.round((translatedKeyCount / baseKeyCount) * 100))
-      totalCompleteness += completeness
-    } catch (err) {
-      // 如果语言文件不存在，该语言的完成度为0
-      console.warn(`Failed to read ${lang} file for progress calculation:`, err)
-      totalCompleteness += 0
+    // 为每种语言获取值
+    for (const lang of ['zh-CN', ...nonBaseLanguages]) {
+      values[lang] = getValueByPath(translationData[lang] || {}, key) || ''
     }
-  }
 
-  return Math.round(totalCompleteness / nonBaseLanguages.length)
+    return { key, values }
+  })
+
+  // 使用与前端完全相同的算法计算进度
+  const total = translationEntries.length * nonBaseLanguages.length
+  const completed = translationEntries.reduce((count, entry) => {
+    return (
+      count +
+      nonBaseLanguages.filter((lang) => {
+        const value = entry.values[lang]
+        if (!value) return false
+
+        // 处理字符串类型
+        if (typeof value === 'string') {
+          return value.trim() !== ''
+        }
+
+        // 处理数组类型
+        if (Array.isArray(value)) {
+          return value.length > 0 && value.some((item) => item && item.trim && item.trim() !== '')
+        }
+
+        // 处理对象类型
+        if (typeof value === 'object') {
+          return Object.keys(value).length > 0
+        }
+
+        return false
+      }).length
+    )
+  }, 0)
+
+  return total > 0 ? Math.round((completed / total) * 100) : 0
+}
+
+// 递归收集所有键路径（与前端逻辑一致）
+function collectKeys(obj: any, prefix: string, keys: Set<string>) {
+  Object.keys(obj).forEach((key) => {
+    const fullKey = prefix ? `${prefix}.${key}` : key
+
+    if (Array.isArray(obj[key])) {
+      // 数组作为一个整体键，不递归进入
+      keys.add(fullKey)
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+      collectKeys(obj[key], fullKey, keys)
+    } else {
+      keys.add(fullKey)
+    }
+  })
+}
+
+// 根据路径获取值（与前端逻辑一致）
+function getValueByPath(obj: any, path: string): any {
+  return path.split('.').reduce((current, key) => {
+    return current && current[key] !== undefined ? current[key] : ''
+  }, obj)
 }
 
 // 获取命名空间的显示标签
