@@ -74,33 +74,6 @@ export function useDocumentImportHandler() {
   )
 
   /**
-   * 选择现有文档并添加版本
-   */
-  const selectExistingDocumentForVersion = useCallback(
-    async (file: DroppedFileInfo, config: DocumentImportConfig): Promise<void> => {
-      try {
-        // 获取项目的所有文档
-        const documents = await tipcClient.getProjectDocuments({ projectId: config.projectId })
-
-        if (documents.length === 0) {
-          toast.error('项目中没有现有文档，请选择创建新文档')
-          return
-        }
-
-        // 这里应该打开一个文档选择界面，但为了简化，我们先选择第一个文档
-        // TODO: 实现文档选择界面
-        const selectedDocument = documents[0]
-
-        await addVersionToExistingDocument(file, selectedDocument, config)
-      } catch (error) {
-        console.error('选择现有文档失败:', error)
-        toast.error('选择现有文档失败')
-      }
-    },
-    [openDocumentVersionForm]
-  )
-
-  /**
    * 为现有文档添加版本
    */
   const addVersionToExistingDocument = useCallback(
@@ -200,8 +173,8 @@ export function useDocumentImportHandler() {
           // 强制创建新文档
           await createNewDocumentWithVersion(file, config)
         } else if (config.forceAddVersion) {
-          // 强制为现有文档添加版本，需要用户选择文档
-          await selectExistingDocumentForVersion(file, config)
+          // 强制为现有文档添加版本，应该使用 DocumentDrawerWrapper 组件
+          throw new Error('forceAddVersion 模式需要使用 DocumentDrawerWrapper 组件处理文档选择')
         } else {
           // 自动检查（保留原有逻辑，但现在不会被使用）
           const existingDocument = await findExistingDocument(file, config.projectId)
@@ -230,7 +203,6 @@ export function useDocumentImportHandler() {
     [
       validateFiles,
       createNewDocumentWithVersion,
-      selectExistingDocumentForVersion,
       findExistingDocument,
       addVersionToExistingDocument
     ]
@@ -240,7 +212,6 @@ export function useDocumentImportHandler() {
     handleImport,
     validateFiles,
     findExistingDocument,
-    selectExistingDocumentForVersion,
     addVersionToExistingDocument,
     createNewDocumentWithVersion
   }
@@ -268,12 +239,7 @@ export const DocumentImportUtils = {
       .replace(/[_\-\s]*\d{4}[_\-\s]*\d{1,2}[_\-\s]*\d{1,2}[_\-\s]*$/i, '') // 移除日期
 
     // 替换下划线和连字符为空格，并清理多余空格
-    return (
-      cleanName
-        .replace(/[_\-]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim() || '新文档'
-    )
+    return cleanName.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim() || '新文档'
   },
 
   /**

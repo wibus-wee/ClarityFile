@@ -5,6 +5,7 @@ import { IntelligentPathGeneratorService } from './intelligent-path-generator.se
 import { ManagedFileService } from '../managed-file.service'
 import { LogicalDocumentService } from '../document/logical-document.service'
 import { DocumentVersionService } from '../document/document-version.service'
+import { CompetitionService } from '../competition.service'
 import { FilesystemOperations } from '../../utils/filesystem-operations'
 import { PathUtils } from '../../utils/path-utils'
 import { MimeTypeUtils } from '../../utils/mime-type-utils'
@@ -292,6 +293,9 @@ export class IntelligentFileImportService {
         if (docResult.errors) {
           errors.push(...docResult.errors)
         }
+        if (docResult.warnings) {
+          warnings.push(...docResult.warnings)
+        }
       }
 
       // 15. 生成相对路径用于显示
@@ -545,6 +549,55 @@ export class IntelligentFileImportService {
   }
 
   /**
+   * 解析比赛里程碑ID
+   */
+  private static async resolveCompetitionMilestoneId(
+    context: FileImportContext,
+    warnings: string[]
+  ): Promise<string | null> {
+    // 如果没有比赛信息，返回 null
+    if (!context.competitionInfo?.seriesName || !context.competitionInfo?.levelName) {
+      return null
+    }
+
+    try {
+      // 1. 根据系列名称和级别名称查找里程碑
+      const milestone = await CompetitionService.findMilestoneBySeriesAndLevel(
+        context.competitionInfo.seriesName,
+        context.competitionInfo.levelName
+      )
+
+      if (!milestone) {
+        warnings.push(
+          `未找到赛事系列 "${context.competitionInfo.seriesName}" 中的里程碑 "${context.competitionInfo.levelName}"`
+        )
+        return null
+      }
+
+      // 2. 检查项目是否参与了该里程碑
+      if (context.projectId) {
+        const participation = await CompetitionService.checkProjectParticipatesInMilestone(
+          context.projectId,
+          milestone.id
+        )
+
+        if (!participation) {
+          warnings.push(
+            `项目未参与赛事系列 "${context.competitionInfo.seriesName}" 的里程碑 "${context.competitionInfo.levelName}"`
+          )
+          return null
+        }
+      }
+
+      return milestone.id
+    } catch (error) {
+      console.error('解析比赛里程碑ID失败:', error)
+      warnings.push('解析比赛里程碑信息时发生错误')
+      return null
+    }
+  }
+
+  /**
    * 处理文档导入（创建或更新逻辑文档和版本）
    */
   private static async handleDocumentImport(
@@ -554,8 +607,10 @@ export class IntelligentFileImportService {
     logicalDocumentId: string
     documentVersionId: string
     errors?: string[]
+    warnings?: string[]
   }> {
     const errors: string[] = []
+    const warnings: string[] = []
 
     try {
       // 1. 查找或创建逻辑文档
@@ -573,19 +628,23 @@ export class IntelligentFileImportService {
         logicalDocumentId = logicalDocument.id
       }
 
-      // 2. 创建文档版本
+      // 2. 解析比赛里程碑ID
+      const competitionMilestoneId = await this.resolveCompetitionMilestoneId(context, warnings)
+
+      // 3. 创建文档版本
       const documentVersion = await DocumentVersionService.createDocumentVersion({
         logicalDocumentId,
         managedFileId,
         versionTag: context.versionTag!,
         isGenericVersion: context.isGenericVersion || false,
-        competitionMilestoneId: context.competitionInfo?.seriesName ? undefined : undefined, // TODO: 实现比赛里程碑关联
+        competitionMilestoneId,
         notes: context.notes
       })
 
       return {
         logicalDocumentId,
-        documentVersionId: documentVersion.id
+        documentVersionId: documentVersion.id,
+        warnings: warnings.length > 0 ? warnings : undefined
       }
     } catch (error) {
       console.error('处理文档导入失败:', error)
@@ -595,7 +654,8 @@ export class IntelligentFileImportService {
       return {
         logicalDocumentId: context.logicalDocumentId || '',
         documentVersionId: '',
-        errors
+        errors,
+        warnings: warnings.length > 0 ? warnings : undefined
       }
     }
   }

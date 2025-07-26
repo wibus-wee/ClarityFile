@@ -733,6 +733,52 @@ export class CompetitionService {
   }
 
   /**
+   * 根据赛事系列名称和里程碑级别名称查找里程碑
+   */
+  static async findMilestoneBySeriesAndLevel(seriesName: string, levelName: string) {
+    const result = await db
+      .select({
+        id: competitionMilestones.id,
+        levelName: competitionMilestones.levelName,
+        competitionSeriesId: competitionMilestones.competitionSeriesId,
+        seriesName: competitionSeries.name
+      })
+      .from(competitionMilestones)
+      .innerJoin(
+        competitionSeries,
+        eq(competitionMilestones.competitionSeriesId, competitionSeries.id)
+      )
+      .where(
+        and(eq(competitionSeries.name, seriesName), eq(competitionMilestones.levelName, levelName))
+      )
+      .limit(1)
+
+    return result.length > 0 ? result[0] : null
+  }
+
+  /**
+   * 检查项目是否参与了指定的里程碑
+   */
+  static async checkProjectParticipatesInMilestone(projectId: string, milestoneId: string) {
+    const result = await db
+      .select({
+        projectId: projectCompetitionMilestones.projectId,
+        competitionMilestoneId: projectCompetitionMilestones.competitionMilestoneId,
+        statusInMilestone: projectCompetitionMilestones.statusInMilestone
+      })
+      .from(projectCompetitionMilestones)
+      .where(
+        and(
+          eq(projectCompetitionMilestones.projectId, projectId),
+          eq(projectCompetitionMilestones.competitionMilestoneId, milestoneId)
+        )
+      )
+      .limit(1)
+
+    return result.length > 0 ? result[0] : null
+  }
+
+  /**
    * 按日期范围获取里程碑（用于日历视图）
    */
   static async getMilestonesByDateRange(startDate: Date, endDate: Date) {
