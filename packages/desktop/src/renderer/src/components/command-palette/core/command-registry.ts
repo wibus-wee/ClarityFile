@@ -1,4 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js'
+import { PluginRegistry } from '../plugins/plugin-registry'
 import type { Command, CommandPalettePlugin, PluginConfig } from '../types'
 
 /**
@@ -12,16 +13,18 @@ import type { Command, CommandPalettePlugin, PluginConfig } from '../types'
  */
 export class CommandRegistry {
   private commands = new Map<string, Command>()
-  private plugins = new Map<string, CommandPalettePlugin>()
   private fuse: Fuse<Command> | null = null
+  private pluginRegistry: PluginRegistry
 
-  constructor(private pluginConfigs: Record<string, PluginConfig>) {}
+  constructor(pluginConfigs: Record<string, PluginConfig>) {
+    this.pluginRegistry = new PluginRegistry(pluginConfigs)
+  }
 
   /**
    * 注册插件
    */
   registerPlugin(plugin: CommandPalettePlugin) {
-    this.plugins.set(plugin.id, plugin)
+    this.pluginRegistry.register(plugin)
     this.refreshCommands(plugin)
     this.initializeFuse()
   }
@@ -37,7 +40,7 @@ export class CommandRegistry {
       }
     }
 
-    this.plugins.delete(pluginId)
+    this.pluginRegistry.unregister(pluginId)
     this.initializeFuse()
   }
 
@@ -68,32 +71,30 @@ export class CommandRegistry {
    * 获取可搜索的插件列表
    */
   getSearchablePlugins(): CommandPalettePlugin[] {
-    return Array.from(this.plugins.values())
-      .filter((plugin) => {
-        const config = this.pluginConfigs[plugin.id]
-        return config?.enabled !== false && config?.searchable !== false && plugin.searchable
-      })
-      .sort((a, b) => {
-        const configA = this.pluginConfigs[a.id]
-        const configB = this.pluginConfigs[b.id]
-        return (configA?.order || 0) - (configB?.order || 0)
-      })
+    return this.pluginRegistry.getSearchable()
   }
 
   /**
    * 获取插件
    */
   getPlugin(pluginId: string): CommandPalettePlugin | undefined {
-    return this.plugins.get(pluginId)
+    return this.pluginRegistry.get(pluginId)
+  }
+
+  /**
+   * 获取能处理特定查询的插件
+   */
+  getPluginsForQuery(query: string): CommandPalettePlugin[] {
+    return this.pluginRegistry.getPluginsForQuery(query)
   }
 
   /**
    * 更新插件配置
    */
   updateConfigs(newConfigs: Record<string, PluginConfig>) {
-    this.pluginConfigs = newConfigs
+    this.pluginRegistry.updateConfigs(newConfigs)
     // 重新刷新所有插件的命令
-    for (const plugin of this.plugins.values()) {
+    for (const plugin of this.pluginRegistry.getAll()) {
       this.refreshCommands(plugin)
     }
     this.initializeFuse()
@@ -111,7 +112,7 @@ export class CommandRegistry {
     }
 
     // 如果插件启用且有命令，则注册命令
-    const config = this.pluginConfigs[plugin.id]
+    const config = this.pluginRegistry.getConfig(plugin.id)
     if (config?.enabled !== false && plugin.publishCommands) {
       const commands = plugin.publishCommands()
       commands.forEach((cmd) => {

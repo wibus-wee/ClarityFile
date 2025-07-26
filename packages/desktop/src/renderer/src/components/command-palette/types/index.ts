@@ -1,6 +1,8 @@
 import React from 'react'
 import { CommandRegistry } from '../core/command-registry'
 import { RouteRegistry } from '../core/route-registry'
+import type { PluginContext } from '../plugins/plugin-context'
+export type { PluginContext }
 
 /**
  * 基础命令接口
@@ -43,20 +45,6 @@ export interface PluginConfig {
   enabled: boolean
   searchable: boolean
   order: number
-}
-
-/**
- * 插件上下文接口
- */
-export interface PluginContext {
-  query: string
-  router: any // 将来会使用正确的Router类型
-  close: () => void
-  setQuery: (query: string) => void
-  services: {
-    // 这里将来会添加各种服务的引用
-    [key: string]: any
-  }
 }
 
 /**

@@ -1,14 +1,11 @@
-import { useEffect, useMemo } from 'react'
-import { useRouter } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useShortcutStore } from '../shortcuts/stores/shortcut-store'
 import { useCommandPaletteActions } from './stores/command-palette-store'
 import { CommandPaletteOverlay } from './command-palette-overlay'
 import { CommandPaletteContext } from './command-palette-context'
-import { useRouteRegistry } from './core/route-registry'
-import { CommandRegistry } from './core/command-registry'
-import { useCommandPaletteData } from './hooks/use-command-palette-data'
+import { useCommandPalette } from './hooks/use-command-palette'
 import type { ShortcutKey } from '../shortcuts/types/shortcut.types'
-import type { CommandPaletteProviderProps, CommandPaletteContextValue, PluginConfig } from './types'
+import type { CommandPaletteProviderProps, CommandPaletteContextValue } from './types'
 
 /**
  * Command Palette Provider 组件
@@ -23,25 +20,9 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   const { open } = useCommandPaletteActions()
   const register = useShortcutStore((state) => state.register)
   const unregister = useShortcutStore((state) => state.unregister)
-  const router = useRouter()
 
-  // 获取插件配置数据
-  const { pluginConfigs, updatePluginConfig: updateConfig, isLoading } = useCommandPaletteData()
-
-  // 初始化路由注册表
-  const routeRegistry = useRouteRegistry(router)
-
-  // 初始化命令注册表
-  const commandRegistry = useMemo(() => {
-    return new CommandRegistry(pluginConfigs)
-  }, [pluginConfigs])
-
-  // 包装 updatePluginConfig 函数以匹配接口
-  const updatePluginConfig = useMemo(() => {
-    return async (pluginId: string, config: PluginConfig) => {
-      return await updateConfig({ pluginId, config })
-    }
-  }, [updateConfig])
+  // 使用统一的命令面板数据管理 hook
+  const commandPaletteData = useCommandPalette()
 
   // 注册 Command Palette 快捷键
   useEffect(() => {
@@ -68,11 +49,11 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
 
   // 创建上下文值
   const contextValue: CommandPaletteContextValue = {
-    commandRegistry,
-    routeRegistry,
-    pluginConfigs,
-    updatePluginConfig,
-    isLoading
+    commandRegistry: commandPaletteData.commandRegistry,
+    routeRegistry: commandPaletteData.routeRegistry,
+    pluginConfigs: commandPaletteData.pluginConfigs,
+    updatePluginConfig: commandPaletteData.updatePluginConfig,
+    isLoading: commandPaletteData.isLoading
   }
 
   return (
