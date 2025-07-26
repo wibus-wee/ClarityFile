@@ -3,6 +3,8 @@ import { ClarityLayout } from '@renderer/components/layouts/ClarityLayout'
 import { DataProvider } from '@renderer/providers/data-provider'
 import { SWRProvider } from '@renderer/providers/swr-provider'
 import { CustomThemeProvider } from '@renderer/providers/custom-theme-provider'
+import { CommandPaletteProvider } from '@renderer/components/command-palette'
+import { ShortcutProvider } from '@renderer/components/shortcuts'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { Toaster } from 'sonner'
@@ -15,9 +17,13 @@ export const Route = createRootRoute({
         <HeroUIProvider>
           <SWRProvider>
             <DataProvider>
-              <ClarityLayout>
-                <Outlet />
-              </ClarityLayout>
+              <ShortcutProvider scope="global">
+                <CommandPaletteProvider>
+                  <ClarityLayout>
+                    <Outlet />
+                  </ClarityLayout>
+                </CommandPaletteProvider>
+              </ShortcutProvider>
             </DataProvider>
           </SWRProvider>
         </HeroUIProvider>

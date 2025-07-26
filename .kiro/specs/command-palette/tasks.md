@@ -2,7 +2,7 @@
 
 ## Core Infrastructure
 
-- [ ] 1. Set up command palette foundation
+- [x] 1. Set up command palette foundation
 
   - Create core command palette components using cmdk library
   - Implement CommandPaletteProvider with global keyboard shortcut handling (Cmd+K/Ctrl+K)
@@ -10,7 +10,7 @@
   - Set up basic state management using Zustand store
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. Implement basic command palette UI structure
+- [x] 2. Implement basic command palette UI structure
   - Create CommandPaletteInput component with search functionality
   - Implement CommandPaletteResults container for displaying results
   - Add keyboard navigation support (Arrow keys, Enter, Escape)
