@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useShortcutStore } from '../shortcuts/stores/shortcut-store'
 import { useCommandPaletteActions } from './stores/command-palette-store'
 import { CommandPaletteOverlay } from './command-palette-overlay'
@@ -47,14 +47,23 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
     }
   }, [open, register, unregister])
 
-  // 创建上下文值
-  const contextValue: CommandPaletteContextValue = {
-    commandRegistry: commandPaletteData.commandRegistry,
-    routeRegistry: commandPaletteData.routeRegistry,
-    pluginConfigs: commandPaletteData.pluginConfigs,
-    updatePluginConfig: commandPaletteData.updatePluginConfig,
-    isLoading: commandPaletteData.isLoading
-  }
+  // 创建上下文值 - 使用 useMemo 避免不必要的重新渲染
+  const contextValue: CommandPaletteContextValue = useMemo(
+    () => ({
+      commandRegistry: commandPaletteData.commandRegistry,
+      routeRegistry: commandPaletteData.routeRegistry,
+      pluginConfigs: commandPaletteData.pluginConfigs,
+      updatePluginConfig: commandPaletteData.updatePluginConfig,
+      isLoading: commandPaletteData.isLoading
+    }),
+    [
+      commandPaletteData.commandRegistry,
+      commandPaletteData.routeRegistry,
+      commandPaletteData.pluginConfigs,
+      commandPaletteData.updatePluginConfig,
+      commandPaletteData.isLoading
+    ]
+  )
 
   return (
     <CommandPaletteContext.Provider value={contextValue}>

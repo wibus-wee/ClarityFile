@@ -187,4 +187,13 @@ export class PluginRegistry {
       nonSearchable: enabled - searchable
     }
   }
+
+  /**
+   * 清理所有插件和配置
+   * 用于组件卸载时防止内存泄漏
+   */
+  dispose(): void {
+    this.plugins.clear()
+    this.pluginConfigs = {}
+  }
 }

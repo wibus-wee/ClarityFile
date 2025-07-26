@@ -96,7 +96,7 @@ export class PluginErrorBoundary extends Component<Props, State> {
 }
 
 /**
- * 插件错误边界的 Hook 版本
+ * 插件错误边界的 HOC 版本
  * 用于函数组件中包装插件内容
  */
 export function withPluginErrorBoundary<T extends object>(
@@ -104,20 +104,24 @@ export function withPluginErrorBoundary<T extends object>(
   pluginId?: string,
   fallback?: ReactNode
 ) {
-  return function WrappedComponent(props: T) {
+  const WrappedComponent = React.memo((props: T) => {
     return (
       <PluginErrorBoundary pluginId={pluginId} fallback={fallback}>
         <Component {...props} />
       </PluginErrorBoundary>
     )
-  }
+  })
+
+  WrappedComponent.displayName = `withPluginErrorBoundary(${Component.displayName || Component.name})`
+
+  return WrappedComponent
 }
 
 /**
  * 简化的插件错误边界组件
  * 用于包装单个插件的渲染内容
  */
-export function PluginWrapper({
+export const PluginWrapper = React.memo(function PluginWrapper({
   children,
   pluginId,
   className
@@ -131,4 +135,4 @@ export function PluginWrapper({
       <PluginErrorBoundary pluginId={pluginId}>{children}</PluginErrorBoundary>
     </div>
   )
-}
+})

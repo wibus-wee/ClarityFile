@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { CommandRegistry } from '../core/command-registry'
 import { useRouteRegistry } from '../core/route-registry'
-import { PluginRegistry } from '../plugins/plugin-registry'
+
 import { createPluginContext } from '../plugins/plugin-context'
 import { useCommandPaletteData, useCommandPaletteFavorites } from './use-command-palette-data'
 import { useCommandPaletteActions, useCommandPaletteQuery } from '../stores/command-palette-store'
@@ -86,85 +86,110 @@ export function useCommandPalette() {
   }, [router, close, setQuery, query])
 
   // 注册插件的方法
-  const registerPlugin = (plugin: CommandPalettePlugin) => {
-    commandRegistry.registerPlugin(plugin)
-  }
+  const registerPlugin = useMemo(() => {
+    return (plugin: CommandPalettePlugin) => {
+      commandRegistry.registerPlugin(plugin)
+    }
+  }, [commandRegistry])
 
   // 注销插件的方法
-  const unregisterPlugin = (pluginId: string) => {
-    commandRegistry.unregisterPlugin(pluginId)
-  }
+  const unregisterPlugin = useMemo(() => {
+    return (pluginId: string) => {
+      commandRegistry.unregisterPlugin(pluginId)
+    }
+  }, [commandRegistry])
 
   // 搜索命令
-  const searchCommands = (searchQuery: string) => {
-    const routeCommands = routeRegistry?.search(searchQuery) || []
-    const pluginCommands = commandRegistry.search(searchQuery)
+  const searchCommands = useMemo(() => {
+    return (searchQuery: string) => {
+      const routeCommands = routeRegistry?.search(searchQuery) || []
+      const pluginCommands = commandRegistry.search(searchQuery)
 
-    return {
-      routes: routeCommands,
-      commands: pluginCommands,
-      total: routeCommands.length + pluginCommands.length
+      return {
+        routes: routeCommands,
+        commands: pluginCommands,
+        total: routeCommands.length + pluginCommands.length
+      }
     }
-  }
+  }, [routeRegistry, commandRegistry])
 
   // 获取所有可用的路由
-  const getAllRoutes = () => {
-    return routeRegistry?.getAllRoutes() || []
-  }
+  const getAllRoutes = useMemo(() => {
+    return () => {
+      return routeRegistry?.getAllRoutes() || []
+    }
+  }, [routeRegistry])
 
   // 获取可搜索的插件
-  const getSearchablePlugins = () => {
-    return commandRegistry.getSearchablePlugins()
-  }
+  const getSearchablePlugins = useMemo(() => {
+    return () => {
+      return commandRegistry.getSearchablePlugins()
+    }
+  }, [commandRegistry])
 
   // 获取能处理特定查询的插件
-  const getPluginsForQuery = (searchQuery: string) => {
-    return commandRegistry.getPluginsForQuery(searchQuery)
-  }
+  const getPluginsForQuery = useMemo(() => {
+    return (searchQuery: string) => {
+      return commandRegistry.getPluginsForQuery(searchQuery)
+    }
+  }, [commandRegistry])
 
   // 执行命令并跟踪使用情况
-  const executeCommand = async (commandId: string, command: () => void | Promise<void>) => {
-    try {
-      await command()
-      await trackCommand({ commandId })
-    } catch (error) {
-      console.error(`Failed to execute command ${commandId}:`, error)
-      throw error
+  const executeCommand = useMemo(() => {
+    return async (commandId: string, command: () => void | Promise<void>) => {
+      try {
+        await command()
+        await trackCommand({ commandId })
+      } catch (error) {
+        console.error(`Failed to execute command ${commandId}:`, error)
+        throw error
+      }
     }
-  }
+  }, [trackCommand])
 
   // 切换收藏状态
-  const toggleFavorite = async (commandId: string) => {
-    if (favorites.includes(commandId)) {
-      await removeFromFavorites(commandId)
-    } else {
-      await addToFavorites(commandId)
+  const toggleFavorite = useMemo(() => {
+    return async (commandId: string) => {
+      if (favorites.includes(commandId)) {
+        await removeFromFavorites(commandId)
+      } else {
+        await addToFavorites(commandId)
+      }
     }
-  }
+  }, [favorites, removeFromFavorites, addToFavorites])
 
-  // 获取插件统计信息
-  const getPluginStats = () => {
-    const pluginRegistry = new PluginRegistry(pluginConfigs)
-    // 注册所有已知插件到临时注册表以获取统计
-    commandRegistry.getSearchablePlugins().forEach((plugin) => {
-      pluginRegistry.register(plugin)
-    })
-    return pluginRegistry.getStats()
-  }
+  // 获取插件统计信息 - 直接从 commandRegistry 获取，避免创建临时对象
+  const getPluginStats = useMemo(() => {
+    return () => {
+      const searchablePlugins = commandRegistry.getSearchablePlugins()
+      const allCommands = commandRegistry.getAllCommands()
+
+      return {
+        total: searchablePlugins.length,
+        enabled: searchablePlugins.length,
+        disabled: 0, // 因为我们只获取启用的插件
+        searchable: searchablePlugins.filter((p) => p.searchable).length,
+        nonSearchable: searchablePlugins.filter((p) => !p.searchable).length,
+        totalCommands: allCommands.length
+      }
+    }
+  }, [commandRegistry])
 
   // 重置插件配置
-  const resetPluginConfigs = async () => {
-    const defaultConfigs: Record<string, PluginConfig> = {}
-    commandRegistry.getSearchablePlugins().forEach((plugin) => {
-      defaultConfigs[plugin.id] = {
-        id: plugin.id,
-        enabled: true,
-        searchable: plugin.searchable ?? false,
-        order: 0
-      }
-    })
-    await batchUpdateConfigs(defaultConfigs)
-  }
+  const resetPluginConfigs = useMemo(() => {
+    return async () => {
+      const defaultConfigs: Record<string, PluginConfig> = {}
+      commandRegistry.getSearchablePlugins().forEach((plugin) => {
+        defaultConfigs[plugin.id] = {
+          id: plugin.id,
+          enabled: true,
+          searchable: plugin.searchable ?? false,
+          order: 0
+        }
+      })
+      await batchUpdateConfigs(defaultConfigs)
+    }
+  }, [commandRegistry, batchUpdateConfigs])
 
   return {
     // 注册表

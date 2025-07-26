@@ -143,4 +143,14 @@ export class CommandRegistry {
 
     this.fuse = new Fuse(Array.from(this.commands.values()), fuseOptions)
   }
+
+  /**
+   * 清理所有资源
+   * 用于组件卸载时防止内存泄漏
+   */
+  dispose(): void {
+    this.commands.clear()
+    this.fuse = null
+    this.pluginRegistry.dispose()
+  }
 }
