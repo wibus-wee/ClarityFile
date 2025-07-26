@@ -18,7 +18,7 @@ export {
 } from './stores/command-palette-store'
 
 // Context Hook
-export { useCommandPaletteContext } from './command-palette-provider'
+export { useCommandPaletteContext } from './command-palette-context'
 
 // 类型定义
 export type {

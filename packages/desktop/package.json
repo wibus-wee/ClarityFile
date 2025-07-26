@@ -52,6 +52,7 @@
     "immer": "10.1.1",
     "mime-types": "^3.0.1",
     "nuqs": "^2.4.3",
+    "pinyin-pro": "3.26.0",
     "react-compiler-runtime": "19.1.0-rc.2",
     "react-hook-form": "^7.56.4",
     "react-i18next": "15.6.0",

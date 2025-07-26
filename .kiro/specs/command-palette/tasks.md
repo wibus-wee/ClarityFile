@@ -19,7 +19,7 @@
 
 ## Route Navigation System
 
-- [ ] 3. Create RouteRegistry for application navigation
+- [x] 3. Create RouteRegistry for application navigation
 
   - Implement RouteRegistry class to manage route-based commands
   - Integrate with existing useTranslatedRoutes hook for route discovery
@@ -27,7 +27,7 @@
   - Support Chinese, English, and pinyin search terms
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 4. Implement route command execution
+- [x] 4. Implement route command execution
   - Add navigation functionality using TanStack Router
   - Create RouteCommand interface extending base Command
   - Implement command execution that navigates to selected routes

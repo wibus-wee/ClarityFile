@@ -1,4 +1,6 @@
 import React from 'react'
+import { CommandRegistry } from '../core/command-registry'
+import { RouteRegistry } from '../core/route-registry'
 
 /**
  * 基础命令接口
@@ -7,7 +9,7 @@ export interface Command {
   id: string
   title: string
   subtitle?: string
-  icon?: React.ComponentType
+  icon?: React.ComponentType<{ className?: string }>
   keywords: string[]
   category?: string
   action: () => void | Promise<void>
@@ -65,7 +67,7 @@ export interface CommandPalettePlugin {
   name: string
   description: string
   keywords: string[]
-  icon?: React.ComponentType
+  icon?: React.ComponentType<{ className?: string }>
   canHandleQuery?: (query: string) => boolean
   execute?: (context: PluginContext) => void | Promise<void>
   render?: (context: PluginContext) => React.ReactNode
@@ -118,6 +120,14 @@ export interface CommandPaletteProviderProps {
  * Command Palette Context 接口
  */
 export interface CommandPaletteContextValue {
-  // 这里将来会添加 commandRegistry, routeRegistry 等
-  [key: string]: any
+  // 注册表
+  commandRegistry?: CommandRegistry
+  routeRegistry?: RouteRegistry
+
+  // 插件配置
+  pluginConfigs: Record<string, PluginConfig>
+  updatePluginConfig: (pluginId: string, config: PluginConfig) => Promise<any>
+
+  // 加载状态
+  isLoading: boolean
 }

@@ -1,14 +1,14 @@
-import { createContext, useContext, useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useRouter } from '@tanstack/react-router'
 import { useShortcutStore } from '../shortcuts/stores/shortcut-store'
 import { useCommandPaletteActions } from './stores/command-palette-store'
 import { CommandPaletteOverlay } from './command-palette-overlay'
+import { CommandPaletteContext } from './command-palette-context'
+import { useRouteRegistry } from './core/route-registry'
+import { CommandRegistry } from './core/command-registry'
+import { useCommandPaletteData } from './hooks/use-command-palette-data'
 import type { ShortcutKey } from '../shortcuts/types/shortcut.types'
-import type { CommandPaletteProviderProps, CommandPaletteContextValue } from './types'
-
-/**
- * Command Palette Context
- */
-const CommandPaletteContext = createContext<CommandPaletteContextValue | null>(null)
+import type { CommandPaletteProviderProps, CommandPaletteContextValue, PluginConfig } from './types'
 
 /**
  * Command Palette Provider 组件
@@ -23,6 +23,25 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   const { open } = useCommandPaletteActions()
   const register = useShortcutStore((state) => state.register)
   const unregister = useShortcutStore((state) => state.unregister)
+  const router = useRouter()
+
+  // 获取插件配置数据
+  const { pluginConfigs, updatePluginConfig: updateConfig, isLoading } = useCommandPaletteData()
+
+  // 初始化路由注册表
+  const routeRegistry = useRouteRegistry(router)
+
+  // 初始化命令注册表
+  const commandRegistry = useMemo(() => {
+    return new CommandRegistry(pluginConfigs)
+  }, [pluginConfigs])
+
+  // 包装 updatePluginConfig 函数以匹配接口
+  const updatePluginConfig = useMemo(() => {
+    return async (pluginId: string, config: PluginConfig) => {
+      return await updateConfig({ pluginId, config })
+    }
+  }, [updateConfig])
 
   // 注册 Command Palette 快捷键
   useEffect(() => {
@@ -37,7 +56,6 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
       description: '打开命令面板',
       action: () => {
         open()
-        console.log(123)
       }
     }
 
@@ -50,7 +68,11 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
 
   // 创建上下文值
   const contextValue: CommandPaletteContextValue = {
-    // 将来会添加 commandRegistry, routeRegistry 等
+    commandRegistry,
+    routeRegistry,
+    pluginConfigs,
+    updatePluginConfig,
+    isLoading
   }
 
   return (
@@ -59,15 +81,4 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
       <CommandPaletteOverlay />
     </CommandPaletteContext.Provider>
   )
-}
-
-/**
- * 使用 Command Palette Context 的 Hook
- */
-export function useCommandPaletteContext() {
-  const context = useContext(CommandPaletteContext)
-  if (!context) {
-    throw new Error('useCommandPaletteContext must be used within a CommandPaletteProvider')
-  }
-  return context
 }
