@@ -1,10 +1,10 @@
-import { useEffect } from 'react'
+import { useMemo } from 'react'
 import { createPluginCommands } from '../utils/plugin-commands'
-import { useCommandPaletteStore } from '../stores/command-palette-store'
+import { useCommandPaletteStore, useSearchableCommands } from '../stores/command-palette-store'
 import { useCommandPaletteData } from './use-command-palette-data'
 
 /**
- * 插件命令管理 Hook - 替换CommandRegistry类
+ * 插件命令管理 Hook
  *
  * 功能：
  * - 使用纯函数管理插件命令
@@ -14,31 +14,35 @@ import { useCommandPaletteData } from './use-command-palette-data'
 export function usePluginCommands() {
   const { pluginConfigs } = useCommandPaletteData()
 
-  // TODO: 获取注册的插件列表
-  // const plugins = usePluginRegistry() // 需要实现插件注册表
-  const plugins = [] // 临时空数组
+  // ✅ 使用useMemo计算插件命令
+  const pluginCommands = useMemo(() => {
+    // TODO: 获取注册的插件列表
+    // const plugins = usePluginRegistry() // 需要实现插件注册表
+    const plugins = [] // 临时空数组
 
-  // 从store获取更新函数
-  const updatePluginCommands = useCommandPaletteStore((state) => state.actions.updatePluginCommands)
+    return createPluginCommands(plugins, pluginConfigs)
+  }, [pluginConfigs])
 
-  useEffect(() => {
-    // 使用纯函数创建插件命令
-    const pluginCommands = createPluginCommands(plugins, pluginConfigs)
+  return pluginCommands
+}
 
-    // 更新store中的插件命令
-    updatePluginCommands(pluginCommands)
+/**
+ * 插件命令同步Hook
+ */
+export function usePluginCommandsSync() {
+  const pluginCommands = usePluginCommands()
+  const setPluginCommands = useCommandPaletteStore((state) => state.actions.setPluginCommands)
 
-    console.log('Plugin commands updated:', pluginCommands.length)
-  }, [plugins, pluginConfigs, updatePluginCommands])
+  // ✅ 使用useMemo + 同步，而不是useEffect
+  useMemo(() => {
+    setPluginCommands(pluginCommands)
+  }, [pluginCommands, setPluginCommands])
 
-  // 从store返回当前插件命令
-  return useCommandPaletteStore((state) => state.pluginCommands)
+  return pluginCommands
 }
 
 /**
  * 可搜索命令 Hook - 用于"Use with..."功能
+ * 重新导出store中的selector
  */
-export function useSearchableCommands() {
-  // 从store返回可搜索命令
-  return useCommandPaletteStore((state) => state.searchableCommands)
-}
+export { useSearchableCommands }

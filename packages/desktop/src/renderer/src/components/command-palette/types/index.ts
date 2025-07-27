@@ -80,43 +80,41 @@ export interface CommandPalettePlugin {
 }
 
 /**
- * Command Palette Store 状态接口
+ * Command Palette Store 状态接口 (已废弃，使用新的store)
+ * @deprecated 使用新的store实现
  */
 export interface CommandPaletteStoreState {
   // UI 状态
   isOpen: boolean
   query: string
-  activeCommand: string | null // 改为activeCommand
+  activeCommand: string | null
 
   // 本地状态（不需要持久化）
   pluginStates: Record<string, any>
 
-  // Computed State (由hooks填充)
+  // 原始数据（不再存储computed state）
   routeCommands: RouteCommand[]
   pluginCommands: Command[]
-  searchResults: Command[]
-  searchableCommands: Command[]
 }
 
 /**
- * Command Palette Store 操作接口
+ * Command Palette Store 操作接口 (已废弃，使用新的store)
+ * @deprecated 使用新的store实现
  */
 export interface CommandPaletteStoreActions {
   // UI Actions
   open: () => void
   close: () => void
   setQuery: (query: string) => void
-  setActiveCommand: (commandId: string | null) => void // 改为setActiveCommand
+  setActiveCommand: (commandId: string | null) => void
 
   // 插件状态管理
   setPluginState: (pluginId: string, state: any) => void
   getPluginState: (pluginId: string) => any
 
-  // 数据更新Actions (由hooks调用)
-  updateRouteCommands: (routeCommands: RouteCommand[]) => void
-  updatePluginCommands: (pluginCommands: Command[]) => void
-  updateSearchResults: () => void
-  updateSearchableCommands: () => void
+  // 数据更新Actions (纯粹的状态更新，无副作用)
+  setRouteCommands: (routeCommands: RouteCommand[]) => void
+  setPluginCommands: (pluginCommands: Command[]) => void
 }
 
 /**

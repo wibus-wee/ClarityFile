@@ -34,11 +34,9 @@ export function useCommandPalette() {
   } = useCommandPaletteData()
 
   // 包装 updatePluginConfig 函数以匹配接口
-  const updatePluginConfig = useMemo(() => {
-    return async (pluginId: string, config: PluginConfig) => {
-      return await updateConfig({ pluginId, config })
-    }
-  }, [updateConfig])
+  const updatePluginConfig = async (pluginId: string, config: PluginConfig) => {
+    return await updateConfig({ pluginId, config })
+  }
 
   // 获取收藏和历史记录
   const {
@@ -102,54 +100,44 @@ export function useCommandPalette() {
   }, [])
 
   // 搜索命令 - 使用新的functional架构
-  const searchCommands = useMemo(() => {
-    return (searchQuery: string) => {
-      // 更新查询会自动触发搜索
-      setQuery(searchQuery)
+  const searchCommands = (searchQuery: string) => {
+    // 更新查询会自动触发搜索
+    setQuery(searchQuery)
 
-      return {
-        routes: routeCommands,
-        commands: pluginCommands,
-        total: routeCommands.length + pluginCommands.length
-      }
+    return {
+      routes: routeCommands,
+      commands: pluginCommands,
+      total: routeCommands.length + pluginCommands.length
     }
-  }, [setQuery, routeCommands, pluginCommands])
+  }
 
   // 获取所有可用的路由
-  const getAllRoutes = useMemo(() => {
-    return () => {
-      return routeCommands
-    }
-  }, [routeCommands])
+  const getAllRoutes = () => {
+    return routeCommands
+  }
 
   // 获取可搜索的命令
-  const getSearchableCommands = useMemo(() => {
-    return () => {
-      return searchableCommands
-    }
-  }, [searchableCommands])
+  const getSearchableCommands = () => {
+    return searchableCommands
+  }
 
   // 获取能处理特定查询的命令
-  const getCommandsForQuery = useMemo(() => {
-    return (searchQuery: string) => {
-      return searchableCommands.filter(
-        (command) => 'canHandleQuery' in command && command.canHandleQuery?.(searchQuery)
-      )
-    }
-  }, [searchableCommands])
+  const getCommandsForQuery = (searchQuery: string) => {
+    return searchableCommands.filter(
+      (command) => 'canHandleQuery' in command && command.canHandleQuery?.(searchQuery)
+    )
+  }
 
   // 执行命令并跟踪使用情况
-  const executeCommand = useMemo(() => {
-    return async (commandId: string, command: () => void | Promise<void>) => {
-      try {
-        await command()
-        await trackCommand({ commandId })
-      } catch (error) {
-        console.error(`Failed to execute command ${commandId}:`, error)
-        throw error
-      }
+  const executeCommand = async (commandId: string, command: () => void | Promise<void>) => {
+    try {
+      await command()
+      await trackCommand({ commandId })
+    } catch (error) {
+      console.error(`Failed to execute command ${commandId}:`, error)
+      throw error
     }
-  }, [trackCommand])
+  }
 
   // 切换收藏状态
   const toggleFavorite = useMemo(() => {

@@ -1,149 +1,160 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { CommandPaletteStore, CommandPaletteStoreState } from '../types'
-import { searchAllCommands } from '../utils/search'
-import { getSearchableCommands } from '../utils/plugin-commands'
+import { useMemo } from 'react'
+import type { Command, RouteCommand } from '../types'
 
 /**
- * 初始状态
+ * Command Palette Store State
+ * 只存储原始状态，不存储computed state
  */
-const initialState: CommandPaletteStoreState = {
-  isOpen: false,
-  query: '',
-  activeCommand: null, // 改为activeCommand
-  pluginStates: {},
+interface CommandPaletteState {
+  // UI状态
+  isOpen: boolean
+  query: string
+  activeCommand: string | null
 
-  // Computed State (初始为空)
-  routeCommands: [],
-  pluginCommands: [],
-  searchResults: [],
-  searchableCommands: []
+  // 原始数据（由外部提供）
+  routeCommands: RouteCommand[]
+  pluginCommands: Command[]
+
+  // 插件状态
+  pluginStates: Record<string, any>
+}
+
+interface CommandPaletteActions {
+  // UI Actions（纯粹的状态更新）
+  open: () => void
+  close: () => void
+  setQuery: (query: string) => void
+  setActiveCommand: (commandId: string | null) => void
+
+  // 数据更新（纯粹的状态更新，无副作用）
+  setRouteCommands: (commands: RouteCommand[]) => void
+  setPluginCommands: (commands: Command[]) => void
+
+  // 插件状态管理
+  setPluginState: (pluginId: string, state: any) => void
+  getPluginState: (pluginId: string) => any
+}
+
+type CommandPaletteStore = CommandPaletteState & {
+  actions: CommandPaletteActions
 }
 
 /**
  * Command Palette Zustand Store
  *
- * 只管理UI状态，数据管理通过SWR hooks处理
+ * 设计原则：
+ * 1. 只存储原始状态，不存储computed state
+ * 2. 使用selectors计算派生状态
+ * 3. 避免action中调用其他actions
+ * 4. 保持数据流单向性
  */
 export const useCommandPaletteStore = create<CommandPaletteStore>()(
   immer((set, get) => ({
-    ...initialState,
+    // 初始状态
+    isOpen: false,
+    query: '',
+    activeCommand: null,
+    routeCommands: [],
+    pluginCommands: [],
+    pluginStates: {},
 
     actions: {
-      /**
-       * 打开 Command Palette
-       */
-      open: () => {
+      // ✅ 纯粹的UI状态更新
+      open: () =>
         set((state) => {
           state.isOpen = true
-        })
-      },
+        }),
 
-      /**
-       * 关闭 Command Palette 并重置状态
-       */
-      close: () => {
+      close: () =>
         set((state) => {
           state.isOpen = false
-          state.activeCommand = null // 改为activeCommand
+          state.activeCommand = null
           state.query = ''
-        })
-      },
+        }),
 
-      /**
-       * 设置搜索查询
-       */
-      setQuery: (query: string) => {
+      // ✅ 不触发副作用，让组件自己处理搜索
+      setQuery: (query: string) =>
         set((state) => {
           state.query = query
-        })
-        // 触发搜索结果更新
-        get().actions.updateSearchResults()
-      },
+        }),
 
-      /**
-       * 设置当前激活的命令
-       */
-      setActiveCommand: (commandId: string | null) => {
+      setActiveCommand: (commandId: string | null) =>
         set((state) => {
-          state.activeCommand = commandId // 改为activeCommand
-        })
-      },
+          state.activeCommand = commandId
+        }),
 
-      /**
-       * 设置插件状态
-       */
-      setPluginState: (pluginId: string, pluginState: any) => {
+      // ✅ 纯粹的数据更新，无副作用
+      setRouteCommands: (commands: RouteCommand[]) =>
+        set((state) => {
+          state.routeCommands = commands
+        }),
+
+      setPluginCommands: (commands: Command[]) =>
+        set((state) => {
+          state.pluginCommands = commands
+        }),
+
+      // 插件状态管理
+      setPluginState: (pluginId: string, pluginState: any) =>
         set((state) => {
           state.pluginStates[pluginId] = pluginState
-        })
-      },
+        }),
 
-      /**
-       * 获取插件状态
-       */
-      getPluginState: (pluginId: string) => {
-        return get().pluginStates[pluginId]
-      },
-
-      // 数据更新Actions (由hooks调用)
-
-      /**
-       * 更新路由命令
-       */
-      updateRouteCommands: (routeCommands) => {
-        set((state) => {
-          state.routeCommands = routeCommands
-        })
-        // 触发搜索结果更新
-        get().actions.updateSearchResults()
-      },
-
-      /**
-       * 更新插件命令
-       */
-      updatePluginCommands: (pluginCommands) => {
-        set((state) => {
-          state.pluginCommands = pluginCommands
-        })
-        // 触发搜索结果和可搜索命令更新
-        get().actions.updateSearchResults()
-        get().actions.updateSearchableCommands()
-      },
-
-      /**
-       * 更新搜索结果
-       */
-      updateSearchResults: () => {
-        const { query, routeCommands, pluginCommands } = get()
-        const allCommands = [...routeCommands, ...pluginCommands]
-
-        // 如果没有查询，显示所有命令；有查询时才进行搜索
-        const searchResults = query.trim() ? searchAllCommands(allCommands, query) : allCommands
-
-        set((state) => {
-          state.searchResults = searchResults
-        })
-      },
-
-      /**
-       * 更新可搜索命令
-       */
-      updateSearchableCommands: () => {
-        const { routeCommands, pluginCommands } = get()
-        const allCommands = [...routeCommands, ...pluginCommands]
-        const searchableCommands = getSearchableCommands(allCommands)
-
-        set((state) => {
-          state.searchableCommands = searchableCommands
-        })
-      }
+      getPluginState: (pluginId: string) => get().pluginStates[pluginId]
     }
   }))
 )
 
 /**
- * 便捷的 hooks 用于访问特定状态
+ * ✅ 计算式selectors - 使用稳定的引用
+ */
+export const useAllCommands = () => {
+  const routeCommands = useCommandPaletteStore((state) => state.routeCommands)
+  const pluginCommands = useCommandPaletteStore((state) => state.pluginCommands)
+
+  // 只有当routeCommands或pluginCommands真正变化时才创建新数组
+  return useMemo(() => {
+    return [...routeCommands, ...pluginCommands]
+  }, [routeCommands, pluginCommands])
+}
+
+export const useSearchResults = () => {
+  const query = useCommandPaletteStore((state) => state.query)
+  const allCommands = useAllCommands()
+
+  // 实时计算搜索结果
+  if (!query.trim()) return allCommands
+
+  // 简单搜索实现，可以后续升级为Fuse.js
+  const lowerQuery = query.toLowerCase()
+  return allCommands.filter((command) => {
+    const searchText = [
+      command.title,
+      command.subtitle || '',
+      command.category || '',
+      ...command.keywords
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return searchText.includes(lowerQuery)
+  })
+}
+
+export const useSearchableCommands = () => {
+  const allCommands = useAllCommands()
+
+  // 实时计算可搜索命令
+  return allCommands.filter(
+    (command): command is Command =>
+      'render' in command && 'canHandleQuery' in command && command.canHandleQuery !== undefined
+  )
+}
+
+/**
+ * ✅ 便捷的状态访问hooks
  */
 export const useCommandPaletteOpen = () => useCommandPaletteStore((state) => state.isOpen)
 

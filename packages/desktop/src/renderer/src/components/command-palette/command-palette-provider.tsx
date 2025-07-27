@@ -1,11 +1,14 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
+import { useRouter } from '@tanstack/react-router'
 import { useShortcutStore } from '../shortcuts/stores/shortcut-store'
 import { useCommandPaletteActions } from './stores/command-palette-store'
 import { CommandPaletteOverlay } from './command-palette-overlay'
 import { CommandPaletteContext } from './command-palette-context'
-import { useCommandPalette } from './hooks/use-command-palette'
+import { useRouteCommandsSync } from './hooks/use-route-commands'
+import { usePluginCommandsSync } from './hooks/use-plugin-commands'
+import { useCommandPaletteData } from './hooks/use-command-palette-data'
 import type { ShortcutKey } from '../shortcuts/types/shortcut.types'
-import type { CommandPaletteProviderProps, CommandPaletteContextValue } from './types'
+import type { CommandPaletteProviderProps, CommandPaletteContextValue, PluginConfig } from './types'
 
 /**
  * Command Palette Provider 组件
@@ -21,8 +24,13 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   const register = useShortcutStore((state) => state.register)
   const unregister = useShortcutStore((state) => state.unregister)
 
-  // 使用统一的命令面板数据管理 hook
-  const commandPaletteData = useCommandPalette()
+  // 使用新的functional hooks同步数据到store
+  const router = useRouter()
+  useRouteCommandsSync(router)
+  usePluginCommandsSync()
+
+  // 获取插件配置数据
+  const commandPaletteData = useCommandPaletteData()
 
   // 注册 Command Palette 快捷键
   useEffect(() => {
@@ -47,19 +55,14 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
     }
   }, [open, register, unregister])
 
-  // 创建上下文值 - 使用 useMemo 避免不必要的重新渲染
-  const contextValue: CommandPaletteContextValue = useMemo(
-    () => ({
-      pluginConfigs: commandPaletteData.pluginConfigs,
-      updatePluginConfig: commandPaletteData.updatePluginConfig,
-      isLoading: commandPaletteData.isLoading
-    }),
-    [
-      commandPaletteData.pluginConfigs,
-      commandPaletteData.updatePluginConfig,
-      commandPaletteData.isLoading
-    ]
-  )
+  // 创建上下文值 - 直接使用数据，避免不必要的 useMemo
+  const contextValue: CommandPaletteContextValue = {
+    pluginConfigs: commandPaletteData.pluginConfigs,
+    updatePluginConfig: async (pluginId: string, config: PluginConfig) => {
+      await commandPaletteData.updatePluginConfig({ pluginId, config })
+    },
+    isLoading: commandPaletteData.isLoading
+  }
 
   return (
     <CommandPaletteContext.Provider value={contextValue}>
