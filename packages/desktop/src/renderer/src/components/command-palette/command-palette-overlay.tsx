@@ -1,7 +1,12 @@
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Command } from 'cmdk'
-import { useCommandPaletteOpen, useCommandPaletteActions } from './stores/command-palette-store'
+import {
+  useCommandPaletteOpen,
+  useCommandPaletteActions,
+  useCommandPaletteQuery,
+  useCommandPaletteActiveCommand
+} from './stores/command-palette-store'
 import { CommandPaletteInput } from './command-palette-input'
 import { CommandPaletteResults } from './command-palette-results'
 
@@ -17,24 +22,41 @@ import { CommandPaletteResults } from './command-palette-results'
  */
 export function CommandPaletteOverlay() {
   const isOpen = useCommandPaletteOpen()
-  const { close } = useCommandPaletteActions()
+  const { close, setQuery, setActiveCommand } = useCommandPaletteActions()
+  const query = useCommandPaletteQuery()
+  const activeCommand = useCommandPaletteActiveCommand()
   const overlayRef = useRef<HTMLDivElement>(null)
   const commandRef = useRef<HTMLDivElement>(null)
 
-  // 处理 Escape 键关闭
+  // 处理 Escape 键的层级逻辑
   useEffect(() => {
     if (!isOpen) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
+
+        // 层级处理逻辑：
+        // 1. 如果有搜索查询，清空查询
+        if (query.trim()) {
+          setQuery('')
+          return
+        }
+
+        // 2. 如果有激活的命令视图，关闭命令视图
+        if (activeCommand) {
+          setActiveCommand(null)
+          return
+        }
+
+        // 3. 都没有时，关闭整个面板
         close()
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, close])
+  }, [isOpen, query, activeCommand, close, setQuery, setActiveCommand])
 
   // 处理点击外部关闭
   const handleOverlayClick = (event: React.MouseEvent) => {
