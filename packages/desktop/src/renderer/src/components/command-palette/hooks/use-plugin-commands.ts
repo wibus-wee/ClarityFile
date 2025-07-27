@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { createPluginCommands } from '../utils/plugin-commands'
 import { useCommandPaletteStore } from '../stores/command-palette-store'
 import { useCommandPaletteData } from './use-command-palette-data'
-import { useAvailablePlugins } from './use-plugin-registry'
 
 /**
  * 插件命令管理 Hook - 替换CommandRegistry类
@@ -15,8 +14,9 @@ import { useAvailablePlugins } from './use-plugin-registry'
 export function usePluginCommands() {
   const { pluginConfigs } = useCommandPaletteData()
 
-  // 从插件注册表获取可用插件
-  const plugins = useAvailablePlugins()
+  // TODO: 获取注册的插件列表
+  // const plugins = usePluginRegistry() // 需要实现插件注册表
+  const plugins = [] // 临时空数组
 
   // 从store获取更新函数
   const updatePluginCommands = useCommandPaletteStore((state) => state.actions.updatePluginCommands)
