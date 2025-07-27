@@ -141,7 +141,7 @@ export function useFavoritesData() {
     ['command-palette-favorites'],
     () =>
       tipcClient
-        .getSetting({ key: 'favorites' })
+        .getSetting({ key: 'command-palete.favorites' })
         .then((result) => (result?.value ? JSON.parse(result.value as string) : []))
         .catch(() => [])
   )
@@ -151,7 +151,7 @@ export function useFavoritesData() {
     ['command-palette-recent'],
     () =>
       tipcClient
-        .getSetting({ key: 'recent-commands' })
+        .getSetting({ key: 'command-palete.recent-commands' })
         .then((result) => (result?.value ? JSON.parse(result.value as string) : []))
         .catch(() => [])
   )
@@ -162,7 +162,7 @@ export function useFavoritesData() {
     async (_key, { arg }: { arg: string }) => {
       const newFavorites = [...new Set([...favorites, arg])]
       const result = await tipcClient.setSetting({
-        key: 'favorites',
+        key: 'command-palete.favorites',
         value: newFavorites,
         category: 'command-palette',
         description: 'User favorite commands',

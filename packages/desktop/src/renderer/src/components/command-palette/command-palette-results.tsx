@@ -74,13 +74,16 @@ export function CommandPaletteResults() {
         <>
           <Command.Group heading="收藏">
             {favoriteCommands.length > 0 ? (
-              favoriteCommands.map((favorite) => (
-                <Command.Item
-                  key={favorite.commandId}
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
-                >
-                  <span>⭐ {favorite.commandId}</span>
-                </Command.Item>
+              favoriteCommands.map((command: CommandType) => (
+                <CommandItem
+                  key={`favorite-${command.id}`}
+                  command={{
+                    ...command,
+                    id: `favorite-${command.id}` // 给收藏命令添加前缀避免ID冲突
+                  }}
+                  onSelect={() => executeCommand(command)}
+                  showFavorite={false} // 在收藏区域不显示收藏图标，避免重复
+                />
               ))
             ) : (
               <Command.Item className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground">

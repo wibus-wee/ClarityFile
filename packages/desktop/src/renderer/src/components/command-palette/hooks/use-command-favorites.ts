@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useFavoritesData } from './use-command-palette-data'
+import { useAllCommands } from '../stores/command-palette-store'
+import type { Command } from '../types'
 
 /**
  * Command Favorites Hook
@@ -8,6 +10,7 @@ import { useFavoritesData } from './use-command-palette-data'
  */
 export function useCommandFavorites() {
   const { favorites, addToFavorites, removeFromFavorites, isLoadingFavorites } = useFavoritesData()
+  const allCommands = useAllCommands()
 
   // Toggle favorite status
   const toggleFavorite = useCallback(
@@ -29,13 +32,12 @@ export function useCommandFavorites() {
     [favorites]
   )
 
-  // Get favorite commands with metadata
+  // Get favorite commands with full command data
   const favoriteCommands = useMemo(() => {
-    return favorites.map((commandId) => ({
-      commandId,
-      isFavorite: true
-    }))
-  }, [favorites])
+    return favorites
+      .map((commandId: string) => allCommands.find((cmd: Command) => cmd.id === commandId))
+      .filter((cmd: Command | undefined): cmd is Command => cmd !== undefined)
+  }, [favorites, allCommands])
 
   return {
     favorites,
