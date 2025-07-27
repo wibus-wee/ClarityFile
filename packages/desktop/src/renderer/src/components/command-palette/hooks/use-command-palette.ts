@@ -6,6 +6,7 @@ import { useCommandPaletteData, useCommandPaletteFavorites } from './use-command
 import { useCommandPaletteActions, useCommandPaletteQuery } from '../stores/command-palette-store'
 import { useRouteCommands } from './use-route-commands'
 import { usePluginCommands, useSearchableCommands } from './use-plugin-commands'
+import { usePluginRegistry } from '../plugins/plugin-registry'
 
 import type { CommandPalettePlugin, PluginConfig, PluginContext } from '../types'
 
@@ -82,22 +83,21 @@ export function useCommandPalette() {
 
   // 使用新的functional hooks获取数据
   const searchableCommands = useSearchableCommands()
+  const pluginRegistry = usePluginRegistry()
 
-  // 注册插件的方法 - TODO: 需要实现插件注册表
+  // 注册插件的方法
   const registerPlugin = useMemo(() => {
     return (plugin: CommandPalettePlugin) => {
-      console.log('TODO: Implement plugin registration for:', plugin.id)
-      // TODO: 实现插件注册逻辑
+      pluginRegistry.registerPlugin(plugin)
     }
-  }, [])
+  }, [pluginRegistry])
 
-  // 注销插件的方法 - TODO: 需要实现插件注册表
+  // 注销插件的方法
   const unregisterPlugin = useMemo(() => {
     return (pluginId: string) => {
-      console.log('TODO: Implement plugin unregistration for:', pluginId)
-      // TODO: 实现插件注销逻辑
+      pluginRegistry.unregisterPlugin(pluginId)
     }
-  }, [])
+  }, [pluginRegistry])
 
   // 搜索命令 - 使用新的functional架构
   const searchCommands = (searchQuery: string) => {
@@ -153,36 +153,39 @@ export function useCommandPalette() {
   // 获取插件统计信息 - 使用新的functional架构
   const getPluginStats = useMemo(() => {
     return () => {
+      const allRegisteredPlugins = pluginRegistry.getAllPlugins()
+      const enabledPlugins = pluginRegistry.getEnabledPlugins(pluginConfigs)
       const allCommands = [...routeCommands, ...pluginCommands]
       const searchableCommandsCount = searchableCommands.length
 
       return {
-        total: pluginCommands.length,
-        enabled: pluginCommands.length,
-        disabled: 0, // TODO: 需要实现插件注册表来获取禁用的插件
+        total: allRegisteredPlugins.length,
+        enabled: enabledPlugins.length,
+        disabled: allRegisteredPlugins.length - enabledPlugins.length,
         searchable: searchableCommandsCount,
         nonSearchable: allCommands.length - searchableCommandsCount,
         totalCommands: allCommands.length
       }
     }
-  }, [routeCommands, pluginCommands, searchableCommands])
+  }, [routeCommands, pluginCommands, searchableCommands, pluginRegistry, pluginConfigs])
 
   // 重置插件配置
   const resetPluginConfigs = useMemo(() => {
     return async () => {
       const defaultConfigs: Record<string, PluginConfig> = {}
-      // TODO: 需要从插件注册表获取插件列表
-      // 临时实现：基于现有配置重置
-      Object.keys(pluginConfigs).forEach((pluginId) => {
-        defaultConfigs[pluginId] = {
-          id: pluginId,
+      const allRegisteredPlugins = pluginRegistry.getAllPlugins()
+
+      allRegisteredPlugins.forEach((plugin, index) => {
+        defaultConfigs[plugin.id] = {
+          id: plugin.id,
           enabled: true,
-          order: 0
+          order: index
         }
       })
+
       await batchUpdateConfigs(defaultConfigs)
     }
-  }, [pluginConfigs, batchUpdateConfigs])
+  }, [pluginRegistry, batchUpdateConfigs])
 
   return {
     // 上下文

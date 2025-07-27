@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { createPluginCommands } from '../utils/plugin-commands'
 import { useCommandPaletteStore, useSearchableCommands } from '../stores/command-palette-store'
 import { useCommandPaletteData } from './use-command-palette-data'
+import { usePluginRegistryStore } from '../plugins/plugin-registry'
 
 /**
  * 插件命令管理 Hook
@@ -14,14 +15,14 @@ import { useCommandPaletteData } from './use-command-palette-data'
 export function usePluginCommands() {
   const { pluginConfigs } = useCommandPaletteData()
 
-  // ✅ 使用useMemo计算插件命令
-  const pluginCommands = useMemo(() => {
-    // TODO: 获取注册的插件列表
-    // const plugins = usePluginRegistry() // 需要实现插件注册表
-    const plugins = [] // 临时空数组
+  // ✅ 获取插件获取函数，避免无限循环
+  const getPlugins = usePluginRegistryStore((state) => state.actions.getAllPlugins)
 
-    return createPluginCommands(plugins, pluginConfigs)
-  }, [pluginConfigs])
+  // ✅ 使用useMemo计算插件命令，依赖插件数量变化来触发重新计算
+  const pluginCommands = useMemo(() => {
+    const registeredPlugins = getPlugins()
+    return createPluginCommands(registeredPlugins, pluginConfigs)
+  }, [pluginConfigs, getPlugins])
 
   return pluginCommands
 }

@@ -10,6 +10,13 @@ export {
   createPluginContext,
   PluginContextProviderComponent
 } from './plugin-context'
+export {
+  usePluginRegistryStore,
+  usePluginRegistry,
+  useRegisteredPlugins,
+  usePluginRegistryState,
+  usePluginState
+} from './plugin-registry'
 
 // 类型导出
 export type { PluginContext, PluginContextProviderProps } from './plugin-context'
