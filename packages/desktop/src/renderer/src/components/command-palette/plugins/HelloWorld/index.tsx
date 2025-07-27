@@ -24,7 +24,7 @@ export const HelloWorldPlugin: CommandPalettePlugin = {
       subtitle: '显示一个简单的问候消息',
       icon: MessageCircle,
       keywords: ['hello', 'world', '问候', '世界', 'test', '测试'],
-      category: '测试',
+      category: '测试插件',
       source: 'plugin' as const,
       pluginId: 'hello-world',
       action: () => {
@@ -39,7 +39,7 @@ export const HelloWorldPlugin: CommandPalettePlugin = {
       subtitle: '测试插件的搜索功能',
       icon: Sparkles,
       keywords: ['search', 'test', '搜索', '测试', 'hello'],
-      category: '测试',
+      category: '测试插件',
       source: 'plugin' as const,
       pluginId: 'hello-world',
       canHandleQuery: (query: string) => {
@@ -58,7 +58,7 @@ export const HelloWorldPlugin: CommandPalettePlugin = {
       subtitle: '测试插件的路由导航功能',
       icon: MessageCircle,
       keywords: ['navigate', 'router', '导航', '路由', 'test'],
-      category: '测试',
+      category: '测试插件',
       source: 'plugin' as const,
       pluginId: 'hello-world',
       action: () => {

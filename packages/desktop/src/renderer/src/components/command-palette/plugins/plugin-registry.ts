@@ -9,11 +9,17 @@ interface PluginRegistryState {
   // 已注册的插件
   plugins: Map<string, CommandPalettePlugin>
 
+  // 缓存的插件数组 - 用于性能优化，避免重复创建数组
+  pluginsArray: CommandPalettePlugin[]
+
   // 插件加载状态
   loadingPlugins: Set<string>
 
   // 插件错误状态
   pluginErrors: Map<string, string>
+
+  // 缓存的错误数组 - 用于性能优化
+  pluginErrorsArray: Array<[string, string]>
 
   // 注册表是否已初始化
   isInitialized: boolean
@@ -59,6 +65,18 @@ type PluginRegistryStore = PluginRegistryState & {
 }
 
 /**
+ * 辅助函数：更新缓存数组
+ * 只有当插件Map发生变化时才重新创建数组，确保引用稳定性
+ */
+function updateCachedArrays(state: PluginRegistryState) {
+  // 更新插件数组缓存
+  state.pluginsArray = Array.from(state.plugins.values())
+
+  // 更新错误数组缓存
+  state.pluginErrorsArray = Array.from(state.pluginErrors.entries())
+}
+
+/**
  * 插件注册表 Zustand Store
  *
  * 设计原则：
@@ -71,8 +89,10 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
   immer((set, get) => ({
     // 初始状态
     plugins: new Map(),
+    pluginsArray: [],
     loadingPlugins: new Set(),
     pluginErrors: new Map(),
+    pluginErrorsArray: [],
     isInitialized: false,
 
     actions: {
@@ -87,6 +107,9 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
           state.pluginErrors.delete(plugin.id)
           state.loadingPlugins.delete(plugin.id)
 
+          // 更新缓存数组
+          updateCachedArrays(state)
+
           console.log(`Plugin registered: ${plugin.id} - ${plugin.name}`)
         }),
 
@@ -97,6 +120,10 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
             state.plugins.delete(pluginId)
             state.pluginErrors.delete(pluginId)
             state.loadingPlugins.delete(pluginId)
+
+            // 更新缓存数组
+            updateCachedArrays(state)
+
             console.log(`Plugin unregistered: ${pluginId}`)
           } else {
             console.warn(`Plugin ${pluginId} is not registered`)
@@ -116,6 +143,9 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
             state.loadingPlugins.delete(plugin.id)
           })
 
+          // 批量操作完成后更新缓存数组
+          updateCachedArrays(state)
+
           console.log(
             `Batch registered ${plugins.length} plugins:`,
             plugins.map((p) => p.id)
@@ -129,12 +159,12 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
 
       // 获取所有插件
       getAllPlugins: () => {
-        return Array.from(get().plugins.values())
+        return get().pluginsArray
       },
 
       // 获取启用的插件
       getEnabledPlugins: (configs: Record<string, { enabled: boolean }>) => {
-        const allPlugins = Array.from(get().plugins.values())
+        const allPlugins = get().pluginsArray
         return allPlugins.filter((plugin) => {
           const config = configs[plugin.id]
           return config?.enabled !== false // 默认启用
@@ -160,6 +190,9 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
           } else {
             state.pluginErrors.delete(pluginId)
           }
+
+          // 更新错误数组缓存
+          state.pluginErrorsArray = Array.from(state.pluginErrors.entries())
         }),
 
       // 清除所有插件
@@ -168,6 +201,10 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
           state.plugins.clear()
           state.loadingPlugins.clear()
           state.pluginErrors.clear()
+
+          // 更新缓存数组
+          updateCachedArrays(state)
+
           console.log('All plugins cleared')
         }),
 
@@ -187,8 +224,8 @@ export const usePluginRegistryStore = create<PluginRegistryStore>()(
 export const usePluginRegistry = () => usePluginRegistryStore((state) => state.actions)
 
 export const useRegisteredPlugins = () => {
-  // ✅ 直接返回插件数组，让调用方处理 memoization
-  return usePluginRegistryStore((state) => Array.from(state.plugins.values()))
+  // ✅ 直接返回缓存的数组，确保引用稳定性，避免无限重渲染
+  return usePluginRegistryStore((state) => state.pluginsArray)
 }
 
 // ✅ 分别获取各个状态，避免创建新对象
@@ -202,7 +239,7 @@ export const usePluginRegistryErrorCount = () =>
   usePluginRegistryStore((state) => state.pluginErrors.size)
 
 export const usePluginRegistryErrors = () =>
-  usePluginRegistryStore((state) => Array.from(state.pluginErrors.entries()))
+  usePluginRegistryStore((state) => state.pluginErrorsArray)
 
 /**
  * 获取特定插件的状态
