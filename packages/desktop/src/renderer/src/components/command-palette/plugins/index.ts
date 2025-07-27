@@ -1,5 +1,4 @@
 // 插件系统核心导出
-export { PluginRegistry } from './plugin-registry'
 export {
   PluginErrorBoundary,
   withPluginErrorBoundary,

@@ -13,7 +13,7 @@ export {
   useCommandPaletteStore,
   useCommandPaletteOpen,
   useCommandPaletteQuery,
-  useCommandPaletteActivePlugin,
+  useCommandPaletteActiveCommand,
   useCommandPaletteActions
 } from './stores/command-palette-store'
 
@@ -24,9 +24,10 @@ export { useCommandPaletteContext } from './command-palette-context'
 export { useCommandPaletteData, useCommandPaletteFavorites } from './hooks/use-command-palette-data'
 export { useCommandPalette } from './hooks/use-command-palette'
 
-// 核心注册表
-export { RouteRegistry } from './core/route-registry'
-export { CommandRegistry } from './core/command-registry'
+// 新的functional hooks
+export { useRouteCommands } from './hooks/use-route-commands'
+export { usePluginCommands, useSearchableCommands } from './hooks/use-plugin-commands'
+export { useCommandSearch } from './hooks/use-command-search'
 
 // 插件系统
 export * from './plugins'

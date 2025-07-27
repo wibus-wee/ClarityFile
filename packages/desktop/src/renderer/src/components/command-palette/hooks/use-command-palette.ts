@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
 import { useRouter } from '@tanstack/react-router'
-import { CommandRegistry } from '../core/command-registry'
-import { useRouteRegistry } from '../core/route-registry'
 
 import { createPluginContext } from '../plugins/plugin-context'
 import { useCommandPaletteData, useCommandPaletteFavorites } from './use-command-palette-data'
 import { useCommandPaletteActions, useCommandPaletteQuery } from '../stores/command-palette-store'
+import { useRouteCommands } from './use-route-commands'
+import { usePluginCommands, useSearchableCommands } from './use-plugin-commands'
+
 import type { CommandPalettePlugin, PluginConfig, PluginContext } from '../types'
 
 /**
@@ -50,13 +51,9 @@ export function useCommandPalette() {
     isLoadingRecent
   } = useCommandPaletteFavorites()
 
-  // 初始化路由注册表
-  const routeRegistry = useRouteRegistry(router)
-
-  // 初始化命令注册表
-  const commandRegistry = useMemo(() => {
-    return new CommandRegistry(pluginConfigs)
-  }, [pluginConfigs])
+  // 使用新的functional hooks替换class registries
+  const routeCommands = useRouteCommands(router)
+  const pluginCommands = usePluginCommands()
 
   // 创建插件上下文
   const pluginContext = useMemo((): PluginContext => {
@@ -85,25 +82,30 @@ export function useCommandPalette() {
     )
   }, [router, close, setQuery, query])
 
-  // 注册插件的方法
+  // 使用新的functional hooks获取数据
+  const searchableCommands = useSearchableCommands()
+
+  // 注册插件的方法 - TODO: 需要实现插件注册表
   const registerPlugin = useMemo(() => {
     return (plugin: CommandPalettePlugin) => {
-      commandRegistry.registerPlugin(plugin)
+      console.log('TODO: Implement plugin registration for:', plugin.id)
+      // TODO: 实现插件注册逻辑
     }
-  }, [commandRegistry])
+  }, [])
 
-  // 注销插件的方法
+  // 注销插件的方法 - TODO: 需要实现插件注册表
   const unregisterPlugin = useMemo(() => {
     return (pluginId: string) => {
-      commandRegistry.unregisterPlugin(pluginId)
+      console.log('TODO: Implement plugin unregistration for:', pluginId)
+      // TODO: 实现插件注销逻辑
     }
-  }, [commandRegistry])
+  }, [])
 
-  // 搜索命令
+  // 搜索命令 - 使用新的functional架构
   const searchCommands = useMemo(() => {
     return (searchQuery: string) => {
-      const routeCommands = routeRegistry?.search(searchQuery) || []
-      const pluginCommands = commandRegistry.search(searchQuery)
+      // 更新查询会自动触发搜索
+      setQuery(searchQuery)
 
       return {
         routes: routeCommands,
@@ -111,28 +113,30 @@ export function useCommandPalette() {
         total: routeCommands.length + pluginCommands.length
       }
     }
-  }, [routeRegistry, commandRegistry])
+  }, [setQuery, routeCommands, pluginCommands])
 
   // 获取所有可用的路由
   const getAllRoutes = useMemo(() => {
     return () => {
-      return routeRegistry?.getAllRoutes() || []
+      return routeCommands
     }
-  }, [routeRegistry])
+  }, [routeCommands])
 
-  // 获取可搜索的插件
-  const getSearchablePlugins = useMemo(() => {
+  // 获取可搜索的命令
+  const getSearchableCommands = useMemo(() => {
     return () => {
-      return commandRegistry.getSearchablePlugins()
+      return searchableCommands
     }
-  }, [commandRegistry])
+  }, [searchableCommands])
 
-  // 获取能处理特定查询的插件
-  const getPluginsForQuery = useMemo(() => {
+  // 获取能处理特定查询的命令
+  const getCommandsForQuery = useMemo(() => {
     return (searchQuery: string) => {
-      return commandRegistry.getPluginsForQuery(searchQuery)
+      return searchableCommands.filter(
+        (command) => 'canHandleQuery' in command && command.canHandleQuery?.(searchQuery)
+      )
     }
-  }, [commandRegistry])
+  }, [searchableCommands])
 
   // 执行命令并跟踪使用情况
   const executeCommand = useMemo(() => {
@@ -158,43 +162,42 @@ export function useCommandPalette() {
     }
   }, [favorites, removeFromFavorites, addToFavorites])
 
-  // 获取插件统计信息 - 直接从 commandRegistry 获取，避免创建临时对象
+  // 获取插件统计信息 - 使用新的functional架构
   const getPluginStats = useMemo(() => {
     return () => {
-      const searchablePlugins = commandRegistry.getSearchablePlugins()
-      const allCommands = commandRegistry.getAllCommands()
+      const allCommands = [...routeCommands, ...pluginCommands]
+      const searchableCommandsCount = searchableCommands.length
 
       return {
-        total: searchablePlugins.length,
-        enabled: searchablePlugins.length,
-        disabled: 0, // 因为我们只获取启用的插件
-        searchable: searchablePlugins.filter((p) => p.searchable).length,
-        nonSearchable: searchablePlugins.filter((p) => !p.searchable).length,
+        total: pluginCommands.length,
+        enabled: pluginCommands.length,
+        disabled: 0, // TODO: 需要实现插件注册表来获取禁用的插件
+        searchable: searchableCommandsCount,
+        nonSearchable: allCommands.length - searchableCommandsCount,
         totalCommands: allCommands.length
       }
     }
-  }, [commandRegistry])
+  }, [routeCommands, pluginCommands, searchableCommands])
 
   // 重置插件配置
   const resetPluginConfigs = useMemo(() => {
     return async () => {
       const defaultConfigs: Record<string, PluginConfig> = {}
-      commandRegistry.getSearchablePlugins().forEach((plugin) => {
-        defaultConfigs[plugin.id] = {
-          id: plugin.id,
+      // TODO: 需要从插件注册表获取插件列表
+      // 临时实现：基于现有配置重置
+      Object.keys(pluginConfigs).forEach((pluginId) => {
+        defaultConfigs[pluginId] = {
+          id: pluginId,
           enabled: true,
-          searchable: plugin.searchable ?? false,
           order: 0
         }
       })
       await batchUpdateConfigs(defaultConfigs)
     }
-  }, [commandRegistry, batchUpdateConfigs])
+  }, [pluginConfigs, batchUpdateConfigs])
 
   return {
-    // 注册表
-    routeRegistry,
-    commandRegistry,
+    // 上下文
     pluginContext,
 
     // 数据
@@ -202,12 +205,15 @@ export function useCommandPalette() {
     favorites,
     recentCommands,
     query,
+    routeCommands,
+    pluginCommands,
+    searchableCommands,
 
     // 搜索功能
     searchCommands,
     getAllRoutes,
-    getSearchablePlugins,
-    getPluginsForQuery,
+    getSearchableCommands,
+    getCommandsForQuery,
 
     // 插件管理
     registerPlugin,

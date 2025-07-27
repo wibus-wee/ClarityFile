@@ -14,7 +14,6 @@ export const pluginConfigUtils = {
   getDefaultConfig: (plugin: CommandPalettePlugin): PluginConfig => ({
     id: plugin.id,
     enabled: true,
-    searchable: plugin.searchable ?? false,
     order: 0
   }),
 

@@ -61,7 +61,7 @@
   - Integrate with existing TIPC client and settings service
   - _Requirements: 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 8. Implement favorites and recent commands system
+- [x] 8. Implement favorites and recent commands system
   - Create data models for RecentCommand and favorites storage
   - Add command usage tracking and frequency calculation
   - Implement persistence using settings service with 'command-palette' category

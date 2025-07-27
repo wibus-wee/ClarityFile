@@ -50,15 +50,11 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   // 创建上下文值 - 使用 useMemo 避免不必要的重新渲染
   const contextValue: CommandPaletteContextValue = useMemo(
     () => ({
-      commandRegistry: commandPaletteData.commandRegistry,
-      routeRegistry: commandPaletteData.routeRegistry,
       pluginConfigs: commandPaletteData.pluginConfigs,
       updatePluginConfig: commandPaletteData.updatePluginConfig,
       isLoading: commandPaletteData.isLoading
     }),
     [
-      commandPaletteData.commandRegistry,
-      commandPaletteData.routeRegistry,
       commandPaletteData.pluginConfigs,
       commandPaletteData.updatePluginConfig,
       commandPaletteData.isLoading
