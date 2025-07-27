@@ -14,7 +14,10 @@ export {
   usePluginRegistryStore,
   usePluginRegistry,
   useRegisteredPlugins,
-  usePluginRegistryState,
+  usePluginRegistryIsInitialized,
+  usePluginRegistryPluginCount,
+  usePluginRegistryErrorCount,
+  usePluginRegistryErrors,
   usePluginState
 } from './plugin-registry'
 

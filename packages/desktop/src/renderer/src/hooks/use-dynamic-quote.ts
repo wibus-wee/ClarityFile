@@ -68,9 +68,10 @@ async function fetchQuotable(): Promise<Quote> {
  */
 async function fetchDynamicQuote(): Promise<Quote & { source: QuoteSource }> {
   try {
-    // 优先尝试一言API
-    const quote = await fetchHitokoto()
-    return { ...quote, source: 'hitokoto' }
+    // // 优先尝试一言API
+    // const quote = await fetchHitokoto()
+    // return { ...quote, source: 'hitokoto' }
+    throw new Error()
   } catch (error) {
     console.warn('Hitokoto API failed, trying Quotable API:', error)
 

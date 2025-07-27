@@ -191,14 +191,18 @@ export const useRegisteredPlugins = () => {
   return usePluginRegistryStore((state) => Array.from(state.plugins.values()))
 }
 
-export const usePluginRegistryState = () =>
-  usePluginRegistryStore((state) => ({
-    isInitialized: state.isInitialized,
-    pluginCount: state.plugins.size,
-    loadingCount: state.loadingPlugins.size,
-    errorCount: state.pluginErrors.size,
-    errors: Array.from(state.pluginErrors.entries())
-  }))
+// ✅ 分别获取各个状态，避免创建新对象
+export const usePluginRegistryIsInitialized = () =>
+  usePluginRegistryStore((state) => state.isInitialized)
+
+export const usePluginRegistryPluginCount = () =>
+  usePluginRegistryStore((state) => state.plugins.size)
+
+export const usePluginRegistryErrorCount = () =>
+  usePluginRegistryStore((state) => state.pluginErrors.size)
+
+export const usePluginRegistryErrors = () =>
+  usePluginRegistryStore((state) => Array.from(state.pluginErrors.entries()))
 
 /**
  * 获取特定插件的状态

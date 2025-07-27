@@ -7,6 +7,7 @@ import { CommandPaletteContext } from './command-palette-context'
 import { useRouteCommandsSync } from './hooks/use-route-commands'
 import { usePluginCommandsSync } from './hooks/use-plugin-commands'
 import { useCommandPaletteData } from './hooks/use-command-palette-data'
+import { initializePlugins } from './plugins/initialize-plugins'
 import type { ShortcutKey } from '../shortcuts/types/shortcut.types'
 import type { CommandPaletteProviderProps, CommandPaletteContextValue, PluginConfig } from './types'
 
@@ -28,6 +29,11 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   const router = useRouter()
   useRouteCommandsSync(router)
   usePluginCommandsSync()
+
+  // 初始化插件系统 - 在 CommandPaletteProvider 中处理
+  useEffect(() => {
+    initializePlugins()
+  }, [])
 
   // 获取插件配置数据
   const commandPaletteData = useCommandPaletteData()
