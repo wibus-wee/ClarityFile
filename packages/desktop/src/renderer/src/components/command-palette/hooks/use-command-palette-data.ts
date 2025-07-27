@@ -180,7 +180,7 @@ export function useFavoritesData() {
     async (_key, { arg }: { arg: string }) => {
       const newFavorites = favorites.filter((id: string) => id !== arg)
       const result = await tipcClient.setSetting({
-        key: 'favorites',
+        key: 'command-palete.favorites',
         value: newFavorites,
         category: 'command-palette',
         description: 'User favorite commands',
@@ -221,7 +221,7 @@ export function useFavoritesData() {
         .slice(0, 50)
 
       const result = await tipcClient.setSetting({
-        key: 'recent-commands',
+        key: 'command-palete.recent-commands',
         value: newRecentCommands,
         category: 'command-palette',
         description: 'Recently used commands',
