@@ -135,7 +135,7 @@ export function useCommandPaletteData() {
  * - 跟踪最近使用的命令
  * - 提供使用频率统计
  */
-export function useCommandPaletteFavorites() {
+export function useFavoritesData() {
   // 获取收藏列表
   const { data: favorites = [], isLoading: isLoadingFavorites } = useSWR(
     ['command-palette-favorites'],
@@ -163,7 +163,7 @@ export function useCommandPaletteFavorites() {
       const newFavorites = [...new Set([...favorites, arg])]
       const result = await tipcClient.setSetting({
         key: 'favorites',
-        value: JSON.stringify(newFavorites),
+        value: newFavorites,
         category: 'command-palette',
         description: 'User favorite commands',
         isUserModifiable: true
@@ -181,7 +181,7 @@ export function useCommandPaletteFavorites() {
       const newFavorites = favorites.filter((id: string) => id !== arg)
       const result = await tipcClient.setSetting({
         key: 'favorites',
-        value: JSON.stringify(newFavorites),
+        value: newFavorites,
         category: 'command-palette',
         description: 'User favorite commands',
         isUserModifiable: true
@@ -222,7 +222,7 @@ export function useCommandPaletteFavorites() {
 
       const result = await tipcClient.setSetting({
         key: 'recent-commands',
-        value: JSON.stringify(newRecentCommands),
+        value: newRecentCommands,
         category: 'command-palette',
         description: 'Recently used commands',
         isUserModifiable: true

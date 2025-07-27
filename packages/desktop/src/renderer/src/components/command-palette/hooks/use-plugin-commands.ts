@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { createPluginCommands } from '../utils/plugin-commands'
-import { useCommandPaletteStore, useSearchableCommands } from '../stores/command-palette-store'
+import { useSearchableCommands } from '../stores/command-palette-store'
 import { useCommandPaletteData } from './use-command-palette-data'
 import { usePluginRegistryStore } from '../plugins/plugin-registry'
 
@@ -23,21 +23,6 @@ export function usePluginCommands() {
     const registeredPlugins = getPlugins()
     return createPluginCommands(registeredPlugins, pluginConfigs)
   }, [pluginConfigs, getPlugins])
-
-  return pluginCommands
-}
-
-/**
- * 插件命令同步Hook
- */
-export function usePluginCommandsSync() {
-  const pluginCommands = usePluginCommands()
-  const setPluginCommands = useCommandPaletteStore((state) => state.actions.setPluginCommands)
-
-  // ✅ 使用useMemo + 同步，而不是useEffect
-  useMemo(() => {
-    setPluginCommands(pluginCommands)
-  }, [pluginCommands, setPluginCommands])
 
   return pluginCommands
 }

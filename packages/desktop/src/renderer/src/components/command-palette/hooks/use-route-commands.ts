@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import type { Router } from '@tanstack/react-router'
 import { createRouteCommands } from '../utils/route-commands'
-import { useCommandPaletteStore } from '../stores/command-palette-store'
 import { useTranslatedRoutes } from '@renderer/routers'
 
 /**
@@ -20,24 +19,6 @@ export function useRouteCommands(router: Router<any, any>) {
     if (!flatRoutes) return []
     return createRouteCommands(flatRoutes, router)
   }, [flatRoutes, router])
-
-  return routeCommands
-}
-
-/**
- * 路由命令同步Hook
- *
- * 这个hook负责将计算出的路由命令同步到store
- * 分离关注点：计算 vs 同步
- */
-export function useRouteCommandsSync(router: Router<any, any>) {
-  const routeCommands = useRouteCommands(router)
-  const setRouteCommands = useCommandPaletteStore((state) => state.actions.setRouteCommands)
-
-  // ✅ 使用useMemo + 同步，而不是useEffect
-  useMemo(() => {
-    setRouteCommands(routeCommands)
-  }, [routeCommands, setRouteCommands])
 
   return routeCommands
 }

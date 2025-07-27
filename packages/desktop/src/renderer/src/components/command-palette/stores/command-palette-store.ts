@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { useMemo } from 'react'
 import type { Command, RouteCommand } from '../types'
+import { fuzzySearch } from '../utils/search'
+import { useCommandFavorites } from '../hooks/use-command-favorites'
 
 /**
  * Command Palette Store State
@@ -107,60 +109,70 @@ export const useCommandPaletteStore = create<CommandPaletteStore>()(
   }))
 )
 
-/**
- * ✅ 计算式selectors - 使用稳定的引用
- */
+export const useCommandPaletteQuery = () => useCommandPaletteStore((state) => state.query)
+export const useRouteCommandsData = () => useCommandPaletteStore((state) => state.routeCommands)
+export const usePluginCommandsData = () => useCommandPaletteStore((state) => state.pluginCommands)
+
+// 组合选择器：计算所有命令
 export const useAllCommands = () => {
-  const routeCommands = useCommandPaletteStore((state) => state.routeCommands)
-  const pluginCommands = useCommandPaletteStore((state) => state.pluginCommands)
-
-  // 只有当routeCommands或pluginCommands真正变化时才创建新数组
-  return useMemo(() => {
-    return [...routeCommands, ...pluginCommands]
-  }, [routeCommands, pluginCommands])
+  const routeCommands = useRouteCommandsData()
+  const pluginCommands = usePluginCommandsData()
+  // 使用 useMemo 确保只有在源数据变化时才创建新数组
+  return useMemo(() => [...routeCommands, ...pluginCommands], [routeCommands, pluginCommands])
 }
 
+// 派生选择器：计算搜索结果
+// 这个 Hook 将替换掉你的 useCommandSearch
 export const useSearchResults = () => {
-  const query = useCommandPaletteStore((state) => state.query)
   const allCommands = useAllCommands()
+  const query = useCommandPaletteQuery()
 
-  // 实时计算搜索结果
-  if (!query.trim()) return allCommands
-
-  // 简单搜索实现，可以后续升级为Fuse.js
-  const lowerQuery = query.toLowerCase()
-  return allCommands.filter((command) => {
-    const searchText = [
-      command.title,
-      command.subtitle || '',
-      command.category || '',
-      ...command.keywords
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return searchText.includes(lowerQuery)
-  })
+  return useMemo(() => {
+    if (!query.trim()) {
+      // 当没有查询时，返回所有命令，让 UI 决定如何显示默认视图
+      return allCommands
+    }
+    // 注意：这里应该使用你更强大的 fuzzySearch
+    return fuzzySearch(allCommands, query)
+  }, [allCommands, query])
 }
 
+// 派生选择器: 为 UI 提供最终的、可直接渲染的数据 (这是最重要的 Hook)
+export const useEnhancedResults = () => {
+  const searchResults = useSearchResults()
+  const { isFavorite } = useCommandFavorites() // 直接在这里组合收藏逻辑
+  const query = useCommandPaletteQuery()
+
+  return useMemo(() => {
+    const enhanced = searchResults.map((cmd) => ({
+      ...cmd,
+      isFavorite: isFavorite(cmd.id)
+    }))
+
+    const routes = enhanced.filter((cmd) => cmd.source === 'core')
+    const plugins = enhanced.filter((cmd) => cmd.source === 'plugin')
+
+    return {
+      results: enhanced, // 扁平、增强的列表
+      categorizedResults: { routes, plugins }, // 分类后的结果
+      totalResults: enhanced.length,
+      hasQuery: query.trim().length > 0,
+      query: query
+    }
+  }, [searchResults, isFavorite, query])
+}
+
+export const useCommandPaletteActions = () => useCommandPaletteStore((state) => state.actions)
 export const useSearchableCommands = () => {
   const allCommands = useAllCommands()
 
-  // 实时计算可搜索命令
-  return allCommands.filter(
-    (command): command is Command =>
-      'render' in command && 'canHandleQuery' in command && command.canHandleQuery !== undefined
-  )
+  return useMemo(() => {
+    return allCommands.filter(
+      (command): command is Command =>
+        'render' in command && 'canHandleQuery' in command && command.canHandleQuery !== undefined
+    )
+  }, [allCommands])
 }
-
-/**
- * ✅ 便捷的状态访问hooks
- */
 export const useCommandPaletteOpen = () => useCommandPaletteStore((state) => state.isOpen)
-
-export const useCommandPaletteQuery = () => useCommandPaletteStore((state) => state.query)
-
 export const useCommandPaletteActiveCommand = () =>
   useCommandPaletteStore((state) => state.activeCommand)
-
-export const useCommandPaletteActions = () => useCommandPaletteStore((state) => state.actions)

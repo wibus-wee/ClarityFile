@@ -1,11 +1,9 @@
 import { useEffect } from 'react'
-import { useRouter } from '@tanstack/react-router'
 import { useShortcutStore } from '../shortcuts/stores/shortcut-store'
 import { useCommandPaletteActions } from './stores/command-palette-store'
 import { CommandPaletteOverlay } from './command-palette-overlay'
 import { CommandPaletteContext } from './command-palette-context'
-import { useRouteCommandsSync } from './hooks/use-route-commands'
-import { usePluginCommandsSync } from './hooks/use-plugin-commands'
+import { useCommandDataSync } from './hooks/use-command-data-sync'
 import { useCommandPaletteData } from './hooks/use-command-palette-data'
 import { initializePlugins } from './plugins/initialize-plugins'
 import type { ShortcutKey } from '../shortcuts/types/shortcut.types'
@@ -25,10 +23,8 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   const register = useShortcutStore((state) => state.register)
   const unregister = useShortcutStore((state) => state.unregister)
 
-  // 使用新的functional hooks同步数据到store
-  const router = useRouter()
-  useRouteCommandsSync(router)
-  usePluginCommandsSync()
+  // 使用新的数据同步hook
+  useCommandDataSync()
 
   // 初始化插件系统 - 在 CommandPaletteProvider 中处理
   useEffect(() => {

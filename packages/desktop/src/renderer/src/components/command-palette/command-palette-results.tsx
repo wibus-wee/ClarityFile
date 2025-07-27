@@ -1,13 +1,16 @@
 import { useMemo } from 'react'
 import { Command } from 'cmdk'
 import {
-  useCommandPaletteQuery,
   useCommandPaletteActiveCommand,
-  useCommandPaletteActions
+  useCommandPaletteActions,
+  useEnhancedResults,
+  useCommandPaletteQuery
 } from './stores/command-palette-store'
-import { useCommandSearch } from './hooks/use-command-search'
-import { useSearchableCommands } from './hooks/use-plugin-commands'
-import type { Command as CommandType, CommandWithAction, RouteCommand } from './types'
+import { useCommandExecution } from './hooks/use-command-execution'
+import { useCommandFavorites } from './hooks/use-command-favorites'
+import { useSearchableCommands } from './stores/command-palette-store'
+import { CommandItem } from './components/CommandItem'
+import type { Command as CommandType, CommandWithAction } from './types'
 
 /**
  * Command Palette 结果显示组件
@@ -19,42 +22,36 @@ import type { Command as CommandType, CommandWithAction, RouteCommand } from './
  * - 显示插件特定的结果格式
  */
 export function CommandPaletteResults() {
-  const query = useCommandPaletteQuery()
   const activeCommand = useCommandPaletteActiveCommand()
-  const { close, setActiveCommand } = useCommandPaletteActions()
+  const { setActiveCommand } = useCommandPaletteActions()
 
-  // 使用新的functional hooks
-  const { searchResults } = useCommandSearch()
+  const query = useCommandPaletteQuery()
+  const { categorizedResults, hasQuery } = useEnhancedResults()
+  const { executeCommand: executeCmd } = useCommandExecution()
+  const { favoriteCommands } = useCommandFavorites()
   const searchableCommands = useSearchableCommands()
 
   // 命令执行辅助函数
-  const executeCommand = (command: CommandType) => {
+  const executeCommand = async (command: CommandType) => {
     if ('action' in command) {
-      ;(command as CommandWithAction).action()
-      close()
+      await executeCmd(command.id, (command as CommandWithAction).action)
     } else if ('render' in command) {
       // 激活命令视图
       setActiveCommand(command.id)
     }
   }
 
-  // 分离路由命令和插件命令
-  const routeCommands = useMemo(() => {
-    return searchResults.filter((cmd) => cmd.source === 'core') as RouteCommand[]
-  }, [searchResults])
-
-  const pluginCommands = useMemo(() => {
-    return searchResults.filter((cmd) => cmd.source === 'plugin')
-  }, [searchResults])
-
   // 获取能处理当前查询的可搜索命令
   const applicableCommands = useMemo(() => {
-    if (!query.trim()) return []
+    if (!hasQuery) return []
 
     return searchableCommands.filter(
       (command) => 'canHandleQuery' in command && command.canHandleQuery?.(query)
     )
-  }, [searchableCommands, query])
+  }, [searchableCommands, query, hasQuery])
+
+  // 使用新架构的分类结果
+  const { routes: routeCommands, plugins: pluginCommands } = categorizedResults
 
   // 如果有激活的命令，显示命令视图
   if (activeCommand) {
@@ -73,12 +70,23 @@ export function CommandPaletteResults() {
   return (
     <Command.List className="max-h-[300px] overflow-y-auto">
       {/* 如果没有查询，显示收藏和建议 */}
-      {!query.trim() && (
+      {!hasQuery && (
         <>
           <Command.Group heading="收藏">
-            <Command.Item className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground">
-              <span>暂无收藏命令</span>
-            </Command.Item>
+            {favoriteCommands.length > 0 ? (
+              favoriteCommands.map((favorite) => (
+                <Command.Item
+                  key={favorite.commandId}
+                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+                >
+                  <span>⭐ {favorite.commandId}</span>
+                </Command.Item>
+              ))
+            ) : (
+              <Command.Item className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground">
+                <span>暂无收藏命令</span>
+              </Command.Item>
+            )}
           </Command.Group>
 
           <Command.Group heading="建议">
@@ -97,18 +105,11 @@ export function CommandPaletteResults() {
         {routeCommands.length > 0 && (
           <Command.Group heading="页面导航">
             {routeCommands.map((command) => (
-              <Command.Item
+              <CommandItem
                 key={command.id}
-                value={command.id}
-                onSelect={() => {
-                  executeCommand(command)
-                }}
-                className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
-              >
-                {command.icon && <command.icon className="h-4 w-4" />}
-                <span>{command.title}</span>
-                <span className="ml-auto text-xs text-muted-foreground">{command.path}</span>
-              </Command.Item>
+                command={command}
+                onSelect={() => executeCommand(command)}
+              />
             ))}
           </Command.Group>
         )}
@@ -117,26 +118,17 @@ export function CommandPaletteResults() {
         {pluginCommands.length > 0 && (
           <Command.Group heading="命令">
             {pluginCommands.map((command) => (
-              <Command.Item
+              <CommandItem
                 key={command.id}
-                value={command.id}
-                onSelect={() => {
-                  executeCommand(command)
-                }}
-                className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
-              >
-                {command.icon && <command.icon className="h-4 w-4" />}
-                <span>{command.title}</span>
-                {command.category && (
-                  <span className="ml-auto text-xs text-muted-foreground">{command.category}</span>
-                )}
-              </Command.Item>
+                command={command}
+                onSelect={() => executeCommand(command)}
+              />
             ))}
           </Command.Group>
         )}
 
         {/* "Use with..." 部分 - 当有查询时始终显示 */}
-        {query.trim() && (
+        {query && (
           <Command.Group heading={`使用 "${query}" 搜索...`}>
             {applicableCommands.length > 0 ? (
               applicableCommands.map((command) => (
