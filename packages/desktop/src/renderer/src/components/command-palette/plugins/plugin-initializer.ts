@@ -1,9 +1,9 @@
-import { HelloWorldPlugin } from './hello-world-plugin'
 import type { CommandPalettePlugin } from '../types'
+import { HelloWorldPlugin } from './HelloWorld'
 
 /**
  * 所有可用的插件列表
- * 
+ *
  * 在这里注册所有的命令面板插件
  */
 export const AVAILABLE_PLUGINS: CommandPalettePlugin[] = [
@@ -15,7 +15,7 @@ export const AVAILABLE_PLUGINS: CommandPalettePlugin[] = [
 
 /**
  * 插件初始化器
- * 
+ *
  * 负责：
  * - 注册所有可用插件
  * - 处理插件加载错误
@@ -40,7 +40,7 @@ export class PluginInitializer {
    * 根据ID查找插件
    */
   static findPluginById(pluginId: string): CommandPalettePlugin | undefined {
-    return AVAILABLE_PLUGINS.find(plugin => plugin.id === pluginId)
+    return AVAILABLE_PLUGINS.find((plugin) => plugin.id === pluginId)
   }
 
   /**
@@ -79,12 +79,18 @@ export class PluginInitializer {
         const hasRender = 'render' in command && typeof command.render === 'function'
 
         if (!hasAction && !hasRender) {
-          console.error(`Plugin validation failed: Command must have either action or render`, command)
+          console.error(
+            `Plugin validation failed: Command must have either action or render`,
+            command
+          )
           return false
         }
 
         if (hasAction && hasRender) {
-          console.error(`Plugin validation failed: Command cannot have both action and render`, command)
+          console.error(
+            `Plugin validation failed: Command cannot have both action and render`,
+            command
+          )
           return false
         }
       }
@@ -100,7 +106,7 @@ export class PluginInitializer {
    * 获取有效的插件列表
    */
   static getValidPlugins(): CommandPalettePlugin[] {
-    return AVAILABLE_PLUGINS.filter(plugin => this.validatePlugin(plugin))
+    return AVAILABLE_PLUGINS.filter((plugin) => this.validatePlugin(plugin))
   }
 
   /**
@@ -115,7 +121,7 @@ export class PluginInitializer {
       total,
       valid,
       invalid,
-      plugins: AVAILABLE_PLUGINS.map(plugin => ({
+      plugins: AVAILABLE_PLUGINS.map((plugin) => ({
         id: plugin.id,
         name: plugin.name,
         isValid: this.validatePlugin(plugin)
