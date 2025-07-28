@@ -13,6 +13,7 @@ import { PluginContext } from '../../types'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { useGlobalFiles } from '@renderer/hooks/use-tipc'
 import { formatFileSize, formatFriendlyDate } from '@renderer/lib/utils'
+import { useCommandPaletteQuery } from '../../stores/command-palette-store'
 
 interface FileSearchViewProps {
   context: PluginContext
@@ -22,8 +23,10 @@ interface FileSearchViewProps {
 export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps) {
   const [sortOrder] = useState<'asc' | 'desc'>('desc')
 
-  // 获取当前查询
-  const currentQuery = context.commandPalette.getQuery()
+  // 直接从 store 获取查询，绕过 context 的限制
+  // 这样可以确保在命令详情视图中仍能获取到用户的搜索查询
+  const storeQuery = useCommandPaletteQuery()
+  const currentQuery = storeQuery || context.commandPalette.getQuery()
 
   // 构建搜索参数
   const searchParams = useMemo(() => {
@@ -72,7 +75,7 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
     return FileText
   }
 
-  // 格式化文件信息
+  // 格式化文件信息 - 优化显示，保持简洁
   const formatFileInfo = (file: any) => {
     const parts: string[] = []
 
@@ -81,10 +84,28 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
     }
 
     if (file.createdAt) {
-      parts.push(`创建于 ${formatFriendlyDate(file.createdAt)}`)
+      parts.push(formatFriendlyDate(file.createdAt))
     }
 
     return parts.join(' • ')
+  }
+
+  // 获取友好的文件类型显示名称
+  const getFileTypeBadge = (file: any) => {
+    if (!file.mimeType) return '文件'
+
+    if (file.mimeType.startsWith('image/')) return '图片'
+    if (file.mimeType.startsWith('video/')) return '视频'
+    if (file.mimeType.startsWith('audio/')) return '音频'
+    if (file.mimeType.startsWith('text/')) return '文本'
+    if (file.mimeType.includes('pdf')) return 'PDF'
+    if (file.mimeType.includes('word') || file.mimeType.includes('document')) return '文档'
+    if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) return '表格'
+    if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint'))
+      return '演示'
+    if (file.mimeType.startsWith('application/')) return '应用'
+
+    return '文件'
   }
 
   // 获取页面标题
@@ -128,9 +149,11 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
                     title={file.name}
                     subtitle={formatFileInfo(file)}
                     description={
-                      file.originalFileName !== file.name ? file.originalFileName : undefined
+                      file.originalFileName && file.originalFileName !== file.name
+                        ? `原始文件名: ${file.originalFileName}`
+                        : undefined
                     }
-                    badge={file.mimeType?.split('/')[0] || 'unknown'}
+                    badge={getFileTypeBadge(file)}
                     onClick={() => handleFileClick(file)}
                     className="w-full"
                   />

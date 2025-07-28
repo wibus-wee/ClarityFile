@@ -8,9 +8,17 @@ import type { RouteCommand } from '../types'
  */
 export function generatePinyin(text: string): string[] {
   try {
+    const pinyinArray = pinyin(text, { toneType: 'none', type: 'array' })
+
     return [
-      pinyin(text, { toneType: 'none', type: 'array' }).join(''),
-      pinyin(text, { toneType: 'none', type: 'array' }).join(' ')
+      // 完整拼音连写：sousuowenjian
+      pinyinArray.join(''),
+      // 完整拼音空格分隔：sousuo wenjian
+      pinyinArray.join(' '),
+      // 首字母连写：sswj
+      pinyinArray.map((p) => p.charAt(0)).join(''),
+      // 首字母空格分隔：s s w j
+      pinyinArray.map((p) => p.charAt(0)).join(' ')
     ]
   } catch (error) {
     console.warn('Failed to generate pinyin for:', text, error)

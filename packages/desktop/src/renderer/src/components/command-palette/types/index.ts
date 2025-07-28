@@ -14,6 +14,7 @@ interface BaseCommand {
   category?: string
   source: 'core' | 'plugin'
   pluginId?: string
+  pinyin?: string[] // 拼音关键词，用于中文搜索
 }
 
 /**
@@ -44,7 +45,6 @@ export type Command = CommandWithRender | CommandWithAction
  */
 export interface RouteCommand extends BaseCommand {
   path: string
-  pinyin: string[]
   source: 'core'
   action: () => void | Promise<void>
 }

@@ -25,10 +25,10 @@ import { useFavoritesData } from './hooks/use-command-palette-data'
  */
 export function CommandPaletteResults() {
   const activeCommand = useCommandPaletteActiveCommand()
-  const { setActiveCommand } = useCommandPaletteActions()
+  const { setActiveCommand, setActiveCommandFromSearch } = useCommandPaletteActions()
 
   const query = useCommandPaletteQuery()
-  const { categorizedResults, hasQuery } = useEnhancedResults()
+  const { results, categorizedResults, hasQuery } = useEnhancedResults()
   const { executeCommand: executeCmd } = useCommandExecution()
   const { trackCommand } = useFavoritesData()
 
@@ -41,11 +41,16 @@ export function CommandPaletteResults() {
       trackCommand({
         commandId: command.id
       })
-      setActiveCommand(command.id)
+      // 从搜索结果进入时，清空查询但保存原查询
+      if (hasQuery) {
+        setActiveCommandFromSearch(command.id)
+      } else {
+        setActiveCommand(command.id)
+      }
     }
   }
 
-  // 处理 "Use with..." 命令选择
+  // 处理 "Use with..." 命令选择（保持查询）
   const handleUseWithCommand = (command: CommandWithRender) => {
     setActiveCommand(command.id)
   }
@@ -58,53 +63,62 @@ export function CommandPaletteResults() {
     return <CommandView />
   }
 
-  // 主要结果视图 - 使用重构后的组件
+  // 主要结果视图 - 根据是否有查询显示不同布局
   return (
     <Command.List className="max-h-[380px] overflow-y-auto px-2 py-2 pb-4">
-      {/* 如果没有查询，显示收藏和建议 */}
-      {!hasQuery && (
+      {hasQuery ? (
+        // 有搜索查询时：混合显示所有结果，不分组
+        <>
+          {/* 混合显示所有匹配的命令 */}
+          {results.map((command) => (
+            <CommandItem
+              key={command.id}
+              command={command}
+              onSelect={() => executeCommand(command)}
+            />
+          ))}
+
+          {/* "Use with..." 部分 */}
+          <UseWithSection query={query} onCommandSelect={handleUseWithCommand} />
+        </>
+      ) : (
+        // 无搜索查询时：显示分组的 sections
         <>
           <FavoritesSection onExecuteCommand={executeCommand} />
           <SuggestionsSection onCommandExecute={executeCommand} />
+
+          {/* 分组显示命令 */}
+          {routeCommands.length > 0 && (
+            <Command.Group
+              heading="页面导航"
+              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
+            >
+              {routeCommands.map((command) => (
+                <CommandItem
+                  key={command.id}
+                  command={command}
+                  onSelect={() => executeCommand(command)}
+                />
+              ))}
+            </Command.Group>
+          )}
+
+          {pluginCommands.length > 0 && (
+            <Command.Group
+              heading="命令"
+              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
+            >
+              {pluginCommands.map((command) => (
+                <CommandItem
+                  key={command.id}
+                  command={command}
+                  onSelect={() => executeCommand(command)}
+                />
+              ))}
+            </Command.Group>
+          )}
         </>
       )}
-
-      {/* 统一显示搜索结果（包括无查询时的所有命令） */}
-      <>
-        {routeCommands.length > 0 && (
-          <Command.Group
-            heading="页面导航"
-            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
-          >
-            {routeCommands.map((command) => (
-              <CommandItem
-                key={command.id}
-                command={command}
-                onSelect={() => executeCommand(command)}
-              />
-            ))}
-          </Command.Group>
-        )}
-
-        {/* 插件命令结果 */}
-        {pluginCommands.length > 0 && (
-          <Command.Group
-            heading="命令"
-            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
-          >
-            {pluginCommands.map((command) => (
-              <CommandItem
-                key={command.id}
-                command={command}
-                onSelect={() => executeCommand(command)}
-              />
-            ))}
-          </Command.Group>
-        )}
-
-        {/* "Use with..." 部分 */}
-        <UseWithSection query={query} onCommandSelect={handleUseWithCommand} />
-      </>
     </Command.List>
   )
 }

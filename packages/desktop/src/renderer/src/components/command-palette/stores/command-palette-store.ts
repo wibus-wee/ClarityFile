@@ -14,6 +14,8 @@ interface CommandPaletteState {
   isOpen: boolean
   query: string
   activeCommand: string | null
+  // 保存进入命令详情前的查询，用于返回时恢复
+  savedQuery: string | null
 
   // 原始数据（由外部提供）
   routeCommands: RouteCommand[]
@@ -29,6 +31,10 @@ interface CommandPaletteActions {
   close: () => void
   setQuery: (query: string) => void
   setActiveCommand: (commandId: string | null) => void
+  // 从搜索结果进入命令详情（清空查询但保存原查询）
+  setActiveCommandFromSearch: (commandId: string) => void
+  // 返回到根视图（恢复保存的查询）
+  goBackToRoot: () => void
 
   // 数据更新（纯粹的状态更新，无副作用）
   setRouteCommands: (commands: RouteCommand[]) => void
@@ -58,6 +64,7 @@ export const useCommandPaletteStore = create<CommandPaletteStore>()(
     isOpen: false,
     query: '',
     activeCommand: null,
+    savedQuery: null,
     routeCommands: [],
     pluginCommands: [],
     pluginStates: {},
@@ -74,6 +81,7 @@ export const useCommandPaletteStore = create<CommandPaletteStore>()(
           state.isOpen = false
           state.activeCommand = null
           state.query = ''
+          state.savedQuery = null
         }),
 
       // ✅ 不触发副作用，让组件自己处理搜索
@@ -85,6 +93,24 @@ export const useCommandPaletteStore = create<CommandPaletteStore>()(
       setActiveCommand: (commandId: string | null) =>
         set((state) => {
           state.activeCommand = commandId
+        }),
+
+      // 从搜索结果进入命令详情（清空查询但保存原查询）
+      setActiveCommandFromSearch: (commandId: string) =>
+        set((state) => {
+          state.savedQuery = state.query // 保存当前查询
+          state.query = '' // 清空查询
+          state.activeCommand = commandId
+        }),
+
+      // 返回到根视图（恢复保存的查询）
+      goBackToRoot: () =>
+        set((state) => {
+          state.activeCommand = null
+          if (state.savedQuery !== null) {
+            state.query = state.savedQuery // 恢复保存的查询
+            state.savedQuery = null
+          }
         }),
 
       // ✅ 纯粹的数据更新，无副作用

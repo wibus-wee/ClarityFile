@@ -51,8 +51,8 @@ export function DetailItem({
     <>
       {Icon && <Icon className="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" />}
 
-      <div className="flex-1 min-w-0 flex">
-        <div className="flex items-center gap-2">
+      <div className="flex-1 min-w-0 flex flex-col items-start">
+        <div className="gap-2">
           <span className="font-medium truncate">{title}</span>
           {badge && (
             <span className="text-xs text-muted-foreground/60 bg-muted/40 px-2 py-0.5 rounded-md font-medium shrink-0">

@@ -1,7 +1,11 @@
 import { useMemo } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { createPluginContext } from '../plugins/plugin-context'
-import { useCommandPaletteActions, useCommandPaletteQuery } from '../stores/command-palette-store'
+import {
+  useCommandPaletteActions,
+  useCommandPaletteQuery,
+  useCommandPaletteActiveCommand
+} from '../stores/command-palette-store'
 import type { PluginContext } from '../types'
 
 /**
@@ -11,8 +15,9 @@ import type { PluginContext } from '../types'
  */
 export function useCommandPaletteContext(): PluginContext {
   const router = useRouter()
-  const { close, setQuery } = useCommandPaletteActions()
+  const { close, setQuery, goBackToRoot } = useCommandPaletteActions()
   const query = useCommandPaletteQuery()
+  const activeCommand = useCommandPaletteActiveCommand()
 
   const pluginContext = useMemo((): PluginContext => {
     return createPluginContext(
@@ -20,17 +25,11 @@ export function useCommandPaletteContext(): PluginContext {
       {
         close,
         setQuery,
-        getQuery: () => query,
+        // 如果有激活命令，返回空查询；否则返回当前查询
+        getQuery: () => (activeCommand ? '' : query),
         goBack: () => {
-          // Implement back navigation logic
-          console.log('Go back')
+          goBackToRoot()
         }
-      },
-      {
-        // Inject service implementations
-        files: undefined,
-        themes: undefined,
-        settings: undefined
       },
       {
         language: 'zh-CN',
@@ -38,7 +37,7 @@ export function useCommandPaletteContext(): PluginContext {
         shortcuts: {}
       }
     )
-  }, [router, close, setQuery, query])
+  }, [router, close, setQuery, query, activeCommand, goBackToRoot])
 
   return pluginContext
 }

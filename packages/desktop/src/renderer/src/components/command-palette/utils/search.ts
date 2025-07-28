@@ -2,13 +2,14 @@ import Fuse, { type IFuseOptions } from 'fuse.js'
 import type { Command, RouteCommand } from '../types'
 
 /**
- * Fuse.js 搜索配置
+ * Fuse.js 搜索配置 - 支持拼音搜索
  */
 const FUSE_OPTIONS: IFuseOptions<Command> = {
   keys: [
     { name: 'title', weight: 0.7 },
     { name: 'keywords', weight: 0.3 },
-    { name: 'category', weight: 0.2 }
+    { name: 'category', weight: 0.2 },
+    { name: 'pinyin', weight: 0.4 }
   ],
   threshold: 0.4,
   includeScore: true,
