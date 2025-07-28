@@ -49,5 +49,5 @@ export function DetailSidebar({ children, className = '' }: DetailSidebarProps) 
 }
 
 export function DetailMain({ children, className = '' }: DetailMainProps) {
-  return <div className={`flex-1 min-w-0 space-y-2 pl-4 ${className}`}>{children}</div>
+  return <div className={`flex-1 min-w-0 space-y-2 ${className}`}>{children}</div>
 }

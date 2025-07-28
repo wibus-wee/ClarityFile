@@ -21,7 +21,7 @@ interface DetailSectionProps {
  */
 export function DetailSection({ title, children, className = '' }: DetailSectionProps) {
   return (
-    <div className={`space-y-1 ${className}`}>
+    <div className={`${className}`}>
       {title && (
         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
           {title}
