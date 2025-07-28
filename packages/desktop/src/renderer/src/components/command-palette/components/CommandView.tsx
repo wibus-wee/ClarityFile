@@ -27,9 +27,9 @@ export function CommandView() {
   // 如果找不到命令或命令没有 render 方法，显示错误
   if (!activeCommand || !('render' in activeCommand)) {
     return (
-      <Command.List className="max-h-[300px] overflow-y-auto">
+      <Command.List className="max-h-[320px] overflow-y-auto px-2 py-2">
         <div className="p-4">
-          <div className="mt-4 text-sm text-muted-foreground">
+          <div className="mt-4 text-sm text-muted-foreground/70 font-medium">
             命令 &quot;{activeCommandId}&quot; 不存在或不支持渲染视图
           </div>
         </div>
@@ -40,8 +40,8 @@ export function CommandView() {
   const renderCommand = activeCommand as CommandWithRender
 
   return (
-    <Command.List className="max-h-[300px] overflow-y-auto">
-      <div>
+    <Command.List className="max-h-[320px] overflow-y-auto px-2 py-2">
+      <div className="p-1">
         <div>{renderCommand.render(pluginContext)}</div>
       </div>
     </Command.List>

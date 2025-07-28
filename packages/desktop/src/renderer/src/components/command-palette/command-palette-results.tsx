@@ -60,7 +60,7 @@ export function CommandPaletteResults() {
 
   // 主要结果视图 - 使用重构后的组件
   return (
-    <Command.List className="max-h-[300px] overflow-y-auto">
+    <Command.List className="max-h-[380px] overflow-y-auto px-2 py-2">
       {/* 如果没有查询，显示收藏和建议 */}
       {!hasQuery && (
         <>
@@ -72,7 +72,10 @@ export function CommandPaletteResults() {
       {/* 统一显示搜索结果（包括无查询时的所有命令） */}
       <>
         {routeCommands.length > 0 && (
-          <Command.Group heading="页面导航">
+          <Command.Group
+            heading="页面导航"
+            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
+          >
             {routeCommands.map((command) => (
               <CommandItem
                 key={command.id}
@@ -85,7 +88,10 @@ export function CommandPaletteResults() {
 
         {/* 插件命令结果 */}
         {pluginCommands.length > 0 && (
-          <Command.Group heading="命令">
+          <Command.Group
+            heading="命令"
+            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
+          >
             {pluginCommands.map((command) => (
               <CommandItem
                 key={command.id}

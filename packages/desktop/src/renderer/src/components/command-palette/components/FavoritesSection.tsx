@@ -18,7 +18,10 @@ export function FavoritesSection({ onExecuteCommand }: FavoritesSectionProps) {
   const { favoriteCommands } = useCommandFavorites()
 
   return (
-    <Command.Group heading="收藏">
+    <Command.Group
+      heading="收藏"
+      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
+    >
       {favoriteCommands.length > 0 ? (
         favoriteCommands.map((command: CommandType) => (
           <CommandItem
@@ -32,8 +35,8 @@ export function FavoritesSection({ onExecuteCommand }: FavoritesSectionProps) {
           />
         ))
       ) : (
-        <Command.Item className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground">
-          <span className="text-muted-foreground">暂无收藏命令</span>
+        <Command.Item className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm aria-selected:bg-accent/60 aria-selected:text-accent-foreground">
+          <span className="text-muted-foreground/70 font-medium">暂无收藏命令</span>
         </Command.Item>
       )}
     </Command.Group>

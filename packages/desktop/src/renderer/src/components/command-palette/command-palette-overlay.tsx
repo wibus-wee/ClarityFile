@@ -84,13 +84,13 @@ export function CommandPaletteOverlay() {
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center"
       onClick={handleOverlayClick}
     >
-      <div className="mt-[20vh] w-full max-w-2xl">
+      <div className="mt-[15vh] w-full max-w-2xl">
         <Command
           ref={commandRef}
-          className="mx-4 overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-2xl"
+          className="mx-4 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-[0_8px_30px_rgb(0,0,0,0.22)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl"
           shouldFilter={false} // 我们将自己处理过滤
         >
           <CommandPaletteInput />
@@ -124,35 +124,41 @@ function CommandPaletteStatusBar() {
   const isInDetailsView = !!activeCommand
 
   return (
-    <div className="flex items-center justify-between px-3 py-2 border-t border-border bg-muted/30 text-xs text-muted-foreground">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-border/50 bg-muted/20 text-xs text-muted-foreground">
       <div className="flex items-center gap-2">
         {isInDetailsView && activeCommand ? (
           <>
-            {activeCommand.icon && <activeCommand.icon className="h-3 w-3" />}
-            <span>{activeCommand.title}</span>
+            {activeCommand.icon && <activeCommand.icon className="h-3.5 w-3.5 opacity-70" />}
+            <span className="font-medium">{activeCommand.title}</span>
           </>
         ) : (
           <>
-            <span>ClarityFile</span>
+            <span className="font-medium text-foreground/60">ClarityFile</span>
           </>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {isInDetailsView ? (
-          <div className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">←</kbd>
-            <span>Back</span>
+          <div className="flex items-center gap-1.5">
+            <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[10px] font-medium bg-background/80 border border-border/60 rounded-md shadow-sm">
+              ←
+            </kbd>
+            <span className="text-muted-foreground/80">Back</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">↵</kbd>
-              <span>Select</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[10px] font-medium bg-background/80 border border-border/60 rounded-md shadow-sm">
+                ↵
+              </kbd>
+              <span className="text-muted-foreground/80">Select</span>
             </div>
-            <div className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">Esc</kbd>
-              <span>Close</span>
+            <div className="flex items-center gap-1.5">
+              <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[10px] font-medium bg-background/80 border border-border/60 rounded-md shadow-sm">
+                Esc
+              </kbd>
+              <span className="text-muted-foreground/80">Close</span>
             </div>
           </div>
         )}

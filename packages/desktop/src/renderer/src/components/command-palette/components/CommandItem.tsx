@@ -48,30 +48,40 @@ export function CommandItem({ command, onSelect, showFavorite = true }: CommandI
       onSelect={onSelect}
       onContextMenu={handleRightClick}
       onKeyDown={handleKeyDown}
-      className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground cursor-pointer"
+      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground cursor-pointer transition-all duration-150 hover:bg-accent/50 group"
     >
-      {command.icon && <command.icon className="h-4 w-4 shrink-0" />}
+      {command.icon && (
+        <command.icon className="h-4 w-4 shrink-0 opacity-70 group-aria-selected:opacity-100" />
+      )}
 
       <div className="flex flex-row gap-4 flex-1 min-w-0">
-        <div className="truncate">{command.title}</div>
+        <div className="truncate font-medium">{command.title}</div>
         <div className="flex items-center gap-1 shrink-0">
           {/* Show plugin name for plugin commands */}
           {command.source === 'plugin' && command.pluginId && (
-            <span className="text-xs text-muted-foreground">{getPluginName(command.pluginId)}</span>
+            <span className="text-xs text-muted-foreground/70 font-medium">
+              {getPluginName(command.pluginId)}
+            </span>
           )}
 
           {/* Show "Core" for core commands without path */}
           {command.source === 'core' && !('path' in command) && (
-            <span className="text-xs text-muted-foreground">Core</span>
+            <span className="text-xs text-muted-foreground/70 font-medium">Core</span>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        {'path' in command && <span className="text-xs text-muted-foreground">Navigation</span>}
+        {'path' in command && (
+          <span className="text-xs text-muted-foreground/60 bg-muted/40 px-2 py-0.5 rounded-md font-medium">
+            Navigation
+          </span>
+        )}
 
         {command.source === 'plugin' && command.pluginId && (
-          <span className="text-xs text-muted-foreground">Command</span>
+          <span className="text-xs text-muted-foreground/60 bg-muted/40 px-2 py-0.5 rounded-md font-medium">
+            Command
+          </span>
         )}
       </div>
     </Command.Item>

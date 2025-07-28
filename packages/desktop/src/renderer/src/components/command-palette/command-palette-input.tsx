@@ -44,24 +44,24 @@ export function CommandPaletteInput() {
   }
 
   return (
-    <div className="flex items-center border-b px-3">
+    <div className="flex items-center border-b border-border/30 px-4 py-1">
       {isInDetailsView ? (
         <button
           onClick={handleBackClick}
-          className="mr-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+          className="mr-3 h-4 w-4 shrink-0 opacity-60 hover:opacity-100 transition-all duration-200 cursor-pointer rounded-sm hover:bg-accent/50 p-0.5 -m-0.5"
           title="返回"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
       ) : (
-        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+        <Search className="mr-3 h-4 w-4 shrink-0 opacity-60" />
       )}
       <Command.Input
         value={query}
         onValueChange={setQuery}
         onKeyDown={handleKeyDown}
         placeholder={isInDetailsView ? '在命令中搜索...' : '搜索命令、页面或文件...'}
-        className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-12 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
       />
     </div>
   )
