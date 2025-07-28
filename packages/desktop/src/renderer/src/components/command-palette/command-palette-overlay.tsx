@@ -5,7 +5,8 @@ import {
   useCommandPaletteOpen,
   useCommandPaletteActions,
   useCommandPaletteQuery,
-  useCommandPaletteActiveCommand
+  useCommandPaletteActiveCommand,
+  useAllCommands
 } from './stores/command-palette-store'
 import { CommandPaletteInput } from './command-palette-input'
 import { CommandPaletteResults } from './command-palette-results'
@@ -94,9 +95,68 @@ export function CommandPaletteOverlay() {
         >
           <CommandPaletteInput />
           <CommandPaletteResults />
+          <CommandPaletteStatusBar />
         </Command>
       </div>
     </div>,
     document.body
+  )
+}
+
+/**
+ * Command Palette 底部状态栏组件
+ *
+ * 功能：
+ * - 显示当前状态（搜索模式 vs 命令详情模式）
+ * - 显示快捷键提示
+ * - 模仿 Raycast 的底部状态栏设计
+ */
+function CommandPaletteStatusBar() {
+  const activeCommandId = useCommandPaletteActiveCommand()
+  const allCommands = useAllCommands()
+
+  // 查找当前激活的命令
+  const activeCommand = activeCommandId
+    ? allCommands.find((cmd) => cmd.id === activeCommandId)
+    : null
+
+  // 是否在 details view
+  const isInDetailsView = !!activeCommand
+
+  return (
+    <div className="flex items-center justify-between px-3 py-2 border-t border-border bg-muted/30 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2">
+        {isInDetailsView && activeCommand ? (
+          <>
+            {activeCommand.icon && <activeCommand.icon className="h-3 w-3" />}
+            <span>{activeCommand.title}</span>
+          </>
+        ) : (
+          <>
+            <span>ClarityFile</span>
+          </>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3">
+        {isInDetailsView ? (
+          <div className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">←</kbd>
+            <span>Back</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">↵</kbd>
+              <span>Select</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">Esc</kbd>
+              <span>Close</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

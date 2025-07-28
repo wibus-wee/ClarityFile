@@ -1,6 +1,10 @@
 import { Command } from 'cmdk'
-import { Search } from 'lucide-react'
-import { useCommandPaletteQuery, useCommandPaletteActions } from './stores/command-palette-store'
+import { Search, ArrowLeft } from 'lucide-react'
+import {
+  useCommandPaletteQuery,
+  useCommandPaletteActions,
+  useCommandPaletteActiveCommand
+} from './stores/command-palette-store'
 
 /**
  * Command Palette 搜索输入组件
@@ -10,18 +14,53 @@ import { useCommandPaletteQuery, useCommandPaletteActions } from './stores/comma
  * - 处理实时搜索查询更新
  * - 提供占位符文本
  * - 支持键盘导航
+ * - 智能 Backspace 行为：在 details view 中先清除搜索，再返回主视图
+ * - 状态感知的图标显示（搜索图标 vs 返回箭头）
  */
 export function CommandPaletteInput() {
   const query = useCommandPaletteQuery()
-  const { setQuery } = useCommandPaletteActions()
+  const activeCommand = useCommandPaletteActiveCommand()
+  const { setQuery, setActiveCommand } = useCommandPaletteActions()
+
+  // 是否在 details view
+  const isInDetailsView = !!activeCommand
+
+  // 处理返回按钮点击
+  const handleBackClick = () => {
+    setActiveCommand(null)
+  }
+
+  // 处理键盘事件 - 智能 Backspace 行为
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && isInDetailsView) {
+      // 如果在 details view 中
+      if (query.trim() === '') {
+        // 搜索为空时，返回主视图
+        e.preventDefault()
+        setActiveCommand(null)
+      }
+      // 如果有搜索内容，让默认行为清除搜索内容（不阻止事件）
+    }
+  }
 
   return (
     <div className="flex items-center border-b px-3">
-      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      {isInDetailsView ? (
+        <button
+          onClick={handleBackClick}
+          className="mr-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+          title="返回"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+      ) : (
+        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      )}
       <Command.Input
         value={query}
         onValueChange={setQuery}
-        placeholder="搜索命令、页面或文件..."
+        onKeyDown={handleKeyDown}
+        placeholder={isInDetailsView ? '在命令中搜索...' : '搜索命令、页面或文件...'}
         className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
       />
     </div>

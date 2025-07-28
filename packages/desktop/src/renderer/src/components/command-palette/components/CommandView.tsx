@@ -1,8 +1,6 @@
 import { Command } from 'cmdk'
-import { ArrowLeft } from 'lucide-react'
 import {
   useCommandPaletteActiveCommand,
-  useCommandPaletteActions,
   useCommandPaletteQuery,
   useAllCommands
 } from '../stores/command-palette-store'
@@ -19,7 +17,6 @@ import type { CommandWithRender } from '../types'
  */
 export function CommandView() {
   const activeCommandId = useCommandPaletteActiveCommand()
-  const { setActiveCommand } = useCommandPaletteActions()
   const query = useCommandPaletteQuery()
   const allCommands = useAllCommands()
   const pluginContext = useCommandPaletteContext()
@@ -37,9 +34,9 @@ export function CommandView() {
     return (
       <Command.List className="max-h-[300px] overflow-y-auto">
         <div className="p-4">
-          <CommandViewHeader title="命令未找到" onBack={() => setActiveCommand(null)} />
+          <CommandViewHeader title="命令未找到" />
           <div className="mt-4 text-sm text-muted-foreground">
-            命令 "{activeCommandId}" 不存在或不支持渲染视图
+            命令 &quot;{activeCommandId}&quot; 不存在或不支持渲染视图
           </div>
         </div>
       </Command.List>
@@ -55,7 +52,6 @@ export function CommandView() {
           title={renderCommand.title}
           subtitle={renderCommand.subtitle}
           query={query}
-          onBack={() => setActiveCommand(null)}
         />
 
         <div className="mt-4">
@@ -74,25 +70,14 @@ interface CommandViewHeaderProps {
   title: string
   subtitle?: string
   query?: string
-  onBack: () => void
 }
 
-function CommandViewHeader({ title, subtitle, query, onBack }: CommandViewHeaderProps) {
+function CommandViewHeader({ title, subtitle, query }: CommandViewHeaderProps) {
   return (
-    <div className="flex items-center gap-3 pb-3 border-b border-border">
-      <button
-        onClick={onBack}
-        className="flex items-center justify-center w-6 h-6 rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-        title="返回"
-      >
-        <ArrowLeft className="h-4 w-4" />
-      </button>
-
-      <div className="flex-1 min-w-0">
-        <div className="font-medium truncate">{title}</div>
-        {subtitle && <div className="text-xs text-muted-foreground truncate">{subtitle}</div>}
-        {query && <div className="text-xs text-muted-foreground mt-1">查询: "{query}"</div>}
-      </div>
+    <div className="pb-3 border-b border-border">
+      <div className="font-medium truncate">{title}</div>
+      {subtitle && <div className="text-xs text-muted-foreground truncate mt-1">{subtitle}</div>}
+      {query && <div className="text-xs text-muted-foreground mt-1">查询: &quot;{query}&quot;</div>}
     </div>
   )
 }
