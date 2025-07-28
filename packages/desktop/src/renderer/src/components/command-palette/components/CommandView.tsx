@@ -1,9 +1,5 @@
 import { Command } from 'cmdk'
-import {
-  useCommandPaletteActiveCommand,
-  useCommandPaletteQuery,
-  useAllCommands
-} from '../stores/command-palette-store'
+import { useCommandPaletteActiveCommand, useAllCommands } from '../stores/command-palette-store'
 import { useCommandPaletteContext } from '../hooks/use-command-palette-context'
 import type { CommandWithRender } from '../types'
 
@@ -17,7 +13,6 @@ import type { CommandWithRender } from '../types'
  */
 export function CommandView() {
   const activeCommandId = useCommandPaletteActiveCommand()
-  const query = useCommandPaletteQuery()
   const allCommands = useAllCommands()
   const pluginContext = useCommandPaletteContext()
 
@@ -34,7 +29,6 @@ export function CommandView() {
     return (
       <Command.List className="max-h-[300px] overflow-y-auto">
         <div className="p-4">
-          <CommandViewHeader title="命令未找到" />
           <div className="mt-4 text-sm text-muted-foreground">
             命令 &quot;{activeCommandId}&quot; 不存在或不支持渲染视图
           </div>
@@ -47,37 +41,9 @@ export function CommandView() {
 
   return (
     <Command.List className="max-h-[300px] overflow-y-auto">
-      <div className="p-4">
-        <CommandViewHeader
-          title={renderCommand.title}
-          subtitle={renderCommand.subtitle}
-          query={query}
-        />
-
-        <div className="mt-4">
-          {/* 渲染命令的具体内容 */}
-          {renderCommand.render(pluginContext)}
-        </div>
+      <div>
+        <div>{renderCommand.render(pluginContext)}</div>
       </div>
     </Command.List>
-  )
-}
-
-/**
- * 命令视图头部组件
- */
-interface CommandViewHeaderProps {
-  title: string
-  subtitle?: string
-  query?: string
-}
-
-function CommandViewHeader({ title, subtitle, query }: CommandViewHeaderProps) {
-  return (
-    <div className="pb-3 border-b border-border">
-      <div className="font-medium truncate">{title}</div>
-      {subtitle && <div className="text-xs text-muted-foreground truncate mt-1">{subtitle}</div>}
-      {query && <div className="text-xs text-muted-foreground mt-1">查询: &quot;{query}&quot;</div>}
-    </div>
   )
 }

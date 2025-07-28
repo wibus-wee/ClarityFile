@@ -1,5 +1,8 @@
 import { createContext, useContext } from 'react'
 import type { Router } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { shell } from 'electron'
+import { tipcClient } from '@renderer/lib/tipc-client'
 
 /**
  * 插件上下文接口
@@ -16,32 +19,6 @@ export interface PluginContext {
     getQuery: () => string
     goBack: () => void
   }
-
-  // 应用服务
-  services: {
-    // 文件服务
-    files?: {
-      searchFiles: (query: string) => Promise<any[]>
-      openFile: (fileId: string) => Promise<void>
-      getFilePreview: (fileId: string) => Promise<string>
-    }
-
-    // 主题服务
-    themes?: {
-      getCurrentTheme: () => string
-      setTheme: (themeId: string) => Promise<void>
-      getAvailableThemes: () => any[]
-      createCustomTheme: (theme: any) => Promise<void>
-    }
-
-    // 设置服务
-    settings?: {
-      get: (key: string) => Promise<any>
-      set: (key: string, value: any) => Promise<void>
-      getCategory: (category: string) => Promise<any[]>
-    }
-  }
-
   // 用户偏好
   preferences: {
     language: string
@@ -92,7 +69,6 @@ export function createPluginContext(
     getQuery: () => string
     goBack: () => void
   },
-  services: PluginContext['services'] = {},
   preferences: PluginContext['preferences'] = {
     language: 'zh-CN',
     theme: 'system',
@@ -102,12 +78,10 @@ export function createPluginContext(
   return {
     router,
     commandPalette: commandPaletteActions,
-    services,
     preferences,
     utils: {
       notify: (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
-        // 这里可以集成现有的通知系统
-        console.log(`[${type.toUpperCase()}] ${message}`)
+        toast[type](message)
       },
 
       confirm: async (message: string): Promise<boolean> => {
@@ -126,7 +100,6 @@ export function createPluginContext(
 
       openExternal: async (url: string): Promise<void> => {
         // 这里可以使用 Electron 的 shell.openExternal
-        window.open(url, '_blank')
       }
     }
   }
