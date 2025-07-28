@@ -32,13 +32,13 @@ export const HelloWorldPlugin: CommandPalettePlugin = {
       }
     },
 
-    // 命令2: 可搜索的命令（带render）
+    // 命令2: 完整示例插件（带render）
     {
-      id: 'hello-world-search',
-      title: '搜索测试',
-      subtitle: '测试插件的搜索功能',
+      id: 'hello-world-demo',
+      title: '完整示例插件',
+      subtitle: '展示详情视图组件库的完整功能',
       icon: Sparkles,
-      keywords: ['search', 'test', '搜索', '测试', 'hello'],
+      keywords: ['demo', 'example', 'components', '示例', '组件', '演示'],
       category: '测试插件',
       source: 'plugin' as const,
       pluginId: 'hello-world',
