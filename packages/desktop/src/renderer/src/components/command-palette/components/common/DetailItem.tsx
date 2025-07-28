@@ -1,4 +1,5 @@
 import React from 'react'
+import { Command } from 'cmdk'
 import { LucideIcon } from 'lucide-react'
 
 interface DetailItemProps {
@@ -10,6 +11,9 @@ interface DetailItemProps {
   onClick?: () => void
   className?: string
   children?: React.ReactNode
+  // cmdk 相关属性
+  value?: string // 用于搜索和选择
+  disabled?: boolean
 }
 
 /**
@@ -36,20 +40,16 @@ export function DetailItem({
   badge,
   onClick,
   className = '',
-  children
+  children,
+  value,
+  disabled = false
 }: DetailItemProps) {
-  const baseClasses = [
-    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm',
-    'transition-all duration-150 group',
-    onClick ? 'cursor-pointer hover:bg-accent/40 aria-selected:bg-accent/60' : '',
-    className
-  ]
-    .filter(Boolean)
-    .join(' ')
+  // 使用 title 作为默认的 value，用于 cmdk 的搜索和选择
+  const itemValue = value || title
 
   const content = (
     <>
-      {Icon && <Icon className="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" />}
+      {Icon && <Icon className="h-4 w-4 shrink-0 opacity-70 group-aria-selected:opacity-100" />}
 
       <div className="flex-1 min-w-0 flex flex-col items-start">
         <div className="gap-2">
@@ -74,13 +74,24 @@ export function DetailItem({
     </>
   )
 
+  // 如果有 onClick，使用 Command.Item 支持键盘导航
   if (onClick) {
     return (
-      <button className={baseClasses} onClick={onClick}>
+      <Command.Item
+        value={itemValue}
+        onSelect={onClick}
+        disabled={disabled}
+        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 group cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground hover:bg-accent/40 ${className}`}
+      >
         {content}
-      </button>
+      </Command.Item>
     )
   }
 
-  return <div className={baseClasses}>{content}</div>
+  // 如果没有 onClick，使用普通的 div（不参与键盘导航）
+  return (
+    <div className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${className}`}>
+      {content}
+    </div>
+  )
 }
