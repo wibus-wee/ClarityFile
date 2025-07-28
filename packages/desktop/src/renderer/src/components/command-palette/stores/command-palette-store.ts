@@ -2,8 +2,9 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { useMemo } from 'react'
 import type { Command, RouteCommand } from '../types'
-import { fuzzySearch } from '../utils/search'
+import { enhancedFuzzySearch } from '../utils/search'
 import { useCommandFavorites } from '../hooks/use-command-favorites'
+import { useFavoritesData } from '../hooks/use-command-palette-data'
 
 /**
  * Command Palette Store State
@@ -14,7 +15,7 @@ interface CommandPaletteState {
   isOpen: boolean
   query: string
   activeCommand: string | null
-  // 保存进入命令详情前的查询，用于返回时恢复
+  // 保存进入命令详情前的查询，用于返回时恢复（仅从搜索结果进入时使用）
   savedQuery: string | null
 
   // 原始数据（由外部提供）
@@ -103,7 +104,7 @@ export const useCommandPaletteStore = create<CommandPaletteStore>()(
           state.activeCommand = commandId
         }),
 
-      // 返回到根视图（恢复保存的查询）
+      // 返回到根视图（仅在从搜索结果进入时恢复保存的查询）
       goBackToRoot: () =>
         set((state) => {
           state.activeCommand = null
@@ -111,6 +112,7 @@ export const useCommandPaletteStore = create<CommandPaletteStore>()(
             state.query = state.savedQuery // 恢复保存的查询
             state.savedQuery = null
           }
+          // 如果没有 savedQuery，说明是从 "Use with..." 进入的，保持当前查询不变
         }),
 
       // ✅ 纯粹的数据更新，无副作用
@@ -152,15 +154,16 @@ export const useAllCommands = () => {
 export const useSearchResults = () => {
   const allCommands = useAllCommands()
   const query = useCommandPaletteQuery()
+  const { recentCommands } = useFavoritesData()
 
   return useMemo(() => {
     if (!query.trim()) {
       // 当没有查询时，返回所有命令，让 UI 决定如何显示默认视图
       return allCommands
     }
-    // 注意：这里应该使用你更强大的 fuzzySearch
-    return fuzzySearch(allCommands, query)
-  }, [allCommands, query])
+    // 使用增强的模糊搜索，结合文本匹配和使用频率
+    return enhancedFuzzySearch(allCommands, query, recentCommands)
+  }, [allCommands, query, recentCommands])
 }
 
 // 派生选择器: 为 UI 提供最终的、可直接渲染的数据 (这是最重要的 Hook)

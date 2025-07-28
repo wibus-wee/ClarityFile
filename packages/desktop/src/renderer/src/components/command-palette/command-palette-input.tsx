@@ -20,14 +20,14 @@ import {
 export function CommandPaletteInput() {
   const query = useCommandPaletteQuery()
   const activeCommand = useCommandPaletteActiveCommand()
-  const { setQuery, setActiveCommand } = useCommandPaletteActions()
+  const { setQuery, goBackToRoot } = useCommandPaletteActions()
 
   // 是否在 details view
   const isInDetailsView = !!activeCommand
 
   // 处理返回按钮点击
   const handleBackClick = () => {
-    setActiveCommand(null)
+    goBackToRoot()
   }
 
   // 处理键盘事件 - 智能 Backspace 行为
@@ -37,7 +37,7 @@ export function CommandPaletteInput() {
       if (query.trim() === '') {
         // 搜索为空时，返回主视图
         e.preventDefault()
-        setActiveCommand(null)
+        goBackToRoot()
       }
       // 如果有搜索内容，让默认行为清除搜索内容（不阻止事件）
     }

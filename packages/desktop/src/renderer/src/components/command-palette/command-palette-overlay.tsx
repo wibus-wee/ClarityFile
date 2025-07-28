@@ -24,7 +24,7 @@ import { CommandPaletteResults } from './command-palette-results'
  */
 export function CommandPaletteOverlay() {
   const isOpen = useCommandPaletteOpen()
-  const { close, setQuery, setActiveCommand } = useCommandPaletteActions()
+  const { close, setQuery, setActiveCommand, goBackToRoot } = useCommandPaletteActions()
   const query = useCommandPaletteQuery()
   const activeCommand = useCommandPaletteActiveCommand()
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -39,26 +39,32 @@ export function CommandPaletteOverlay() {
         event.preventDefault()
 
         // 层级处理逻辑：
-        // 1. 如果有搜索查询，清空查询
+        // 1. 如果在命令详情视图中且有搜索查询，先清空查询
+        if (activeCommand && query.trim()) {
+          setQuery('')
+          return
+        }
+
+        // 2. 如果有激活的命令视图，返回到根视图
+        if (activeCommand) {
+          goBackToRoot()
+          return
+        }
+
+        // 3. 如果在根视图有搜索查询，清空查询
         if (query.trim()) {
           setQuery('')
           return
         }
 
-        // 2. 如果有激活的命令视图，关闭命令视图
-        if (activeCommand) {
-          setActiveCommand(null)
-          return
-        }
-
-        // 3. 都没有时，关闭整个面板
+        // 4. 都没有时，关闭整个面板
         close()
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, query, activeCommand, close, setQuery, setActiveCommand])
+  }, [isOpen, query, activeCommand, close, setQuery, setActiveCommand, goBackToRoot])
 
   // 处理点击外部关闭
   const handleOverlayClick = (event: React.MouseEvent) => {
