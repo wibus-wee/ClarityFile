@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Command } from 'cmdk'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   useCommandPaletteOpen,
   useCommandPaletteActions,
@@ -77,28 +78,40 @@ export function CommandPaletteOverlay() {
     }
   }, [isOpen])
 
-  if (!isOpen) {
-    return null
-  }
-
   return createPortal(
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-start justify-center"
-      onClick={handleOverlayClick}
-    >
-      <div className="mt-[15vh] w-full max-w-2xl">
-        <Command
-          ref={commandRef}
-          className="mx-4 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-[0_8px_30px_rgb(0,0,0,0.22)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl"
-          shouldFilter={false} // 我们将自己处理过滤
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 z-50 flex items-start justify-center"
+          onClick={handleOverlayClick}
         >
-          <CommandPaletteInput />
-          <CommandPaletteResults />
-          <CommandPaletteStatusBar />
-        </Command>
-      </div>
-    </div>,
+          <div className="mt-[15vh] w-full max-w-[48rem]">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0.9, y: -10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: -10 }}
+              transition={{
+                type: 'spring',
+                duration: 0.05,
+                damping: 19,
+                stiffness: 300
+              }}
+            >
+              <Command
+                ref={commandRef}
+                className="mx-4 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-[0_8px_30px_rgb(0,0,0,0.22)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl"
+                shouldFilter={false} // 我们将自己处理过滤
+              >
+                <CommandPaletteInput />
+                <CommandPaletteResults />
+                <CommandPaletteStatusBar />
+              </Command>
+            </motion.div>
+          </div>
+        </div>
+      )}
+    </AnimatePresence>,
     document.body
   )
 }

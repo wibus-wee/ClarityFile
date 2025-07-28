@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Command } from 'cmdk'
 import { useSearchableCommands } from '../stores/command-palette-store'
 import type { CommandWithRender } from '../types'
+import { CommandItem } from './CommandItem'
 
 /**
  * "Use with..." 区域组件
@@ -38,29 +39,18 @@ export function UseWithSection({ query, onCommandSelect }: UseWithSectionProps) 
   return (
     <Command.Group
       heading={`使用 "${query}" 搜索...`}
-      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
+      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
     >
       {applicableCommands.length > 0 ? (
         applicableCommands.map((command) => (
-          <Command.Item
+          <CommandItem
             key={command.id}
-            value={`use-with:${command.id}`}
+            command={{
+              ...command,
+              id: `use-with:${command.id}`
+            }}
             onSelect={() => onCommandSelect(command)}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm aria-selected:bg-accent/60 aria-selected:text-accent-foreground cursor-pointer transition-all duration-150 hover:bg-accent/40 group"
-          >
-            {command.icon && (
-              <command.icon className="h-4 w-4 shrink-0 opacity-70 group-aria-selected:opacity-100" />
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{command.title}</div>
-              {command.subtitle && (
-                <div className="text-xs text-muted-foreground/70 truncate">{command.subtitle}</div>
-              )}
-            </div>
-            <span className="text-xs text-muted-foreground/60 bg-muted/40 px-2 py-0.5 rounded-md font-medium shrink-0">
-              {command.category || '搜索'}
-            </span>
-          </Command.Item>
+          />
         ))
       ) : (
         <Command.Item className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground/70">

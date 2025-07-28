@@ -60,7 +60,7 @@ export function CommandPaletteResults() {
 
   // 主要结果视图 - 使用重构后的组件
   return (
-    <Command.List className="max-h-[380px] overflow-y-auto px-2 py-2">
+    <Command.List className="max-h-[380px] overflow-y-auto px-2 py-2 pb-4">
       {/* 如果没有查询，显示收藏和建议 */}
       {!hasQuery && (
         <>
@@ -74,7 +74,7 @@ export function CommandPaletteResults() {
         {routeCommands.length > 0 && (
           <Command.Group
             heading="页面导航"
-            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
+            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
           >
             {routeCommands.map((command) => (
               <CommandItem
@@ -90,7 +90,7 @@ export function CommandPaletteResults() {
         {pluginCommands.length > 0 && (
           <Command.Group
             heading="命令"
-            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
+            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
           >
             {pluginCommands.map((command) => (
               <CommandItem

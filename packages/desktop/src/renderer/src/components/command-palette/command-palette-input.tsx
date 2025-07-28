@@ -1,5 +1,5 @@
 import { Command } from 'cmdk'
-import { Search, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import {
   useCommandPaletteQuery,
   useCommandPaletteActions,
@@ -48,20 +48,20 @@ export function CommandPaletteInput() {
       {isInDetailsView ? (
         <button
           onClick={handleBackClick}
-          className="mr-3 h-4 w-4 shrink-0 opacity-60 hover:opacity-100 transition-all duration-200 cursor-pointer rounded-sm hover:bg-accent/50 p-0.5 -m-0.5"
+          className="mr-3 h-7 w-7 shrink-0 opacity-60 bg-muted hover:opacity-100 transition-all duration-200 cursor-pointer rounded-sm hover:bg-accent/50 p-0.5 -m-0.5"
           title="返回"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mx-auto" />
         </button>
       ) : (
-        <Search className="mr-3 h-4 w-4 shrink-0 opacity-60" />
+        <></>
       )}
       <Command.Input
         value={query}
         onValueChange={setQuery}
         onKeyDown={handleKeyDown}
-        placeholder={isInDetailsView ? '在命令中搜索...' : '搜索命令、页面或文件...'}
-        className="flex h-12 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
+        placeholder={isInDetailsView ? '在命令中搜索...' : '搜索命令或页面...'}
+        className="flex h-12 w-full text-base rounded-md bg-transparent py-3 outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
       />
     </div>
   )
