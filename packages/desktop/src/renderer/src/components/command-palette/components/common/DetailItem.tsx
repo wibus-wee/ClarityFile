@@ -51,7 +51,7 @@ export function DetailItem({
     <>
       {Icon && <Icon className="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" />}
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 flex">
         <div className="flex items-center gap-2">
           <span className="font-medium truncate">{title}</span>
           {badge && (

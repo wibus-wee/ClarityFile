@@ -1,5 +1,6 @@
 import type { CommandPalettePlugin } from '../types'
 import { HelloWorldPlugin } from './HelloWorld'
+import { FileSearchPlugin } from './FileSearch'
 
 /**
  * 所有可用的插件列表
@@ -7,9 +8,9 @@ import { HelloWorldPlugin } from './HelloWorld'
  * 在这里注册所有的命令面板插件
  */
 export const AVAILABLE_PLUGINS: CommandPalettePlugin[] = [
-  HelloWorldPlugin
+  HelloWorldPlugin,
+  FileSearchPlugin
   // TODO: 添加更多插件
-  // FileSearchPlugin,
   // ThemesStudioPlugin,
 ]
 
