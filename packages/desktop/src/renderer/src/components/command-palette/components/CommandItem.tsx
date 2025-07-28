@@ -1,6 +1,8 @@
 import React from 'react'
 import { Command } from 'cmdk'
 import { useCommandFavorites } from '../hooks/use-command-favorites'
+import { useRegisteredPlugins } from '../plugins/plugin-registry'
+import { usePluginUtils } from '../utils/plugin-utils'
 import type { Command as CommandType, RouteCommand } from '../types'
 
 interface CommandItemProps {
@@ -18,8 +20,9 @@ interface CommandItemProps {
  * - Displays command metadata
  */
 export function CommandItem({ command, onSelect, showFavorite = true }: CommandItemProps) {
-  const { isFavorite, toggleFavorite } = useCommandFavorites()
-  const isCommandFavorite = isFavorite(command.id)
+  const { toggleFavorite } = useCommandFavorites()
+  const registeredPlugins = useRegisteredPlugins()
+  const { getPluginName } = usePluginUtils(registeredPlugins)
 
   const handleRightClick = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -49,26 +52,26 @@ export function CommandItem({ command, onSelect, showFavorite = true }: CommandI
     >
       {command.icon && <command.icon className="h-4 w-4 shrink-0" />}
 
-      <div className="flex-1 min-w-0">
-        <div className="font-medium truncate">{command.title}</div>
-        {command.subtitle && (
-          <div className="text-xs text-muted-foreground truncate">{command.subtitle}</div>
-        )}
+      <div className="flex flex-row gap-4 flex-1 min-w-0">
+        <div className="truncate">{command.title}</div>
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Show plugin name for plugin commands */}
+          {command.source === 'plugin' && command.pluginId && (
+            <span className="text-xs text-muted-foreground">{getPluginName(command.pluginId)}</span>
+          )}
+
+          {/* Show "Core" for core commands without path */}
+          {command.source === 'core' && !('path' in command) && (
+            <span className="text-xs text-muted-foreground">Core</span>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        {showFavorite && isCommandFavorite && (
-          <span className="text-yellow-500" title="收藏的命令">
-            ⭐
-          </span>
-        )}
+        {'path' in command && <span className="text-xs text-muted-foreground">Navigation</span>}
 
-        {/* Show path for route commands */}
-        {'path' in command && <span className="text-xs text-muted-foreground">{command.path}</span>}
-
-        {/* Show category for plugin commands */}
-        {command.category && !('path' in command) && (
-          <span className="text-xs text-muted-foreground">{command.category}</span>
+        {command.source === 'plugin' && command.pluginId && (
+          <span className="text-xs text-muted-foreground">Command</span>
         )}
       </div>
     </Command.Item>

@@ -12,6 +12,7 @@ import { FavoritesSection } from './components/FavoritesSection'
 import { SuggestionsSection } from './components/SuggestionsSection'
 import { UseWithSection } from './components/UseWithSection'
 import type { Command as CommandType, CommandWithAction, CommandWithRender } from './types'
+import { useFavoritesData } from './hooks/use-command-palette-data'
 
 /**
  * Command Palette 结果显示组件
@@ -29,6 +30,7 @@ export function CommandPaletteResults() {
   const query = useCommandPaletteQuery()
   const { categorizedResults, hasQuery } = useEnhancedResults()
   const { executeCommand: executeCmd } = useCommandExecution()
+  const { trackCommand } = useFavoritesData()
 
   // 命令执行辅助函数
   const executeCommand = async (command: CommandType) => {
@@ -36,6 +38,9 @@ export function CommandPaletteResults() {
       await executeCmd(command.id, (command as CommandWithAction).action)
     } else if ('render' in command) {
       // 激活命令视图
+      trackCommand({
+        commandId: command.id
+      })
       setActiveCommand(command.id)
     }
   }
@@ -43,13 +48,6 @@ export function CommandPaletteResults() {
   // 处理 "Use with..." 命令选择
   const handleUseWithCommand = (command: CommandWithRender) => {
     setActiveCommand(command.id)
-  }
-
-  // 处理建议选择
-  const handleSuggestionSelect = (suggestion: string) => {
-    // 这里可以根据建议类型执行不同的操作
-    console.log('Selected suggestion:', suggestion)
-    // 例如：设置查询、导航到特定页面等
   }
 
   // 使用新架构的分类结果
@@ -67,7 +65,7 @@ export function CommandPaletteResults() {
       {!hasQuery && (
         <>
           <FavoritesSection onExecuteCommand={executeCommand} />
-          <SuggestionsSection onSuggestionSelect={handleSuggestionSelect} />
+          <SuggestionsSection onCommandExecute={executeCommand} />
         </>
       )}
 

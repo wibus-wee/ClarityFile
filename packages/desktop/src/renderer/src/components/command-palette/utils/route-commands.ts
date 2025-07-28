@@ -19,34 +19,10 @@ export function generatePinyin(text: string): string[] {
 }
 
 /**
- * 获取英文翻译关键词
- * 这里可以根据实际的翻译键来获取对应的英文翻译
- */
-export function getEnglishTranslations(chineseLabel: string): string[] {
-  // 简单的映射，实际项目中可以通过翻译系统获取
-  const translations: Record<string, string[]> = {
-    仪表盘: ['dashboard', 'overview'],
-    文件管理: ['files', 'file management'],
-    项目管理: ['projects', 'project management'],
-    赛事中心: ['competitions', 'contest center'],
-    经费追踪: ['expenses', 'expense tracking'],
-    设置: ['settings', 'preferences'],
-    关于: ['about']
-  }
-
-  return translations[chineseLabel] || []
-}
-
-/**
  * 生成路由搜索关键词
  */
 export function generateRouteKeywords(route: AppRouteItem): string[] {
-  const keywords = [
-    route.label,
-    route.path,
-    ...generatePinyin(route.label),
-    ...getEnglishTranslations(route.label)
-  ]
+  const keywords = [route.label, route.path, ...generatePinyin(route.label)]
 
   return keywords
 }

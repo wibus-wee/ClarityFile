@@ -199,7 +199,7 @@ export function useFavoritesData() {
       const now = Date.now()
       const existingCommand = recentCommands.find((cmd: any) => cmd.commandId === arg.commandId)
 
-      let newRecentCommands
+      let newRecentCommands: any[]
       if (existingCommand) {
         // 更新现有命令的频率和时间戳
         newRecentCommands = recentCommands.map((cmd: any) =>

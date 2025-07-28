@@ -1,15 +1,80 @@
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Command, Zap, Package, Hash, MousePointer, Eye } from 'lucide-react'
-import { SettingsSection } from './components'
+import { Command, Zap, Package, Hash, MousePointer, Eye, Brain, RotateCcw } from 'lucide-react'
+import { SettingsSection, SettingsSliderField } from './components'
 import { useRegisteredPlugins } from '@renderer/components/command-palette/plugins/plugin-registry'
 import { usePluginCommands } from '@renderer/components/command-palette/hooks/use-plugin-commands'
+import { useRecommendationConfig } from '@renderer/components/command-palette/hooks/use-recommendation-config'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@clarity/shadcn/ui/card'
+import { Button } from '@clarity/shadcn/ui/button'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Form } from '@clarity/shadcn/ui/form'
+import { toast } from 'sonner'
+
+// 推荐配置 Schema
+const recommendationConfigSchema = z.object({
+  frequencyWeight: z.number().min(0).max(1),
+  recencyWeight: z.number().min(0).max(1),
+  contextWeight: z.number().min(0).max(1),
+  decayHalfLife: z.number().min(1).max(30),
+  maxSuggestions: z.number().min(1).max(10)
+})
+
+type RecommendationConfigForm = z.infer<typeof recommendationConfigSchema>
 
 export function FeaturesSettings() {
   const { t } = useTranslation('settings')
   const registeredPlugins = useRegisteredPlugins()
   const pluginCommands = usePluginCommands()
+
+  // 推荐配置管理
+  const { config, updateConfig, resetConfig, isUpdating, isResetting } = useRecommendationConfig()
+
+  // 推荐配置表单
+  const recommendationForm = useForm<RecommendationConfigForm>({
+    resolver: zodResolver(recommendationConfigSchema),
+    defaultValues: {
+      frequencyWeight: config.frequencyWeight,
+      recencyWeight: config.recencyWeight,
+      contextWeight: config.contextWeight,
+      decayHalfLife: config.decayHalfLife,
+      maxSuggestions: config.maxSuggestions
+    }
+  })
+
+  // 监听配置变化，更新表单默认值
+  React.useEffect(() => {
+    recommendationForm.reset({
+      frequencyWeight: config.frequencyWeight,
+      recencyWeight: config.recencyWeight,
+      contextWeight: config.contextWeight,
+      decayHalfLife: config.decayHalfLife,
+      maxSuggestions: config.maxSuggestions
+    })
+  }, [config, recommendationForm])
+
+  // 保存推荐配置
+  const handleSaveRecommendationConfig = async (data: RecommendationConfigForm) => {
+    try {
+      await updateConfig(data)
+      toast.success('推荐算法配置已成功更新')
+    } catch (error) {
+      toast.error('无法保存推荐配置，请重试')
+    }
+  }
+
+  // 重置推荐配置
+  const handleResetRecommendationConfig = async () => {
+    try {
+      await resetConfig()
+      toast.success('推荐算法配置已恢复为默认值')
+    } catch (error) {
+      toast.error('无法重置推荐配置，请重试')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -30,6 +95,114 @@ export function FeaturesSettings() {
             </p>
           </div>
         </div>
+      </SettingsSection>
+
+      {/* 智能推荐配置 */}
+      <SettingsSection
+        title="智能推荐配置"
+        description="调整命令推荐算法的参数，优化个性化推荐效果"
+        showSeparator={true}
+      >
+        <Form {...recommendationForm}>
+          <form
+            onSubmit={recommendationForm.handleSubmit(handleSaveRecommendationConfig)}
+            className="space-y-6"
+          >
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                <Brain className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium">推荐算法配置</h3>
+                <p className="text-sm text-muted-foreground">
+                  基于使用频率、时间衰减和上下文的智能推荐系统
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetRecommendationConfig}
+                  disabled={isResetting}
+                >
+                  <RotateCcw className="h-4 w-4 mr-1" />
+                  重置
+                </Button>
+                <Button type="submit" size="sm" disabled={isUpdating}>
+                  保存配置
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-6">
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">权重配置</h4>
+                <div className="grid gap-4">
+                  <SettingsSliderField
+                    control={recommendationForm.control}
+                    name="frequencyWeight"
+                    label="使用频率权重"
+                    description="基于命令使用频率的推荐权重"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    formatValue={(value) => `${Math.round(value * 100)}%`}
+                  />
+
+                  <SettingsSliderField
+                    control={recommendationForm.control}
+                    name="recencyWeight"
+                    label="时间衰减权重"
+                    description="基于最近使用时间的推荐权重"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    formatValue={(value) => `${Math.round(value * 100)}%`}
+                  />
+
+                  <SettingsSliderField
+                    control={recommendationForm.control}
+                    name="contextWeight"
+                    label="上下文权重"
+                    description="基于使用场景和时间段的推荐权重"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    formatValue={(value) => `${Math.round(value * 100)}%`}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">算法参数</h4>
+                <div className="grid gap-4">
+                  <SettingsSliderField
+                    control={recommendationForm.control}
+                    name="decayHalfLife"
+                    label="时间衰减半衰期"
+                    description="命令推荐权重减半的天数"
+                    min={1}
+                    max={30}
+                    step={1}
+                    formatValue={(value) => `${value} 天`}
+                  />
+
+                  <SettingsSliderField
+                    control={recommendationForm.control}
+                    name="maxSuggestions"
+                    label="最大推荐数量"
+                    description="在建议区域显示的最大命令数量"
+                    min={1}
+                    max={10}
+                    step={1}
+                    formatValue={(value) => `${value} 个`}
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+        </Form>
       </SettingsSection>
 
       {/* 插件管理 */}
