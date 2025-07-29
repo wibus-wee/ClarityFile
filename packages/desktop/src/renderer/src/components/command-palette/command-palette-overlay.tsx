@@ -11,6 +11,7 @@ import {
 } from './stores/command-palette-store'
 import { CommandPaletteInput } from './command-palette-input'
 import { CommandPaletteResults } from './command-palette-results'
+import { CommandPaletteStatusBar } from './command-palette-status-bar'
 
 /**
  * Command Palette 主覆盖层组件
@@ -98,16 +99,13 @@ export function CommandPaletteOverlay() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: -10 }}
               transition={{
-                type: 'spring',
-                duration: 0.05,
-                damping: 19,
-                stiffness: 300
+                duration: 0.1
               }}
             >
               <Command
                 ref={commandRef}
                 className="mx-4 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-[0_8px_30px_rgb(0,0,0,0.22)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl"
-                shouldFilter={false} // 我们将自己处理过滤
+                shouldFilter={false}
               >
                 <CommandPaletteInput />
                 <CommandPaletteResults />
@@ -119,69 +117,5 @@ export function CommandPaletteOverlay() {
       )}
     </AnimatePresence>,
     document.body
-  )
-}
-
-/**
- * Command Palette 底部状态栏组件
- *
- * 功能：
- * - 显示当前状态（搜索模式 vs 命令详情模式）
- * - 显示快捷键提示
- * - 模仿 Raycast 的底部状态栏设计
- */
-function CommandPaletteStatusBar() {
-  const activeCommandId = useCommandPaletteActiveCommand()
-  const allCommands = useAllCommands()
-
-  // 查找当前激活的命令
-  const activeCommand = activeCommandId
-    ? allCommands.find((cmd) => cmd.id === activeCommandId)
-    : null
-
-  // 是否在 details view
-  const isInDetailsView = !!activeCommand
-
-  return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-border/50 bg-muted/20 text-xs text-muted-foreground">
-      <div className="flex items-center gap-2">
-        {isInDetailsView && activeCommand ? (
-          <>
-            {activeCommand.icon && <activeCommand.icon className="h-3.5 w-3.5 opacity-70" />}
-            <span className="font-medium">{activeCommand.title}</span>
-          </>
-        ) : (
-          <>
-            <span className="font-medium text-foreground/60">ClarityFile</span>
-          </>
-        )}
-      </div>
-
-      <div className="flex items-center gap-4">
-        {isInDetailsView ? (
-          <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[10px] font-medium bg-background/80 border border-border/60 rounded-md shadow-sm">
-              ←
-            </kbd>
-            <span className="text-muted-foreground/80">Back</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[10px] font-medium bg-background/80 border border-border/60 rounded-md shadow-sm">
-                ↵
-              </kbd>
-              <span className="text-muted-foreground/80">Select</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[10px] font-medium bg-background/80 border border-border/60 rounded-md shadow-sm">
-                Esc
-              </kbd>
-              <span className="text-muted-foreground/80">Close</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
   )
 }
