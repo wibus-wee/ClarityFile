@@ -1,8 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { Router } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { shell } from 'electron'
-import { tipcClient } from '@renderer/lib/tipc-client'
 
 /**
  * 插件上下文接口
@@ -18,12 +16,6 @@ export interface PluginContext {
     setQuery: (query: string) => void
     getQuery: () => string
     goBack: () => void
-  }
-  // 用户偏好
-  preferences: {
-    language: string
-    theme: string
-    shortcuts: Record<string, string[]>
   }
 
   // 工具函数
@@ -68,17 +60,11 @@ export function createPluginContext(
     setQuery: (query: string) => void
     getQuery: () => string
     goBack: () => void
-  },
-  preferences: PluginContext['preferences'] = {
-    language: 'zh-CN',
-    theme: 'system',
-    shortcuts: {}
   }
 ): PluginContext {
   return {
     router,
     commandPalette: commandPaletteActions,
-    preferences,
     utils: {
       notify: (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
         toast[type](message)
