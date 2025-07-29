@@ -18,7 +18,6 @@ export const FileSearchPlugin: CommandPalettePlugin = {
   description: '提供强大的文件搜索功能，支持模糊搜索、类型过滤和快速预览',
 
   publishCommands: () => [
-    // 命令1: 文件搜索（带render，支持查询）
     {
       id: 'file-search-command',
       title: '搜索文件',
