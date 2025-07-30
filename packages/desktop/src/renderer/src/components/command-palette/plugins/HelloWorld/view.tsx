@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Sparkles, Search, FileText, Settings, Heart, Coffee } from 'lucide-react'
-import { PluginContext } from '../plugin-context'
 import {
   DetailLayout,
   DetailSidebar,
@@ -14,6 +13,7 @@ import {
   DetailEmpty
 } from '../../components/common'
 import { cn } from '@clarity/shadcn'
+import { PluginContext } from '../types'
 
 /**
  * HelloWorld 完整示例插件视图

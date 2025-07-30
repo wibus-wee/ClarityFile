@@ -1,4 +1,4 @@
-import { useCustomTheme } from '@renderer/providers/custom-theme-provider'
+import { useCustomTheme } from '@renderer/providers/custom-theme-hooks'
 import type { Theme, ExtendedTheme } from '@renderer/types/theme'
 
 export { type Theme, type ExtendedTheme }

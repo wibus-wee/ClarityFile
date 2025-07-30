@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react'
-import { CommandPalettePlugin, PluginContext } from '../../types'
 import { FileSearchView } from './view'
+import { CommandPalettePlugin } from '../../types'
+import { PluginContext } from '../types'
 
 /**
  * FileSearch 插件 - 文件搜索功能

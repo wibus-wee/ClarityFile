@@ -1,7 +1,12 @@
 'use client'
 
 import { useEffect, useState, useCallback, PropsWithChildren } from 'react'
-import type { Theme, ResolvedTheme, CustomTheme } from '@renderer/types/theme'
+import type {
+  Theme,
+  ResolvedTheme,
+  CustomTheme,
+  ExtendedThemeContextValue
+} from '@renderer/types/theme'
 import { useSettingsByCategory, useSetSetting } from '@renderer/hooks/use-tipc'
 import { CustomThemeManager } from '@renderer/lib/custom-theme-manager'
 import { ThemeService } from '@renderer/lib/theme-service'

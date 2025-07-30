@@ -9,7 +9,8 @@
  */
 
 import { Button } from '@clarity/shadcn/ui/button'
-import { ShortcutProvider, Shortcut, useShortcutOverlay } from '../index'
+import { ShortcutProvider, Shortcut } from '../index'
+import { useShortcutOverlay } from '../shortcut-overlay-hooks'
 
 export function ShortcutOverlayExample() {
   const { show, hide, isVisible } = useShortcutOverlay()

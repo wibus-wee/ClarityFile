@@ -1,6 +1,5 @@
 import React from 'react'
-import type { PluginContext } from '../plugins/plugin-context'
-export type { PluginContext }
+import { PluginContext } from '../plugins/types'
 
 /**
  * 基础命令接口 - 包含所有命令的公共字段

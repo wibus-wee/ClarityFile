@@ -2,8 +2,8 @@ import { useEffect, useCallback } from 'react'
 import { useImportAssistantStore } from '@renderer/stores/import-assistant'
 import { extractFileInfoFromFile, validateFileSize } from '../../core/utils'
 import type { DroppedFileInfo } from '../../core/types'
-import { useDragDrop } from '../../context/drag-drop-context'
 import { toast } from 'sonner'
+import { useDragDrop } from '../../context/drag-drop-hooks'
 
 /**
  * 全局文件拖拽监听组件

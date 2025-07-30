@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { useDragDropState } from '../../context/drag-drop-context'
+import { useDragDropState } from '../../context/drag-drop-hooks'
 
 /**
  * 全局文件拖拽覆盖层组件

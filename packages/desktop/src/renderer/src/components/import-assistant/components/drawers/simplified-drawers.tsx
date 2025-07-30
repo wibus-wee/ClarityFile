@@ -4,14 +4,14 @@ import { DocumentVersionFormDrawer } from '@renderer/components/project-details/
 import { useGlobalDrawersStore } from '@renderer/stores/global-drawers'
 import { useImportAssistantStore } from '@renderer/stores/import-assistant'
 import { useProjects } from '@renderer/hooks/use-tipc'
+import { toast } from 'sonner'
 import {
-  useImportContext,
   usePreselectedFile,
   useExpensePrefilledData,
   useDocumentPrefilledData,
-  useDocumentVersionPrefilledData
-} from '../../core/import-context'
-import { toast } from 'sonner'
+  useDocumentVersionPrefilledData,
+  useImportContext
+} from '../../core/import-hooks'
 
 /**
  * 简化的发票报销 Drawer

@@ -1,6 +1,7 @@
 import { MessageCircle, Sparkles } from 'lucide-react'
-import { CommandPalettePlugin, PluginContext } from '../../types'
+import { CommandPalettePlugin } from '../../types'
 import { HelloWorldView } from './view'
+import { PluginContext } from '../types'
 
 /**
  * HelloWorld 插件 - 用于测试插件系统

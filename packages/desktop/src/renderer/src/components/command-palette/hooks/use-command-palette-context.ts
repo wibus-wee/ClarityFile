@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { useRouter } from '@tanstack/react-router'
-import { createPluginContext } from '../plugins/plugin-context'
 import {
   useCommandPaletteActions,
   useCommandPaletteQuery,
   useCommandPaletteActiveCommand
 } from '../stores/command-palette-store'
-import type { PluginContext } from '../types'
+import { PluginContext } from '../plugins/types'
+import { createPluginContext } from '../plugins/utils'
 
 /**
  * Command Palette Context Hook

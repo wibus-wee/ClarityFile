@@ -17,7 +17,7 @@ export {
 } from './components/drawers/simplified-drawers'
 
 // Context导出
-export { DragDropProvider, useDragDrop, useDragDropState } from './context/drag-drop-context'
+export { DragDropProvider } from './context/drag-drop-context'
 
 // Hooks导出
 export { useExpenseImportHandler, ExpenseImportUtils } from './hooks/use-expense-import'
@@ -25,7 +25,7 @@ export { useDocumentImportHandler, DocumentImportUtils } from './hooks/use-docum
 export { useImportContextData, useFileValidation } from './hooks/use-import-context-data'
 
 // 核心导出
-export { ImportContextProvider, useImportContext } from './core/import-context'
+export { ImportContextProvider } from './core/import-context'
 export type {
   DroppedFileInfo,
   ImportContextData,

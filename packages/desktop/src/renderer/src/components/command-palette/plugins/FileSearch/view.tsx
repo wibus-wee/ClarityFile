@@ -9,7 +9,7 @@ import {
   DetailEmpty,
   DetailStatus
 } from '../../components/common'
-import { PluginContext } from '../../types'
+import { PluginContext } from '../types'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { useGlobalFiles } from '@renderer/hooks/use-tipc'
 import { formatFileSize, formatFriendlyDate } from '@renderer/lib/utils'
