@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, type Transition } from 'framer-motion'
 import { Badge } from '@clarity/shadcn'
 import { ChevronRight, Sparkles } from 'lucide-react'
 import { useState } from 'react'
@@ -28,7 +28,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
         duration: 0.6,
         delay: index * 0.1,
         ease: [0.25, 0.46, 0.45, 0.94]
-      }
+      } as Transition
     }
   }
 
@@ -40,7 +40,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
         type: 'spring',
         stiffness: 300,
         damping: 20
-      }
+      } as Transition
     }
   }
 
@@ -84,6 +84,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 whileInView={{ scale: 1, rotate: 0 }}
+                viewport={{ once: true }}
                 transition={{
                   delay: index * 0.1 + 0.3,
                   type: 'spring',
@@ -103,6 +104,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ delay: index * 0.1 + 0.2 }}
               >
                 <Badge
@@ -131,6 +133,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ delay: index * 0.1 + 0.4 }}
             className="text-xl font-bold mb-3 group-hover:text-primary transition-colors duration-300"
           >
@@ -140,6 +143,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ delay: index * 0.1 + 0.5 }}
             className="text-muted-foreground leading-relaxed mb-4"
           >
@@ -150,6 +154,7 @@ export function FeatureCard({ feature, index }: FeatureCardProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ delay: index * 0.1 + 0.6 }}
             className="flex flex-wrap gap-2 mb-4"
           >

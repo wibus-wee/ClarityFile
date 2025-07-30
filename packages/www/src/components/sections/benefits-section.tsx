@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Clock, Shield, Users, Star } from 'lucide-react'
+import { Clock, Shield, Star } from 'lucide-react'
 
 // Benefits Section Component
 export function BenefitsSection() {
@@ -15,12 +15,6 @@ export function BenefitsSection() {
       title: '数据安全',
       description: '本地存储确保数据隐私，完全掌控您的重要文档',
       stats: '100% 本地化存储'
-    },
-    {
-      icon: Users,
-      title: '团队协作',
-      description: '统一的项目管理平台，提升团队协作效率',
-      stats: '支持无限团队成员'
     },
     {
       icon: Star,
@@ -49,7 +43,7 @@ export function BenefitsSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon
             return (

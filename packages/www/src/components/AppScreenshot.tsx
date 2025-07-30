@@ -61,12 +61,11 @@ export function AppScreenshot({
           src={currentSrc}
           alt={alt}
           className="w-full h-auto object-contain"
-          initial={{ opacity: 0, scale: 0.98 }}
+          initial={{ opacity: 0 }}
           animate={{
-            opacity: imageLoaded ? 1 : 0,
-            scale: imageLoaded ? 1 : 0.98
+            opacity: imageLoaded ? 1 : 0
           }}
-          exit={{ opacity: 0, scale: 0.98 }}
+          exit={{ opacity: 0 }}
           transition={{
             duration: 0.6,
             ease: [0.25, 0.46, 0.45, 0.94]
