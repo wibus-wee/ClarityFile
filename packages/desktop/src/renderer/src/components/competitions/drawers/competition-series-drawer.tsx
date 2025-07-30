@@ -154,7 +154,9 @@ export function CompetitionSeriesDrawer({
               )}
             </div>
             <div>
-              <DrawerTitle className="text-xl">{isEdit ? '编辑赛事系列' : '创建赛事系列'}</DrawerTitle>
+              <DrawerTitle className="text-xl">
+                {isEdit ? '编辑赛事系列' : '创建赛事系列'}
+              </DrawerTitle>
               <DrawerDescription className="text-sm">
                 {isEdit ? '修改赛事系列的基本信息' : '创建一个新的赛事系列来管理相关比赛'}
               </DrawerDescription>
@@ -179,11 +181,11 @@ export function CompetitionSeriesDrawer({
                       赛事系列名称 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="例如：全国大学生创新创业大赛" 
-                        maxLength={100} 
+                      <Input
+                        placeholder="例如：全国大学生创新创业大赛"
+                        maxLength={100}
                         autoFocus
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -212,7 +214,8 @@ export function CompetitionSeriesDrawer({
                     </FormControl>
                     <FormMessage />
                     <p className="text-xs text-muted-foreground">
-                      可选，帮助您和团队成员了解赛事系列的背景和目标 ({field.value?.length || 0}/500 字符)
+                      可选，帮助您和团队成员了解赛事系列的背景和目标 ({field.value?.length || 0}/500
+                      字符)
                     </p>
                   </FormItem>
                 )}
