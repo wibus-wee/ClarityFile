@@ -8,6 +8,7 @@
     "accessibility": "Accessibility",
     "audioVideo": "Audio & Video",
     "privacy": "Privacy & Visibility",
+    "features": "Features",
     "advanced": "Advanced"
   },
   "descriptions": {
@@ -18,6 +19,7 @@
     "accessibility": "Manage application accessibility",
     "audioVideo": "Manage application audio & video",
     "privacy": "Manage application privacy & visibility",
+    "features": "Manage application features and tools",
     "advanced": "Manage application advanced settings"
   },
   "general": {
@@ -223,6 +225,25 @@
     "maxLogFilesDescription": "Maximum number of log files to keep",
     "enableTelemetry": "Enable telemetry",
     "enableTelemetryDescription": "Send anonymous usage data to improve the product"
+  },
+  "features": {
+    "title": "Features",
+    "commandPalette": {
+      "title": "Command Palette",
+      "description": "View and manage command palette plugins",
+      "shortcut": "Shortcut: ⌘K or Ctrl+K",
+      "pluginManagement": {
+        "title": "Plugin Management",
+        "description": "View currently registered command palette plugins and their published commands",
+        "stats": "{{pluginCount}} plugins registered, {{commandCount}} commands published",
+        "noPlugins": "No plugins registered",
+        "commandsPublished": "{{count}} commands published"
+      },
+      "commandTypes": {
+        "action": "Action",
+        "render": "Render"
+      }
+    }
   },
   "audioVideo": {
     "title": "Audio & Video",

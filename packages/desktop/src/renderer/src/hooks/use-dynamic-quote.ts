@@ -1,6 +1,7 @@
 import useSWR from 'swr'
 import type { Quote, HitokotoResponse, QuotableResponse, QuoteSource } from '@renderer/types/quote'
 import { getRandomFallbackQuote } from '@renderer/data/fallback-quotes'
+import { is } from '@electron-toolkit/utils'
 
 /**
  * 一言API请求函数
@@ -68,29 +69,22 @@ async function fetchQuotable(): Promise<Quote> {
  */
 async function fetchDynamicQuote(): Promise<Quote & { source: QuoteSource }> {
   try {
-    // 优先尝试一言API
+    if (import.meta.env.DEV) {
+      throw new Error('Simulated Hitokoto API failure for avoiding hitokoto rate limit.')
+    }
     const quote = await fetchHitokoto()
     return { ...quote, source: 'hitokoto' }
   } catch (error) {
     console.warn('Hitokoto API failed, trying Quotable API:', error)
 
-    try {
-      // 尝试Quotable API
-      const quote = await fetchQuotable()
-      return { ...quote, source: 'quotable' }
-    } catch (quotableError) {
-      console.warn('Quotable API failed, using fallback:', quotableError)
-
-      // 使用本地fallback数据
-      const fallbackQuote = getRandomFallbackQuote()
-      return {
-        id: `fallback-${Date.now()}`,
-        content: fallbackQuote.content,
-        author: fallbackQuote.author,
-        source: (fallbackQuote.source as QuoteSource) || 'fallback',
-        category: fallbackQuote.category,
-        length: fallbackQuote.content.length
-      }
+    const fallbackQuote = getRandomFallbackQuote()
+    return {
+      id: `fallback-${Date.now()}`,
+      content: fallbackQuote.content,
+      author: fallbackQuote.author,
+      source: (fallbackQuote.source as QuoteSource) || 'fallback',
+      category: fallbackQuote.category,
+      length: fallbackQuote.content.length
     }
   }
 }

@@ -9,8 +9,8 @@
     <pre align="center">🧪 Working in Progress</pre>
     <p align="center">
       <b>Download for </b>
-      <a href="/releases">macOS</a>&nbsp;·&nbsp;
-      <a href="/releases">Windows</a>&nbsp;·&nbsp;
+      <span>macOS</spa>&nbsp;·&nbsp;
+      <span>Windows</span>&nbsp;·&nbsp;
       <i><span>PWA (Comming Soon)</span></i>
     </p>
     <br />
@@ -39,7 +39,7 @@
 ## Packages
 
 - `packages/desktop`: ClarityFile 的核心桌面应用代码。
-- `packages/locales-web`: ClarityFile 的本地化编辑器，用于管理 ClarityFile 的本地化。
+- `packages/locales-web`: ClarityFile 的本地化编辑器，用于管理 ClarityFile 的本地化。 _(WIP)_
 - `packages/www`: ClarityFile 的官方网站，用于展示项目、提供下载等。
 - `packages/shadcn`: shadcn/ui 的本地化版本，用于统一 UI 组件库。同时为各类子项目提供统一的 UI 组件。
 

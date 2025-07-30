@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef, ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 
 interface ScreenshotContainerProps {
   children: ReactNode
@@ -18,7 +18,6 @@ export function ScreenshotContainer({ children, className = '' }: ScreenshotCont
   // 3D 变换效果 - 更微妙的角度
   const rotateX = useTransform(scrollYProgress, [0, 0.5, 1], [8, 0, -8])
   const rotateY = useTransform(scrollYProgress, [0, 1], [-3, 3])
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1, 0.9])
   const y = useTransform(scrollYProgress, [0, 1], ['5%', '-5%'])
 
   return (
@@ -52,12 +51,10 @@ export function ScreenshotContainer({ children, className = '' }: ScreenshotCont
         style={{
           rotateX,
           rotateY,
-          scale,
           y,
           transformStyle: 'preserve-3d'
         }}
         whileHover={{
-          scale: 1.03,
           transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }
         }}
       >

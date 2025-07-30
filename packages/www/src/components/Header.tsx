@@ -1,16 +1,28 @@
 import { motion } from 'framer-motion'
 import { Button } from '@clarity/shadcn/ui/button'
 import { Github, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  // 监听滚动事件
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 0)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const navigationItems = [
     { name: '解决方案', href: '#solutions' },
     { name: '功能特性', href: '#features' },
-    { name: '关于我们', href: '#about' },
-    { name: '文档', href: '#docs' }
+    { name: '关于我们', href: '#about' }
+    // { name: '文档', href: '#docs' }
   ]
 
   // 平滑滚动函数
@@ -39,7 +51,11 @@ export function Header() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50"
+      className={`fixed top-0 left-0 right-0 z-50 ${
+        isScrolled
+          ? 'bg-background/80 backdrop-blur-md border-b border-border/50'
+          : 'bg-transparent'
+      }`}
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
@@ -63,19 +79,19 @@ export function Header() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="hidden md:flex items-center gap-8"
           >
-            {navigationItems.map((item, index) => (
+            {navigationItems.map((item) => (
               <motion.a
                 key={item.name}
                 href={item.href}
                 onClick={(e) => handleSmoothScroll(e, item.href)}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
+                transition={{ duration: 0.4 }}
                 whileHover={{ y: -2 }}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 relative group cursor-pointer"
               >
                 {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full duration-300" />
               </motion.a>
             ))}
           </motion.nav>

@@ -1,0 +1,49 @@
+{
+  "sections": {
+    "favorites": "Favorites",
+    "suggestions": "Suggestions",
+    "navigation": "Navigation",
+    "commands": "Commands",
+    "useWith": "Search with \"{{query}}\"..."
+  },
+  "empty": {
+    "noFavorites": "No favorite commands",
+    "noSearchCommands": "No available search commands",
+    "noContent": "No content",
+    "noResults": "No results found",
+    "tryDifferentKeywords": "Try using different keywords"
+  },
+  "loading": {
+    "default": "Loading...",
+    "searching": "Searching...",
+    "processing": "Processing..."
+  },
+  "actions": {
+    "search": "Search",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "back": "Back",
+    "close": "Close"
+  },
+  "input": {
+    "placeholder": {
+      "search": "Search commands or pages...",
+      "searchInCommand": "Search in command..."
+    },
+    "backButton": "Back"
+  },
+  "status": {
+    "ready": "Ready",
+    "loading": "Loading",
+    "error": "Error",
+    "success": "Success",
+    "processing": "Processing"
+  },
+  "accessibility": {
+    "commandItem": "Command item",
+    "favoriteCommand": "Favorite command",
+    "suggestedCommand": "Suggested command",
+    "navigationCommand": "Navigation command",
+    "searchCommand": "Search command"
+  }
+}

@@ -8,6 +8,7 @@
     "accessibility": "无障碍",
     "audioVideo": "音频与视频",
     "privacy": "隐私与可见性",
+    "features": "功能设置",
     "advanced": "高级设置"
   },
   "descriptions": {
@@ -18,6 +19,7 @@
     "accessibility": "管理应用程序的无障碍",
     "audioVideo": "管理应用程序的音频与视频",
     "privacy": "管理应用程序的隐私与可见性",
+    "features": "管理应用程序的功能特性和工具",
     "advanced": "管理应用程序的高级设置"
   },
   "general": {
@@ -223,6 +225,25 @@
     "maxLogFilesDescription": "保留的日志文件数量上限",
     "enableTelemetry": "启用遥测",
     "enableTelemetryDescription": "发送匿名使用数据以改进产品"
+  },
+  "features": {
+    "title": "功能设置",
+    "commandPalette": {
+      "title": "命令面板",
+      "description": "查看和管理命令面板插件",
+      "shortcut": "快捷键: ⌘K 或 Ctrl+K",
+      "pluginManagement": {
+        "title": "插件管理",
+        "description": "查看当前注册的命令面板插件和它们发布的命令",
+        "stats": "已注册 {{pluginCount}} 个插件，发布了 {{commandCount}} 个命令",
+        "noPlugins": "暂无注册的插件",
+        "commandsPublished": "发布了 {{count}} 个命令"
+      },
+      "commandTypes": {
+        "action": "Action",
+        "render": "Render"
+      }
+    }
   },
   "audioVideo": {
     "title": "音频与视频",

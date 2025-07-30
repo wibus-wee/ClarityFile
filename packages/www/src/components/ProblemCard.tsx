@@ -85,6 +85,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
             transition={{ delay: index * 0.15 + 0.3, type: 'spring' }}
             className={`w-8 h-8 rounded-full bg-gradient-to-r ${problem.numberGradient} flex items-center justify-center text-white text-sm font-bold shadow-lg`}
           >
@@ -96,6 +97,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: index * 0.15 + 0.2 }}
           className="mb-4"
         >
@@ -108,6 +110,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           whileInView={{ scale: 1, rotate: 0 }}
+          viewport={{ once: true }}
           transition={{
             delay: index * 0.15 + 0.4,
             type: 'spring',
@@ -127,6 +130,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: index * 0.15 + 0.5 }}
           className="text-lg font-bold mb-2 group-hover:text-primary transition-colors duration-300"
         >
@@ -137,6 +141,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: index * 0.15 + 0.6 }}
           className="text-sm text-muted-foreground leading-relaxed mb-3"
         >
@@ -147,6 +152,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: index * 0.15 + 0.7 }}
           className="mb-3 space-y-2"
         >
@@ -182,6 +188,7 @@ export function ProblemCard({ problem, index }: { problem: ProblemData; index: n
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: index * 0.15 + 0.8 }}
           className="flex items-center justify-between text-xs"
         >

@@ -108,6 +108,10 @@ export function createRoutes(t: (key: string, options?: any) => string): AppRout
             label: t('settings:categories.privacy')
           },
           {
+            path: '?category=features',
+            label: t('settings:categories.features')
+          },
+          {
             path: '?category=advanced',
             label: t('settings:categories.advanced')
           }

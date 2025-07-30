@@ -26,18 +26,6 @@ export function HeroSection() {
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-full blur-3xl" />
 
       <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mb-6"
-        >
-          <Badge variant="secondary" className="mb-4 px-4 py-2 text-sm font-medium">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Powered by Wibus Studio
-          </Badge>
-        </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

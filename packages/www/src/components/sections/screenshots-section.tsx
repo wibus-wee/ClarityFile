@@ -43,6 +43,7 @@ export function ScreenshotsSection() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
           >
@@ -51,11 +52,11 @@ export function ScreenshotsSection() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
           >
-            简洁优雅的 macOS 风格界面，让文档管理变得轻松愉悦。
-            支持浅色和深色主题，完美适配您的工作环境。
+            简洁优雅的风格界面，让文档管理变得轻松愉悦。 支持浅色和深色主题，完美适配您的工作环境。
           </motion.p>
         </motion.div>
 
