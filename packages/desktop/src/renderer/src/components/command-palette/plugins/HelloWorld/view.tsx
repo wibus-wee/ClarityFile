@@ -1,16 +1,5 @@
 import { useState } from 'react'
-import {
-  Sparkles,
-  Search,
-  FileText,
-  Settings,
-  Play,
-  Pause,
-  RotateCcw,
-  Heart,
-  Star,
-  Coffee
-} from 'lucide-react'
+import { Sparkles, Search, FileText, Settings, Heart, Coffee } from 'lucide-react'
 import { PluginContext } from '../plugin-context'
 import {
   DetailLayout,

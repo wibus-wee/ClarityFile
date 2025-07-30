@@ -125,7 +125,7 @@ export function getRandomFallbackQuote(): FallbackQuote {
  * 根据分类获取fallback文案
  */
 export function getFallbackQuoteByCategory(category: FallbackQuote['category']): FallbackQuote {
-  const categoryQuotes = fallbackQuotes.filter(quote => quote.category === category)
+  const categoryQuotes = fallbackQuotes.filter((quote) => quote.category === category)
   if (categoryQuotes.length === 0) {
     return getRandomFallbackQuote()
   }

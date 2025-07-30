@@ -1,6 +1,6 @@
 /**
  * 快捷键 Overlay 功能使用示例
- * 
+ *
  * 这个示例展示了如何使用新的快捷键提示 overlay 功能：
  * 1. 长按⌘键显示当前页面可用的快捷键
  * 2. 按功能分组显示
@@ -35,21 +35,15 @@ export function ShortcutOverlayExample() {
       <div className="p-8 space-y-6">
         <div className="space-y-4">
           <h1 className="text-2xl font-bold">快捷键 Overlay 功能示例</h1>
-          <p className="text-muted-foreground">
-            长按 ⌘ 键查看当前页面可用的快捷键提示
-          </p>
+          <p className="text-muted-foreground">长按 ⌘ 键查看当前页面可用的快捷键提示</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           {/* 创建操作分组 */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">创建操作</h3>
-            
-            <Shortcut 
-              shortcut={['cmd', 'n']} 
-              description="创建新项目"
-              priority={90}
-            >
+
+            <Shortcut shortcut={['cmd', 'n']} description="创建新项目" priority={90}>
               <Button onClick={handleCreateProject} className="w-full">
                 新建项目
               </Button>
@@ -59,12 +53,8 @@ export function ShortcutOverlayExample() {
           {/* 文件操作分组 */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">文件操作</h3>
-            
-            <Shortcut 
-              shortcut={['cmd', 'i']} 
-              description="导入文件到当前项目"
-              priority={80}
-            >
+
+            <Shortcut shortcut={['cmd', 'i']} description="导入文件到当前项目" priority={80}>
               <Button onClick={handleImportFiles} variant="outline" className="w-full">
                 导入文件
               </Button>
@@ -74,12 +64,8 @@ export function ShortcutOverlayExample() {
           {/* 搜索导航分组 */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">搜索导航</h3>
-            
-            <Shortcut 
-              shortcut={['cmd', 'f']} 
-              description="搜索项目和文件"
-              priority={70}
-            >
+
+            <Shortcut shortcut={['cmd', 'f']} description="搜索项目和文件" priority={70}>
               <Button onClick={handleSearch} variant="outline" className="w-full">
                 搜索
               </Button>
@@ -89,12 +75,8 @@ export function ShortcutOverlayExample() {
           {/* 设置分组 */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">设置</h3>
-            
-            <Shortcut 
-              shortcut={['cmd', 'comma']} 
-              description="打开应用设置"
-              priority={60}
-            >
+
+            <Shortcut shortcut={['cmd', 'comma']} description="打开应用设置" priority={60}>
               <Button onClick={handleOpenSettings} variant="outline" className="w-full">
                 设置
               </Button>
@@ -137,10 +119,10 @@ export function ShortcutOverlayExample() {
 
 /**
  * 在页面中使用示例：
- * 
+ *
  * ```tsx
  * import { ShortcutOverlayExample } from './components/shortcuts/examples/shortcut-overlay-example'
- * 
+ *
  * function ExamplePage() {
  *   return <ShortcutOverlayExample />
  * }

@@ -1,24 +1,11 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  PropsWithChildren
-} from 'react'
-import type {
-  Theme,
-  ResolvedTheme,
-  ExtendedThemeContextValue,
-  CustomTheme
-} from '@renderer/types/theme'
+import { useEffect, useState, useCallback, PropsWithChildren } from 'react'
+import type { Theme, ResolvedTheme, CustomTheme } from '@renderer/types/theme'
 import { useSettingsByCategory, useSetSetting } from '@renderer/hooks/use-tipc'
 import { CustomThemeManager } from '@renderer/lib/custom-theme-manager'
 import { ThemeService } from '@renderer/lib/theme-service'
-
-const ThemeContext = createContext<ExtendedThemeContextValue | undefined>(undefined)
+import { ThemeContext } from './custom-theme-context'
 
 export function CustomThemeProvider({ children }: PropsWithChildren) {
   const [theme, setThemeState] = useState<Theme>('system')
@@ -321,12 +308,4 @@ export function CustomThemeProvider({ children }: PropsWithChildren) {
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-}
-
-export function useCustomTheme(): ExtendedThemeContextValue {
-  const context = useContext(ThemeContext)
-  if (context === undefined) {
-    throw new Error('useCustomTheme must be used within a CustomThemeProvider')
-  }
-  return context
 }

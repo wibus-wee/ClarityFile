@@ -293,7 +293,9 @@ function DocumentSelectionStep({
         <div>
           <h3 className="font-medium">选择要添加版本的文档</h3>
           {fileName && (
-            <p className="text-sm text-muted-foreground">为文件 "{fileName}" 选择目标逻辑文档</p>
+            <p className="text-sm text-muted-foreground">
+              为文件 &quot;{fileName}&quot; 选择目标逻辑文档
+            </p>
           )}
         </div>
       </div>

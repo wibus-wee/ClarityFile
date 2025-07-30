@@ -58,7 +58,7 @@ function ProjectsPage() {
     setEditingProject(null)
   }
 
-  const handleDeleteProject = async (projectId: string, _projectName: string) => {
+  const handleDeleteProject = async (projectId: string) => {
     // 找到要删除的项目并打开确认对话框
     const project = projects?.find((p) => p.id === projectId)
     if (project) {
@@ -66,7 +66,7 @@ function ProjectsPage() {
     }
   }
 
-  const handleConfirmDelete = async (projectId: string, _projectName: string) => {
+  const handleConfirmDelete = async (projectId: string) => {
     try {
       await deleteProject({ id: projectId })
       toast.success(t('messages.deleteSuccess'))

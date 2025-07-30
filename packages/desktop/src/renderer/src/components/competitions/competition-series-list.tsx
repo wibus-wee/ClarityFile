@@ -17,15 +17,15 @@ import {
   Trash2,
   Plus,
   Clock,
-  List,
-  Calendar
+  Calendar,
+  ChevronRight
 } from 'lucide-react'
 import { useGetAllCompetitionSeries } from '@renderer/hooks/use-tipc'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { CompetitionSeriesDrawer } from './drawers/competition-series-drawer'
 import { DeleteCompetitionSeriesDialog } from './dialogs/delete-competition-series-dialog'
-import { CompetitionMilestoneList } from './competition-milestone-list'
+import { EmbeddedMilestoneList } from './embedded-milestone-list'
 import type { CompetitionSeriesWithStatsOutput } from '../../../../main/types/competition-schemas'
 
 interface CompetitionSeriesListProps {
@@ -39,18 +39,20 @@ interface CompetitionSeriesListProps {
 
 interface SeriesCardProps {
   series: CompetitionSeriesWithStatsOutput
+  isExpanded: boolean
+  onToggleExpand: (seriesId: string) => void
   onCreateMilestone: (seriesId: string) => void
   onEdit: (series: CompetitionSeriesWithStatsOutput) => void
   onDelete: (series: CompetitionSeriesWithStatsOutput) => void
-  onViewMilestones: (series: CompetitionSeriesWithStatsOutput) => void
 }
 
 function SeriesCard({
   series,
+  isExpanded,
+  onToggleExpand,
   onCreateMilestone,
   onEdit,
-  onDelete,
-  onViewMilestones
+  onDelete
 }: SeriesCardProps) {
   return (
     <motion.div
@@ -58,18 +60,26 @@ function SeriesCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="group flex items-center justify-between py-3 px-4 border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer"
+      className="group flex items-center justify-between py-3 px-4 hover:bg-muted/30 transition-colors cursor-pointer"
       transition={{
         type: 'spring',
         stiffness: 400,
         damping: 35
       }}
-      onClick={() => onViewMilestones(series)}
+      onClick={() => onToggleExpand(series.id)}
     >
       {/* 左侧：图标和内容 */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-          <Trophy className="h-4 w-4 text-primary" />
+        <div className="flex items-center gap-2">
+          <motion.div
+            animate={{ rotate: isExpanded ? 90 : 0 }}
+            transition={{ duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] }}
+          >
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </motion.div>
+          <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+            <Trophy className="h-4 w-4 text-primary" />
+          </div>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -138,15 +148,6 @@ function SeriesCard({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
-                onViewMilestones(series)
-              }}
-            >
-              <List className="h-4 w-4 mr-2" />
-              查看里程碑
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation()
                 onCreateMilestone(series.id)
               }}
             >
@@ -194,22 +195,16 @@ export function CompetitionSeriesList({
   const [deletingSeries, setDeletingSeries] = useState<CompetitionSeriesWithStatsOutput | null>(
     null
   )
-  const [viewingMilestonesSeries, setViewingMilestonesSeries] =
-    useState<CompetitionSeriesWithStatsOutput | null>(null)
+  const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set())
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [showMilestonesList, setShowMilestonesList] = useState(false)
 
-  // 自动显示特定系列的里程碑
+  // 自动展开特定系列的里程碑
   useEffect(() => {
-    if (initialSeriesId && autoShowMilestones && series) {
-      const targetSeries = series.find((s) => s.id === initialSeriesId)
-      if (targetSeries) {
-        setViewingMilestonesSeries(targetSeries)
-        setShowMilestonesList(true)
-      }
+    if (initialSeriesId && autoShowMilestones) {
+      setExpandedSeries(new Set([initialSeriesId]))
     }
-  }, [initialSeriesId, autoShowMilestones, series])
+  }, [initialSeriesId, autoShowMilestones])
 
   // 过滤和排序逻辑
   const filteredAndSortedSeries = useMemo(() => {
@@ -247,6 +242,16 @@ export function CompetitionSeriesList({
     return filtered
   }, [series, searchQuery, sortBy, filterStatus])
 
+  const toggleSeriesExpansion = (seriesId: string) => {
+    const newExpanded = new Set(expandedSeries)
+    if (newExpanded.has(seriesId)) {
+      newExpanded.delete(seriesId)
+    } else {
+      newExpanded.add(seriesId)
+    }
+    setExpandedSeries(newExpanded)
+  }
+
   const handleEdit = (series: CompetitionSeriesWithStatsOutput) => {
     setEditingSeries(series)
     setEditDialogOpen(true)
@@ -257,36 +262,12 @@ export function CompetitionSeriesList({
     setDeleteDialogOpen(true)
   }
 
-  const handleViewMilestones = (series: CompetitionSeriesWithStatsOutput) => {
-    setViewingMilestonesSeries(series)
-    setShowMilestonesList(true)
-  }
-
-  const handleBackFromMilestones = () => {
-    setShowMilestonesList(false)
-    setViewingMilestonesSeries(null)
-    // 清理可能的编辑状态，防止返回时意外显示 Dialog
-    setEditDialogOpen(false)
-    setEditingSeries(null)
-  }
-
   const handleSuccess = () => {
     // SWR 会自动重新验证数据
     setEditDialogOpen(false)
     setDeleteDialogOpen(false)
     setEditingSeries(null)
     setDeletingSeries(null)
-  }
-
-  // 如果正在查看里程碑列表，显示里程碑列表组件
-  if (showMilestonesList && viewingMilestonesSeries) {
-    return (
-      <CompetitionMilestoneList
-        series={viewingMilestonesSeries}
-        onBack={handleBackFromMilestones}
-        onCreateMilestone={() => onCreateMilestone(viewingMilestonesSeries.id)}
-      />
-    )
   }
 
   if (isLoading) {
@@ -349,20 +330,38 @@ export function CompetitionSeriesList({
       </div>
 
       {/* 赛事系列列表 */}
-      <motion.div layout className="divide-y divide-border/50">
+      <div className="space-y-4">
         <AnimatePresence>
-          {filteredAndSortedSeries.map((series) => (
-            <SeriesCard
-              key={series.id}
-              series={series}
-              onCreateMilestone={onCreateMilestone}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onViewMilestones={handleViewMilestones}
-            />
-          ))}
+          {filteredAndSortedSeries.map((series) => {
+            const isExpanded = expandedSeries.has(series.id)
+
+            return (
+              <motion.div
+                key={series.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="border border-border rounded-lg overflow-hidden"
+              >
+                <SeriesCard
+                  series={series}
+                  isExpanded={isExpanded}
+                  onToggleExpand={toggleSeriesExpansion}
+                  onCreateMilestone={onCreateMilestone}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+
+                <EmbeddedMilestoneList
+                  series={series}
+                  isExpanded={isExpanded}
+                  onCreateMilestone={onCreateMilestone}
+                />
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       {/* 抽屉组件 */}
       <CompetitionSeriesDrawer

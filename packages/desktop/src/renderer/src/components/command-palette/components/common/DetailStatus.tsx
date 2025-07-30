@@ -1,4 +1,3 @@
-import React from 'react'
 import { LucideIcon, CheckCircle, AlertCircle, Clock, XCircle } from 'lucide-react'
 
 interface DetailStatusProps {

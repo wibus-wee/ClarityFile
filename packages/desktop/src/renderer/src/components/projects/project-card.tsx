@@ -26,7 +26,7 @@ import { SafeImage } from '@renderer/components/ui/safe-image'
 interface ProjectCardProps {
   project: Project
   onEdit: (project: Project) => void
-  onDelete: (id: string, name: string) => void
+  onDelete: (id: string) => void
   onStatusChange: (id: string, status: string) => void
   isDeleting: boolean
   isUpdating: boolean
@@ -208,7 +208,7 @@ export function ProjectCard({
 
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => onDelete(project.id, project.name)}
+              onClick={() => onDelete(project.id)}
               disabled={isDeleting || isUpdating}
               className="text-destructive focus:text-destructive"
             >

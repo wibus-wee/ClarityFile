@@ -8,7 +8,9 @@ describe('MimeTypeUtils', () => {
       expect(MimeTypeUtils.getMimeType('test.jpg')).toBe('image/jpeg')
       expect(MimeTypeUtils.getMimeType('test.jpeg')).toBe('image/jpeg')
       expect(MimeTypeUtils.getMimeType('test.png')).toBe('image/png')
-      expect(MimeTypeUtils.getMimeType('test.docx')).toBe('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+      expect(MimeTypeUtils.getMimeType('test.docx')).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      )
       expect(MimeTypeUtils.getMimeType('test.txt')).toBe('text/plain')
     })
 
@@ -51,7 +53,7 @@ describe('MimeTypeUtils', () => {
   describe('isFileTypeSupported', () => {
     it('应该正确检查文件类型支持', () => {
       const supportedTypes = ['.pdf', '.doc', '.docx', '.txt']
-      
+
       expect(MimeTypeUtils.isFileTypeSupported('test.pdf', supportedTypes)).toBe(true)
       expect(MimeTypeUtils.isFileTypeSupported('test.docx', supportedTypes)).toBe(true)
       expect(MimeTypeUtils.isFileTypeSupported('test.jpg', supportedTypes)).toBe(false)
@@ -59,7 +61,7 @@ describe('MimeTypeUtils', () => {
 
     it('应该支持通配符', () => {
       const supportedTypes = ['.*']
-      
+
       expect(MimeTypeUtils.isFileTypeSupported('test.anything', supportedTypes)).toBe(true)
       expect(MimeTypeUtils.isFileTypeSupported('test.pdf', supportedTypes)).toBe(true)
     })
@@ -68,7 +70,7 @@ describe('MimeTypeUtils', () => {
   describe('getFileInfo', () => {
     it('应该返回完整的文件信息', () => {
       const info = MimeTypeUtils.getFileInfo('test.pdf')
-      
+
       expect(info.extension).toBe('.pdf')
       expect(info.mimeType).toBe('application/pdf')
       expect(info.isDocument).toBe(true)
@@ -80,7 +82,7 @@ describe('MimeTypeUtils', () => {
 
     it('应该正确识别图片文件信息', () => {
       const info = MimeTypeUtils.getFileInfo('test.jpg')
-      
+
       expect(info.extension).toBe('.jpg')
       expect(info.mimeType).toBe('image/jpeg')
       expect(info.isImage).toBe(true)

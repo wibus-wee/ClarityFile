@@ -6,8 +6,7 @@ import {
   useCommandPaletteOpen,
   useCommandPaletteActions,
   useCommandPaletteQuery,
-  useCommandPaletteActiveCommand,
-  useAllCommands
+  useCommandPaletteActiveCommand
 } from './stores/command-palette-store'
 import { CommandPaletteInput } from './command-palette-input'
 import { CommandPaletteResults } from './command-palette-results'

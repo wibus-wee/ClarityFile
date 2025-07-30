@@ -1,6 +1,6 @@
 /**
  * 优化后的 Shortcut 组件使用示例
- * 
+ *
  * 展示重构后的组件如何遵循 React.dev 最佳实践：
  * - 清晰的组件结构
  * - 分离的关注点
@@ -9,8 +9,8 @@
 
 import React from 'react'
 import { Button } from '@clarity/shadcn/ui/button'
-import { 
-  Shortcut, 
+import {
+  Shortcut,
   ShortcutDisplay,
   useShortcutValidation,
   useChildComponentHandler,
@@ -29,13 +29,9 @@ export function BasicUsageExample() {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">基本用法</h3>
-      
+
       {/* 简单的快捷键包装 */}
-      <Shortcut
-        shortcut={['cmd', 'n']}
-        description="创建新项目"
-        action={handleNewProject}
-      >
+      <Shortcut shortcut={['cmd', 'n']} description="创建新项目" action={handleNewProject}>
         <Button>新建项目</Button>
       </Shortcut>
 
@@ -65,9 +61,8 @@ export function AdvancedUsageExample() {
 
   // 2. 使用子组件处理 Hook
   const saveButton = <Button variant="outline">保存所有</Button>
-  const { renderChild, actionRef } = useChildComponentHandler(
-    saveButton,
-    () => console.log('保存所有文件')
+  const { renderChild, actionRef } = useChildComponentHandler(saveButton, () =>
+    console.log('保存所有文件')
   )
 
   // 3. 使用注册 Hook
@@ -91,7 +86,7 @@ export function AdvancedUsageExample() {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">高级用法 - 自定义 Hooks</h3>
-      
+
       <div className="flex items-center gap-2">
         <label>
           <input
@@ -122,7 +117,7 @@ export function PerformanceExample() {
 
   // 使用 useCallback 优化 action 函数
   const handleIncrement = React.useCallback(() => {
-    setCount(prev => prev + 1)
+    setCount((prev) => prev + 1)
   }, [])
 
   // 使用 useMemo 优化条件函数
@@ -133,7 +128,7 @@ export function PerformanceExample() {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">性能优化示例</h3>
-      
+
       <p>当前计数: {count}</p>
       <p>快捷键仅在偶数时生效</p>
 
@@ -156,7 +151,7 @@ export function OptimizedShortcutExample() {
   return (
     <div className="p-6 space-y-8">
       <h2 className="text-2xl font-bold">优化后的 Shortcut 组件示例</h2>
-      
+
       <div className="grid gap-8">
         <BasicUsageExample />
         <AdvancedUsageExample />

@@ -111,7 +111,7 @@ export function validateFileForImportType(
       }
       break
 
-    case 'document':
+    case 'document': {
       // 文档导入支持多种格式
       const supportedExts = ['pdf', 'doc', 'docx', 'txt', 'md', 'ppt', 'pptx']
       if (!supportedExts.includes(ext)) {
@@ -121,6 +121,7 @@ export function validateFileForImportType(
         }
       }
       break
+    }
 
     default:
       return {

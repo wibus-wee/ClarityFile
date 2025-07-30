@@ -17,7 +17,7 @@ beforeAll(async () => {
   process.env.NODE_ENV = 'test'
   process.env.CLARITY_FILE_ROOT = TEST_FILES_ROOT
   process.env.DATABASE_PATH = TEST_DB_PATH
-  
+
   // 创建测试文件目录
   if (!fs.existsSync(TEST_FILES_ROOT)) {
     fs.mkdirSync(TEST_FILES_ROOT, { recursive: true })
@@ -32,7 +32,7 @@ afterAll(async () => {
   if (fs.existsSync(TEST_DB_PATH)) {
     fs.unlinkSync(TEST_DB_PATH)
   }
-  
+
   // 清理测试文件目录
   if (fs.existsSync(TEST_FILES_ROOT)) {
     fs.rmSync(TEST_FILES_ROOT, { recursive: true, force: true })
@@ -56,12 +56,12 @@ afterEach(async () => {
   // 清理测试文件目录中的文件（保留目录结构）
   const cleanDirectory = (dirPath: string) => {
     if (!fs.existsSync(dirPath)) return
-    
+
     const files = fs.readdirSync(dirPath)
     for (const file of files) {
       const filePath = path.join(dirPath, file)
       const stat = fs.statSync(filePath)
-      
+
       if (stat.isDirectory()) {
         cleanDirectory(filePath)
         // 如果目录为空，删除它
@@ -73,7 +73,7 @@ afterEach(async () => {
       }
     }
   }
-  
+
   cleanDirectory(TEST_FILES_ROOT)
 })
 
@@ -83,15 +83,15 @@ afterEach(async () => {
 export function createTestFile(relativePath: string, content: string = 'test content'): string {
   const fullPath = path.join(TEST_FILES_ROOT, relativePath)
   const dir = path.dirname(fullPath)
-  
+
   // 确保目录存在
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
   }
-  
+
   // 创建文件
   fs.writeFileSync(fullPath, content)
-  
+
   return fullPath
 }
 
@@ -100,11 +100,11 @@ export function createTestFile(relativePath: string, content: string = 'test con
  */
 export function createTestDirectory(relativePath: string): string {
   const fullPath = path.join(TEST_FILES_ROOT, relativePath)
-  
+
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true })
   }
-  
+
   return fullPath
 }
 

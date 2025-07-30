@@ -1,44 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
-
-/**
- * 拖拽状态数据
- */
-interface DragDropContextData {
-  /** 是否正在拖拽文件 */
-  isDragging: boolean
-  /** 拖拽计数器，用于处理嵌套的拖拽事件 */
-  dragCounter: number
-}
-
-/**
- * 拖拽状态操作
- */
-interface DragDropContextActions {
-  /** 开始拖拽 */
-  startDragging: () => void
-  /** 结束拖拽 */
-  stopDragging: () => void
-  /** 增加拖拽计数 */
-  incrementDragCounter: () => void
-  /** 减少拖拽计数 */
-  decrementDragCounter: () => void
-  /** 重置拖拽状态 */
-  resetDragState: () => void
-}
-
-type DragDropContextValue = DragDropContextData & DragDropContextActions
-
-/**
- * 拖拽状态Context
- */
-const DragDropContext = createContext<DragDropContextValue | null>(null)
-
-/**
- * 拖拽状态Provider组件
- */
-export interface DragDropProviderProps {
-  children: ReactNode
-}
+import { useState } from 'react'
+import { DragDropContext } from './drag-drop-context-def'
+import type { DragDropProviderProps, DragDropContextValue } from './drag-drop-types'
 
 export function DragDropProvider({ children }: DragDropProviderProps) {
   const [isDragging, setIsDragging] = useState(false)
@@ -93,23 +55,4 @@ export function DragDropProvider({ children }: DragDropProviderProps) {
   }
 
   return <DragDropContext.Provider value={contextValue}>{children}</DragDropContext.Provider>
-}
-
-/**
- * 使用拖拽状态的Hook
- */
-export function useDragDrop(): DragDropContextValue {
-  const context = useContext(DragDropContext)
-  if (!context) {
-    throw new Error('useDragDrop must be used within DragDropProvider')
-  }
-  return context
-}
-
-/**
- * 仅获取拖拽状态的Hook（用于只读组件）
- */
-export function useDragDropState(): DragDropContextData {
-  const { isDragging, dragCounter } = useDragDrop()
-  return { isDragging, dragCounter }
 }

@@ -130,10 +130,12 @@ export const recommendationUtils = {
  */
 export function useCommandRecommendations(config: Partial<RecommendationConfig> = {}) {
   const allCommands = useAllCommands()
-  const { recentCommands, favorites } = useFavoritesData()
+  const { recentCommands } = useFavoritesData()
 
   // 合并配置
-  const finalConfig = { ...DEFAULT_RECOMMENDATION_CONFIG, ...config }
+  const finalConfig = useMemo(() => {
+    return { ...DEFAULT_RECOMMENDATION_CONFIG, ...config }
+  }, [config])
 
   // 计算推荐命令
   const recommendations = useMemo(() => {
@@ -191,7 +193,7 @@ export function useCommandRecommendations(config: Partial<RecommendationConfig> 
       .slice(0, finalConfig.maxSuggestions)
 
     return scoredCommands
-  }, [allCommands, recentCommands, favorites, finalConfig])
+  }, [allCommands, recentCommands, finalConfig])
 
   return {
     recommendations,

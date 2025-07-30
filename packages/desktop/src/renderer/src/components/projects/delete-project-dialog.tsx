@@ -30,12 +30,12 @@ export function DeleteProjectDialog({
   isDeleting
 }: DeleteProjectDialogProps) {
   const [confirmationText, setConfirmationText] = useState('')
-  
+
   const isConfirmationValid = project && confirmationText === project.name
-  
+
   const handleConfirm = async () => {
     if (!project || !isConfirmationValid) return
-    
+
     try {
       await onConfirm(project.id, project.name)
       // 成功后重置状态并关闭对话框
@@ -46,12 +46,12 @@ export function DeleteProjectDialog({
       console.error('删除项目失败:', error)
     }
   }
-  
+
   const handleCancel = () => {
     setConfirmationText('')
     onOpenChange(false)
   }
-  
+
   // 当对话框关闭时重置确认文本
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -72,9 +72,7 @@ export function DeleteProjectDialog({
             </div>
             <div>
               <DialogTitle className="text-xl">删除项目</DialogTitle>
-              <DialogDescription className="text-sm">
-                此操作不可撤销，请谨慎操作
-              </DialogDescription>
+              <DialogDescription className="text-sm">此操作不可撤销，请谨慎操作</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -89,11 +87,9 @@ export function DeleteProjectDialog({
               <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
               <div className="space-y-2">
                 <h4 className="font-medium text-red-900 dark:text-red-100">
-                  您即将删除项目 "{project.name}"
+                  您即将删除项目 &quot;{project.name}&quot;
                 </h4>
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  删除后将会：
-                </p>
+                <p className="text-sm text-red-700 dark:text-red-300">删除后将会：</p>
                 <ul className="text-sm text-red-700 dark:text-red-300 space-y-1 ml-4">
                   <li>• 永久删除项目记录和所有相关数据</li>
                   <li>• 删除项目文件夹（如果为空）</li>
@@ -106,7 +102,9 @@ export function DeleteProjectDialog({
 
           <div className="space-y-2">
             <Label htmlFor="confirmation" className="text-sm font-medium">
-              请输入项目名称 <span className="font-mono text-xs bg-muted px-1 py-0.5 rounded">{project.name}</span> 以确认删除：
+              请输入项目名称{' '}
+              <span className="font-mono text-xs bg-muted px-1 py-0.5 rounded">{project.name}</span>{' '}
+              以确认删除：
             </Label>
             <Input
               id="confirmation"
@@ -130,11 +128,7 @@ export function DeleteProjectDialog({
         </motion.div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isDeleting}>
             取消
           </Button>
           <Button

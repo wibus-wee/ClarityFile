@@ -17,4 +17,4 @@ export interface UserActions {
   clearUser: () => void
   setError: (error: string | null) => void
   setLoading: (isLoading: boolean) => void
-} 
+}

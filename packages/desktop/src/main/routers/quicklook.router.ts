@@ -13,9 +13,11 @@ export function quickLookRouter(t: ITipc) {
     }),
 
     // 通过文件路径预览文件
-    previewFileByPath: t.procedure.input<QuickLookPreviewByPathInput>().action(async ({ input }) => {
-      return await QuickLookService.previewFileByPath(input)
-    }),
+    previewFileByPath: t.procedure
+      .input<QuickLookPreviewByPathInput>()
+      .action(async ({ input }) => {
+        return await QuickLookService.previewFileByPath(input)
+      }),
 
     // 检查 QuickLook 是否可用
     isQuickLookAvailable: t.procedure.action(async () => {
@@ -30,11 +32,9 @@ export function quickLookRouter(t: ITipc) {
     }),
 
     // 检查文件是否支持预览
-    isFileSupported: t.procedure
-      .input<{ fileName: string }>()
-      .action(async ({ input }) => {
-        const isSupported = QuickLookService.isFileSupported(input.fileName)
-        return { supported: isSupported }
-      })
+    isFileSupported: t.procedure.input<{ fileName: string }>().action(async ({ input }) => {
+      const isSupported = QuickLookService.isFileSupported(input.fileName)
+      return { supported: isSupported }
+    })
   }
 }

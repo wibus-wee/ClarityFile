@@ -1,7 +1,6 @@
 import useSWR from 'swr'
-import type { Quote, HitokotoResponse, QuotableResponse, QuoteSource } from '@renderer/types/quote'
+import type { Quote, HitokotoResponse, QuoteSource } from '@renderer/types/quote'
 import { getRandomFallbackQuote } from '@renderer/data/fallback-quotes'
-import { is } from '@electron-toolkit/utils'
 
 /**
  * 一言API请求函数
@@ -28,38 +27,6 @@ async function fetchHitokoto(): Promise<Quote> {
     source: data.from || undefined,
     category: getCategoryFromType(data.type),
     length: data.length
-  }
-}
-
-/**
- * Quotable API请求函数（备用）
- * 获取智慧和励志类英文名言
- */
-async function fetchQuotable(): Promise<Quote> {
-  const response = await fetch(
-    'https://api.quotable.io/quotes/random?tags=wisdom,motivational&limit=1',
-    {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json'
-      }
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Quotable API error: ${response.status}`)
-  }
-
-  const data: QuotableResponse[] = await response.json()
-  const quote = data[0]
-
-  return {
-    id: quote._id,
-    content: quote.content,
-    author: quote.author,
-    source: undefined,
-    category: 'wisdom',
-    length: quote.length
   }
 }
 

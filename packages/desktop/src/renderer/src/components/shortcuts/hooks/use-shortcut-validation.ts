@@ -25,7 +25,7 @@ export interface ShortcutValidationConfig {
 
 /**
  * 快捷键验证 Hook
- * 
+ *
  * 职责：
  * - 验证快捷键配置的有效性
  * - 在开发环境中显示错误和警告

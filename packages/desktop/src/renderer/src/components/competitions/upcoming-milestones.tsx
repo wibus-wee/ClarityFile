@@ -148,7 +148,7 @@ function MilestoneCard({ milestone, index, onViewDetails, onViewSeries }: Milest
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 <span>
-                  {t('dueDate')}：{formatFriendlyDate(milestone.dueDate?.toString()!)}
+                  {t('dueDate')}：{formatFriendlyDate(milestone.dueDate?.toString() || '')}
                 </span>
               </div>
             )}

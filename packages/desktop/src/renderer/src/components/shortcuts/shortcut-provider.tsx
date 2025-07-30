@@ -230,11 +230,3 @@ export function ShortcutDebugPanel() {
     </div>
   )
 }
-
-/**
- * 兼容性 Hook - 保持原有 API
- * 现在直接使用 zustand store
- */
-export function useShortcuts() {
-  return useShortcutStore()
-}

@@ -128,7 +128,7 @@ export function EditCompetitionStatusDialog({
             编辑赛事状态
           </DialogTitle>
           <DialogDescription>
-            更新项目在 "{competitionName} - {levelName}" 中的参与状态
+            更新项目在 &quot;{competitionName} - {levelName}&quot; 中的参与状态
           </DialogDescription>
         </DialogHeader>
 
