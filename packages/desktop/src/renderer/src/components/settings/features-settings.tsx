@@ -24,8 +24,19 @@ export function FeaturesSettings() {
           <div>
             <h3 className="font-medium">{t('features.commandPalette.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              快捷键: <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">⌘K</kbd> 或{' '}
-              <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">Ctrl+K</kbd>
+              {t('features.commandPalette.shortcut')
+                .split(/(\s+)/)
+                .map((part, index) => {
+                  const trimmedPart = part.trim()
+                  if (trimmedPart === '⌘K' || trimmedPart === 'Ctrl+K') {
+                    return (
+                      <kbd key={index} className="px-1.5 py-0.5 text-xs bg-muted rounded mx-1">
+                        {trimmedPart}
+                      </kbd>
+                    )
+                  }
+                  return <span key={index}>{part}</span>
+                })}
             </p>
           </div>
         </div>
@@ -33,22 +44,25 @@ export function FeaturesSettings() {
 
       {/* 插件管理 */}
       <SettingsSection
-        title="插件管理"
-        description="查看当前注册的命令面板插件和它们发布的命令"
+        title={t('features.commandPalette.pluginManagement.title')}
+        description={t('features.commandPalette.pluginManagement.description')}
         showSeparator={true}
       >
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Package className="h-4 w-4" />
             <span>
-              已注册 {registeredPlugins.length} 个插件，发布了 {pluginCommands.length} 个命令
+              {t('features.commandPalette.pluginManagement.stats', {
+                pluginCount: registeredPlugins.length,
+                commandCount: pluginCommands.length
+              })}
             </span>
           </div>
 
           {registeredPlugins.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>暂无注册的插件</p>
+              <p>{t('features.commandPalette.pluginManagement.noPlugins')}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -78,7 +92,11 @@ export function FeaturesSettings() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Hash className="h-4 w-4" />
-                          <span>发布了 {commands.length} 个命令</span>
+                          <span>
+                            {t('features.commandPalette.pluginManagement.commandsPublished', {
+                              count: commands.length
+                            })}
+                          </span>
                         </div>
 
                         {commands.length > 0 && (
@@ -105,12 +123,12 @@ export function FeaturesSettings() {
                                   {'action' in command ? (
                                     <Badge variant="outline" className="text-xs">
                                       <MousePointer className="h-3 w-3 mr-1" />
-                                      Action
+                                      {t('features.commandPalette.commandTypes.action')}
                                     </Badge>
                                   ) : (
                                     <Badge variant="outline" className="text-xs">
                                       <Eye className="h-3 w-3 mr-1" />
-                                      Render
+                                      {t('features.commandPalette.commandTypes.render')}
                                     </Badge>
                                   )}
                                   {command.category && (

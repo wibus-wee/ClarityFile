@@ -230,7 +230,19 @@
     "title": "Features",
     "commandPalette": {
       "title": "Command Palette",
-      "description": "View and manage command palette plugins"
+      "description": "View and manage command palette plugins",
+      "shortcut": "Shortcut: ⌘K or Ctrl+K",
+      "pluginManagement": {
+        "title": "Plugin Management",
+        "description": "View currently registered command palette plugins and their published commands",
+        "stats": "{{pluginCount}} plugins registered, {{commandCount}} commands published",
+        "noPlugins": "No plugins registered",
+        "commandsPublished": "{{count}} commands published"
+      },
+      "commandTypes": {
+        "action": "Action",
+        "render": "Render"
+      }
     }
   },
   "audioVideo": {

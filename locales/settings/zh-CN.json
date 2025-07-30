@@ -230,7 +230,19 @@
     "title": "功能设置",
     "commandPalette": {
       "title": "命令面板",
-      "description": "查看和管理命令面板插件"
+      "description": "查看和管理命令面板插件",
+      "shortcut": "快捷键: ⌘K 或 Ctrl+K",
+      "pluginManagement": {
+        "title": "插件管理",
+        "description": "查看当前注册的命令面板插件和它们发布的命令",
+        "stats": "已注册 {{pluginCount}} 个插件，发布了 {{commandCount}} 个命令",
+        "noPlugins": "暂无注册的插件",
+        "commandsPublished": "发布了 {{count}} 个命令"
+      },
+      "commandTypes": {
+        "action": "Action",
+        "render": "Render"
+      }
     }
   },
   "audioVideo": {
