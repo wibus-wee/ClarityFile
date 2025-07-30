@@ -3,13 +3,44 @@ import { Command, Zap, Package, Hash, MousePointer, Eye } from 'lucide-react'
 import { SettingsSection } from './components'
 import { useRegisteredPlugins } from '@renderer/components/command-palette/plugins/plugin-registry'
 import { usePluginCommands } from '@renderer/components/command-palette/hooks/use-plugin-commands'
+import { useCommandPaletteData } from '@renderer/components/command-palette/hooks/use-command-palette-data'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@clarity/shadcn/ui/card'
+import { Switch } from '@clarity/shadcn/ui/switch'
+import { Label } from '@clarity/shadcn/ui/label'
+import { toast } from 'sonner'
 
 export function FeaturesSettings() {
   const { t } = useTranslation('settings')
   const registeredPlugins = useRegisteredPlugins()
   const pluginCommands = usePluginCommands()
+
+  // 插件配置管理
+  const { pluginConfigs, updatePluginConfig, isUpdatingConfig } = useCommandPaletteData()
+
+  // 处理插件开关切换
+  const handlePluginToggle = async (pluginId: string, enabled: boolean) => {
+    try {
+      const currentConfig = pluginConfigs[pluginId] || {
+        id: pluginId,
+        enabled: true,
+        order: 0
+      }
+
+      await updatePluginConfig({
+        pluginId,
+        config: {
+          ...currentConfig,
+          enabled
+        }
+      })
+    } catch (error) {
+      console.error('Failed to toggle plugin:', error)
+      toast.error(t('features.commandPalette.pluginManagement.toggleError'), {
+        description: t('features.commandPalette.pluginManagement.toggleErrorDescription')
+      })
+    }
+  }
   return (
     <div className="space-y-6">
       {/* 命令面板概览 */}
@@ -68,24 +99,45 @@ export function FeaturesSettings() {
             <div className="grid gap-4 md:grid-cols-2">
               {registeredPlugins.map((plugin) => {
                 const commands = pluginCommands.filter((cmd) => cmd.pluginId === plugin.id)
+                const pluginConfig = pluginConfigs[plugin.id]
+                const isEnabled = pluginConfig?.enabled !== false // 默认启用
+
                 return (
-                  <Card key={plugin.id}>
+                  <Card key={plugin.id} className={isEnabled ? '' : 'opacity-60'}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1">
                           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
                             <Zap className="h-4 w-4 text-primary" />
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <CardTitle className="text-base">{plugin.name}</CardTitle>
                             <CardDescription className="text-sm">
                               {plugin.description}
                             </CardDescription>
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                          ID: {plugin.id}
-                        </Badge>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <Label
+                              htmlFor={`plugin-${plugin.id}`}
+                              className="text-sm font-medium cursor-pointer"
+                            >
+                              {isEnabled
+                                ? t('features.commandPalette.pluginManagement.enabled')
+                                : t('features.commandPalette.pluginManagement.disabled')}
+                            </Label>
+                            <Switch
+                              id={`plugin-${plugin.id}`}
+                              checked={isEnabled}
+                              disabled={isUpdatingConfig}
+                              onCheckedChange={(checked) => handlePluginToggle(plugin.id, checked)}
+                            />
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            ID: {plugin.id}
+                          </Badge>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">

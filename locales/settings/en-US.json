@@ -237,7 +237,14 @@
         "description": "View currently registered command palette plugins and their published commands",
         "stats": "{{pluginCount}} plugins registered, {{commandCount}} commands published",
         "noPlugins": "No plugins registered",
-        "commandsPublished": "{{count}} commands published"
+        "commandsPublished": "{{count}} commands published",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "enableSuccess": "Plugin enabled",
+        "disableSuccess": "Plugin disabled",
+        "toggleDescription": "Plugin {{pluginName}} status updated",
+        "toggleError": "Failed to toggle plugin",
+        "toggleErrorDescription": "Unable to update plugin status, please try again later"
       },
       "commandTypes": {
         "action": "Action",
