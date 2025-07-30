@@ -159,7 +159,7 @@ export const featuresData: FeatureData[] = [
     id: 'i18n-system',
     icon: Globe,
     title: '现代化国际化系统',
-    description: '类型安全的 i18n 架构，支持动态语言包加载和实时切换',
+    description: '类型安全的 i18n 架构，支持动态语言包加载和切换',
     category: '国际化',
     details: [
       '类型安全翻译：TypeScript 模块增强，完全嵌套的类型推断',

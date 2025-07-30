@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Command } from 'cmdk'
 import {
   useCommandPaletteActiveCommand,
@@ -24,6 +25,7 @@ import { useFavoritesData } from './hooks/use-command-palette-data'
  * - 显示插件特定的结果格式
  */
 export function CommandPaletteResults() {
+  const { t } = useTranslation('command-palette')
   const activeCommand = useCommandPaletteActiveCommand()
   const { setActiveCommand, setActiveCommandFromSearch } = useCommandPaletteActions()
 
@@ -90,8 +92,8 @@ export function CommandPaletteResults() {
           {/* 分组显示命令 */}
           {routeCommands.length > 0 && (
             <Command.Group
-              heading="页面导航"
-              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
+              heading={t('sections.navigation')}
+              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80"
             >
               {routeCommands.map((command) => (
                 <CommandItem
@@ -105,8 +107,8 @@ export function CommandPaletteResults() {
 
           {pluginCommands.length > 0 && (
             <Command.Group
-              heading="命令"
-              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
+              heading={t('sections.commands')}
+              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80"
             >
               {pluginCommands.map((command) => (
                 <CommandItem

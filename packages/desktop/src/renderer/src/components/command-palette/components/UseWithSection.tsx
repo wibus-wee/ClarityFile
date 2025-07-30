@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Command } from 'cmdk'
 import { useSearchableCommands } from '../stores/command-palette-store'
 import type { CommandWithRender } from '../types'
@@ -17,6 +18,7 @@ interface UseWithSectionProps {
 }
 
 export function UseWithSection({ query, onCommandSelect }: UseWithSectionProps) {
+  const { t } = useTranslation('command-palette')
   const searchableCommands = useSearchableCommands()
 
   // 获取能处理当前查询的可搜索命令
@@ -38,8 +40,8 @@ export function UseWithSection({ query, onCommandSelect }: UseWithSectionProps) 
 
   return (
     <Command.Group
-      heading={`使用 "${query}" 搜索...`}
-      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
+      heading={t('sections.useWith', { query })}
+      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80"
     >
       {applicableCommands.length > 0 ? (
         applicableCommands.map((command) => (
@@ -54,7 +56,7 @@ export function UseWithSection({ query, onCommandSelect }: UseWithSectionProps) 
         ))
       ) : (
         <Command.Item className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground/70">
-          <span className="font-medium">无可用的搜索命令</span>
+          <span className="font-medium">{t('empty.noSearchCommands')}</span>
         </Command.Item>
       )}
     </Command.Group>

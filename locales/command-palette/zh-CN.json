@@ -1,0 +1,49 @@
+{
+  "sections": {
+    "favorites": "收藏",
+    "suggestions": "建议",
+    "navigation": "页面导航",
+    "commands": "命令",
+    "useWith": "使用 \"{{query}}\" 搜索..."
+  },
+  "empty": {
+    "noFavorites": "暂无收藏命令",
+    "noSearchCommands": "无可用的搜索命令",
+    "noContent": "暂无内容",
+    "noResults": "没有找到结果",
+    "tryDifferentKeywords": "尝试使用不同的关键词搜索"
+  },
+  "loading": {
+    "default": "加载中...",
+    "searching": "正在搜索...",
+    "processing": "正在处理..."
+  },
+  "actions": {
+    "search": "搜索",
+    "retry": "重试",
+    "cancel": "取消",
+    "back": "返回",
+    "close": "关闭"
+  },
+  "input": {
+    "placeholder": {
+      "search": "搜索命令或页面...",
+      "searchInCommand": "在命令中搜索..."
+    },
+    "backButton": "返回"
+  },
+  "status": {
+    "ready": "就绪",
+    "loading": "加载中",
+    "error": "错误",
+    "success": "成功",
+    "processing": "处理中"
+  },
+  "accessibility": {
+    "commandItem": "命令项",
+    "favoriteCommand": "收藏命令",
+    "suggestedCommand": "建议命令",
+    "navigationCommand": "导航命令",
+    "searchCommand": "搜索命令"
+  }
+}

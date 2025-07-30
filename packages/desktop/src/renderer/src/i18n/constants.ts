@@ -5,6 +5,7 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 // 所有 i18n 命名空间
 export const NAMESPACES = [
   'common',
+  'command-palette',
   'competitions',
   'dashboard',
   'expenses',

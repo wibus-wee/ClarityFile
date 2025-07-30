@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Command } from 'cmdk'
 import { CommandItem } from './CommandItem'
 import { useCommandFavorites } from '../hooks/use-command-favorites'
@@ -15,12 +16,13 @@ interface FavoritesSectionProps {
 }
 
 export function FavoritesSection({ onExecuteCommand }: FavoritesSectionProps) {
+  const { t } = useTranslation('command-palette')
   const { favoriteCommands } = useCommandFavorites()
 
   return (
     <Command.Group
-      heading="收藏"
-      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80 [&_[cmdk-group-heading]]:tracking-wider"
+      heading={t('sections.favorites')}
+      className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/80"
     >
       {favoriteCommands.length > 0 ? (
         favoriteCommands.map((command: CommandType) => (
@@ -36,7 +38,7 @@ export function FavoritesSection({ onExecuteCommand }: FavoritesSectionProps) {
         ))
       ) : (
         <Command.Item className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm aria-selected:bg-accent/60 aria-selected:text-accent-foreground">
-          <span className="text-muted-foreground/70 font-medium">暂无收藏命令</span>
+          <span className="text-muted-foreground/70 font-medium">{t('empty.noFavorites')}</span>
         </Command.Item>
       )}
     </Command.Group>
