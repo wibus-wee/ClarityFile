@@ -1,6 +1,6 @@
-import { Badge, Button } from '@clarity/shadcn'
+import { Button } from '@clarity/shadcn'
 import { useScroll, useTransform, motion } from 'framer-motion'
-import { Sparkles, DownloadCloud, ExternalLink, CheckCircle } from 'lucide-react'
+import { DownloadCloud, ExternalLink, CheckCircle } from 'lucide-react'
 import { useRef } from 'react'
 
 // Hero Section Component

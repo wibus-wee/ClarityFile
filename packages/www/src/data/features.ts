@@ -1,17 +1,4 @@
-import {
-  Brain,
-  Layers,
-  Users,
-  Shield,
-  BarChart3,
-  Zap,
-  Puzzle,
-  Globe,
-  Keyboard,
-  Palette,
-  Database,
-  Workflow
-} from 'lucide-react'
+import { Brain, Layers, Shield, Zap, Puzzle, Globe, Keyboard, Palette } from 'lucide-react'
 
 // Feature Data Interface
 export interface FeatureData {
