@@ -37,90 +37,111 @@ export function NavMain({
 }) {
   const location = useLocation()
 
+  const isParentActive = (item: any) => {
+    if (location.pathname === item.url) {
+      return true
+    }
+
+    if (item.items?.length) {
+      return item.items.some((subItem: any) => {
+        if (subItem.url.startsWith('?')) {
+          return `${location.pathname}${location.search}` === `${item.url}${subItem.url}`
+        }
+        return location.pathname === subItem.url
+      })
+    }
+
+    return false
+  }
+
   return (
     <>
       {items.map((group) => (
         <SidebarGroup key={group.group}>
           <SidebarGroupLabel>{group.group}</SidebarGroupLabel>
           <SidebarMenu>
-            {group.items.map((item) => (
-              <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={location.pathname === item.url}
-                    asChild
-                    tooltip={item.title}
-                  >
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                  {item.items?.length ? (
-                    <>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuAction className="data-[state=open]:rotate-90">
-                          <ChevronRight />
-                          <span className="sr-only">Toggle</span>
-                        </SidebarMenuAction>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
+            {group.items.map((item) => {
+              const parentActive = isParentActive(item)
+
+              return (
+                <Collapsible key={item.title} asChild open={parentActive}>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={location.pathname === item.url}
+                      asChild
+                      tooltip={item.title}
+                    >
+                      <Link to={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                    {item.items?.length ? (
+                      <>
                         <AnimatePresence>
-                          <SidebarMenuSub
-                            initial={{ opacity: 0, height: 0, y: -20 }}
-                            animate={{ opacity: 1, height: 'auto', y: 0 }}
-                            exit={{ opacity: 0, height: 0, y: -20 }}
-                            transition={{
-                              type: 'spring',
-                              stiffness: 300,
-                              damping: 20
-                            }}
-                          >
-                            {item.items?.map((subItem) => (
-                              <SidebarMenuSubItem
-                                key={subItem.title}
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{
-                                  type: 'spring',
-                                  stiffness: 500,
-                                  damping: 30,
-                                  delay: 0.05
-                                }}
-                              >
-                                <SidebarMenuSubButton
-                                  isActive={
-                                    subItem.url.startsWith('?')
-                                      ? `${location.pathname}${location.search}` ===
-                                        `${item.url}${subItem.url}`
-                                      : location.pathname === subItem.url
-                                  }
-                                  asChild
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuAction className="data-[state=open]:rotate-90">
+                              <ChevronRight />
+                              <span className="sr-only">Toggle</span>
+                            </SidebarMenuAction>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub
+                              initial={{ opacity: 0, height: 0, y: -20 }}
+                              animate={{ opacity: 1, height: 'auto', y: 0 }}
+                              exit={{ opacity: 0, height: 0, y: -20 }}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 300,
+                                damping: 20
+                              }}
+                            >
+                              {item.items?.map((subItem) => (
+                                <SidebarMenuSubItem
+                                  key={subItem.title}
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  transition={{
+                                    type: 'spring',
+                                    stiffness: 500,
+                                    damping: 30,
+                                    delay: 0.05
+                                  }}
                                 >
-                                  <Link
-                                    to={item.url}
-                                    search={
+                                  <SidebarMenuSubButton
+                                    isActive={
                                       subItem.url.startsWith('?')
-                                        ? Object.fromEntries(
-                                            new URLSearchParams(subItem.url.substring(1))
-                                          )
-                                        : undefined
+                                        ? `${location.pathname}${location.search}` ===
+                                          `${item.url}${subItem.url}`
+                                        : location.pathname === subItem.url
                                     }
+                                    asChild
                                   >
-                                    <span>{subItem.title}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
+                                    <Link
+                                      to={item.url}
+                                      search={
+                                        subItem.url.startsWith('?')
+                                          ? Object.fromEntries(
+                                              new URLSearchParams(subItem.url.substring(1))
+                                            )
+                                          : undefined
+                                      }
+                                    >
+                                      <span>{subItem.title}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
                         </AnimatePresence>
-                      </CollapsibleContent>
-                    </>
-                  ) : null}
-                </SidebarMenuItem>
-              </Collapsible>
-            ))}
+                      </>
+                    ) : null}
+                  </SidebarMenuItem>
+                </Collapsible>
+              )
+            })}
           </SidebarMenu>
         </SidebarGroup>
       ))}
