@@ -1,0 +1,169 @@
+name: Find Good Commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      commits_to_check:
+        description: 'Number of commits to check (0 = all commits)'
+        required: false
+        default: '0'
+        type: string
+      error_message:
+        description: 'Error message to search for'
+        required: false
+        default: 'Cannot add property 0, object is not extensible'
+        type: string
+      branch:
+        description: 'Branch to check (default: current branch)'
+        required: false
+        default: ''
+        type: string
+
+  # 也可以通过 push 触发（可选）
+  # push:
+  #   branches: [ main, develop ]
+
+jobs:
+  find-good-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # 获取完整的 git 历史，这样才能检查多个 commit
+          fetch-depth: 0
+          # 如果指定了分支，则切换到该分支
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Make script executable
+        run: chmod +x .github/test/find-optimized.sh
+      - name: Run commit finder
+        env:
+          COMMITS_TO_CHECK: ${{ github.event.inputs.commits_to_check || '0' }}
+          ERROR_MESSAGE: ${{ github.event.inputs.error_message || 'Cannot add property 0, object is not extensible' }}
+        run: |
+          echo "🔍 开始查找可构建的 commit..."
+          if [ "$COMMITS_TO_CHECK" = "0" ]; then
+            echo "检查模式: 所有 commit（完整历史）"
+            TOTAL_COMMITS=$(git rev-list --count HEAD)
+            echo "总 commit 数量: $TOTAL_COMMITS"
+          else
+            echo "检查 commit 数量: $COMMITS_TO_CHECK"
+          fi
+          echo "目标错误信息: $ERROR_MESSAGE"
+          echo "当前分支: $(git branch --show-current)"
+          echo "当前 commit: $(git rev-parse --short HEAD)"
+          echo ""
+
+          # 运行优化后的脚本
+          ./.github/test/find-optimized.sh
+
+      - name: Upload build logs directory
+        uses: actions/upload-artifact@v4
+        if: always() # 即使构建失败也上传日志
+        with:
+          name: build-logs-directory-${{ github.run_number }}
+          path: build_logs/
+          retention-days: 30
+
+      - name: Upload build logs archive
+        uses: actions/upload-artifact@v4
+        if: always() # 即使构建失败也上传压缩包
+        with:
+          name: build-logs-archive-${{ github.run_number }}
+          path: build_logs_*.tar.gz
+          retention-days: 30
+
+      - name: Generate summary report
+        if: always()
+        run: |
+          echo "## 🔍 Commit 构建测试报告" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**测试配置:**" >> $GITHUB_STEP_SUMMARY
+          COMMITS_CHECKED="${{ github.event.inputs.commits_to_check || '0' }}"
+          if [ "$COMMITS_CHECKED" = "0" ]; then
+            TOTAL_COMMITS=$(git rev-list --count HEAD)
+            echo "- 检查的 commit 数量: 所有 commit ($TOTAL_COMMITS 个)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- 检查的 commit 数量: $COMMITS_CHECKED" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- 目标错误信息: \`${{ github.event.inputs.error_message || 'Cannot add property 0, object is not extensible' }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- 测试分支: $(git branch --show-current)" >> $GITHUB_STEP_SUMMARY
+          echo "- 开始 commit: $(git rev-parse --short HEAD)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # 检查是否有日志文件
+          if [ -d "build_logs" ] && [ "$(ls -A build_logs)" ]; then
+            echo "**构建日志文件:**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Commit | 状态 | 错误摘要 | 日志文件 |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|------|----------|----------|" >> $GITHUB_STEP_SUMMARY
+
+            for log_file in build_logs/*.log; do
+              if [ -f "$log_file" ]; then
+                commit_hash=$(basename "$log_file" .log | sed 's/build_//')
+
+                # 检查构建是否成功
+                if grep -q "Exit Code: 0" "$log_file"; then
+                  status="✅ 成功"
+                  error_summary="-"
+                elif grep -q "${{ github.event.inputs.error_message || 'Cannot add property 0, object is not extensible' }}" "$log_file"; then
+                  status="❌ 目标错误"
+                  error_summary="object is not extensible"
+                else
+                  status="⚠️ 其他错误"
+                  # 提取错误摘要
+                  error_summary=$(tail -n 10 "$log_file" | grep -E "(error|Error|ERROR|failed|Failed|FAILED)" | head -n 1 | sed 's/^[[:space:]]*//' | cut -c1-50)
+                  if [ -z "$error_summary" ]; then
+                    error_summary=$(tail -n 3 "$log_file" | tr '\n' ' ' | sed 's/^[[:space:]]*//' | cut -c1-50)
+                  fi
+                  # 转义特殊字符
+                  error_summary=$(echo "$error_summary" | sed 's/|/\\|/g' | sed 's/`/\\`/g')
+                fi
+
+                echo "| \`$commit_hash\` | $status | $error_summary | \`$(basename "$log_file")\` |" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📁 **下载选项:**" >> $GITHUB_STEP_SUMMARY
+            echo "- \`build-logs-directory-${{ github.run_number }}\`: 单独的日志文件" >> $GITHUB_STEP_SUMMARY
+            echo "- \`build-logs-archive-${{ github.run_number }}\`: 压缩包（推荐）" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # 检查是否有压缩包
+            if ls build_logs_*.tar.gz 1> /dev/null 2>&1; then
+              ARCHIVE_SIZE=$(du -h build_logs_*.tar.gz | cut -f1)
+              echo "📦 压缩包大小: $ARCHIVE_SIZE" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ 没有找到构建日志文件。" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*报告生成时间: $(date)*" >> $GITHUB_STEP_SUMMARY
+
+  # 可选：发送通知到 Slack/Discord 等
+  # notify:
+  #   runs-on: ubuntu-latest
+  #   needs: find-good-commit
+  #   if: always()
+  #   steps:
+  #   - name: Send notification
+  #     # 添加你的通知逻辑
