@@ -17,29 +17,29 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "destr": "2.0.5",
-    "framer-motion": "^12.12.1",
-    "lucide-react": "^0.511.0",
-    "tailwind-merge": "^3.3.0",
-    "tailwindcss": "^4.1.7",
-    "tw-animate-css": "^1.3.0"
+    "framer-motion": "^12.23.12",
+    "lucide-react": "^0.535.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.11",
+    "tw-animate-css": "^1.3.6"
   },
   "devDependencies": {
-    "@types/node": "^22.15.21",
-    "@types/react": "^19.1.1",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "@vitest/ui": "^3.1.4",
+    "@types/node": "^22.17.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/ui": "^3.2.4",
     "consola": "^3.4.2",
-    "eslint": "^9.24.0",
+    "eslint": "^9.32.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "6.0.0-rc1",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "prettier": "^3.5.3",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "prettier": "^3.6.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "typescript": "^5.8.3",
     "vite": "7.0.4",
-    "vitest": "^3.1.4"
+    "vitest": "^3.2.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -51,5 +51,8 @@
       "fs-xattr",
       "macos-alias"
     ]
+  },
+  "overrides": {
+    "rollup": "4.40.0"
   }
 }

@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 // 项目状态枚举
 export const projectStatusSchema = z.enum(['active', 'on_hold', 'archived'], {
-  errorMap: () => ({ message: '项目状态必须是 active、on_hold 或 archived' })
+  error: '项目状态必须是 active、on_hold 或 archived'
 })
 
 // 创建项目 Schema

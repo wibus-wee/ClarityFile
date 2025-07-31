@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@nuxt/devtools": "latest",
-    "@pinia/nuxt": "^0.11.1",
-    "nuxt": "^3.16.0",
+    "@pinia/nuxt": "^0.11.2",
+    "nuxt": "^4.0.2",
     "pinia": "^3.0.3",
     "vue": "latest",
     "vue-router": "latest"

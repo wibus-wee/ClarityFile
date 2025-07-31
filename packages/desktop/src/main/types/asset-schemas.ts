@@ -37,7 +37,7 @@ export const createProjectAssetSchema = z.object({
   assetType: assetTypeSchema,
   contextDescription: z.string().max(500, '上下文描述不能超过500个字符').optional(),
   versionInfo: z.string().max(100, '版本信息不能超过100个字符').optional(),
-  customFields: z.record(z.any()).optional(),
+  customFields: z.record(z.string(), z.any()).optional(),
   managedFileId: z.string().min(1, '受管文件ID不能为空')
 })
 
@@ -53,7 +53,7 @@ export const updateProjectAssetSchema = z.object({
   assetType: assetTypeSchema.optional(),
   contextDescription: z.string().max(500, '上下文描述不能超过500个字符').optional(),
   versionInfo: z.string().max(100, '版本信息不能超过100个字符').optional(),
-  customFields: z.record(z.any()).optional()
+  customFields: z.record(z.string(), z.any()).optional()
 })
 
 // 获取项目资产 Schema

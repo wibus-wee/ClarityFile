@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 // 文档状态枚举
 export const documentStatusSchema = z.enum(['active', 'archived', 'deleted'], {
-  errorMap: () => ({ message: '文档状态必须是 active、archived 或 deleted' })
+  error: '文档状态必须是 active、archived 或 deleted'
 })
 
 // 文档类型 Schema - 使用字符串类型以支持自定义类型

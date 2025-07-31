@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 // 经费状态枚举
 export const expenseStatusSchema = z.enum(['pending', 'approved', 'rejected', 'reimbursed'], {
-  errorMap: () => ({ message: '请选择有效的经费状态' })
+  error: '请选择有效的经费状态'
 })
 
 // 创建经费追踪 Schema
@@ -23,8 +23,7 @@ export const createExpenseTrackingSchema = z.object({
     .refine((name) => name.trim().length > 0, '申请人不能只包含空格'),
   amount: z.number().positive('金额必须大于0').max(999999999, '金额不能超过999,999,999'),
   applicationDate: z.date({
-    required_error: '请选择申请日期',
-    invalid_type_error: '申请日期格式不正确'
+    error: (issue) => (issue.input === undefined ? '请选择申请日期' : '申请日期格式不正确')
   }),
   status: expenseStatusSchema,
   invoiceManagedFileId: z.string().optional(),
@@ -52,7 +51,7 @@ export const updateExpenseTrackingSchema = z.object({
   amount: z.number().positive('金额必须大于0').max(999999999, '金额不能超过999,999,999').optional(),
   applicationDate: z
     .date({
-      invalid_type_error: '申请日期格式不正确'
+      error: '申请日期格式不正确'
     })
     .optional(),
   status: expenseStatusSchema.optional(),

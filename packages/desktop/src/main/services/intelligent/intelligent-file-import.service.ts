@@ -22,7 +22,7 @@ const fileImportContextSchema = z
 
     // 导入类型
     importType: z.enum(['document', 'asset', 'expense', 'competition', 'inbox'], {
-      errorMap: () => ({ message: '不支持的导入类型' })
+      error: '不支持的导入类型'
     }),
 
     // 项目相关信息（当 importType 为 document/asset/expense 时必需）
@@ -66,28 +66,28 @@ const fileImportContextSchema = z
       case 'document':
         if (!data.projectId) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '项目ID不能为空',
             path: ['projectId']
           })
         }
         if (!data.logicalDocumentName) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '逻辑文档名称不能为空',
             path: ['logicalDocumentName']
           })
         }
         if (!data.logicalDocumentType) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '逻辑文档类型不能为空',
             path: ['logicalDocumentType']
           })
         }
         if (!data.versionTag) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '版本标签不能为空',
             path: ['versionTag']
           })
@@ -97,21 +97,21 @@ const fileImportContextSchema = z
       case 'asset':
         if (!data.projectId) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '项目ID不能为空',
             path: ['projectId']
           })
         }
         if (!data.assetType) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '资产类型不能为空',
             path: ['assetType']
           })
         }
         if (!data.assetName) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '资产名称不能为空',
             path: ['assetName']
           })
@@ -121,14 +121,14 @@ const fileImportContextSchema = z
       case 'expense':
         if (!data.projectId) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '项目ID不能为空',
             path: ['projectId']
           })
         }
         if (!data.expenseDescription) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '报销事项描述不能为空',
             path: ['expenseDescription']
           })
@@ -138,14 +138,14 @@ const fileImportContextSchema = z
       case 'competition':
         if (!data.seriesName) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '赛事系列名称不能为空',
             path: ['seriesName']
           })
         }
         if (!data.levelName) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: '赛事级别不能为空',
             path: ['levelName']
           })
@@ -158,7 +158,7 @@ const fileImportContextSchema = z
 
       default:
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: '不支持的导入类型',
           path: ['importType']
         })
@@ -429,7 +429,7 @@ export class IntelligentFileImportService {
     } catch (error) {
       if (error instanceof z.ZodError) {
         // 提取所有验证错误信息
-        const errors = error.errors.map((err) => err.message)
+        const errors = error.issues.map((err) => err.message)
         return {
           isValid: false,
           errors
