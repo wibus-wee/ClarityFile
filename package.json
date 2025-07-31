@@ -51,8 +51,5 @@
       "fs-xattr",
       "macos-alias"
     ]
-  },
-  "overrides": {
-    "rollup": "4.40.0"
   }
 }
