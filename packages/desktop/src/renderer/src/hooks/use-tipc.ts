@@ -48,6 +48,11 @@ import type {
   GetGlobalFilesInput
 } from '../../../main/services/managed-file.service'
 import type { FileImportContext } from '../../../main/services/intelligent/intelligent-file-import.service'
+import type {
+  CreateUserInput,
+  UpdateUserInput,
+  UpdateUserPreferencesInput
+} from '../../../main/types/user-schemas'
 
 // 项目相关的 hooks
 export function useProjects() {
@@ -972,4 +977,57 @@ export function useDeleteManagedFile() {
       return result
     }
   )
+}
+
+// 用户相关的 hooks
+export function useCurrentUser() {
+  return useSWR('current-user', () => tipcClient.getCurrentUser())
+}
+
+export function useUser(id: string | null) {
+  return useSWR(id ? ['user', id] : null, () => (id ? tipcClient.getUserById({ id }) : null))
+}
+
+export function useCheckUserExists() {
+  return useSWR('check-user-exists', () => tipcClient.checkUserExists())
+}
+
+export function useCreateUser() {
+  return useSWRMutation('users', async (_key, { arg }: { arg: CreateUserInput }) => {
+    const result = await tipcClient.createUser(arg)
+    // 重新验证用户相关数据
+    mutate('current-user')
+    mutate('check-user-exists')
+    return result
+  })
+}
+
+export function useUpdateUser() {
+  return useSWRMutation('users', async (_key, { arg }: { arg: UpdateUserInput }) => {
+    const result = await tipcClient.updateUser(arg)
+    // 重新验证用户相关数据
+    mutate('current-user')
+    mutate(['user', arg.id])
+    return result
+  })
+}
+
+export function useUpdateUserPreferences() {
+  return useSWRMutation('users', async (_key, { arg }: { arg: UpdateUserPreferencesInput }) => {
+    const result = await tipcClient.updateUserPreferences(arg)
+    // 重新验证用户相关数据
+    mutate('current-user')
+    mutate(['user', arg.userId])
+    return result
+  })
+}
+
+export function useInitializeDefaultUser() {
+  return useSWRMutation('users', async () => {
+    const result = await tipcClient.initializeDefaultUser()
+    // 重新验证用户相关数据
+    mutate('current-user')
+    mutate('check-user-exists')
+    return result
+  })
 }

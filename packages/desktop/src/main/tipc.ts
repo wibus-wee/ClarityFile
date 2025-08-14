@@ -3,6 +3,7 @@ import { projectRouter } from './routers/project.router'
 import { fileRouter } from './routers/file.router'
 import { settingsRouter } from './routers/settings.router'
 import { systemRouter } from './routers/system.router'
+import { userRouter } from './routers/user.router'
 import { logicalDocumentRouter } from './routers/document/logical-document.router'
 import { managedFileRouter } from './routers/managed-file.router'
 import { intelligentNamingRouter } from './routers/intelligent-naming.router'
@@ -58,6 +59,9 @@ export const router = {
 
   // 系统相关路由
   ...systemRouter(t),
+
+  // 用户相关路由
+  ...userRouter(t),
 
   // 逻辑文档相关路由
   ...logicalDocumentRouter(t),

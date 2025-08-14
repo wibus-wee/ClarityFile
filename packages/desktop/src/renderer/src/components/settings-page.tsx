@@ -2,7 +2,18 @@
 
 import { useSearch } from '@tanstack/react-router'
 import { Suspense } from 'react'
-import { Bell, Globe, Home, Keyboard, Lock, Paintbrush, Settings, Video, Zap } from 'lucide-react'
+import {
+  Bell,
+  Globe,
+  Home,
+  Keyboard,
+  Lock,
+  Paintbrush,
+  Settings,
+  Video,
+  Zap,
+  User
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { GeneralSettings } from './settings/general-settings'
@@ -14,12 +25,14 @@ import { AccessibilitySettings } from './settings/accessibility-settings'
 import { PrivacySettings } from './settings/privacy-settings'
 import { AudioVideoSettings } from './settings/audio-video-settings'
 import { FeaturesSettings } from './settings/features-settings'
+import { UserSettings } from './settings/user-settings'
 
 function useSettingsCategories() {
   const { t } = useTranslation('settings')
 
   return [
     { id: 'general', name: t('categories.general'), icon: Home, component: GeneralSettings },
+    { id: 'user', name: t('categories.user'), icon: User, component: UserSettings },
     {
       id: 'appearance',
       name: t('categories.appearance'),
@@ -65,6 +78,7 @@ function SettingsContent() {
   const getDescriptionKey = (categoryId: string) => {
     const keyMap: Record<string, any> = {
       general: 'settings:descriptions.general',
+      user: 'settings:descriptions.user',
       appearance: 'settings:descriptions.appearance',
       notifications: 'settings:descriptions.notifications',
       language: 'settings:descriptions.language',

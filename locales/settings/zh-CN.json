@@ -2,6 +2,7 @@
   "title": "设置",
   "categories": {
     "general": "常规设置",
+    "user": "用户设置",
     "appearance": "外观设置",
     "notifications": "通知设置",
     "language": "语言与地区",
@@ -13,6 +14,7 @@
   },
   "descriptions": {
     "general": "管理应用程序的常规设置",
+    "user": "管理用户账户信息和个人偏好设置",
     "appearance": "管理应用程序的外观设置",
     "notifications": "管理应用程序的通知设置",
     "language": "管理应用程序的语言与地区",
@@ -49,6 +51,37 @@
     "backupSettings": "备份设置",
     "backupLocation": "备份位置",
     "maxBackups": "最大备份数量"
+  },
+  "user": {
+    "title": "用户设置",
+    "accountInfo": "账户信息",
+    "accountInfoDescription": "查看和管理您的账户基本信息",
+    "personalInfo": "个人信息",
+    "personalInfoDescription": "编辑您的个人资料信息",
+    "name": "姓名",
+    "nameDescription": "您的显示姓名",
+    "namePlaceholder": "请输入您的姓名",
+    "nameValidation": "姓名不能为空",
+    "nameMaxLength": "姓名不能超过100个字符",
+    "email": "邮箱地址",
+    "emailDescription": "您的邮箱地址，用于接收通知",
+    "emailPlaceholder": "请输入邮箱地址",
+    "emailValidation": "请输入有效的邮箱地址",
+    "emailMaxLength": "邮箱地址不能超过255个字符",
+    "avatar": "头像",
+    "avatarDescription": "您的头像图片URL",
+    "avatarPlaceholder": "https://example.com/avatar.jpg",
+    "avatarValidation": "请输入有效的URL地址",
+    "createdAt": "创建时间",
+    "updatedAt": "更新时间",
+    "updateProfile": "更新资料",
+    "updating": "更新中...",
+    "roles": {
+      "founder": "创始人",
+      "enterprise": "企业版",
+      "pro": "专业版",
+      "basic": "基础版"
+    }
   },
   "appearance": {
     "title": "外观设置",

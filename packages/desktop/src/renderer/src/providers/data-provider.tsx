@@ -2,16 +2,11 @@ import { PropsWithChildren, useEffect } from 'react'
 import { useAppStore } from '@renderer/stores/app'
 
 export function DataProvider({ children }: PropsWithChildren) {
-  const setUser = useAppStore((state) => state.setUser)
+  const initializeUser = useAppStore((state) => state.initializeUser)
 
   useEffect(() => {
-    setUser({
-      name: 'Wibus Wu',
-      email: 'i@wibus.ren',
-      avatar: 'https://github.com/wibus-wee.png',
-      role: 'founder'
-    })
-  }, [setUser])
+    initializeUser()
+  }, [initializeUser])
 
   return <>{children}</>
 }

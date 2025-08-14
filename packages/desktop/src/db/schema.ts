@@ -262,6 +262,23 @@ export const tags = sqliteTable('tags', {
     .default(sql`(strftime('%s', 'now') * 1000)`)
 })
 
+export const users = sqliteTable('users', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  name: text('name').notNull(), // 用户姓名
+  email: text('email').notNull().unique(), // 用户邮箱，唯一
+  avatar: text('avatar'), // 头像URL或本地路径
+  role: text('role').notNull().default('basic'), // 用户角色：'enterprise' | 'pro' | 'basic' | 'founder'
+  preferences: text('preferences', { mode: 'json' }), // 用户偏好设置，JSON格式
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`)
+})
+
 export const settings = sqliteTable('settings', {
   id: text('id')
     .primaryKey()
@@ -468,6 +485,11 @@ export const tagsRelations = relations(tags, ({ many }) => ({
 
   projectTags: many(projectTags),
   projectAssetTags: many(projectAssetTags)
+}))
+
+export const usersRelations = relations(users, () => ({
+  // users 表通常不需要关联其他表，它是独立的用户信息存储
+  // 未来可以扩展关联用户创建的项目、文档等
 }))
 
 export const settingsRelations = relations(settings, () => ({

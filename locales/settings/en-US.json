@@ -2,6 +2,7 @@
   "title": "Settings",
   "categories": {
     "general": "General",
+    "user": "User",
     "appearance": "Appearance",
     "notifications": "Notifications",
     "language": "Language & Region",
@@ -13,6 +14,7 @@
   },
   "descriptions": {
     "general": "Manage general application settings",
+    "user": "Manage user account information and personal preferences",
     "appearance": "Manage application appearance settings",
     "notifications": "Manage application notification settings",
     "language": "Manage application language & region",
@@ -49,6 +51,37 @@
     "backupSettings": "Backup Settings",
     "backupLocation": "Backup location",
     "maxBackups": "Maximum backups"
+  },
+  "user": {
+    "title": "User Settings",
+    "accountInfo": "Account Information",
+    "accountInfoDescription": "View and manage your basic account information",
+    "personalInfo": "Personal Information",
+    "personalInfoDescription": "Edit your personal profile information",
+    "name": "Name",
+    "nameDescription": "Your display name",
+    "namePlaceholder": "Enter your name",
+    "nameValidation": "Name cannot be empty",
+    "nameMaxLength": "Name cannot exceed 100 characters",
+    "email": "Email Address",
+    "emailDescription": "Your email address for receiving notifications",
+    "emailPlaceholder": "Enter email address",
+    "emailValidation": "Please enter a valid email address",
+    "emailMaxLength": "Email address cannot exceed 255 characters",
+    "avatar": "Avatar",
+    "avatarDescription": "Your avatar image URL",
+    "avatarPlaceholder": "https://example.com/avatar.jpg",
+    "avatarValidation": "Please enter a valid URL",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "updateProfile": "Update Profile",
+    "updating": "Updating...",
+    "roles": {
+      "founder": "Founder",
+      "enterprise": "Enterprise",
+      "pro": "Pro",
+      "basic": "Basic"
+    }
   },
   "appearance": {
     "title": "Appearance Settings",

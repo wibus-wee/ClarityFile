@@ -58,7 +58,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="p-2 flex items-center gap-3">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <Avatar
-                  name={CONSTANTS.info.name[0]}
+                  name={user?.name?.[0] || CONSTANTS.info.name[0]}
+                  src={user?.avatar}
                   size="sm"
                   isBordered
                   radius="sm"
@@ -67,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{CONSTANTS.info.name}</span>
+                <span className="truncate font-semibold">{user?.name || CONSTANTS.info.name}</span>
                 <span className="truncate text-xs">
                   {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Guest'}
                 </span>

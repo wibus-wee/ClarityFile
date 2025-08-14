@@ -84,6 +84,10 @@ export function createRoutes(t: (key: string, options?: any) => string): AppRout
             label: t('settings:categories.general')
           },
           {
+            path: '?category=user',
+            label: t('settings:categories.user')
+          },
+          {
             path: '?category=appearance',
             label: t('settings:categories.appearance')
           },
