@@ -1,0 +1,205 @@
+---
+description: Component architecture patterns and best practices for ClarityFile
+include: ['packages/desktop/src/renderer/src/**/*.{ts,tsx}']
+---
+
+# Component Architecture Guidelines
+
+This document defines component architecture patterns and best practices for the ClarityFile project.
+
+## Core Principles
+
+### 1. Component Separation
+
+**Always split components into separate files - never define multiple components in a single file:**
+
+```typescript
+// ❌ Wrong - Multiple components in one file
+function UserCard({ user }) {
+  const Avatar = ({ src }) => <img src={src} className="w-8 h-8 rounded-full" />
+  const UserInfo = ({ name, email }) => (
+    <div>
+      <h3>{name}</h3>
+      <p>{email}</p>
+    </div>
+  )
+
+  return (
+    <div>
+      <Avatar src={user.avatar} />
+      <UserInfo name={user.name} email={user.email} />
+    </div>
+  )
+}
+
+// ✅ Correct - Separate files for each component
+// components/Avatar.tsx
+export function Avatar({ src }: { src: string }) {
+  return <img src={src} className="w-8 h-8 rounded-full" />
+}
+
+// components/UserInfo.tsx
+export function UserInfo({ name, email }: { name: string; email: string }) {
+  return (
+    <div>
+      <h3>{name}</h3>
+      <p>{email}</p>
+    </div>
+  )
+}
+
+// components/UserCard.tsx
+import { Avatar } from './Avatar'
+import { UserInfo } from './UserInfo'
+
+export function UserCard({ user }: { user: User }) {
+  return (
+    <div>
+      <Avatar src={user.avatar} />
+      <UserInfo name={user.name} email={user.email} />
+    </div>
+  )
+}
+```
+
+### 2. Type Safety with main/types
+
+**Always use types from main/types - never manually define types in frontend code:**
+
+```typescript
+// ❌ Wrong - Manual type definition in frontend
+interface Project {
+  id: string
+  name: string
+  status: 'active' | 'archived'
+}
+
+// ✅ Correct - Import from main/types
+import type { Project } from '@/main/types'
+
+function ProjectCard({ project }: { project: Project }) {
+  return <div>{project.name}</div>
+}
+```
+
+### 3. Component File Structure
+
+**Organize components with clear hierarchy and naming:**
+
+```
+packages/desktop/src/renderer/src/components/
+├── ui/                    # shadcn/ui components
+│   ├── button.tsx
+│   ├── dialog.tsx
+│   └── drawer.tsx
+├── forms/                 # Form-specific components
+│   ├── ProjectForm.tsx
+│   ├── SettingsForm.tsx
+│   └── fields/
+│       ├── SettingsSwitchField.tsx
+│       └── SettingsSection.tsx
+├── layout/                # Layout components
+│   ├── Sidebar.tsx
+│   ├── Header.tsx
+│   └── MainLayout.tsx
+└── features/              # Feature-specific components
+    ├── projects/
+    │   ├── ProjectList.tsx
+    │   ├── ProjectCard.tsx
+    │   └── ProjectDetails.tsx
+    └── settings/
+        └── SettingsPanel.tsx
+```
+
+## Component Composition Patterns
+
+### 1. Reusable Component Abstractions
+
+**Create abstracted components for consistent patterns:**
+
+```typescript
+// ✅ Settings components abstraction
+import { SettingsForm } from '@/components/forms/SettingsForm'
+import { SettingsSection } from '@/components/forms/SettingsSection'
+import { SettingsSwitchField } from '@/components/forms/fields/SettingsSwitchField'
+
+function ProjectSettings({ project }: { project: Project }) {
+  return (
+    <SettingsForm>
+      <SettingsSection title="General" description="Basic project settings">
+        <SettingsSwitchField
+          name="autoSync"
+          label="Auto Sync"
+          description="Automatically sync files when changes are detected"
+        />
+      </SettingsSection>
+    </SettingsForm>
+  )
+}
+```
+
+### 2. Component Props Interface Pattern
+
+**Define clear, typed interfaces for component props:**
+
+```typescript
+// ✅ Clear prop interfaces
+interface ProjectCardProps {
+  project: Project
+  onEdit?: (project: Project) => void
+  onDelete?: (projectId: string) => void
+  className?: string
+}
+
+export function ProjectCard({ project, onEdit, onDelete, className }: ProjectCardProps) {
+  return (
+    <div className={cn('border rounded-lg p-4', className)}>
+      <h3>{project.name}</h3>
+      {onEdit && <button onClick={() => onEdit(project)}>Edit</button>}
+      {onDelete && <button onClick={() => onDelete(project.id)}>Delete</button>}
+    </div>
+  )
+}
+```
+
+### 3. Compound Component Pattern
+
+**Use compound components for complex UI patterns:**
+
+```typescript
+// ✅ Compound component pattern
+function ProjectDetails({ project }: { project: Project }) {
+  return (
+    <div>
+      <ProjectDetails.Header project={project} />
+      <ProjectDetails.Tabs>
+        <ProjectDetails.Tab id="overview" label="Overview">
+          <ProjectDetails.Overview project={project} />
+        </ProjectDetails.Tab>
+        <ProjectDetails.Tab id="files" label="Files">
+          <ProjectDetails.Files projectId={project.id} />
+        </ProjectDetails.Tab>
+      </ProjectDetails.Tabs>
+    </div>
+  )
+}
+
+ProjectDetails.Header = function ProjectDetailsHeader({ project }: { project: Project }) {
+  return <header>{project.name}</header>
+}
+
+ProjectDetails.Tabs = function ProjectDetailsTabs({ children }: { children: React.ReactNode }) {
+  return <div className="tabs">{children}</div>
+}
+
+// ... other compound components
+```
+
+## Best Practices
+
+1. **One Component Per File**: Always split components into separate files for maintainability
+2. **Use main/types**: Never manually define types in frontend code - import from main/types
+3. **Clear File Structure**: Organize components by feature and responsibility
+4. **Abstracted Patterns**: Create reusable component abstractions for consistency
+5. **Typed Props**: Always define clear TypeScript interfaces for component props
+6. **Compound Components**: Use compound component pattern for complex UI structures

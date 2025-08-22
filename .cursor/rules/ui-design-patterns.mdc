@@ -1,0 +1,233 @@
+---
+description: UI/UX design patterns and visual preferences for ClarityFile
+include: ['packages/desktop/src/renderer/src/components/**/*', 'packages/desktop/src/renderer/src/routes/**/*']
+---
+
+# UI/UX Design Patterns
+
+This document defines UI/UX design patterns and visual preferences for the ClarityFile project.
+
+## Core Design Philosophy
+
+### 1. No Card Components
+**Never use Card components - use lightweight border + bg_card design:**
+
+```typescript
+// ❌ Wrong - Using Card component
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+
+function ProjectItem({ project }) {
+  return (
+    <Card>
+      <CardHeader>
+        <h3>{project.name}</h3>
+      </CardHeader>
+      <CardContent>
+        <p>{project.description}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ✅ Correct - Lightweight border + bg_card design
+function ProjectItem({ project }: { project: Project }) {
+  return (
+    <div className="border border-border bg-card rounded-lg p-4 hover:bg-card/80 transition-colors">
+      <h3 className="font-medium text-foreground">{project.name}</h3>
+      <p className="text-muted-foreground mt-1">{project.description}</p>
+    </div>
+  )
+}
+```
+
+### 2. Linear/GitHub Style Design
+
+**Mimic Linear and GitHub design patterns with clean, minimal aesthetics:**
+
+
+### 3. High Contrast Design
+
+**Prefer higher contrast designs with clear visual hierarchy:**
+
+```typescript
+// ✅ High contrast design with clear hierarchy
+function ProjectHeader({ project }: { project: Project }) {
+  return (
+    <header className="bg-background border-b border-border">
+      <div className="px-6 py-4">
+        <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+        <p className="text-muted-foreground mt-1">{project.description}</p>
+      </div>
+    </header>
+  )
+}
+
+// ✅ Clear visual separation
+function SectionDivider() {
+  return <div className="border-t border-border my-6" />
+}
+```
+
+## Color System
+
+### 1. Green Color Scheme
+
+**Use green color scheme instead of blue for primary colors:**
+
+```typescript
+// ✅ Green primary colors
+function PrimaryButton({ children, ...props }) {
+  return (
+    <button
+      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+// ✅ Green accent colors
+
+function StatusIndicator({ status }: { status: 'active' | 'completed' | 'pending' }) {
+  return (
+    <div className={cn(
+      'w-3 h-3 rounded-full',
+      {
+        'bg-green-500': status === 'active',
+        'bg-emerald-600': status === 'completed',
+        'bg-yellow-500': status === 'pending'
+      }
+    )} />
+  )
+}
+```
+
+### 2. macOS Color System
+
+**Use macOS-style color design with subtle variations**
+
+## Shadow and Depth
+
+### 1. Subtle macOS-style Shadows
+
+**Use lightweight shadows to maintain macOS aesthetic:**
+
+
+## Dark Mode Considerations
+
+### 1. Subtle Borders in Dark Mode
+
+**Use more subtle borders in dark mode:**
+
+```typescript
+// ✅ Dark mode aware borders
+function DarkModeCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-card border border-border/50 dark:border-border/30 rounded-lg p-4">
+      {children}
+    </div>
+  )
+}
+
+// ✅ Conditional border opacity
+function ListItem({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="border-b border-border/60 dark:border-border/40 py-3">
+      {children}
+    </div>
+  )
+}
+```
+
+## Interactive Elements
+
+### 1. Dialog vs Drawer Usage
+**Use Dialog for simple operations, Drawer for complex forms:**
+
+```typescript
+// ✅ Simple confirmation - Use Dialog
+function DeleteConfirmDialog({ open, onOpenChange, onConfirm }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Delete Project</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete the project.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="destructive" onClick={onConfirm}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ✅ Complex form - Use Drawer
+function ProjectFormDrawer({ open, onOpenChange, project }) {
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader>
+          <DrawerTitle>{project ? 'Edit Project' : 'Create Project'}</DrawerTitle>
+        </DrawerHeader>
+        <div className="px-4 pb-4 overflow-y-auto">
+          <ProjectForm project={project} onSubmit={handleSubmit} />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+```
+
+### 2. View Toggle Patterns
+**Implement consistent view switching with clear visual states:**
+
+```typescript
+// ✅ View toggle with green accent
+function ViewToggle({ view, onViewChange }: { 
+  view: 'grid' | 'list'
+  onViewChange: (view: 'grid' | 'list') => void 
+}) {
+  return (
+    <div className="inline-flex border border-border rounded-lg overflow-hidden">
+      <button
+        className={cn(
+          'px-3 py-2 text-sm font-medium transition-colors',
+          view === 'grid' 
+            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' 
+            : 'hover:bg-fill text-muted-foreground'
+        )}
+        onClick={() => onViewChange('grid')}
+      >
+        <Grid className="w-4 h-4" />
+      </button>
+      <button
+        className={cn(
+          'px-3 py-2 text-sm font-medium transition-colors border-l border-border',
+          view === 'list' 
+            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' 
+            : 'hover:bg-fill text-muted-foreground'
+        )}
+        onClick={() => onViewChange('list')}
+      >
+        <List className="w-4 h-4" />
+      </button>
+    </div>
+  )
+}
+```
+
+## Best Practices
+
+1. **No Card Components**: Use lightweight border + bg_card design patterns
+2. **Linear/GitHub Style**: Mimic clean, minimal design patterns from Linear and GitHub
+3. **High Contrast**: Prefer higher contrast designs with clear visual hierarchy
+4. **Green Color Scheme**: Use green instead of blue for primary colors
+5. **macOS Aesthetics**: Follow macOS design patterns with subtle shadows
+6. **Subtle Dark Mode**: Use more subtle borders and effects in dark mode
+7. **Dialog vs Drawer**: Simple operations use Dialog, complex forms use Drawer
+8. **Clear Visual States**: Provide clear feedback for interactive elements

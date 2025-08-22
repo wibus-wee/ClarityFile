@@ -1,0 +1,235 @@
+---
+description: State management patterns using Context, zustand, and SWR for ClarityFile
+include: ['packages/desktop/src/renderer/src/stores/**/*', 'packages/desktop/src/renderer/src/hooks/**/*', 'packages/desktop/src/renderer/src/providers/**/*']
+---
+
+# State Management Guidelines
+
+This document defines state management patterns and best practices using Context, zustand, and SWR for the ClarityFile project.
+
+## Core Principles
+
+### 1. State Management Hierarchy
+**Use the appropriate tool for each type of state:**
+
+- **Global Application State** → Use zustand
+- **Server State** → Use SWR (never React Query)
+- **Theme/Configuration** → Use Context
+- **Local Component State** → Use useState/useReducer
+
+### 2. Global State with zustand
+**Create typed stores with clear interfaces:**
+
+```typescript
+// ✅ Global application state
+interface AppStore {
+  user: User | null
+  isLoading: boolean
+  error: string | null
+  loadUser: () => Promise<void>
+  updateUser: (partialUser: Partial<User>) => Promise<void>
+  clearUser: () => void
+}
+
+export const useAppStore = create<AppStore>((set, get) => ({
+  user: null,
+  isLoading: false,
+  error: null,
+  // ... actions
+}))
+```
+
+### 3. Server State with SWR
+**Always use SWR for server state, never React Query:**
+
+```typescript
+// ✅ Data fetching with SWR
+export function useProjects() {
+  return useSWR('projects', () => tipcClient.getProjects())
+}
+
+export function useCreateProject() {
+  return useSWRMutation('projects', async (_key, { arg }) => {
+    const result = await tipcClient.createProject(arg)
+    mutate('projects') // 重新验证项目列表
+    return result
+  })
+}
+```
+
+### 4. SWR Configuration
+**Use centralized SWR configuration:**
+
+```typescript
+// ✅ SWR Provider configuration
+export function SWRProvider({ children }: PropsWithChildren) {
+  return (
+    <SWRConfig
+      value={{
+        revalidateOnFocus: true,
+        revalidateOnReconnect: true,
+        dedupingInterval: 2000,
+        errorRetryCount: 3,
+        onError: (error, key) => {
+          console.error('SWR Error:', error, 'Key:', key)
+          toast.error('请求失败', error.message)
+        }
+      }}
+    >
+      {children}
+    </SWRConfig>
+  )
+}
+```
+
+## Component State Management
+
+### 1. UI State with zustand
+**Use zustand for complex UI state that needs to be shared:**
+
+```typescript
+// ✅ File management state
+export interface FileManagementState {
+  selectedFile: string | null
+  selectedFiles: Set<string>
+  isRenameDialogOpen: boolean
+  isDeleteDialogOpen: boolean
+  isProcessing: boolean
+}
+
+interface FileManagementActions {
+  selectSingleFile: (fileId: string) => void
+  toggleFileSelection: (fileId: string) => void
+  openRenameDialog: (file: any) => void
+  closeRenameDialog: () => void
+  setProcessing: (isProcessing: boolean) => void
+  reset: () => void
+}
+
+export const useFileManagementStore = create<FileManagementState & FileManagementActions>(
+  (set, get) => ({
+    // 初始状态
+    selectedFile: null,
+    selectedFiles: new Set(),
+    isRenameDialogOpen: false,
+    isDeleteDialogOpen: false,
+    isProcessing: false,
+
+    // Actions
+    selectSingleFile: (fileId: string) => {
+      set({ selectedFile: fileId, selectedFiles: new Set([fileId]) })
+    },
+    // ... other actions
+  })
+)
+```
+
+### 2. Theme State with Context
+**Use Context for theme and configuration:**
+
+```typescript
+// ✅ Theme context
+interface ThemeContextValue {
+  theme: Theme
+  resolvedTheme: ResolvedTheme
+  setTheme: (theme: Theme) => Promise<void>
+  toggleTheme: () => Promise<void>
+  isLoading: boolean
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
+
+export function CustomThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>('system')
+  const [isLoading, setIsLoading] = useState(true)
+
+  const value: ThemeContextValue = {
+    theme,
+    resolvedTheme: theme === 'system' ? systemTheme : theme,
+    setTheme: async (newTheme: Theme) => {
+      setThemeState(newTheme)
+      await setSetting({ key: 'appearance.theme', value: newTheme })
+    },
+    toggleTheme: async () => {
+      const newTheme = resolvedTheme === 'light' ? 'dark' : 'light'
+      await setTheme(newTheme)
+    },
+    isLoading
+  }
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+}
+
+export function useCustomTheme(): ThemeContextValue {
+  const context = useContext(ThemeContext)
+  if (context === undefined) {
+    throw new Error('useCustomTheme must be used within a CustomThemeProvider')
+  }
+  return context
+}
+```
+
+## Real-time Data Synchronization
+
+### 1. TIPC Event System Integration
+**Use TIPC events for real-time data updates instead of polling:**
+
+```typescript
+// ✅ TIPC event listeners for data synchronization
+export function DataRefreshListener() {
+  const handlers = createTipcEventHandlers<CommonRendererHandlers>()
+
+  const handleDataRefresh = useCallback((data: { type: string; id?: string }) => {
+    const { type, id } = data
+
+    switch (type) {
+      case 'projects':
+        mutate('projects')
+        if (id) {
+          mutate(['project', id])
+          mutate(['project-details', id])
+        }
+        break
+      case 'files':
+        mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+        break
+    }
+  }, [])
+
+  useTipcEvent(handlers, 'refreshData', handleDataRefresh)
+  return null
+}
+```
+
+### 2. Event-driven State Updates
+**Use TIPC events to trigger state updates:**
+
+```typescript
+// ✅ File operation event listener
+export function FileOperationListener() {
+  const handlers = createTipcEventHandlers<FileOperationHandlers>()
+  const { clearSelection } = useFileManagementStore()
+
+  const handleFileDeleted = useCallback((data: { fileId: string; fileName: string }) => {
+    toast.info('文件已删除', { description: `文件 "${data.fileName}" 已被删除` })
+    clearSelection()
+    mutate((key) => Array.isArray(key) && key[0] === 'managed-files')
+  }, [clearSelection])
+
+  useTipcEvent(handlers, 'fileDeleted', handleFileDeleted)
+  return null
+}
+```
+
+## Best Practices
+
+1. **State Hierarchy**: Use zustand for global app state, SWR for server state, Context for configuration
+2. **SWR over React Query**: Always use SWR for data fetching, never React Query
+3. **TIPC Events**: Use TIPC event system for real-time updates instead of polling
+4. **Type Safety**: Always use types from main/types, never define types manually in frontend
+5. **Error Handling**: Implement proper error handling in all state operations
+6. **Cache Invalidation**: Use SWR's mutate function to invalidate cache after mutations
+7. **Event Optimization**: Use useCallback for event handlers to prevent unnecessary re-renders
+8. **State Separation**: Keep UI state separate from server state
+9. **Immer Integration**: Use immer middleware for complex state updates in zustand
+10. **Provider Pattern**: Use providers for global state that needs to be accessed throughout the app
