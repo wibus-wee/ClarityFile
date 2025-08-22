@@ -4,6 +4,7 @@ import { Button } from '@clarity/shadcn/ui/button'
 import { Input } from '@clarity/shadcn/ui/input'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import { Separator } from '@clarity/shadcn/ui/separator'
+
 import {
   Select,
   SelectContent,
@@ -43,6 +44,7 @@ import type { ProjectDetailsOutput } from '@main/types/project-schemas'
 
 import { BudgetPoolFormDrawer } from './drawers/budget-pool-form-drawer'
 import { BudgetPoolDetailsDialog } from '../budget-pools/budget-pool-details-dialog'
+import { DeleteBudgetPoolDialog } from './dialogs/delete-budget-pool-dialog'
 
 // 统计卡片组件
 interface BudgetStatCardProps {
@@ -92,6 +94,10 @@ export function BudgetPoolsTab({ projectDetails }: BudgetPoolsTabProps) {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [selectedPool, setSelectedPool] = useState<any>(null)
 
+  // 删除确认对话框状态
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [poolToDelete, setPoolToDelete] = useState<any>(null)
+
   // 处理创建操作
   const handleCreate = () => {
     setPoolFormMode('create')
@@ -123,6 +129,12 @@ export function BudgetPoolsTab({ projectDetails }: BudgetPoolsTabProps) {
   // 处理成功回调
   const handleSuccess = () => {
     // SWR 会自动重新验证数据
+  }
+
+  // 处理删除操作
+  const handleDelete = (pool: any) => {
+    setPoolToDelete(pool)
+    setDeleteDialogOpen(true)
   }
 
   // 格式化金额
@@ -404,7 +416,10 @@ export function BudgetPoolsTab({ projectDetails }: BudgetPoolsTabProps) {
                             编辑信息
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDelete(pool)}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             删除经费池
                           </DropdownMenuItem>
@@ -451,6 +466,19 @@ export function BudgetPoolsTab({ projectDetails }: BudgetPoolsTabProps) {
         onOpenChange={setDetailsDialogOpen}
         budgetPool={selectedPool}
         onEdit={handleEditFromDetails}
+      />
+
+      {/* 删除确认对话框 */}
+      <DeleteBudgetPoolDialog
+        budgetPool={poolToDelete}
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) setPoolToDelete(null)
+        }}
+        onSuccess={() => {
+          setPoolToDelete(null)
+        }}
       />
     </div>
   )
