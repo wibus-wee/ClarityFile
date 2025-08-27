@@ -379,8 +379,7 @@ export const managedFilesRelations = relations(managedFiles, ({ many }) => ({
   documentVersions: many(documentVersions),
   projectAssets: many(projectAssets),
   expenseTrackingsInvoices: many(expenseTrackings), // For invoiceManagedFileId
-  competitionMilestoneNotifications: many(competitionMilestones), // For notificationManagedFileId
-  projectCovers: many(projects) // For project cover images if managed_files stores them directly (but we used project_assets)
+  competitionMilestoneNotifications: many(competitionMilestones) // For notificationManagedFileId
 }))
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
