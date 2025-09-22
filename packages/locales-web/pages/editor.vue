@@ -25,9 +25,9 @@
         <h3 class="text-sm font-medium text-antfu-text mb-3">
           Current Language
         </h3>
-        <select v-model="currentLanguage"
+        <select :value="currentLanguage" @change="handleLanguageChange"
           class="w-full px-3 py-2 text-sm border border-antfu-border bg-antfu-bg text-antfu-text rounded focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-          <option v-for="lang in languages" :key="lang.code" :value="lang.code">
+          <option v-for="lang in availableLanguages" :key="lang.code" :value="lang.code">
             {{ lang.name }} {{ lang.isBase ? '(Base)' : '' }}
           </option>
         </select>
@@ -110,7 +110,11 @@
             </button>
 
             <!-- 添加键按钮 -->
-            <AddKeyPopover :namespace="activeNamespace" :base-language="currentLanguage" @add-key="handleAddKey" />
+            <AddKeyPopover
+              :namespace="activeNamespace"
+              :base-language="baseLanguage?.name || baseLanguage?.code || 'Base'"
+              @add-key="handleAddKey"
+            />
 
             <!-- 添加语言按钮 -->
             <AddLanguagePopover @add-language="handleAddLanguage" />
@@ -135,7 +139,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useTranslationsNew } from '~/composables/useTranslationsNew'
 import { useSettingsNew } from '~/composables/useSettingsNew'
 
@@ -150,7 +154,9 @@ const { isDark, toggleDark } = useSettingsNew()
 // 使用翻译数据
 const {
   namespaces,
+  availableLanguages,
   languages,
+  baseLanguage,
   activeNamespace,
   currentLanguage,
   translationEntries,
@@ -160,9 +166,15 @@ const {
   showOnlyUntranslated,
   untranslatedCount,
   selectNamespace,
+  selectLanguage: selectLanguageInStore,
   toggleUntranslatedFilter,
   loadNamespaces,
-  loadNamespaceTranslations
+  loadNamespaceTranslations,
+  loadAvailableLanguages,
+  addTranslationKey,
+  updateTranslation,
+  addLanguage,
+  dialog
 } = useTranslationsNew()
 
 // 当前命名空间信息
@@ -170,34 +182,175 @@ const currentNamespace = computed(() =>
   namespaces.value.find(ns => ns.name === activeNamespace.value)
 )
 
-// 处理添加新键
-const handleAddKey = (data) => {
-  console.log('Adding new key:', data)
-  // TODO: 实现添加新键的逻辑
-  // 调用 API 添加新键到当前命名空间
+const route = useRoute()
+
+const showAlert = async (message: string) => {
+  if (dialog) {
+    await dialog.alert(message)
+  } else if (import.meta.client) {
+    alert(message)
+  }
 }
 
-// 处理添加新语言
-const handleAddLanguage = (data) => {
-  console.log('Adding new language:', data)
-  // TODO: 实现添加新语言的逻辑
-  // 调用 API 为所有命名空间添加新语言文件
+const handleAddKey = async (data: { key: string; translation: string }) => {
+  if (!activeNamespace.value) {
+    await showAlert('请先选择一个命名空间后再添加翻译键。')
+    return
+  }
+
+  const trimmedKey = data.key.trim()
+  const trimmedTranslation = data.translation.trim()
+  if (!trimmedKey) {
+    await showAlert('翻译键名称不能为空。')
+    return
+  }
+
+  const initialValues: Record<string, any> = {}
+  const baseCode = baseLanguage.value?.code
+  if (baseCode && trimmedTranslation) {
+    initialValues[baseCode] = trimmedTranslation
+  }
+
+  try {
+    const created = await addTranslationKey(trimmedKey, initialValues)
+
+    if (!created) {
+      await showAlert('添加翻译键失败：该键可能已经存在。')
+      return
+    }
+
+    if (baseCode && trimmedTranslation) {
+      updateTranslation(trimmedKey, baseCode, trimmedTranslation)
+    }
+
+    await showAlert('新的翻译键已添加，请记得保存更改。')
+  } catch (error) {
+    console.error('Failed to add translation key:', error)
+    await showAlert('添加翻译键时出现问题，请稍后再试。')
+  }
 }
 
-// 页面加载时获取数据
+const handleAddLanguage = async (data: { code: string; name: string }) => {
+  const languageCode = data.code.trim()
+  const displayName = data.name.trim() || languageCode
+
+  if (!languageCode) {
+    await showAlert('语言代码不能为空。')
+    return
+  }
+
+  try {
+    const created = await addLanguage(languageCode, displayName)
+
+    if (!created) {
+      await showAlert('该语言已存在或创建失败。')
+      return
+    }
+
+    await loadAvailableLanguages()
+    await showAlert(`语言 ${displayName} 已添加。`)
+  } catch (error) {
+    console.error('Failed to add language:', error)
+    await showAlert('添加语言时出现问题，请稍后再试。')
+  }
+}
+
+const ensureNamespaceSelection = async (
+  namespaceName: string | undefined,
+  { forceReload = false }: { forceReload?: boolean } = {}
+) => {
+  if (!namespaceName || typeof namespaceName !== 'string') {
+    return
+  }
+
+  if (!namespaces.value?.some((ns) => ns.name === namespaceName)) {
+    console.warn(`Namespace ${namespaceName} is not available`)
+    return
+  }
+
+  if (namespaceName === activeNamespace.value) {
+    if (forceReload) {
+      await loadNamespaceTranslations(namespaceName)
+    }
+    return
+  }
+
+  await selectNamespace(namespaceName)
+}
+
+const handleLanguageChange = async (event: Event) => {
+  const target = event.target as HTMLSelectElement
+  const nextLanguage = target.value
+
+  if (!nextLanguage || nextLanguage === currentLanguage.value) {
+    return
+  }
+
+  try {
+    const switched = await selectLanguageInStore(nextLanguage)
+    if (!switched && import.meta.client) {
+      target.value = currentLanguage.value
+    }
+  } catch (error) {
+    console.error('Failed to switch language from editor sidebar:', error)
+    await showAlert('切换语言时出现问题，请稍后再试。')
+    if (import.meta.client) {
+      target.value = currentLanguage.value
+    }
+  }
+}
+
 onMounted(async () => {
+  await loadAvailableLanguages()
   await loadNamespaces()
 
-  // 检查URL参数中是否有指定的命名空间
-  const route = useRoute()
-  const namespaceFromQuery = route.query.namespace
+  const namespaceFromQuery = typeof route.query.namespace === 'string'
+    ? route.query.namespace
+    : undefined
 
   if (namespaceFromQuery) {
-    // 如果URL中有命名空间参数，自动选择该命名空间
-    await selectNamespace(namespaceFromQuery)
-  } else if (activeNamespace.value) {
-    // 如果有预选的 namespace，加载其翻译数据
+    await ensureNamespaceSelection(namespaceFromQuery, { forceReload: true })
+    return
+  }
+
+  if (activeNamespace.value) {
     await loadNamespaceTranslations(activeNamespace.value)
+    return
+  }
+
+  if (namespaces.value?.length) {
+    await selectNamespace(namespaces.value[0].name)
   }
 })
+
+watch(
+  () => route.query.namespace,
+  async (namespace) => {
+    if (typeof namespace === 'string') {
+      await ensureNamespaceSelection(namespace, { forceReload: true })
+    }
+  }
+)
+
+watch(
+  () => namespaces.value,
+  async (namespaceList) => {
+    if (!namespaceList || namespaceList.length === 0) {
+      return
+    }
+
+    const namespaceFromQuery = typeof route.query.namespace === 'string'
+      ? route.query.namespace
+      : undefined
+
+    if (namespaceFromQuery) {
+      await ensureNamespaceSelection(namespaceFromQuery)
+      return
+    }
+
+    if (!activeNamespace.value) {
+      await selectNamespace(namespaceList[0].name)
+    }
+  }
+)
 </script>
