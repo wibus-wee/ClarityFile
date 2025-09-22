@@ -5,41 +5,43 @@
       <button
         @click="handleDelete"
         class="p-1 opacity-0 group-hover:opacity-100 text-antfu-text-mute hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
-        title="删除此翻译键"
+        title="Delete this translation key"
       >
         <div class="i-carbon-trash-can text-xs"></div>
       </button>
-      
+
       <!-- 复制按钮 -->
       <button
         @click="handleCopy"
         class="p-1 opacity-0 group-hover:opacity-100 text-antfu-text-mute hover:text-antfu-text hover:bg-antfu-soft rounded transition-all"
-        title="复制翻译键路径"
+        title="Copy translation key path"
       >
         <div class="i-carbon-copy text-xs"></div>
       </button>
-      
+
       <!-- 编辑按钮（用于复杂类型） -->
       <button
         v-if="showEditButton"
         @click="handleEdit"
         class="p-1 opacity-0 group-hover:opacity-100 text-antfu-text-mute hover:text-antfu-text hover:bg-antfu-soft rounded transition-all"
-        title="编辑"
+        title="Edit value"
       >
         <div class="i-carbon-edit text-xs"></div>
       </button>
-      
+
       <!-- 修改状态指示器 -->
       <div
         v-if="isModified"
         class="w-2 h-2 bg-emerald-500 rounded-full"
-        title="已修改"
+        title="Unsaved change"
       ></div>
     </div>
   </td>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useDialog } from '~/composables/useDialog'
 import type { TranslationEntry } from '~/types'
 
 interface Props {
@@ -67,10 +69,17 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 
 const isModified = computed(() => props.entry.isModified)
+const dialog = useDialog()
 
 async function handleDelete() {
-  // 可以添加确认对话框
-  const confirmed = confirm(`确定要删除翻译键 "${props.entry.path}" 吗？`)
+  const confirmed = await dialog.confirm(
+    `Delete translation key "${props.entry.path}"?`,
+    {
+      title: 'Delete translation key',
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    }
+  )
   if (confirmed) {
     emit('delete', props.index)
   }

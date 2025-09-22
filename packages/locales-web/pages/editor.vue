@@ -183,25 +183,26 @@ const currentNamespace = computed(() =>
 )
 
 const route = useRoute()
-
-const showAlert = async (message: string) => {
+const showAlert = async (message: string, options?: { title?: string }) => {
   if (dialog) {
-    await dialog.alert(message)
-  } else if (import.meta.client) {
-    alert(message)
+    await dialog.alert(message, options)
+  } else {
+    console.warn(message)
   }
 }
 
 const handleAddKey = async (data: { key: string; translation: string }) => {
   if (!activeNamespace.value) {
-    await showAlert('请先选择一个命名空间后再添加翻译键。')
+    await showAlert('Select a namespace before adding translation keys.', {
+      title: 'Namespace required'
+    })
     return
   }
 
   const trimmedKey = data.key.trim()
   const trimmedTranslation = data.translation.trim()
   if (!trimmedKey) {
-    await showAlert('翻译键名称不能为空。')
+    await showAlert('The translation key cannot be empty.', { title: 'Missing key' })
     return
   }
 
@@ -215,18 +216,23 @@ const handleAddKey = async (data: { key: string; translation: string }) => {
     const created = await addTranslationKey(trimmedKey, initialValues)
 
     if (!created) {
-      await showAlert('添加翻译键失败：该键可能已经存在。')
+      await showAlert('Failed to add the translation key. It may already exist.', {
+        title: 'Operation failed'
+      })
       return
     }
 
     if (baseCode && trimmedTranslation) {
       updateTranslation(trimmedKey, baseCode, trimmedTranslation)
     }
-
-    await showAlert('新的翻译键已添加，请记得保存更改。')
+    await showAlert('New translation key added. Remember to save your changes.', {
+      title: 'Translation key added'
+    })
   } catch (error) {
     console.error('Failed to add translation key:', error)
-    await showAlert('添加翻译键时出现问题，请稍后再试。')
+    await showAlert('Something went wrong while adding the translation key. Please try again.', {
+      title: 'Operation failed'
+    })
   }
 }
 
@@ -235,7 +241,7 @@ const handleAddLanguage = async (data: { code: string; name: string }) => {
   const displayName = data.name.trim() || languageCode
 
   if (!languageCode) {
-    await showAlert('语言代码不能为空。')
+    await showAlert('Language code is required.', { title: 'Missing language code' })
     return
   }
 
@@ -243,15 +249,21 @@ const handleAddLanguage = async (data: { code: string; name: string }) => {
     const created = await addLanguage(languageCode, displayName)
 
     if (!created) {
-      await showAlert('该语言已存在或创建失败。')
+      await showAlert('The language already exists or could not be created.', {
+        title: 'Operation failed'
+      })
       return
     }
 
     await loadAvailableLanguages()
-    await showAlert(`语言 ${displayName} 已添加。`)
+    await showAlert(`Language ${displayName} has been added.`, {
+      title: 'Language created'
+    })
   } catch (error) {
     console.error('Failed to add language:', error)
-    await showAlert('添加语言时出现问题，请稍后再试。')
+    await showAlert('Something went wrong while adding the language. Please try again.', {
+      title: 'Operation failed'
+    })
   }
 }
 
@@ -293,7 +305,10 @@ const handleLanguageChange = async (event: Event) => {
     }
   } catch (error) {
     console.error('Failed to switch language from editor sidebar:', error)
-    await showAlert('切换语言时出现问题，请稍后再试。')
+    await showAlert('We ran into a problem while switching languages. Please try again.', {
+      title: 'Language switch failed'
+    })
+
     if (import.meta.client) {
       target.value = currentLanguage.value
     }

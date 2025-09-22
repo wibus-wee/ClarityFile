@@ -7,11 +7,15 @@
     <main class="max-w-6xl mx-auto h-[calc(100vh-3rem)]">
       <slot />
     </main>
+
+    <!-- 全局对话框 -->
+    <GlobalDialog />
   </div>
 </template>
 
 <script setup>
 import { useSettingsNew } from '~/composables/useSettingsNew'
+import GlobalDialog from '~/components/GlobalDialog.vue'
 
 // 初始化设置
 const { isDark } = useSettingsNew()

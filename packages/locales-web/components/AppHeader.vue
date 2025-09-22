@@ -120,7 +120,7 @@ const languageSelectorRef = ref()
 
 // 可用语言列表
 const fallbackLanguages = [
-  { code: 'zh-CN', name: '简体中文' },
+  { code: 'zh-CN', name: 'Simplified Chinese' },
   { code: 'en-US', name: 'English' }
 ]
 
@@ -192,7 +192,9 @@ async function selectLanguage(languageCode: string) {
   } catch (error) {
     console.error('Failed to switch language:', error)
     if (dialog) {
-      await dialog.alert('切换语言时出现问题，请稍后再试。')
+      await dialog.alert('We ran into a problem while switching languages. Please try again.', {
+        title: 'Language switch failed'
+      })
     }
   }
 }

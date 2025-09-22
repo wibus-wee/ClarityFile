@@ -1,5 +1,13 @@
 import { defineStore } from 'pinia'
+import { useDialog } from '~/composables/useDialog'
 import type { Language, Namespace, TranslationEntry, ApiResponse, TranslationsState } from '~/types'
+
+const getDialog = () => {
+  if (import.meta.client) {
+    return useDialog()
+  }
+  return null
+}
 
 // 检查值是否未翻译的辅助函数
 function isValueUntranslated(value: any): boolean {
@@ -190,22 +198,44 @@ export const useTranslationsStore = defineStore('translations', {
     },
 
     // 选择命名空间
-    async selectNamespace(namespace: string) {
-      // 如果选择的是当前命名空间，直接返回
-      if (this.activeNamespace === namespace) {
-        return
+    async selectNamespace(namespace: string): Promise<boolean> {
+      if (!namespace || this.activeNamespace === namespace) {
+        return true
       }
 
+      const dialog = getDialog()
+
       if (this.hasUnsavedChanges) {
-        const shouldSave = confirm('有未保存的修改，是否保存？')
-        if (shouldSave) {
-          await this.saveAllChanges()
+        if (dialog) {
+          const shouldSave = await dialog.confirm(
+            'You have unsaved changes. Save them before switching namespaces? Choosing "Skip" will discard those edits.',
+            {
+              title: 'Unsaved changes',
+              confirmText: 'Save & Switch',
+              cancelText: 'Skip Save'
+            }
+          )
+
+          if (shouldSave) {
+            const saved = await this.saveAllChanges()
+            if (!saved) {
+              await dialog.alert(
+                'We could not save your changes. Resolve the issue and try again before switching namespaces.',
+                { title: 'Save failed' }
+              )
+              return false
+            }
+          }
+        } else {
+          const saved = await this.saveAllChanges()
+          if (!saved) {
+            return false
+          }
         }
       }
 
       this.activeNamespace = namespace
 
-      // 更新 URL 参数
       if (import.meta.client) {
         const router = useRouter()
         await router.push({
@@ -214,6 +244,7 @@ export const useTranslationsStore = defineStore('translations', {
       }
 
       await this.loadNamespaceTranslations(namespace)
+      return true
     },
 
     // 语言选择管理 - 改为单选
@@ -223,30 +254,48 @@ export const useTranslationsStore = defineStore('translations', {
       }
 
       const targetLanguage = this.availableLanguages.find((lang) => lang.code === languageCode)
+
+      const dialog = getDialog()
+
       if (!targetLanguage) {
         console.warn(`Language ${languageCode} is not registered in availableLanguages`)
-        if (import.meta.client) {
-          alert('所选语言不存在，请刷新后重试')
-        }
+        await dialog?.alert('The selected language is not available. Please refresh and try again.', {
+          title: 'Language unavailable'
+        })
+
         return false
       }
 
       if (this.hasUnsavedChanges) {
-        let shouldProceed = true
-        if (import.meta.client) {
-          shouldProceed = confirm('存在未保存的改动，切换语言会先保存这些更改，是否继续？')
-        }
 
-        if (!shouldProceed) {
-          return false
-        }
+        if (dialog) {
+          const shouldProceed = await dialog.confirm(
+            'Switching languages will save your pending edits first. Continue?',
+            {
+              title: 'Unsaved changes',
+              confirmText: 'Save & Switch',
+              cancelText: 'Stay'
+            }
+          )
 
-        const saved = await this.saveAllChanges()
-        if (!saved) {
-          if (import.meta.client) {
-            alert('保存失败，已取消语言切换，请稍后重试。')
+          if (!shouldProceed) {
+            return false
           }
-          return false
+
+          const saved = await this.saveAllChanges()
+          if (!saved) {
+            await dialog.alert(
+              'We could not save your changes, so the language was not switched. Please try again.',
+              { title: 'Save failed' }
+            )
+            return false
+          }
+        } else {
+          const saved = await this.saveAllChanges()
+          if (!saved) {
+            return false
+          }
+
         }
       }
 
@@ -311,10 +360,7 @@ export const useTranslationsStore = defineStore('translations', {
       // 检查键是否已存在
       const exists = this.translationEntries.some((entry) => entry.path === keyPath)
       if (exists) {
-        // 简单的 alert，避免复杂的依赖
-        if (import.meta.client) {
-          alert('该键已存在')
-        }
+        console.warn(`Translation key "${keyPath}" already exists in ${this.activeNamespace}`)
         return false
       }
 
@@ -364,9 +410,7 @@ export const useTranslationsStore = defineStore('translations', {
       // 检查语言是否已存在
       const exists = this.availableLanguages.some((lang) => lang.code === code)
       if (exists) {
-        if (import.meta.client) {
-          alert('该语言已存在')
-        }
+        console.warn(`Language ${code} already exists in the available list`)
         return false
       }
 
@@ -392,9 +436,7 @@ export const useTranslationsStore = defineStore('translations', {
         // 检查语言是否已存在
         const exists = this.availableLanguages.some((lang) => lang.code === code)
         if (exists) {
-          if (import.meta.client) {
-            alert('该语言已存在')
-          }
+          console.warn(`Language ${code} already exists in the available list`)
           return false
         }
 
@@ -418,17 +460,13 @@ export const useTranslationsStore = defineStore('translations', {
 
           return true
         } else {
-          if (import.meta.client) {
-            alert('添加语言失败')
-          }
           return false
         }
       } catch (error) {
         console.error('Error adding language:', error)
         const errorMessage = error instanceof Error ? error.message : String(error)
-        if (import.meta.client) {
-          alert(`添加语言失败: ${errorMessage}`)
-        }
+        const dialog = getDialog()
+        await dialog?.alert(`Failed to add language: ${errorMessage}`, { title: 'Operation failed' })
         return false
       }
     },

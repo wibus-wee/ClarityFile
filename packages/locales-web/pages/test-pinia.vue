@@ -113,6 +113,7 @@
 import { useTranslationsNew } from '~/composables/useTranslationsNew'
 import { useSettingsNew } from '~/composables/useSettingsNew'
 import { useFileSystemNew } from '~/composables/useFileSystemNew'
+import { useDialog } from '~/composables/useDialog'
 
 // 设置页面标题
 useHead({
@@ -123,6 +124,7 @@ useHead({
 const settings = useSettingsNew()
 const translations = useTranslationsNew()
 const fileSystem = useFileSystemNew()
+const dialog = useDialog()
 
 // 测试方法
 const reloadPage = () => {
@@ -131,11 +133,13 @@ const reloadPage = () => {
   }
 }
 
-const exportSettings = () => {
+const exportSettings = async () => {
   const settingsJson = settings.exportSettings()
   console.log('导出的设置:', settingsJson)
   if (import.meta.client) {
-    alert('设置已导出到控制台')
+    await dialog.alert('Settings have been logged to the console.', {
+      title: 'Export complete'
+    })
   }
 }
 
@@ -149,32 +153,40 @@ const testBatchUpdate = async () => {
   const result = await translations.batchUpdateTranslations(updates)
   console.log('批量更新结果:', result)
   if (import.meta.client) {
-    alert(`批量更新完成: 成功 ${result.success}, 失败 ${result.failed}`)
+    await dialog.alert(`Batch update complete: ${result.success} succeeded, ${result.failed} failed.`, {
+      title: 'Batch update'
+    })
   }
 }
 
-const testExportJson = () => {
+const testExportJson = async () => {
   const jsonData = translations.exportTranslations('json')
   console.log('导出的 JSON 数据:', jsonData)
   if (import.meta.client) {
-    alert('JSON 数据已导出到控制台')
+    await dialog.alert('JSON export has been logged to the console.', {
+      title: 'Export complete'
+    })
   }
 }
 
-const testExportCsv = () => {
+const testExportCsv = async () => {
   const csvData = translations.exportTranslations('csv')
   console.log('导出的 CSV 数据:', csvData)
   if (import.meta.client) {
-    alert('CSV 数据已导出到控制台')
+    await dialog.alert('CSV export has been logged to the console.', {
+      title: 'Export complete'
+    })
   }
 }
 
-const resetAllStores = () => {
+const resetAllStores = async () => {
   translations.resetStore()
   settings.resetSettings()
   fileSystem.clearError()
   if (import.meta.client) {
-    alert('所有状态已重置')
+    await dialog.alert('All store state has been reset.', {
+      title: 'Reset complete'
+    })
   }
 }
 
