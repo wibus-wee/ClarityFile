@@ -31,7 +31,7 @@
             <div class="text-sm text-gray-500 dark:text-gray-400">Translation Keys</div>
           </div>
           <div>
-            <div class="text-2xl font-light text-gray-900 dark:text-gray-100 mb-1">{{ languages.length || 2 }}</div>
+            <div class="text-2xl font-light text-gray-900 dark:text-gray-100 mb-1">{{ languageCount || 0 }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Languages</div>
           </div>
           <div>
@@ -137,7 +137,7 @@ useHead({
 const { isDark, toggleDark } = useSettingsNew()
 
 // 使用翻译数据
-const { namespaces, languages, loadNamespaces } = useTranslationsNew()
+const { namespaces, availableLanguages, loadNamespaces, loadAvailableLanguages } = useTranslationsNew()
 
 // 计算统计信息
 const totalKeys = computed(() => {
@@ -151,9 +151,11 @@ const averageProgress = computed(() => {
   return Math.round(total / namespaces.value.length)
 })
 
+const languageCount = computed(() => availableLanguages.value?.length || 0)
+
 // 刷新命名空间
 async function refreshNamespaces() {
-  await loadNamespaces()
+  await Promise.all([loadAvailableLanguages(), loadNamespaces()])
 }
 
 // 导航到指定命名空间
@@ -163,7 +165,8 @@ async function navigateToNamespace(namespaceName) {
 }
 
 // 页面加载时获取数据
-onMounted(() => {
-  loadNamespaces()
+onMounted(async () => {
+  await loadAvailableLanguages()
+  await loadNamespaces()
 })
 </script>

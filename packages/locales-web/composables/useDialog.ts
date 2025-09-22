@@ -1,6 +1,8 @@
-import { ref } from 'vue'
+import type { Ref } from 'vue'
+import { readonly, ref } from 'vue'
+import { createGlobalState } from '@vueuse/core'
 
-interface DialogOptions {
+export interface DialogOptions {
   title?: string
   message?: string
   type?: 'alert' | 'confirm' | 'prompt'
@@ -9,19 +11,35 @@ interface DialogOptions {
   cancelText?: string
 }
 
-export const useDialog = () => {
+interface DialogState {
+  isOpen: Ref<boolean>
+  dialogOptions: Ref<DialogOptions>
+  alert: (message: string, options?: Pick<DialogOptions, 'title' | 'confirmText'>) => Promise<void>
+  confirm: (
+    message: string,
+    options?: Pick<DialogOptions, 'title' | 'confirmText' | 'cancelText'>
+  ) => Promise<boolean>
+  prompt: (
+    message: string,
+    options?: Pick<DialogOptions, 'title' | 'placeholder' | 'confirmText' | 'cancelText'>
+  ) => Promise<string | null>
+  handleConfirm: (value?: any) => void
+  handleCancel: () => void
+  closeDialog: () => void
+}
+
+const useDialogState = createGlobalState<() => DialogState>(() => {
   const isOpen = ref(false)
-  const dialogOptions = ref<DialogOptions>({})
+  const dialogOptions = ref<DialogOptions>({ type: 'alert' })
   const resolvePromise = ref<((value: any) => void) | null>(null)
   const rejectPromise = ref<((reason?: any) => void) | null>(null)
 
-  // 显示对话框的通用方法
   const showDialog = (options: DialogOptions): Promise<any> => {
     return new Promise((resolve, reject) => {
       dialogOptions.value = {
         type: 'alert',
-        confirmText: '确定',
-        cancelText: '取消',
+        confirmText: 'OK',
+        cancelText: 'Cancel',
         ...options
       }
 
@@ -31,45 +49,51 @@ export const useDialog = () => {
     })
   }
 
-  // 显示警告对话框
-  const alert = (message: string, title?: string): Promise<void> => {
+  const alert = (
+    message: string,
+    options: Pick<DialogOptions, 'title' | 'confirmText'> = {}
+  ): Promise<void> => {
     return showDialog({
       type: 'alert',
       message,
-      title: title || '提示'
+      title: options.title || 'Notice',
+      confirmText: options.confirmText || 'OK'
     })
   }
 
-  // 显示确认对话框
-  const confirm = (message: string, title?: string): Promise<boolean> => {
+  const confirm = (
+    message: string,
+    options: Pick<DialogOptions, 'title' | 'confirmText' | 'cancelText'> = {}
+  ): Promise<boolean> => {
     return showDialog({
       type: 'confirm',
       message,
-      title: title || '确认'
+      title: options.title || 'Confirmation',
+      confirmText: options.confirmText || 'Confirm',
+      cancelText: options.cancelText || 'Cancel'
     })
   }
 
-  // 显示输入对话框
   const prompt = (
     message: string,
-    placeholder?: string,
-    title?: string
+    options: Pick<DialogOptions, 'title' | 'placeholder' | 'confirmText' | 'cancelText'> = {}
   ): Promise<string | null> => {
     return showDialog({
       type: 'prompt',
       message,
-      placeholder,
-      title: title || '输入'
+      title: options.title || 'Input',
+      placeholder: options.placeholder,
+      confirmText: options.confirmText || 'Confirm',
+      cancelText: options.cancelText || 'Cancel'
     })
   }
 
-  // 处理确认
   const handleConfirm = (value?: any) => {
     if (resolvePromise.value) {
       if (dialogOptions.value.type === 'confirm') {
         resolvePromise.value(true)
       } else if (dialogOptions.value.type === 'prompt') {
-        resolvePromise.value(value || null)
+        resolvePromise.value(value ?? null)
       } else {
         resolvePromise.value(undefined)
       }
@@ -77,43 +101,46 @@ export const useDialog = () => {
     closeDialog()
   }
 
-  // 处理取消
   const handleCancel = () => {
     if (dialogOptions.value.type === 'confirm') {
-      if (resolvePromise.value) {
-        resolvePromise.value(false)
-      }
+      resolvePromise.value?.(false)
     } else if (dialogOptions.value.type === 'prompt') {
-      if (resolvePromise.value) {
-        resolvePromise.value(null)
-      }
+      resolvePromise.value?.(null)
     } else {
-      if (rejectPromise.value) {
-        rejectPromise.value()
-      }
+      rejectPromise.value?.()
     }
     closeDialog()
   }
 
-  // 关闭对话框
   const closeDialog = () => {
     isOpen.value = false
     resolvePromise.value = null
     rejectPromise.value = null
-    dialogOptions.value = {}
+    dialogOptions.value = { type: 'alert' }
   }
 
   return {
-    // 状态
-    isOpen: readonly(isOpen),
-    dialogOptions: readonly(dialogOptions),
-
-    // 方法
+    isOpen,
+    dialogOptions,
     alert,
     confirm,
     prompt,
     handleConfirm,
     handleCancel,
     closeDialog
+  }
+})
+
+export const useDialog = () => {
+  const state = useDialogState()
+  return {
+    isOpen: readonly(state.isOpen),
+    dialogOptions: readonly(state.dialogOptions),
+    alert: state.alert,
+    confirm: state.confirm,
+    prompt: state.prompt,
+    handleConfirm: state.handleConfirm,
+    handleCancel: state.handleCancel,
+    closeDialog: state.closeDialog
   }
 }

@@ -1,5 +1,13 @@
 import { defineStore } from 'pinia'
+import { useDialog } from '~/composables/useDialog'
 import type { Language, Namespace, TranslationEntry, ApiResponse, TranslationsState } from '~/types'
+
+const getDialog = () => {
+  if (import.meta.client) {
+    return useDialog()
+  }
+  return null
+}
 
 // 检查值是否未翻译的辅助函数
 function isValueUntranslated(value: any): boolean {
@@ -190,22 +198,44 @@ export const useTranslationsStore = defineStore('translations', {
     },
 
     // 选择命名空间
-    async selectNamespace(namespace: string) {
-      // 如果选择的是当前命名空间，直接返回
-      if (this.activeNamespace === namespace) {
-        return
+    async selectNamespace(namespace: string): Promise<boolean> {
+      if (!namespace || this.activeNamespace === namespace) {
+        return true
       }
 
+      const dialog = getDialog()
+
       if (this.hasUnsavedChanges) {
-        const shouldSave = confirm('有未保存的修改，是否保存？')
-        if (shouldSave) {
-          await this.saveAllChanges()
+        if (dialog) {
+          const shouldSave = await dialog.confirm(
+            'You have unsaved changes. Save them before switching namespaces? Choosing "Skip" will discard those edits.',
+            {
+              title: 'Unsaved changes',
+              confirmText: 'Save & Switch',
+              cancelText: 'Skip Save'
+            }
+          )
+
+          if (shouldSave) {
+            const saved = await this.saveAllChanges()
+            if (!saved) {
+              await dialog.alert(
+                'We could not save your changes. Resolve the issue and try again before switching namespaces.',
+                { title: 'Save failed' }
+              )
+              return false
+            }
+          }
+        } else {
+          const saved = await this.saveAllChanges()
+          if (!saved) {
+            return false
+          }
         }
       }
 
       this.activeNamespace = namespace
 
-      // 更新 URL 参数
       if (import.meta.client) {
         const router = useRouter()
         await router.push({
@@ -214,11 +244,64 @@ export const useTranslationsStore = defineStore('translations', {
       }
 
       await this.loadNamespaceTranslations(namespace)
+      return true
     },
 
     // 语言选择管理 - 改为单选
-    selectLanguage(languageCode: string) {
+    async selectLanguage(languageCode: string): Promise<boolean> {
+      if (!languageCode || languageCode === this.currentLanguage) {
+        return true
+      }
+
+      const targetLanguage = this.availableLanguages.find((lang) => lang.code === languageCode)
+      const dialog = getDialog()
+
+      if (!targetLanguage) {
+        console.warn(`Language ${languageCode} is not registered in availableLanguages`)
+        await dialog?.alert('The selected language is not available. Please refresh and try again.', {
+          title: 'Language unavailable'
+        })
+        return false
+      }
+
+      if (this.hasUnsavedChanges) {
+        if (dialog) {
+          const shouldProceed = await dialog.confirm(
+            'Switching languages will save your pending edits first. Continue?',
+            {
+              title: 'Unsaved changes',
+              confirmText: 'Save & Switch',
+              cancelText: 'Stay'
+            }
+          )
+
+          if (!shouldProceed) {
+            return false
+          }
+
+          const saved = await this.saveAllChanges()
+          if (!saved) {
+            await dialog.alert(
+              'We could not save your changes, so the language was not switched. Please try again.',
+              { title: 'Save failed' }
+            )
+            return false
+          }
+        } else {
+          const saved = await this.saveAllChanges()
+          if (!saved) {
+            return false
+          }
+        }
+      }
+
       this.currentLanguage = languageCode
+
+      if (this.activeNamespace) {
+        await this.loadNamespaceTranslations(this.activeNamespace)
+      }
+
+      return true
     },
 
     // 切换筛选状态
@@ -264,35 +347,55 @@ export const useTranslationsStore = defineStore('translations', {
     },
 
     // 添加新的翻译键
-    async addTranslationKey(keyPath: string): Promise<boolean> {
+    async addTranslationKey(
+      keyPath: string,
+      initialValues: Record<string, any> = {}
+    ): Promise<boolean> {
       if (!this.activeNamespace) return false
 
       // 检查键是否已存在
       const exists = this.translationEntries.some((entry) => entry.path === keyPath)
       if (exists) {
-        // 简单的 alert，避免复杂的依赖
-        if (import.meta.client) {
-          alert('该键已存在')
-        }
+        console.warn(`Translation key "${keyPath}" already exists in ${this.activeNamespace}`)
         return false
+      }
+
+      const languageSources = this.availableLanguages.length
+        ? this.availableLanguages
+        : this.languages
+
+      const values = languageSources.reduce(
+        (acc, lang) => {
+          acc[lang.code] = initialValues[lang.code] ?? ''
+          return acc
+        },
+        {} as Record<string, any>
+      )
+
+      const sampleValue = values[this.baseLanguage.code]
+      let detectedType: 'string' | 'array' | 'object' | 'number' | 'boolean' = 'string'
+
+      if (Array.isArray(sampleValue)) {
+        detectedType = 'array'
+      } else if (typeof sampleValue === 'object' && sampleValue !== null) {
+        detectedType = 'object'
+      } else if (typeof sampleValue === 'number') {
+        detectedType = 'number'
+      } else if (typeof sampleValue === 'boolean') {
+        detectedType = 'boolean'
       }
 
       // 添加新条目
       const newEntry: TranslationEntry = {
         key: keyPath.split('.').pop() || keyPath,
         path: keyPath,
-        values: this.languages.reduce(
-          (acc, lang) => {
-            acc[lang.code] = ''
-            return acc
-          },
-          {} as Record<string, any>
-        ),
-        type: 'string',
+        values,
+        type: detectedType,
         isModified: true
       }
 
       this.translationEntries.push(newEntry)
+      this.translationEntries.sort((a, b) => a.path.localeCompare(b.path))
       this.hasUnsavedChanges = true
 
       return true
@@ -303,9 +406,7 @@ export const useTranslationsStore = defineStore('translations', {
       // 检查语言是否已存在
       const exists = this.availableLanguages.some((lang) => lang.code === code)
       if (exists) {
-        if (import.meta.client) {
-          alert('该语言已存在')
-        }
+        console.warn(`Language ${code} already exists in the available list`)
         return false
       }
 
@@ -331,9 +432,7 @@ export const useTranslationsStore = defineStore('translations', {
         // 检查语言是否已存在
         const exists = this.availableLanguages.some((lang) => lang.code === code)
         if (exists) {
-          if (import.meta.client) {
-            alert('该语言已存在')
-          }
+          console.warn(`Language ${code} already exists in the available list`)
           return false
         }
 
@@ -357,17 +456,13 @@ export const useTranslationsStore = defineStore('translations', {
 
           return true
         } else {
-          if (import.meta.client) {
-            alert('添加语言失败')
-          }
           return false
         }
       } catch (error) {
         console.error('Error adding language:', error)
         const errorMessage = error instanceof Error ? error.message : String(error)
-        if (import.meta.client) {
-          alert(`添加语言失败: ${errorMessage}`)
-        }
+        const dialog = getDialog()
+        await dialog?.alert(`Failed to add language: ${errorMessage}`, { title: 'Operation failed' })
         return false
       }
     },
@@ -378,7 +473,20 @@ export const useTranslationsStore = defineStore('translations', {
         const response =
           await $fetch<ApiResponse<{ languages: Language[]; count: number }>>('/api/languages')
         if (response.success && response.data) {
-          this.availableLanguages = response.data.languages
+          const previousLanguages = new Map(
+            this.availableLanguages.map((lang) => [lang.code, lang])
+          )
+
+          this.availableLanguages = response.data.languages.map((lang) => {
+            const existing = previousLanguages.get(lang.code)
+            if (existing) {
+              return {
+                ...lang,
+                name: existing.name || lang.name
+              }
+            }
+            return lang
+          })
 
           // 如果当前语言不在可用语言中，切换到基准语言
           const currentExists = this.availableLanguages.some(

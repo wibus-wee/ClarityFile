@@ -143,9 +143,23 @@ export const useTranslations = () => {
     }
 
     if (hasUnsavedChanges.value) {
-      const shouldSave = confirm('有未保存的修改，是否保存？')
+      const shouldSave = await dialog.confirm(
+        'You have unsaved changes. Save them before switching namespaces? Choosing "Skip" will discard those edits.',
+        {
+          title: 'Unsaved changes',
+          confirmText: 'Save & Switch',
+          cancelText: 'Skip Save'
+        }
+      )
       if (shouldSave) {
-        await saveAllChanges()
+        const saved = await saveAllChanges()
+        if (!saved) {
+          await dialog.alert(
+            'We could not save your changes. Resolve the issue and try again before switching namespaces.',
+            { title: 'Save failed' }
+          )
+          return
+        }
       }
     }
 
@@ -338,7 +352,9 @@ export const useTranslations = () => {
     // 检查键是否已存在
     const exists = translationEntries.value.some((entry) => entry.path === keyPath)
     if (exists) {
-      await dialog.alert('该键已存在')
+      await dialog.alert('This translation key already exists.', {
+        title: 'Duplicate key'
+      })
       return false
     }
 
@@ -399,7 +415,9 @@ export const useTranslations = () => {
     // 检查语言是否已存在
     const exists = availableLanguages.value.some((lang) => lang.code === code)
     if (exists) {
-      await dialog.alert('该语言已存在')
+      await dialog.alert('This language already exists.', {
+        title: 'Duplicate language'
+      })
       return false
     }
 
@@ -425,7 +443,9 @@ export const useTranslations = () => {
       // 检查语言是否已存在
       const exists = availableLanguages.value.some((lang) => lang.code === code)
       if (exists) {
-        await dialog.alert('该语言已存在')
+        await dialog.alert('This language already exists.', {
+          title: 'Duplicate language'
+        })
         return false
       }
 
@@ -449,13 +469,17 @@ export const useTranslations = () => {
 
         return true
       } else {
-        await dialog.alert('添加语言失败')
+        await dialog.alert('Failed to create the language file. Please try again.', {
+          title: 'Operation failed'
+        })
         return false
       }
     } catch (error) {
       console.error('Error adding language:', error)
       const errorMessage = error instanceof Error ? error.message : String(error)
-      await dialog.alert(`添加语言失败: ${errorMessage}`)
+      await dialog.alert(`Failed to add the language: ${errorMessage}`, {
+        title: 'Operation failed'
+      })
       return false
     }
   }
