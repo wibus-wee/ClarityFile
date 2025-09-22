@@ -267,7 +267,20 @@ export function ExpenseFormDrawer({
 
       // 如果选择了发票文件，先上传
       if (selectedFile && selectedFile.trim()) {
-        invoiceManagedFileId = await uploadInvoiceFile(selectedFile, data)
+        try {
+          invoiceManagedFileId = await uploadInvoiceFile(selectedFile, data)
+          // 确保文件上传成功后才有有效的 managedFileId
+          if (!invoiceManagedFileId) {
+            throw new Error('文件上传失败：未能获取有效的文件ID')
+          }
+        } catch (fileUploadError) {
+          // 文件上传失败时，显示错误并停止整个流程
+          toast.error(
+            `发票文件上传失败：${fileUploadError instanceof Error ? fileUploadError.message : '未知错误'}`
+          )
+          console.error('发票文件上传失败:', fileUploadError)
+          return // 直接返回，不继续创建经费记录
+        }
       }
 
       if (mode === 'create') {

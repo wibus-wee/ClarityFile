@@ -26,7 +26,8 @@ import {
   Receipt,
   CheckCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  Trash2
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -41,6 +42,7 @@ import { Shortcut } from '@renderer/components/shortcuts'
 import { ExpenseFormDrawer } from './drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from '../expenses/expense-details-dialog'
 import { ExpenseStatusDialog } from '../expenses/expense-status-dialog'
+import { DeleteExpenseDialog } from '../expenses/delete-expense-dialog'
 import type { ProjectDetailsOutput } from '@main/types/project-schemas'
 import type { ExpenseTrackingOutput } from '@main/types/expense-schemas'
 
@@ -93,6 +95,7 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   const [expenseFormMode, setExpenseFormMode] = useState<'create' | 'edit'>('create')
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<ExpenseTrackingOutput | null>(null)
 
   // 处理创建操作
@@ -132,6 +135,12 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
   // 处理成功回调
   const handleSuccess = () => {
     // SWR 会自动重新验证数据
+  }
+
+  // 处理删除操作
+  const handleDelete = (expense: ExpenseTrackingOutput) => {
+    setSelectedExpense(expense)
+    setDeleteDialogOpen(true)
   }
 
   // 获取所有状态
@@ -429,7 +438,13 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
                             更新状态
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(expense)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            删除记录
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -477,12 +492,24 @@ export function ExpensesTab({ projectDetails }: ExpensesTabProps) {
           setDetailsDialogOpen(false)
           handleUpdateStatus(expense)
         }}
+        onDelete={(expense) => {
+          setDetailsDialogOpen(false)
+          handleDelete(expense)
+        }}
       />
 
       {/* 状态更新对话框 */}
       <ExpenseStatusDialog
         open={statusDialogOpen}
         onOpenChange={setStatusDialogOpen}
+        expense={selectedExpense}
+        onSuccess={handleSuccess}
+      />
+
+      {/* 删除确认对话框 */}
+      <DeleteExpenseDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
         expense={selectedExpense}
         onSuccess={handleSuccess}
       />

@@ -9,7 +9,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@clarity/shadcn/ui/dropdown-menu'
-import { DollarSign, Calendar, Edit, Eye, MoreHorizontal, User, Receipt, Plus } from 'lucide-react'
+import {
+  DollarSign,
+  Calendar,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  User,
+  Receipt,
+  Plus,
+  Trash2
+} from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { Link } from '@tanstack/react-router'
 import useSWR from 'swr'
@@ -17,6 +27,7 @@ import { tipcClient } from '@renderer/lib/tipc-client'
 import { ExpenseFormDrawer } from '@renderer/components/project-details/drawers/expense-form-drawer'
 import { ExpenseDetailsDialog } from './expense-details-dialog'
 import { ExpenseStatusDialog } from './expense-status-dialog'
+import { DeleteExpenseDialog } from './delete-expense-dialog'
 import type { ExpenseTrackingOutput } from '@main/types/expense-schemas'
 
 interface ExpenseListProps {
@@ -33,6 +44,7 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<ExpenseItem | null>(null)
 
   // 获取经费数据
@@ -57,6 +69,11 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
   const handleUpdateStatus = (expense: ExpenseItem) => {
     setSelectedExpense(expense)
     setStatusDialogOpen(true)
+  }
+
+  const handleDelete = (expense: ExpenseItem) => {
+    setSelectedExpense(expense)
+    setDeleteDialogOpen(true)
   }
 
   const handleSuccess = () => {
@@ -235,7 +252,13 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
                             更新状态
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">删除记录</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(expense)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            删除记录
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -282,12 +305,24 @@ export function ExpenseList({ searchQuery, sortBy, filterStatus, projectId }: Ex
           setDetailsDialogOpen(false)
           handleUpdateStatus(expense)
         }}
+        onDelete={(expense) => {
+          setDetailsDialogOpen(false)
+          handleDelete(expense)
+        }}
       />
 
       {/* 状态更新对话框 */}
       <ExpenseStatusDialog
         open={statusDialogOpen}
         onOpenChange={setStatusDialogOpen}
+        expense={selectedExpense}
+        onSuccess={handleSuccess}
+      />
+
+      {/* 删除确认对话框 */}
+      <DeleteExpenseDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
         expense={selectedExpense}
         onSuccess={handleSuccess}
       />

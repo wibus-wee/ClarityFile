@@ -64,6 +64,19 @@ export class ExpenseTrackingService {
       throw new Error('经费池不属于指定的项目')
     }
 
+    // 如果提供了发票文件ID，验证该文件是否存在
+    if (input.invoiceManagedFileId) {
+      const managedFile = await db
+        .select()
+        .from(managedFiles)
+        .where(eq(managedFiles.id, input.invoiceManagedFileId))
+        .limit(1)
+
+      if (!managedFile[0]) {
+        throw new Error('指定的发票文件不存在')
+      }
+    }
+
     const result = await db
       .insert(expenseTrackings)
       .values({
@@ -148,6 +161,19 @@ export class ExpenseTrackingService {
         if (currentBudgetPool[0] && currentBudgetPool[0].projectId !== finalProjectId) {
           throw new Error('当前经费池不属于新项目，请同时更新经费池')
         }
+      }
+    }
+
+    // 如果更新了发票文件ID，验证该文件是否存在
+    if (input.invoiceManagedFileId !== undefined && input.invoiceManagedFileId !== null) {
+      const managedFile = await db
+        .select()
+        .from(managedFiles)
+        .where(eq(managedFiles.id, input.invoiceManagedFileId))
+        .limit(1)
+
+      if (!managedFile[0]) {
+        throw new Error('指定的发票文件不存在')
       }
     }
 
