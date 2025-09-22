@@ -217,8 +217,46 @@ export const useTranslationsStore = defineStore('translations', {
     },
 
     // 语言选择管理 - 改为单选
-    selectLanguage(languageCode: string) {
+    async selectLanguage(languageCode: string): Promise<boolean> {
+      if (!languageCode || languageCode === this.currentLanguage) {
+        return true
+      }
+
+      const targetLanguage = this.availableLanguages.find((lang) => lang.code === languageCode)
+      if (!targetLanguage) {
+        console.warn(`Language ${languageCode} is not registered in availableLanguages`)
+        if (import.meta.client) {
+          alert('所选语言不存在，请刷新后重试')
+        }
+        return false
+      }
+
+      if (this.hasUnsavedChanges) {
+        let shouldProceed = true
+        if (import.meta.client) {
+          shouldProceed = confirm('存在未保存的改动，切换语言会先保存这些更改，是否继续？')
+        }
+
+        if (!shouldProceed) {
+          return false
+        }
+
+        const saved = await this.saveAllChanges()
+        if (!saved) {
+          if (import.meta.client) {
+            alert('保存失败，已取消语言切换，请稍后重试。')
+          }
+          return false
+        }
+      }
+
       this.currentLanguage = languageCode
+
+      if (this.activeNamespace) {
+        await this.loadNamespaceTranslations(this.activeNamespace)
+      }
+
+      return true
     },
 
     // 切换筛选状态
@@ -264,7 +302,10 @@ export const useTranslationsStore = defineStore('translations', {
     },
 
     // 添加新的翻译键
-    async addTranslationKey(keyPath: string): Promise<boolean> {
+    async addTranslationKey(
+      keyPath: string,
+      initialValues: Record<string, any> = {}
+    ): Promise<boolean> {
       if (!this.activeNamespace) return false
 
       // 检查键是否已存在
@@ -277,22 +318,42 @@ export const useTranslationsStore = defineStore('translations', {
         return false
       }
 
+      const languageSources = this.availableLanguages.length
+        ? this.availableLanguages
+        : this.languages
+
+      const values = languageSources.reduce(
+        (acc, lang) => {
+          acc[lang.code] = initialValues[lang.code] ?? ''
+          return acc
+        },
+        {} as Record<string, any>
+      )
+
+      const sampleValue = values[this.baseLanguage.code]
+      let detectedType: 'string' | 'array' | 'object' | 'number' | 'boolean' = 'string'
+
+      if (Array.isArray(sampleValue)) {
+        detectedType = 'array'
+      } else if (typeof sampleValue === 'object' && sampleValue !== null) {
+        detectedType = 'object'
+      } else if (typeof sampleValue === 'number') {
+        detectedType = 'number'
+      } else if (typeof sampleValue === 'boolean') {
+        detectedType = 'boolean'
+      }
+
       // 添加新条目
       const newEntry: TranslationEntry = {
         key: keyPath.split('.').pop() || keyPath,
         path: keyPath,
-        values: this.languages.reduce(
-          (acc, lang) => {
-            acc[lang.code] = ''
-            return acc
-          },
-          {} as Record<string, any>
-        ),
-        type: 'string',
+        values,
+        type: detectedType,
         isModified: true
       }
 
       this.translationEntries.push(newEntry)
+      this.translationEntries.sort((a, b) => a.path.localeCompare(b.path))
       this.hasUnsavedChanges = true
 
       return true
@@ -378,7 +439,20 @@ export const useTranslationsStore = defineStore('translations', {
         const response =
           await $fetch<ApiResponse<{ languages: Language[]; count: number }>>('/api/languages')
         if (response.success && response.data) {
-          this.availableLanguages = response.data.languages
+          const previousLanguages = new Map(
+            this.availableLanguages.map((lang) => [lang.code, lang])
+          )
+
+          this.availableLanguages = response.data.languages.map((lang) => {
+            const existing = previousLanguages.get(lang.code)
+            if (existing) {
+              return {
+                ...lang,
+                name: existing.name || lang.name
+              }
+            }
+            return lang
+          })
 
           // 如果当前语言不在可用语言中，切换到基准语言
           const currentExists = this.availableLanguages.some(

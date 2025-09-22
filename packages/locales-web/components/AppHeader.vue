@@ -50,7 +50,7 @@
 
             <template #content>
               <div class="py-1 min-w-36">
-                <button v-for="lang in availableLanguages.filter(l => l.code !== currentLanguage)" :key="lang.code"
+                <button v-for="lang in languageOptions.filter(l => l.code !== currentLanguage)" :key="lang.code"
                   @click="selectLanguage(lang.code)"
                   class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors rounded-sm flex items-center gap-2">
                   <div class="i-carbon-language text-xs opacity-60"></div>
@@ -90,7 +90,7 @@
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useSettingsNew } from '~/composables/useSettingsNew'
 import { useTranslationsNew } from '~/composables/useTranslationsNew'
 
@@ -102,10 +102,12 @@ const route = useRoute()
 const isEditingPage = computed(() => route.path === '/editor')
 
 const {
-  languages,
+  availableLanguages,
   currentLanguage,
   hasUnsavedChanges,
   saveAllChanges,
+  selectLanguage: selectLanguageInStore,
+  dialog,
   activeNamespace,
   namespaces
 } = useTranslationsNew()
@@ -117,15 +119,19 @@ const showSaveButton = computed(() => isEditingPage.value && hasUnsavedChanges.v
 const languageSelectorRef = ref()
 
 // 可用语言列表
-const availableLanguages = computed(() => languages.value || [
+const fallbackLanguages = [
   { code: 'zh-CN', name: '简体中文' },
   { code: 'en-US', name: 'English' }
-])
+]
+
+const languageOptions = computed(() =>
+  availableLanguages.value?.length ? availableLanguages.value : fallbackLanguages
+)
 
 // 当前语言信息
 const getCurrentLanguage = computed(() => {
-  return availableLanguages.value.find(lang => lang.code === currentLanguage.value) ||
-    availableLanguages.value[0]
+  const list = languageOptions.value
+  return list.find((lang) => lang.code === currentLanguage.value) || list[0]
 })
 
 // 当前命名空间信息
@@ -172,14 +178,26 @@ function getProgressColor(progress) {
 }
 
 // 选择语言
-function selectLanguage(languageCode) {
-  // TODO: 实现语言切换逻辑
-  console.log('Select language:', languageCode)
-  languageSelectorRef.value?.close()
+async function selectLanguage(languageCode: string) {
+  if (!languageCode || languageCode === currentLanguage.value) {
+    languageSelectorRef.value?.close()
+    return
+  }
+
+  try {
+    const switched = await selectLanguageInStore(languageCode)
+    if (switched) {
+      languageSelectorRef.value?.close()
+    }
+  } catch (error) {
+    console.error('Failed to switch language:', error)
+    if (dialog) {
+      await dialog.alert('切换语言时出现问题，请稍后再试。')
+    }
+  }
 }
 
-// 处理语言选择确认
-function handleLanguageSelect(languageCode) {
-  selectLanguage(languageCode)
+async function handleLanguageSelect(languageCode: string) {
+  await selectLanguage(languageCode)
 }
 </script>
