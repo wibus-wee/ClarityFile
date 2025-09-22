@@ -62,12 +62,12 @@
     "website": "Website",
     "tags": "Tags"
   },
-  "dueDate": "",
-  "dueDateLabel": "",
-  "createTime": "",
-  "overdue": "",
-  "dueToday": "",
-  "daysLeft": "",
-  "noDescription": "",
-  "noDueDate": ""
+  "dueDate": "Due Date",
+  "dueDateLabel": "Due Date",
+  "createTime": "Create Time",
+  "overdue": "Over due {{days}}",
+  "dueToday": "due to today",
+  "daysLeft": "{{days}} days left",
+  "noDescription": "No description",
+  "noDueDate": "No due date"
 }
