@@ -183,7 +183,6 @@ const currentNamespace = computed(() =>
 )
 
 const route = useRoute()
-
 const showAlert = async (message: string, options?: { title?: string }) => {
   if (dialog) {
     await dialog.alert(message, options)
@@ -226,7 +225,6 @@ const handleAddKey = async (data: { key: string; translation: string }) => {
     if (baseCode && trimmedTranslation) {
       updateTranslation(trimmedKey, baseCode, trimmedTranslation)
     }
-
     await showAlert('New translation key added. Remember to save your changes.', {
       title: 'Translation key added'
     })
@@ -310,6 +308,7 @@ const handleLanguageChange = async (event: Event) => {
     await showAlert('We ran into a problem while switching languages. Please try again.', {
       title: 'Language switch failed'
     })
+
     if (import.meta.client) {
       target.value = currentLanguage.value
     }

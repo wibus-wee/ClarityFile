@@ -254,6 +254,7 @@ export const useTranslationsStore = defineStore('translations', {
       }
 
       const targetLanguage = this.availableLanguages.find((lang) => lang.code === languageCode)
+
       const dialog = getDialog()
 
       if (!targetLanguage) {
@@ -261,10 +262,12 @@ export const useTranslationsStore = defineStore('translations', {
         await dialog?.alert('The selected language is not available. Please refresh and try again.', {
           title: 'Language unavailable'
         })
+
         return false
       }
 
       if (this.hasUnsavedChanges) {
+
         if (dialog) {
           const shouldProceed = await dialog.confirm(
             'Switching languages will save your pending edits first. Continue?',
@@ -292,6 +295,7 @@ export const useTranslationsStore = defineStore('translations', {
           if (!saved) {
             return false
           }
+
         }
       }
 
