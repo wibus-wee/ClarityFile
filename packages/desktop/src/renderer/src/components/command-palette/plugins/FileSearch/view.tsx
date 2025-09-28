@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Search, FileText, Image, Video, Music, Archive } from 'lucide-react'
 import {
   DetailLayout,
@@ -9,7 +9,7 @@ import {
   DetailEmpty,
   DetailStatus
 } from '../../components/common'
-import { PluginContext } from '../types'
+import type { PluginContext } from '../types'
 import { tipcClient } from '@renderer/lib/tipc-client'
 import { useGlobalFiles } from '@renderer/hooks/use-tipc'
 import { formatFileSize, formatFriendlyDate } from '@renderer/lib/utils'
@@ -22,21 +22,19 @@ interface FileSearchViewProps {
 
 export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps) {
   const [sortOrder] = useState<'asc' | 'desc'>('desc')
+  const { i18n } = context
+  const t = i18n.t
 
-  // 直接从 store 获取查询，绕过 context 的限制
-  // 这样可以确保在命令详情视图中仍能获取到用户的搜索查询
   const storeQuery = useCommandPaletteQuery()
   const currentQuery = storeQuery || context.commandPalette.getQuery()
 
-  // 构建搜索参数
   const searchParams = useMemo(() => {
-    const params: any = {
+    const params: Record<string, unknown> = {
       limit: 50,
       offset: 0,
       sortOrder
     }
 
-    // 根据模式设置不同的搜索参数
     if (currentQuery.trim()) {
       params.search = currentQuery.trim()
     }
@@ -44,38 +42,40 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
     return params
   }, [currentQuery, sortOrder])
 
-  // 使用SWR获取文件数据
   const { data: fileData, error, isLoading } = useGlobalFiles(searchParams)
 
-  // 处理文件点击
   const handleFileClick = async (file: any) => {
     try {
-      // 使用QuickLook预览文件
       await tipcClient.previewFileById({ fileId: file.id })
-    } catch (error) {
-      console.error('Failed to preview file:', error)
-      // 如果预览失败，尝试用系统默认应用打开文件
+    } catch (previewError) {
+      context.utils.notify(
+        t('view.actions.previewFallback', { defaultValue: 'Failed to preview the file.' }),
+        'error'
+      )
+
       try {
         await tipcClient.openFileWithSystem({ filePath: file.physicalPath })
+        context.utils.notify(
+          t('view.actions.openFallback', {
+            defaultValue: 'Opening with the default system application.'
+          }),
+          'info'
+        )
       } catch (openError) {
         console.error('Failed to open file with system:', openError)
       }
     }
   }
 
-  // 获取文件图标
   const getFileIcon = (file: any) => {
     if (!file.mimeType) return FileText
-
     if (file.mimeType.startsWith('image/')) return Image
     if (file.mimeType.startsWith('video/')) return Video
     if (file.mimeType.startsWith('audio/')) return Music
     if (file.mimeType.startsWith('application/')) return Archive
-
     return FileText
   }
 
-  // 格式化文件信息 - 优化显示，保持简洁
   const formatFileInfo = (file: any) => {
     const parts: string[] = []
 
@@ -90,54 +90,83 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
     return parts.join(' • ')
   }
 
-  // 获取友好的文件类型显示名称
   const getFileTypeBadge = (file: any) => {
-    if (!file.mimeType) return '文件'
+    if (!file.mimeType) return t('view.badges.default', { defaultValue: 'File' })
 
-    if (file.mimeType.startsWith('image/')) return '图片'
-    if (file.mimeType.startsWith('video/')) return '视频'
-    if (file.mimeType.startsWith('audio/')) return '音频'
-    if (file.mimeType.startsWith('text/')) return '文本'
-    if (file.mimeType.includes('pdf')) return 'PDF'
-    if (file.mimeType.includes('word') || file.mimeType.includes('document')) return '文档'
-    if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) return '表格'
-    if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint'))
-      return '演示'
-    if (file.mimeType.startsWith('application/')) return '应用'
+    if (file.mimeType.startsWith('image/')) {
+      return t('view.badges.image', { defaultValue: 'Image' })
+    }
+    if (file.mimeType.startsWith('video/')) {
+      return t('view.badges.video', { defaultValue: 'Video' })
+    }
+    if (file.mimeType.startsWith('audio/')) {
+      return t('view.badges.audio', { defaultValue: 'Audio' })
+    }
+    if (file.mimeType.startsWith('text/')) {
+      return t('view.badges.text', { defaultValue: 'Text' })
+    }
+    if (file.mimeType.includes('pdf')) {
+      return t('view.badges.pdf', { defaultValue: 'PDF' })
+    }
+    if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+      return t('view.badges.document', { defaultValue: 'Document' })
+    }
+    if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) {
+      return t('view.badges.sheet', { defaultValue: 'Spreadsheet' })
+    }
+    if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint')) {
+      return t('view.badges.presentation', { defaultValue: 'Presentation' })
+    }
+    if (file.mimeType.startsWith('application/')) {
+      return t('view.badges.application', { defaultValue: 'Application' })
+    }
 
-    return '文件'
+    return t('view.badges.default', { defaultValue: 'File' })
   }
 
-  // 获取页面标题
   const getPageTitle = () => {
     switch (mode) {
       case 'recent':
-        return '最近文件'
+        return t('view.title.recent', { defaultValue: 'Recent files' })
       case 'favorites':
-        return '收藏文件'
+        return t('view.title.favorites', { defaultValue: 'Favorite files' })
       default:
-        return '文件搜索'
+        return t('view.title.search', { defaultValue: 'File search' })
     }
   }
+
+  const renderEmptyState = () => (
+    <DetailEmpty
+      icon={Search}
+      title={t('view.empty.title', { defaultValue: 'No files found' })}
+      description={
+        mode === 'search' && currentQuery
+          ? t('view.empty.withQuery', {
+              defaultValue: 'No files found containing "{{query}}".',
+              query: currentQuery
+            })
+          : t('view.empty.withoutQuery', {
+              defaultValue: 'Try adjusting your filters or keywords.'
+            })
+      }
+    />
+  )
 
   return (
     <DetailLayout>
       <DetailMain>
         <DetailSection title={getPageTitle()}>
           {isLoading ? (
-            <DetailLoading message="正在搜索文件..." />
-          ) : error ? (
-            <DetailStatus status="error" message="搜索失败，请重试" />
-          ) : !fileData?.files?.length ? (
-            <DetailEmpty
-              icon={Search}
-              title="没有找到文件"
-              description={
-                mode === 'search' && currentQuery
-                  ? `没有找到包含 "${currentQuery}" 的文件`
-                  : '尝试调整搜索条件或文件类型过滤器'
-              }
+            <DetailLoading
+              message={t('view.loading', { defaultValue: 'Searching files…' })}
             />
+          ) : error ? (
+            <DetailStatus
+              status="error"
+              message={t('view.error', { defaultValue: 'Search failed, please try again.' })}
+            />
+          ) : !fileData?.files?.length ? (
+            renderEmptyState()
           ) : (
             <div className="w-full space-y-1">
               {fileData.files.map((file: any) => {
@@ -150,7 +179,10 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
                     subtitle={formatFileInfo(file)}
                     description={
                       file.originalFileName && file.originalFileName !== file.name
-                        ? `原始文件名: ${file.originalFileName}`
+                        ? t('view.originalName', {
+                            defaultValue: 'Original name: {{name}}',
+                            name: file.originalFileName
+                          })
                         : undefined
                     }
                     badge={getFileTypeBadge(file)}
@@ -163,7 +195,10 @@ export function FileSearchView({ context, mode = 'search' }: FileSearchViewProps
               {fileData.hasMore && (
                 <DetailStatus
                   status="info"
-                  message={`显示了 ${fileData.files.length} 个文件，还有更多结果`}
+                  message={t('view.infoMore', {
+                    defaultValue: 'Showing {{count}} files. There are more results available.',
+                    count: fileData.files.length
+                  })}
                 />
               )}
             </div>

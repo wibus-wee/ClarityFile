@@ -1,4 +1,5 @@
 import type { Router } from '@tanstack/react-router'
+import type { PluginI18nAdapter, PluginLogger, PluginRuntimeServices } from '../types'
 
 /**
  * 插件上下文接口
@@ -30,6 +31,15 @@ export interface PluginContext {
     // 打开外部链接
     openExternal: (url: string) => Promise<void>
   }
+
+  // 运行时服务
+  runtime: PluginRuntimeServices
+
+  // 便捷访问翻译
+  i18n: PluginI18nAdapter
+
+  // 便捷访问日志
+  logger: PluginLogger
 }
 
 /**

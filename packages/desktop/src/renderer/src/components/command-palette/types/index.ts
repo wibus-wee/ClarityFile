@@ -73,9 +73,75 @@ export interface CommandPalettePlugin {
   id: string
   name: string
   description: string
+  version?: string
+  source?: 'builtin' | 'user' | 'remote'
+  manifest?: CommandPalettePluginManifest
 
   // 插件只发布命令，不再有自己的render/execute
   publishCommands: () => Command[]
+}
+
+export interface PluginLogger {
+  debug: (message: string, meta?: Record<string, unknown>) => void
+  info: (message: string, meta?: Record<string, unknown>) => void
+  warn: (message: string, meta?: Record<string, unknown>) => void
+  error: (message: string, meta?: Record<string, unknown>) => void
+}
+
+export interface PluginI18nTranslateOptions<T = unknown> {
+  defaultValue?: T
+  returnObjects?: boolean
+  count?: number
+  [key: string]: unknown
+}
+
+export interface PluginI18nAdapter {
+  namespace: string
+  /**
+   * 翻译函数，默认会回退到 defaultValue
+   */
+  t: <T = string>(key: string, options?: PluginI18nTranslateOptions<T>) => T
+  /**
+   * 检查翻译键是否存在
+   */
+  hasKey: (key: string) => boolean
+}
+
+export interface PluginRuntimeServices {
+  logger: PluginLogger
+  i18n: PluginI18nAdapter
+  registerCleanup: (callback: () => void | Promise<void>) => void
+}
+
+export interface CommandPalettePluginManifest {
+  id: string
+  name: string
+  description: string
+  version: string
+  author?: string
+  source?: 'builtin' | 'user' | 'remote'
+  homepage?: string
+  repository?: string
+  keywords?: string[]
+  autoActivate?: boolean
+  i18nNamespace?: string
+}
+
+export type PluginTranslationResources = Record<string, Record<string, any>>
+
+export interface PluginActivationContext {
+  manifest: CommandPalettePluginManifest
+  runtime: PluginRuntimeServices
+}
+
+export interface CommandPalettePluginModule {
+  manifest: CommandPalettePluginManifest
+  /**
+   * 插件翻译资源，按语言划分
+   */
+  translations?: PluginTranslationResources
+  activate: (context: PluginActivationContext) => Promise<CommandPalettePlugin> | CommandPalettePlugin
+  deactivate?: () => Promise<void> | void
 }
 
 /**
