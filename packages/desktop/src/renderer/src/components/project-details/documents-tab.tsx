@@ -42,6 +42,8 @@ import type {
   LogicalDocumentWithVersionsOutput,
   DocumentVersionOutput
 } from '../../../../main/types/document-schemas'
+import { useSaveFileAs } from '@renderer/hooks/use-tipc'
+import { toast } from 'sonner'
 
 interface DocumentsTabProps {
   projectDetails: ProjectDetailsOutput
@@ -53,6 +55,7 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
   const [sortBy, setSortBy] = useState<'name' | 'type' | 'created' | 'updated'>('updated')
   const [filterType, setFilterType] = useState<string>('all')
   const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set())
+  const { trigger: saveFileAs } = useSaveFileAs()
 
   // Dialog/Drawer 状态管理
   const [createDocumentOpen, setCreateDocumentOpen] = useState(false)
@@ -149,9 +152,20 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
     setVersionDetailsOpen(true)
   }
 
-  const handleDownloadVersion = (version: DocumentVersionOutput) => {
-    // TODO: 实现下载功能
-    console.log('下载版本:', version.id)
+  const handleDownloadVersion = async (version: DocumentVersionOutput) => {
+    try {
+      const result = await saveFileAs({ fileId: version.managedFileId })
+
+      if (!result?.success) {
+        toast.info('已取消下载')
+        return
+      }
+
+      toast.success(`已下载版本 ${version.versionTag} 到 ${result.targetPath || '指定位置'}`)
+    } catch (error) {
+      console.error('下载文档版本失败:', error)
+      toast.error(`下载文档版本失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
   }
 
   const handleSuccess = () => {
@@ -393,6 +407,7 @@ export function DocumentsTab({ projectDetails }: DocumentsTabProps) {
         version={selectedVersion}
         open={versionDetailsOpen}
         onOpenChange={setVersionDetailsOpen}
+        onDownload={handleDownloadVersion}
       />
 
       <DeleteDocumentVersionDialog

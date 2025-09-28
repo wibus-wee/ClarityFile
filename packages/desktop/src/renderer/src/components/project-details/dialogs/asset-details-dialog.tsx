@@ -13,26 +13,33 @@ import { SafeImage } from '@renderer/components/ui/safe-image'
 import { formatFileSize } from '@renderer/lib/utils'
 import { Image, Calendar, Download, HardDrive, FileType, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import type { ProjectAssetOutput } from '@main/types/asset-schemas'
 
 interface AssetDetailsDialogProps {
-  asset: any | null // 使用 ProjectDetailsOutput['assets'][0] 类型
+  asset: ProjectAssetOutput | null
   open: boolean
   onOpenChange: (open: boolean) => void
   isCurrentCover?: boolean
+  onDownload?: (asset: ProjectAssetOutput) => Promise<void> | void
 }
 
 export function AssetDetailsDialog({
   asset,
   open,
   onOpenChange,
-  isCurrentCover = false
+  isCurrentCover = false,
+  onDownload
 }: AssetDetailsDialogProps) {
   const { t } = useTranslation('projects')
 
-  const handleDownload = () => {
-    if (!asset) return
-    // TODO: 实现下载功能
-    console.log('下载资产:', asset.id)
+  const handleDownload = async () => {
+    if (!asset || !onDownload) return
+
+    try {
+      await onDownload(asset)
+    } catch (error) {
+      console.error('下载资产失败:', error)
+    }
   }
 
   if (!asset) return null

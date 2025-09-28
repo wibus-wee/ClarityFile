@@ -20,19 +20,35 @@ import {
   Button,
   User
 } from '@heroui/react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import { useSidebar } from '@clarity/shadcn/ui/sidebar'
 import { useTheme } from '@renderer/hooks/use-theme'
 import { useAppStore } from '@renderer/stores/app'
 import { User as UserType } from '@renderer/types/user'
+import { useLogout } from '@renderer/hooks/use-tipc'
 
 export function NavUser({ user }: { user: UserType }) {
   const { isMobile } = useSidebar()
   const { currentTheme, toggleTheme } = useTheme()
   const clearUser = useAppStore((state) => state.clearUser)
+  const { trigger: logout } = useLogout()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const handleLogout = () => {
-    clearUser()
-    // TODO: 调用后端登出接口
+  const handleLogout = async () => {
+    if (isLoggingOut) return
+
+    try {
+      setIsLoggingOut(true)
+      await logout()
+      clearUser()
+      toast.success('已退出登录')
+    } catch (error) {
+      console.error('退出登录失败:', error)
+      toast.error(`退出登录失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   return (
@@ -92,6 +108,7 @@ export function NavUser({ user }: { user: UserType }) {
             color="danger"
             startContent={<LogOut className="h-4 w-4" />}
             onPress={handleLogout}
+            isDisabled={isLoggingOut}
           >
             Log out
           </DropdownItem>

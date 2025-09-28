@@ -17,17 +17,23 @@ interface DocumentVersionDetailsDialogProps {
   version: DocumentVersionOutput | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onDownload?: (version: DocumentVersionOutput) => Promise<void> | void
 }
 
 export function DocumentVersionDetailsDialog({
   version,
   open,
-  onOpenChange
+  onOpenChange,
+  onDownload
 }: DocumentVersionDetailsDialogProps) {
-  const handleDownload = () => {
-    if (!version) return
-    // TODO: 实现下载功能
-    console.log('下载版本:', version.id)
+  const handleDownload = async () => {
+    if (!version || !onDownload) return
+
+    try {
+      await onDownload(version)
+    } catch (error) {
+      console.error('下载文档版本失败:', error)
+    }
   }
 
   if (!version) return null

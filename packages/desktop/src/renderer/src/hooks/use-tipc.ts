@@ -929,6 +929,12 @@ export function useBatchCopyFilesToDirectory() {
   )
 }
 
+export function useLogout() {
+  return useSWRMutation('logout', async () => {
+    return await tipcClient.logout()
+  })
+}
+
 // QuickLook 预览相关的 hooks
 export function useQuickLookPreviewById() {
   return useSWRMutation(

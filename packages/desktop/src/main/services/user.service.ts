@@ -257,6 +257,28 @@ export class UserService {
   }
 
   /**
+   * 用户登出
+   */
+  static async logout(): Promise<{ success: boolean; loggedOutAt: Date }> {
+    try {
+      const existingUser = await db.select().from(users).limit(1)
+      const loggedOutAt = new Date()
+
+      if (existingUser.length > 0) {
+        await db
+          .update(users)
+          .set({ updatedAt: loggedOutAt })
+          .where(eq(users.id, existingUser[0].id))
+      }
+
+      return { success: true, loggedOutAt }
+    } catch (error) {
+      console.error('用户登出失败:', error)
+      throw new Error('用户登出失败')
+    }
+  }
+
+  /**
    * 获取所有用户列表（为未来多用户支持预留）
    */
   static async getAllUsers(): Promise<UserListOutput> {
