@@ -30,15 +30,34 @@ export function useFileActions() {
   const { trigger: selectDirectory } = useSelectDirectory()
   const { trigger: batchCopyFilesToDirectory } = useBatchCopyFilesToDirectory()
 
+  const resolveFileId = useCallback((file: any): string | null => {
+    if (!file) return null
+
+    return (
+      file.id ||
+      file.managedFileId ||
+      file.fileId ||
+      file?.managedFile?.id ||
+      file?.file?.id ||
+      null
+    )
+  }, [])
+
   const handlePreview = useCallback(
     async (file: any) => {
       try {
         setProcessing(true, 'preview')
 
+        const fileId = resolveFileId(file)
+        if (!fileId) {
+          toast.error('无法确定文件标识，无法预览')
+          return
+        }
+
         // 检查是否在 macOS 上且 QuickLook 可用
         if (quickLookAvailable?.available) {
           try {
-            await quickLookPreview({ fileId: file.id })
+            await quickLookPreview({ fileId })
             return
           } catch (quickLookError) {
             console.warn('QuickLook 预览失败，回退到系统默认应用:', quickLookError)
@@ -47,7 +66,7 @@ export function useFileActions() {
         }
 
         // 回退到系统默认应用
-        await openFileWithSystem({ fileId: file.id })
+        await openFileWithSystem({ fileId })
       } catch (error) {
         console.error('预览文件失败:', error)
         toast.error(`预览文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
@@ -55,7 +74,7 @@ export function useFileActions() {
         setProcessing(false)
       }
     },
-    [openFileWithSystem, quickLookPreview, quickLookAvailable, setProcessing]
+    [openFileWithSystem, quickLookPreview, quickLookAvailable, resolveFileId, setProcessing]
   )
 
   const handleRename = useCallback(
@@ -86,16 +105,21 @@ export function useFileActions() {
     async (file: any) => {
       try {
         setProcessing(true, 'download')
-        const result = await saveFileAs({ fileId: file.id })
+        const fileId = resolveFileId(file)
+        if (!fileId) {
+          toast.error('无法确定文件标识，无法下载')
+          return
+        }
+
+        const result = await saveFileAs({ fileId })
 
         if (!result?.success) {
           toast.info('已取消下载')
           return
         }
 
-        toast.success(
-          `文件已保存到 ${result.targetPath || '指定位置'}: ${file.originalFileName || file.name}`
-        )
+        const displayName = file?.originalFileName || file?.name || '文件'
+        toast.success(`文件已保存到 ${result.targetPath || '指定位置'}: ${displayName}`)
       } catch (error) {
         console.error('下载文件失败:', error)
         toast.error(`下载文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
@@ -103,13 +127,19 @@ export function useFileActions() {
         setProcessing(false)
       }
     },
-    [saveFileAs, setProcessing]
+    [resolveFileId, saveFileAs, setProcessing]
   )
 
   const handleCopy = useCallback(
     async (file: any) => {
       try {
         setProcessing(true, 'copy')
+
+        const fileId = resolveFileId(file)
+        if (!fileId) {
+          toast.error('无法确定文件标识，无法复制')
+          return
+        }
 
         const directoryResult = await selectDirectory({
           title: '选择复制文件的目标文件夹'
@@ -121,16 +151,13 @@ export function useFileActions() {
         }
 
         const result = await copyFileToDirectory({
-          fileId: file.id,
+          fileId,
           targetDirectory: directoryResult.path
         })
 
         if (result.success) {
-          toast.success(
-            `文件已复制到 ${result.targetPath || directoryResult.path}: ${
-              file.originalFileName || file.name
-            }`
-          )
+          const displayName = file?.originalFileName || file?.name || '文件'
+          toast.success(`文件已复制到 ${result.targetPath || directoryResult.path}: ${displayName}`)
         }
       } catch (error) {
         console.error('复制文件失败:', error)
@@ -139,7 +166,7 @@ export function useFileActions() {
         setProcessing(false)
       }
     },
-    [copyFileToDirectory, selectDirectory, setProcessing]
+    [copyFileToDirectory, resolveFileId, selectDirectory, setProcessing]
   )
 
   const handleShare = useCallback(async (file: any) => {
@@ -177,8 +204,17 @@ export function useFileActions() {
           return
         }
 
+        const fileIds = files
+          .map((file) => resolveFileId(file))
+          .filter((id): id is string => Boolean(id))
+
+        if (!fileIds.length) {
+          toast.error('选中的文件缺少有效的标识，无法批量下载')
+          return
+        }
+
         const result = await batchCopyFilesToDirectory({
-          fileIds: files.map((file) => file.id),
+          fileIds,
           targetDirectory: directoryResult.path
         })
 
@@ -197,7 +233,7 @@ export function useFileActions() {
         setProcessing(false)
       }
     },
-    [batchCopyFilesToDirectory, selectDirectory, setProcessing]
+    [batchCopyFilesToDirectory, resolveFileId, selectDirectory, setProcessing]
   )
 
   const handleBatchCopy = useCallback(
@@ -216,8 +252,17 @@ export function useFileActions() {
           return
         }
 
+        const fileIds = files
+          .map((file) => resolveFileId(file))
+          .filter((id): id is string => Boolean(id))
+
+        if (!fileIds.length) {
+          toast.error('选中的文件缺少有效的标识，无法批量复制')
+          return
+        }
+
         const result = await batchCopyFilesToDirectory({
-          fileIds: files.map((file) => file.id),
+          fileIds,
           targetDirectory: directoryResult.path
         })
 
@@ -236,7 +281,7 @@ export function useFileActions() {
         setProcessing(false)
       }
     },
-    [batchCopyFilesToDirectory, selectDirectory, setProcessing]
+    [batchCopyFilesToDirectory, resolveFileId, selectDirectory, setProcessing]
   )
 
   const handleUpload = useCallback(async () => {
