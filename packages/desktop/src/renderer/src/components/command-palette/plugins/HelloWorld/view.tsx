@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sparkles, Search, FileText, Settings, Heart, Coffee } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import {
   DetailLayout,
   DetailSidebar,
@@ -19,6 +20,12 @@ const SAMPLE_ITEM_IDS = ['item-1', 'item-2', 'item-3', 'item-4'] as const
 
 type SampleItemId = (typeof SAMPLE_ITEM_IDS)[number]
 type Category = 'overview' | 'search' | 'favorites' | 'settings'
+
+interface SidebarItem {
+  id: Category
+  icon: LucideIcon
+  badge?: string
+}
 
 interface HelloWorldViewProps {
   context: PluginContext
@@ -89,17 +96,17 @@ export function HelloWorldView({ context, version }: HelloWorldViewProps) {
     setVisibleItems([...SAMPLE_ITEM_IDS])
   }
 
+  const sidebarItems: SidebarItem[] = [
+    { id: 'overview', icon: Sparkles },
+    { id: 'search', icon: Search },
+    { id: 'favorites', icon: Heart, badge: favorites.length.toString() },
+    { id: 'settings', icon: Settings }
+  ]
+
   const renderSidebar = () => (
     <DetailSidebar>
       <DetailSection title={t('view.sidebarTitle', { defaultValue: 'Categories' })}>
-        {(
-          [
-            { id: 'overview' as Category, icon: Sparkles },
-            { id: 'search' as Category, icon: Search },
-            { id: 'favorites' as Category, icon: Heart, badge: favorites.length.toString() },
-            { id: 'settings' as Category, icon: Settings }
-          ] as const
-        ).map((item) => (
+        {sidebarItems.map((item) => (
           <DetailItem
             key={item.id}
             icon={item.icon}

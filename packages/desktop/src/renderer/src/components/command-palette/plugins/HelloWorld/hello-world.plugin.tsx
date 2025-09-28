@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react'
 import { MessageCircle, Sparkles } from 'lucide-react'
 import type {
   CommandPalettePlugin,
@@ -220,7 +221,7 @@ const translations: PluginTranslationResources = {
   }
 }
 
-function withPluginContext(render: (context: PluginContext) => JSX.Element) {
+function withPluginContext(render: (context: PluginContext) => ReactElement) {
   return (context: PluginContext) => render(context)
 }
 
