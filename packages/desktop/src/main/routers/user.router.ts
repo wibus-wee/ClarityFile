@@ -118,6 +118,16 @@ export function userRouter(t: ITipc) {
         console.error('检查用户是否存在失败:', error)
         return { exists: false, user: null }
       }
+    }),
+
+    // 用户登出
+    logout: t.procedure.action(async () => {
+      try {
+        return await UserService.logout()
+      } catch (error) {
+        console.error('用户登出失败:', error)
+        throw new Error(error instanceof Error ? error.message : '用户登出失败')
+      }
     })
   }
 }

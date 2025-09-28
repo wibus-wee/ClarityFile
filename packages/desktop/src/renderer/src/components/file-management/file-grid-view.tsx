@@ -51,7 +51,7 @@ export function FileGridView({ files, getFileTypeIcon, getFileTypeColor }: FileG
 
   const [hoveredFile, setHoveredFile] = useState<string | null>(null)
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
-  const { handleFileAction } = useFileActions()
+  const { handleFileAction, handleBatchDownload, handleBatchCopy, isProcessing } = useFileActions()
 
   const formatFileSize = (bytes: number) => {
     if (!bytes) return '0 B'
@@ -309,9 +309,10 @@ export function FileGridView({ files, getFileTypeIcon, getFileTypeColor }: FileG
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isProcessing}
                 onClick={() => {
-                  // TODO: 实现批量下载功能
-                  console.log('批量下载功能待实现')
+                  const selectedFileObjects = files.filter((f) => selectedFiles.has(f.id))
+                  handleBatchDownload(selectedFileObjects)
                 }}
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -320,9 +321,10 @@ export function FileGridView({ files, getFileTypeIcon, getFileTypeColor }: FileG
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isProcessing}
                 onClick={() => {
-                  // TODO: 实现批量复制功能
-                  console.log('批量复制功能待实现')
+                  const selectedFileObjects = files.filter((f) => selectedFiles.has(f.id))
+                  handleBatchCopy(selectedFileObjects)
                 }}
               >
                 <Copy className="w-4 h-4 mr-2" />

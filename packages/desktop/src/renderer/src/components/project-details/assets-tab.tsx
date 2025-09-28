@@ -41,6 +41,8 @@ import { DeleteAssetDialog } from './dialogs/delete-asset-dialog'
 import { SetCoverDialog } from './dialogs/set-cover-dialog'
 import type { ProjectDetailsOutput } from '../../../../main/types/project-schemas'
 import type { ProjectAssetOutput } from '../../../../main/types/asset-schemas'
+import { useSaveFileAs } from '@renderer/hooks/use-tipc'
+import { toast } from 'sonner'
 
 interface AssetsTabProps {
   projectDetails: ProjectDetailsOutput
@@ -102,6 +104,7 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
 
   // 当前选中的资产
   const [selectedAsset, setSelectedAsset] = useState<ProjectAssetOutput | null>(null)
+  const { trigger: saveFileAs } = useSaveFileAs()
 
   // 获取所有资产类型
   const assetTypes = Array.from(new Set(assets.map((asset) => asset.assetType)))
@@ -155,9 +158,20 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
     setSetCoverOpen(true)
   }
 
-  const handleDownloadAsset = (asset: ProjectAssetOutput) => {
-    // TODO: 实现下载功能
-    console.log('下载资产:', asset.id)
+  const handleDownloadAsset = async (asset: ProjectAssetOutput) => {
+    try {
+      const result = await saveFileAs({ fileId: asset.managedFileId })
+
+      if (!result?.success) {
+        toast.info('已取消下载')
+        return
+      }
+
+      toast.success(`资产 "${asset.name}" 已保存到 ${result.targetPath || '指定位置'}`)
+    } catch (error) {
+      console.error('下载资产失败:', error)
+      toast.error(`下载资产失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
   }
 
   const handleSuccess = () => {
@@ -656,6 +670,7 @@ export function AssetsTab({ projectDetails }: AssetsTabProps) {
         open={assetDetailsOpen}
         onOpenChange={setAssetDetailsOpen}
         isCurrentCover={selectedAsset ? isCurrentCover(selectedAsset.id) : false}
+        onDownload={handleDownloadAsset}
       />
 
       <DeleteAssetDialog

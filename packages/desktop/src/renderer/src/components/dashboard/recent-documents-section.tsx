@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '@clarity/shadcn/ui/button'
 import { Badge } from '@clarity/shadcn/ui/badge'
 import {
@@ -25,7 +26,10 @@ import {
   useManagedFiles,
   useQuickLookPreviewById,
   useOpenFileByIdWithSystem,
-  useIsQuickLookAvailable
+  useIsQuickLookAvailable,
+  useRenameFile,
+  useMoveFileToTrash,
+  useSaveFileAs
 } from '@renderer/hooks/use-tipc'
 import { toast } from 'sonner'
 import { formatRelativeTime } from '@renderer/lib/i18n-formatters'
@@ -77,6 +81,10 @@ export function RecentDocumentsSection() {
   const { trigger: quickLookPreview } = useQuickLookPreviewById()
   const { trigger: openFileWithSystem } = useOpenFileByIdWithSystem()
   const { data: quickLookAvailable } = useIsQuickLookAvailable()
+  const { trigger: renameFile } = useRenameFile()
+  const { trigger: moveFileToTrash } = useMoveFileToTrash()
+  const { trigger: saveFileAs } = useSaveFileAs()
+  const [actionInProgress, setActionInProgress] = useState(false)
 
   // 处理文档预览
   const handlePreviewDocument = async (file: any) => {
@@ -119,6 +127,80 @@ export function RecentDocumentsSection() {
     } catch (error) {
       console.error('打开文件失败:', error)
       toast.error(`打开文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
+  }
+
+  const handleDownloadDocument = async (file: any) => {
+    if (actionInProgress) return
+
+    try {
+      setActionInProgress(true)
+      const result = await saveFileAs({ fileId: file.id })
+
+      if (!result?.success) {
+        toast.info('已取消下载')
+        return
+      }
+
+      toast.success(`文档已保存到 ${result.targetPath || '指定位置'}`)
+    } catch (error) {
+      console.error('下载文档失败:', error)
+      toast.error(`下载文档失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      setActionInProgress(false)
+    }
+  }
+
+  const handleRenameDocument = async (file: any) => {
+    if (actionInProgress) return
+
+    try {
+      const currentName = file.originalFileName || file.name
+      const extension = currentName?.match(/\.[^/.]+$/)?.[0] || ''
+      const defaultName = currentName?.replace(/\.[^/.]+$/, '') || ''
+      const newName = window.prompt('请输入新的文件名', defaultName)
+
+      if (!newName || newName.trim() === defaultName) {
+        return
+      }
+
+      setActionInProgress(true)
+      const normalized = newName.trim().replace(/[<>:"/\\|?*]/g, '')
+      if (!normalized) {
+        toast.error('文件名不能为空或包含非法字符')
+        return
+      }
+
+      const finalName = `${normalized}${extension}`
+      await renameFile({ fileId: file.id, newName: finalName })
+      toast.success(`文件已重命名为 ${finalName}`)
+    } catch (error) {
+      console.error('重命名文件失败:', error)
+      toast.error(`重命名文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      setActionInProgress(false)
+    }
+  }
+
+  const handleDeleteDocument = async (file: any) => {
+    if (actionInProgress) return
+
+    try {
+      const confirmed = window.confirm(
+        `确定要将文档 "${file.originalFileName || file.name}" 移动到回收站吗？`
+      )
+      if (!confirmed) {
+        return
+      }
+
+      setActionInProgress(true)
+      await moveFileToTrash({ fileId: file.id })
+      toast.success('文档已移动到回收站')
+    } catch (error) {
+      console.error('删除文档失败:', error)
+      toast.error(`删除文档失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      setActionInProgress(false)
     }
   }
 
@@ -262,8 +344,7 @@ export function RecentDocumentsSection() {
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation()
-                            // TODO: 实现下载功能
-                            toast.info('下载功能开发中...')
+                            handleDownloadDocument(file)
                           }}
                         >
                           <Download className="w-4 h-4 mr-2" />
@@ -272,8 +353,7 @@ export function RecentDocumentsSection() {
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation()
-                            // TODO: 实现重命名功能
-                            toast.info('重命名功能开发中...')
+                            handleRenameDocument(file)
                           }}
                         >
                           <Edit className="w-4 h-4 mr-2" />
@@ -284,8 +364,7 @@ export function RecentDocumentsSection() {
                           className="text-destructive"
                           onClick={(e) => {
                             e.stopPropagation()
-                            // TODO: 实现删除功能
-                            toast.info('删除功能开发中...')
+                            handleDeleteDocument(file)
                           }}
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
