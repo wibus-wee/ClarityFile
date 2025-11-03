@@ -7,17 +7,19 @@ import {
 } from '../stores/command-palette-store'
 import { PluginContext } from '../plugins/types'
 import { createPluginContext } from '../plugins/utils'
+import { pluginManager } from '../plugins/plugin-manager'
 
 /**
  * Command Palette Context Hook
  *
  * Single responsibility: Create and manage plugin context
  */
-export function useCommandPaletteContext(): PluginContext {
+export function useCommandPaletteContext(pluginId?: string): PluginContext {
   const router = useRouter()
   const { close, setQuery, goBackToRoot } = useCommandPaletteActions()
   const query = useCommandPaletteQuery()
   const activeCommand = useCommandPaletteActiveCommand()
+  const runtime = pluginId ? pluginManager.getRuntime(pluginId) : undefined
 
   const pluginContext = useMemo((): PluginContext => {
     return createPluginContext(router, {
@@ -28,8 +30,8 @@ export function useCommandPaletteContext(): PluginContext {
       goBack: () => {
         goBackToRoot()
       }
-    })
-  }, [router, close, setQuery, query, activeCommand, goBackToRoot])
+    }, runtime)
+  }, [router, close, setQuery, query, activeCommand, goBackToRoot, runtime])
 
   return pluginContext
 }

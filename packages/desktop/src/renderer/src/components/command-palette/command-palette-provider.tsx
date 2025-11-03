@@ -28,7 +28,17 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
 
   // 初始化插件系统 - 在 CommandPaletteProvider 中处理
   useEffect(() => {
-    initializePlugins()
+    let isMounted = true
+
+    initializePlugins().catch((error) => {
+      if (isMounted) {
+        console.error('Failed to initialize command palette plugins:', error)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   // 获取插件配置数据

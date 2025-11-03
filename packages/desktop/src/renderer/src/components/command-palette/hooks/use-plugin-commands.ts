@@ -15,14 +15,13 @@ import { usePluginRegistryStore } from '../plugins/plugin-registry'
 export function usePluginCommands() {
   const { pluginConfigs } = useCommandPaletteData()
 
-  // ✅ 获取插件获取函数，避免无限循环
-  const getPlugins = usePluginRegistryStore((state) => state.actions.getAllPlugins)
+  // ✅ 订阅插件数组以响应注册表的更新
+  const registeredPlugins = usePluginRegistryStore((state) => state.pluginsArray)
 
   // ✅ 使用useMemo计算插件命令，依赖插件数量变化来触发重新计算
   const pluginCommands = useMemo(() => {
-    const registeredPlugins = getPlugins()
     return createPluginCommands(registeredPlugins, pluginConfigs)
-  }, [pluginConfigs, getPlugins])
+  }, [pluginConfigs, registeredPlugins])
 
   return pluginCommands
 }

@@ -14,7 +14,13 @@ import type { CommandWithRender } from '../types'
 export function CommandView() {
   const activeCommandId = useCommandPaletteActiveCommand()
   const allCommands = useAllCommands()
-  const pluginContext = useCommandPaletteContext()
+
+  const activeCommand = activeCommandId
+    ? allCommands.find((cmd) => cmd.id === activeCommandId)
+    : undefined
+
+  const pluginId = activeCommand && 'pluginId' in activeCommand ? activeCommand.pluginId : undefined
+  const pluginContext = useCommandPaletteContext(pluginId)
 
   // 如果没有激活的命令，不渲染
   if (!activeCommandId) {
@@ -22,10 +28,10 @@ export function CommandView() {
   }
 
   // 查找激活的命令
-  const activeCommand = allCommands.find((cmd) => cmd.id === activeCommandId)
+  const command = activeCommand
 
   // 如果找不到命令或命令没有 render 方法，显示错误
-  if (!activeCommand || !('render' in activeCommand)) {
+  if (!command || !('render' in command)) {
     return (
       <Command.List className="h-[380px] overflow-y-auto px-2 py-2">
         <div className="p-4">
@@ -37,7 +43,7 @@ export function CommandView() {
     )
   }
 
-  const renderCommand = activeCommand as CommandWithRender
+  const renderCommand = command as CommandWithRender
 
   return (
     <Command.List className="h-[380px] overflow-y-auto px-2 py-2">
