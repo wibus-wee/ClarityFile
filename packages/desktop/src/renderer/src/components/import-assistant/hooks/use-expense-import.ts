@@ -126,18 +126,17 @@ export const ExpenseImportUtils = {
   inferExpenseItemFromFile(file: DroppedFileInfo): string {
     const fileName = file.name
 
-    // 移除文件扩展名
     const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '')
+    const normalizedName = nameWithoutExt.replace(/[_-]+/g, ' ')
 
-    // 尝试解析 "物品名称_金额" 格式
-    const match = nameWithoutExt.match(/^(.+?)_\d+(\.\d+)?$/)
-    if (match && match[1]) {
-      // 返回物品名称部分，清理多余的空格和特殊字符
-      return match[1].trim().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ')
+    const structuredMatch = normalizedName.match(/^(.+?)\s*\d+(?:\.\d+)?$/)
+    if (structuredMatch && structuredMatch[1]) {
+      return structuredMatch[1].trim().replace(/\s+/g, ' ')
     }
 
-    // 如果解析失败，返回空字符串
-    return ''
+    const fallbackName = normalizedName.replace(/\d+/g, ' ').replace(/\s+/g, ' ').trim()
+
+    return fallbackName
   },
 
   /**
@@ -147,20 +146,16 @@ export const ExpenseImportUtils = {
   inferAmountFromFile(file: DroppedFileInfo): number | null {
     const fileName = file.name
 
-    // 移除文件扩展名
     const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '')
 
-    // 尝试解析 "物品名称_金额" 格式
-    const match = nameWithoutExt.match(/^.+?_(\d+(?:\.\d+)?)$/)
-    if (match && match[1]) {
-      const amount = parseFloat(match[1])
-      // 验证金额是否为有效数字且大于0
+    const numericMatch = nameWithoutExt.match(/(\d+(?:\.\d+)?)/)
+    if (numericMatch && numericMatch[1]) {
+      const amount = parseFloat(numericMatch[1])
       if (!isNaN(amount) && amount > 0) {
         return amount
       }
     }
 
-    // 如果解析失败，返回 null
     return null
   },
 
